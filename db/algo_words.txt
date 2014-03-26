@@ -1,0 +1,5 @@
+<pre><span class="cursor cursor-done">Loop over all elements</span>
+  <span class="cursor cursor-current">Set element to current minimum</span>
+  <span class="cursor">Loop over remaining elements</span>
+    <span class="cursor">If the element is smaller than the current minimum, replace the minimum</span>
+  <span class="cursor">Replace the current element by the found minimum</span></pre>
