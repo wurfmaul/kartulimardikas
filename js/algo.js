@@ -4,6 +4,7 @@
 
 // constants
 var TIMEOUT = 200;
+var STATES = 11;
 
 // variables
 var a = new Array(7, 3, 2, 1, 9, 6, 5, 4, 8);
@@ -33,6 +34,8 @@ var ctrl = new Controls();
  * beginning.
  */
 function reset() {
+	// disable automatic stepping
+	pause();
 	// reset variables and counters
 	a = shuffle(a);
 	len = a.length;
@@ -57,10 +60,14 @@ function reset() {
 	$("#btn-noc").prop("value", "0");
 	$("#btn-noo").prop("value", "0");
 
+	// reset cursor
+	for (var i = 0; i < STATES; i++) {
+		$(".cur-s" + i).removeClass("cursor-current");
+	}
+	$(".cur-s0").addClass("cursor-current");
+	
 	// reset state
 	state = 0;
-	// reset cursor
-	stepCursor();
 	// reset result
 	done = false;
 	// reset controls
@@ -71,6 +78,7 @@ function reset() {
  * The click-event of the second button. Moves back by one step.
  */
 function stepback() {
+	pause();
 	// TODO stepback
 }
 
@@ -234,9 +242,9 @@ function finish() {
  */
 function stepCursor() {
 	// remove cursor from previous step
-	$("#cur-s" + prevState).toggleClass("cursor-current");
+	$(".cur-s" + prevState).toggleClass("cursor-current");
 	// add cursor to new state
-	$("#cur-s" + state).toggleClass("cursor-current");
+	$(".cur-s" + state).toggleClass("cursor-current");
 }
 
 /**

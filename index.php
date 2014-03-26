@@ -86,12 +86,12 @@
 				efficient on large lists than more advanced algorithms such as
 				quicksort, heapsort, or merge sort... <a href="view.php?aid=6930">read more</a></dd>
 			<dt>
-				<a href="veww.php?aid=1457">Euclidean algorithm</a>
+				<a href="view.php?aid=1457">Euclidean algorithm</a>
 			</dt>
 			<dd>The Euclidean algorithm[a], or Euclid's algorithm, is a method
 				for computing the greatest common divisor (GCD) of two (usually
 				positive) integers, also known as the greatest common factor (GCF)
-				or highest common factor (HCF)... <a href="veww.php?aid=1457">read more</a></dd>
+				or highest common factor (HCF)... <a href="view.php?aid=1457">read more</a></dd>
 		</dl>
 		<div class="well well-sm" style="text-align: center;">
 			<ul class="pagination">
