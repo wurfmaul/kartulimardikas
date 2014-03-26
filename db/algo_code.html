@@ -1,0 +1,14 @@
+<pre>for (<span class="cursor cursor-current" id="cur-s0">i = 0</span>; <span class="cursor" id="cur-s1">i &lt; len</span>; <span class="cursor" id="cur-s2">i++</span>)
+{
+  <span class="cursor" id="cur-s3">min = i</span>;
+  for (<span class="cursor" id="cur-s4">j = i + 1</span>; <span class="cursor" id="cur-s5">j &lt; len</span>; <span class="cursor" id="cur-s6">j++</span>)
+  {
+    if (<span class="cursor" id="cur-s7">a[j] &lt; a[min]</span>)
+    {
+      <span class="cursor" id="cur-s8">min = j</span>;
+    }
+  }
+  <span class="cursor" id="cur-s9">t = a[min]</span>;
+  <span class="cursor" id="cur-s10">a[min] = a[i]</span>;
+  <span class="cursor" id="cur-s11">a[i] = t</span>;
+}</pre>

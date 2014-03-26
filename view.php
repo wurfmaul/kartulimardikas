@@ -1,7 +1,8 @@
 <?php
-$algo["words"] = file_get_contents('db/algo_words.txt');
-$algo["source"] = file_get_contents('db/algo_code.txt');
-$algo["desc"] = file_get_contents('db/algo_desc.txt');
+//FIXME simulates a database as long as it is not implemented
+$algo ["words"] = file_get_contents ( 'db/algo_words.html' );
+$algo ["source"] = file_get_contents ( 'db/algo_code.html' );
+$algo ["desc"] = file_get_contents ( 'db/algo_desc.html' );
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -111,31 +112,36 @@ $algo["desc"] = file_get_contents('db/algo_desc.txt');
 					<div class="btn-group">
 						<button type="button" class="btn btn-default"
 							data-toggle="tooltip" data-placement="top"
-							title="Back to beginning">
+							title="Back to beginning" id="btn-reset" onclick="reset()"
+							disabled="disabled">
 							<span class="glyphicon glyphicon-fast-backward"></span>
 						</button>
 					</div>
 					<div class="btn-group">
 						<button type="button" class="btn btn-default"
-							data-toggle="tooltip" data-placement="top" title="Step back">
+							data-toggle="tooltip" data-placement="top" title="Step back"
+							id="btn-stepback" onclick="stepback()" disabled="disabled">
 							<span class="glyphicon glyphicon-step-backward"></span>
 						</button>
 					</div>
 					<div class="btn-group">
 						<button type="button" class="btn btn-default"
-							data-toggle="tooltip" data-placement="top" title="Play">
-							<span class="glyphicon glyphicon-play"></span>
+							data-toggle="tooltip" data-placement="top" title="Play"
+							id="btn-play" onclick="play()">
+							<span class="glyphicon glyphicon-play" id="img-play"></span>
 						</button>
 					</div>
 					<div class="btn-group">
 						<button type="button" class="btn btn-default"
-							data-toggle="tooltip" data-placement="top" title="Step forward">
+							data-toggle="tooltip" data-placement="top" title="Step forward"
+							id="btn-step" onclick="step()">
 							<span class="glyphicon glyphicon-step-forward"></span>
 						</button>
 					</div>
 					<div class="btn-group">
 						<button type="button" class="btn btn-default"
-							data-toggle="tooltip" data-placement="top" title="Forward to end">
+							data-toggle="tooltip" data-placement="top" title="Forward to end"
+							id="btn-finish" onclick="finish()">
 							<span class="glyphicon glyphicon-fast-forward"></span>
 						</button>
 					</div>
@@ -164,68 +170,67 @@ $algo["desc"] = file_get_contents('db/algo_desc.txt');
 								<td><code>a</code></td>
 								<td>
 									<div class="btn-group">
-										<button type="button" class="btn btn-default"
-											disabled="disabled">7</button>
-										<button type="button" class="btn btn-default"
-											disabled="disabled">3</button>
-										<button type="button" class="btn btn-default"
-											disabled="disabled">2</button>
-										<button type="button" class="btn btn-default"
-											disabled="disabled">1</button>
-										<button type="button" class="btn btn-default"
-											disabled="disabled">9</button>
-										<button type="button" class="btn btn-default"
-											disabled="disabled">6</button>
-										<button type="button" class="btn btn-default"
-											disabled="disabled">5</button>
-										<button type="button" class="btn btn-default"
-											disabled="disabled">4</button>
-										<button type="button" class="btn btn-default"
-											disabled="disabled">8</button>
-									</div></td>
+										<input type="button" class="btn btn-default"
+											disabled="disabled" value="7" id="btn-a0" /> <input
+											type="button" class="btn btn-default" disabled="disabled"
+											value="3" id="btn-a1" /> <input type="button"
+											class="btn btn-default" disabled="disabled" value="2"
+											id="btn-a2" /> <input type="button" class="btn btn-default"
+											disabled="disabled" value="1" id="btn-a3" /> <input
+											type="button" class="btn btn-default" disabled="disabled"
+											value="9" id="btn-a4" /> <input type="button"
+											class="btn btn-default" disabled="disabled" value="6"
+											id="btn-a5" /> <input type="button" class="btn btn-default"
+											disabled="disabled" value="5" id="btn-a6" /> <input
+											type="button" class="btn btn-default" disabled="disabled"
+											value="4" id="btn-a7" /> <input type="button"
+											class="btn btn-default" disabled="disabled" value="8"
+											id="btn-a8" />
+									</div>
+								</td>
 							</tr>
 							<tr>
 								<td><code>len</code></td>
 								<td>
 									<div class="btn-group">
-										<button type="button" class="btn btn-default"
-											disabled="disabled">8</button>
-									</div></td>
+										<input type="button" class="btn btn-default"
+											disabled="disabled" value="9" />
+									</div>
+								</td>
 							</tr>
 							<tr>
-								<td><code>i</code>
-								</td>
+								<td><code>i</code></td>
 								<td>
 									<div class="btn-group">
-										<button type="button" class="btn btn-default"
-											disabled="disabled">0</button>
-									</div></td>
+										<input type="button" class="btn btn-default" id="btn-i"
+											disabled="disabled" value="?" />
+									</div>
+								</td>
 							</tr>
 							<tr>
-								<td><code>min</code>
-								</td>
+								<td><code>min</code></td>
 								<td>
 									<div class="btn-group">
-										<button type="button" class="btn btn-default"
-											disabled="disabled">0</button>
-									</div></td>
+										<input type="button" class="btn btn-default"
+											disabled="disabled" id="btn-min" value="?" />
+									</div>
+								</td>
 							</tr>
 							<tr>
-								<td><code>j</code>
-								</td>
+								<td><code>j</code></td>
 								<td>
 									<div class="btn-group">
-										<button type="button" class="btn btn-default"
-											disabled="disabled">0</button>
-									</div></td>
+										<input type="button" class="btn btn-default"
+											disabled="disabled" id="btn-j" value="?" />
+									</div>
+								</td>
 							</tr>
 							<tr>
-								<td><code>t</code>
-								</td>
+								<td><code>t</code></td>
 								<td>
 									<div class="btn-group">
-										<button type="button" class="btn btn-default"
-											disabled="disabled">0</button>
+										<input type="button" class="btn btn-default"
+											disabled="disabled" id="btn-t" value="?" />
 									</div>
 								</td>
 							</tr>
@@ -240,24 +245,24 @@ $algo["desc"] = file_get_contents('db/algo_desc.txt');
 								<th style="border-top: none;">Count</th>
 							</tr>
 							<tr>
-								<td>Number of writes</td>
+								<td>Number of write operations</td>
 								<td><div class="btn-group">
-										<button type="button" class="btn btn-default"
-											disabled="disabled">1</button>
+										<input type="button" class="btn btn-default"
+											disabled="disabled" value="0" id="btn-now" />
 									</div></td>
 							</tr>
 							<tr>
-								<td>Number of comparisons</td>
+								<td>Number of compare operations</td>
 								<td><div class="btn-group">
-										<button type="button" class="btn btn-default"
-											disabled="disabled">1</button>
+										<input type="button" class="btn btn-default"
+											disabled="disabled" value="0" id="btn-noc" />
 									</div></td>
 							</tr>
 							<tr>
-								<td>Number of steps</td>
+								<td>Number of other operations</td>
 								<td><div class="btn-group">
-										<button type="button" class="btn btn-default"
-											disabled="disabled">0</button>
+										<input type="button" class="btn btn-default"
+											disabled="disabled" value="0" id="btn-noo" />
 									</div></td>
 							</tr>
 						</table>
@@ -270,5 +275,6 @@ $algo["desc"] = file_get_contents('db/algo_desc.txt');
 	<script src="js/jquery.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="js/custom.js"></script>
+	<script src="js/algo.js"></script>
 </body>
 </html>
