@@ -77,25 +77,21 @@
 			<dd>Selection sort is a sorting algorithm, specifically an in-place
 				comparison sort. It has O(n2) time complexity, making it inefficient
 				on large lists, and generally performs worse than the similar
-				insertion sort. Selection sort is noted for its simplicity, and it
-				has performance advantages over more complicated algorithms in
-				certain situations, particularly where auxiliary memory is limited.</dd>
+				insertion sort. Selection sort is noted for its simplicity, ... <a href="view.php?aid=2749">read more</a></dd>
 			<dt>
 				<a href="view.php?aid=6930">Insertion sort</a>
 			</dt>
 			<dd>Insertion sort is a simple sorting algorithm that builds the
 				final sorted array (or list) one item at a time. It is much less
 				efficient on large lists than more advanced algorithms such as
-				quicksort, heapsort, or merge sort.</dd>
+				quicksort, heapsort, or merge sort... <a href="view.php?aid=6930">read more</a></dd>
 			<dt>
 				<a href="veww.php?aid=1457">Euclidean algorithm</a>
 			</dt>
 			<dd>The Euclidean algorithm[a], or Euclid's algorithm, is a method
 				for computing the greatest common divisor (GCD) of two (usually
 				positive) integers, also known as the greatest common factor (GCF)
-				or highest common factor (HCF). It is named after the Greek
-				mathematician Euclid, who described it in Books VII and X of his
-				Elements.</dd>
+				or highest common factor (HCF)... <a href="veww.php?aid=1457">read more</a></dd>
 		</dl>
 		<div class="well well-sm" style="text-align: center;">
 			<ul class="pagination">
