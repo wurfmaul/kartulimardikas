@@ -3,6 +3,8 @@
 $algo ["words"] = file_get_contents ( 'db/algo_words.html' );
 $algo ["source"] = file_get_contents ( 'db/algo_code.html' );
 $algo ["desc"] = file_get_contents ( 'db/algo_desc.html' );
+
+$jsFile = "algo2749-20140327094019.js";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -275,6 +277,6 @@ $algo ["desc"] = file_get_contents ( 'db/algo_desc.html' );
 	<script src="js/jquery.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="js/custom.js"></script>
-	<script src="js/algo.js"></script>
+	<script src="js-gen/<?=$jsFile?>"></script>
 </body>
 </html>

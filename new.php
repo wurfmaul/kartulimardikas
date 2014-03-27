@@ -57,6 +57,19 @@
 			</h1>
 		</div>
 		<!-- CONTENT -->
+		<form role="form">
+			<div class="form-group">
+				<label for="in-name">Algorithm name</label> <input
+					type="email" class="form-control" id="in-name"
+					placeholder="Algorithm name">
+			</div>
+			<div class="form-group">
+				<label for="in-title">Short description</label> <input
+					type="password" class="form-control" id="in-title"
+					placeholder="Description in a couple of words">
+			</div>
+			<button type="submit" class="btn btn-default">Submit</button>
+		</form>
 
 	</div>
 	<script src="js/jquery.min.js"></script>
