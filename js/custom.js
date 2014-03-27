@@ -1,2 +1,2 @@
 // activate tooltips
-$('button').tooltip();
+//$('button').tooltip();
