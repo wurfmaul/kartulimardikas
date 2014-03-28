@@ -57,20 +57,85 @@
 			</h1>
 		</div>
 		<!-- CONTENT -->
-		<form role="form">
-			<div class="form-group">
-				<label for="in-name">Algorithm name</label> <input
-					type="email" class="form-control" id="in-name"
-					placeholder="Algorithm name">
-			</div>
-			<div class="form-group">
-				<label for="in-title">Short description</label> <input
-					type="password" class="form-control" id="in-title"
-					placeholder="Description in a couple of words">
-			</div>
-			<button type="submit" class="btn btn-default">Submit</button>
-		</form>
+		<div class="row">
 
+			<!-- LEFT COLUMN -->
+			<div class="col-md-6">
+				<form class="form-horizontal" role="form">
+
+					<div class="panel-group" id="accordion-left">
+
+						<!-- TAB - GENERAL INFORMATION -->
+						<div class="panel panel-default">
+							<div class="panel-heading">
+								<h4 class="panel-title">
+									<a data-toggle="collapse" href="#general"> General Information </a>
+								</h4>
+							</div>
+							<div id="general" class="panel-collapse collapse in">
+								<div class="panel-body">
+									<div class="form-group">
+										<label for="in-name" class="control-label col-sm-3">Algorithm
+											name</label>
+										<div class="col-sm-9">
+											<input type="text" class="form-control" id="in-name"
+												placeholder="Algorithm name">
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="in-title" class="control-label col-sm-3">Description</label>
+										<div class="col-sm-9">
+											<input type="text" class="form-control" id="in-title"
+												placeholder="Description in a couple of words">
+										</div>
+									</div>
+									<textarea class="form-control" rows="3">Long description...</textarea>
+								</div>
+							</div>
+						</div>
+
+						<!-- TAB - DATA STRUCTURES -->
+						<div class="panel panel-default">
+							<div class="panel-heading">
+								<h4 class="panel-title">
+									<a data-toggle="collapse" href="#data"> Data Structures </a>
+								</h4>
+							</div>
+							<div id="data" class="panel-collapse collapse">
+								<div class="panel-body"></div>
+							</div>
+						</div>
+
+						<!-- TAB - STEPS -->
+						<div class="panel panel-default">
+							<div class="panel-heading">
+								<h4 class="panel-title">
+									<a data-toggle="collapse" href="#steps"> Steps </a>
+								</h4>
+							</div>
+							<div id="steps" class="panel-collapse collapse">
+								<div class="panel-body"></div>
+							</div>
+						</div>
+
+						<!-- TAB - INSTRUCTIONS -->
+						<div class="panel panel-default">
+							<div class="panel-heading">
+								<h4 class="panel-title">
+									<a data-toggle="collapse" href="#instructions"> Instructions </a>
+								</h4>
+							</div>
+							<div id="instructions" class="panel-collapse collapse">
+								<div class="panel-body"></div>
+							</div>
+						</div>
+					</div>
+
+					<button type="submit" class="btn btn-primary">Save</button>
+
+				</form>
+			</div>
+		</div>
 	</div>
 	<script src="js/jquery.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>

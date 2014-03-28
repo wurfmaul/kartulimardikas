@@ -14,45 +14,28 @@ var TIMEOUT = 200;
 var state = 0;
 /** Stores the previous state */
 var prevState;
-/** Number of write operations */
-var noOfWrites = 0;
-/** Number of compare operations */
-var noOfCompares = 0;
-/** Number of other operations */
-var noOfOps = 0;
 /** The id of the timer as reference */
 var playTimer;
 /** Indicates whether the algorithm is finished */
 var done = false;
+
 /** Manages the control panels */
 var ctrl = new Controls();
+/** Manages all other display elements */
+var display = new Display();
 
 /**
  * The click-event of the very left button. Sets algorithm back to the
  * beginning.
  */
 function reset() {
-	// disable automatic stepping
-	pause();
 	// reset variables
 	//~VARRESET~//
 
-	// reset counters
-	noOfWrites = 0;
-	noOfCompares = 0;
-	noOfOps = 0;
-	$("#btn-now").prop("value", "0");
-	$("#btn-noc").prop("value", "0");
-	$("#btn-noo").prop("value", "0");
-
-	// reset cursor
-	for (var i = 0; i < STATES; i++) {
-		$(".cur-s" + i).removeClass("cursor-current");
-	}
-	$(".cur-s0").addClass("cursor-current");
-	
 	// reset state
 	state = 0;
+	// reset cursor
+	stepCursor();
 	// reset result
 	done = false;
 	// reset controls
@@ -63,8 +46,7 @@ function reset() {
  * The click-event of the second button. Moves back by one step.
  */
 function stepback() {
-	pause();
-	// TODO stepback
+	alert("Not supported operation!");
 }
 
 /**
@@ -73,13 +55,11 @@ function stepback() {
  */
 function play() {
 	// enable automatic stepping
-	playTimer = setInterval(step, TIMEOUT);
+	playTimer = setInterval(performStep, TIMEOUT);
 	// transform play-button to pause-button
 	$("#btn-play").prop("title", "Pause");
-	// $("#btn-play").click(function() { pause(); });
-	document.getElementById("btn-play").setAttribute("onclick", "pause()");
-	$("#img-play").removeClass("glyphicon-play");
-	$("#img-play").addClass("glyphicon-pause");
+	document.getElementById("btn-play").setAttribute("onclick", "pause()"); // TODO jQuery somehow
+	$("#img-play").toggleClass("glyphicon-play glyphicon-pause");
 	// disable manual stepping
 	ctrl.set(ctrl.PLAY);
 }
@@ -93,10 +73,8 @@ function pause() {
 	clearInterval(playTimer);
 	// transform pause-button to play-button
 	$("#btn-play").prop("title", "Play");
-	// $("#btn-play").click(function() { play(); });
 	document.getElementById("btn-play").setAttribute("onclick", "play()");
-	$("#img-play").removeClass("glyphicon-pause");
-	$("#img-play").addClass("glyphicon-play");
+	$("#img-play").toggleClass("glyphicon-pause glyphicon-play");
 	// enable manual stepping
 	ctrl.set(ctrl.PAUSE);
 }
@@ -105,6 +83,22 @@ function pause() {
  * The click-event of the fourth button. Moves on by one state.
  */
 function step() {
+	//step by one
+	performStep();
+	// enable stepping back
+	ctrl.set(ctrl.MIDDLE);
+}
+
+/**
+ * The click-event of the very right button. Moves on to the final state.
+ */
+function finish() {
+	while (!done) {
+		performStep();
+	}
+}
+
+function performStep() {
 	// store previous state
 	prevState = state;
 
@@ -113,43 +107,11 @@ function step() {
 }
 
 /**
- * The click-event of the very right button. Moves on to the final state.
- */
-function finish() {
-	while (!done) {
-		step();
-	}
-}
-
-/**
  * Moves the cursor forward by one state.
  */
 function stepCursor() {
-	// remove cursor from previous step
-	$(".cur-s" + prevState).toggleClass("cursor-current");
-	// add cursor to new state
-	$(".cur-s" + state).toggleClass("cursor-current");
-}
-
-/**
- * Increments the write operation counter and updates the counter
- */
-function countWrite() {
-	$("#btn-now").prop("value", ++noOfWrites);
-}
-
-/**
- * Increments the compare operation counter and updates the counter
- */
-function countCompare() {
-	$("#btn-noc").prop("value", ++noOfCompares);
-}
-
-/**
- * Increments the operation counter and updates the counter
- */
-function countOps() {
-	$("#btn-noo").prop("value", ++noOfOps);
+	$(".cursor-current").removeClass("cursor-current");
+	$(".cur-s" + state).addClass("cursor-current");
 }
 
 /**
@@ -188,14 +150,88 @@ function Controls() {
 	this.BEGIN = 0;
 	this.PLAY = 1;
 	this.PAUSE = 2;
-	this.END = 3;
+	this.MIDDLE = 4;
+	this.END = 8;
 
 	this.set = function(pos) {
 		$("#btn-reset").prop("disabled", pos == this.BEGIN || pos == this.PLAY);
-		$("#btn-stepback").prop("disabled",
-				pos == this.BEGIN || pos == this.PLAY);
+//		$("#btn-stepback").prop("disabled",
+//				pos == this.BEGIN || pos == this.PLAY);
 		$("#btn-play").prop("disabled", pos == this.END);
 		$("#btn-step").prop("disabled", pos == this.END || pos == this.PLAY);
 		$("#btn-finish").prop("disabled", pos == this.END || pos == this.PLAY);
+	};
+}
+
+function Display() {
+	/** Number of write operations */
+	this.noOfWrites = 0;
+	/** Number of compare operations */
+	this.noOfCompares = 0;
+	/** Number of other operations */
+	this.noOfOps = 0;
+	
+	this.setValue = function(varName, value) {
+		this.unHighlight();
+		// update button value and color
+		var btn = $("#btn-" + varName);
+		btn.toggleClass("btn-default highlight-write");
+		btn.prop("value", value);
+		// update stats
+		this.countWrite();
+	};
+	
+	this.compare = function(varName1, varName2) {
+		this.unHighlight();
+		// update button value and color
+		$("#btn-" + varName1).toggleClass("btn-default highlight-compare");
+		$("#btn-" + varName2).toggleClass("btn-default highlight-compare");
+		// update stats
+		this.countCompare();
+	};
+	
+	this.reset = function() {
+		// delete highlights
+		this.unHighlight();
+		// reset counters
+		this.noOfWrites = 0;
+		this.noOfCompares = 0;
+		this.noOfOps = 0;
+		$("#btn-now").prop("value", "0");
+		$("#btn-noc").prop("value", "0");
+		$("#btn-noo").prop("value", "0");
+	};
+	
+	// unhighlight currently active memory cell
+	this.unHighlight = function() {
+		$(".highlight-write").removeClass("highlight-write").addClass("btn-default");
+		$(".highlight-compare").removeClass("highlight-compare").addClass("btn-default");
+	};
+	
+	/**
+	 * Increments the write operation counter and updates the counter
+	 */
+	this.countWrite = function() {
+		var btn=$("#btn-now");
+		btn.prop("value", ++this.noOfWrites);
+		btn.toggleClass("btn-default highlight-write");
+	};
+
+	/**
+	 * Increments the compare operation counter and updates the counter
+	 */
+	this.countCompare = function() {
+		var btn=$("#btn-noc");
+		btn.prop("value", ++this.noOfCompares);
+		btn.toggleClass("btn-default highlight-write");
+	};
+
+	/**
+	 * Increments the operation counter and updates the counter
+	 */
+	this.countOps = function() {
+		var btn=$("#btn-noo");
+		btn.prop("value", ++this.noOfOps);
+		btn.toggleClass("btn-default highlight-write");
 	};
 }

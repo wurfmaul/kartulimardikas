@@ -1,9 +1,8 @@
 switch (state) {
 	case 0: // i = 0
 		i = 0;
+		display.setValue("i", i);
 		state = 1;
-		$("#btn-i").prop("value", 0);
-		countWrite();
 		break;
 
 	case 1: // i < len
@@ -12,29 +11,26 @@ switch (state) {
 		} else {
 			state = 12;
 		}
-		countCompare();
+		display.compare("i", "len");
 		break;
 
 	case 2: // i++
 		i++;
-		$("#btn-i").prop("value", i);
-		countOps();
-		countWrite();
+		display.countOps();
+		display.setValue("i", i);
 		state = 1;
 		break;
 
 	case 3: // min = i
 		min = i;
-		$("#btn-min").prop("value", i);
-		countWrite();
+		display.setValue("min", i);
 		state = 4;
 		break;
 
 	case 4: // j = i + 1
 		j = i + 1;
-		$("#btn-j").prop("value", j);
-		countWrite();
-		countOps();
+		display.countOps();
+		display.setValue("j", j);
 		state = 5;
 		break;
 
@@ -44,14 +40,13 @@ switch (state) {
 		} else {
 			state = 9;
 		}
-		countCompare();
+		display.compare("j", "len");
 		break;
 
 	case 6: // j++
 		j++;
-		$("#btn-j").prop("value", j);
-		countOps();
-		countWrite();
+		display.countOps();
+		display.setValue("j", j);
 		state = 5;
 		break;
 
@@ -61,39 +56,36 @@ switch (state) {
 		} else {
 			state = 6;
 		}
-		countCompare();
+		display.compare("a" + j, "a" + min);
 		break;
 
 	case 8: // min = j
 		min = j;
-		$("#btn-min").prop("value", j);
-		countWrite();
+		display.setValue("min", j);
 		state = 6;
 		break;
 
 	case 9: // t = a[min]
 		t = a[min];
-		$("#btn-t").prop("value", a[min]);
-		countWrite();
+		display.setValue("t", a[min]);
 		state = 10;
 		break;
 
 	case 10: // a[min] = a[i]
 		a[min] = a[i];
-		$("#btn-a" + min).prop("value", a[i]);
-		countWrite();
+		display.setValue("a" + min, a[i]);
 		state = 11;
 		break;
 
 	case 11: // a[i] = t
 		a[i] = t;
-		$("#btn-a" + i).prop("value", t);
-		countWrite();
+		display.setValue("a" + i, t);
 		state = 2;
 		break;
 
 	case 12: // DONE
 		done = true;
+		pause();
 		ctrl.set(ctrl.END);
 		break;
 		

@@ -4,7 +4,10 @@ $algo ["words"] = file_get_contents ( 'db/algo_words.html' );
 $algo ["source"] = file_get_contents ( 'db/algo_code.html' );
 $algo ["desc"] = file_get_contents ( 'db/algo_desc.html' );
 
-$jsFile = "algo2749-20140327094019.js";
+include_once 'machine/generator.php';
+generate(123);
+
+$jsFile = "algo.js";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -132,7 +135,7 @@ $jsFile = "algo2749-20140327094019.js";
 								<a data-toggle="collapse" href="#pseudocode"> Selection sort </a>
 							</h4>
 						</div>
-						<div id="pseudocode" class="panel-collapse collapse in">
+						<div id="pseudocode" class="panel-collapse collapse">
 							<div class="panel-body">
 							<?=$algo["words"]?>
 							</div>
@@ -146,7 +149,7 @@ $jsFile = "algo2749-20140327094019.js";
 								<a data-toggle="collapse" href="#sourcecode"> Source code </a>
 							</h4>
 						</div>
-						<div id="sourcecode" class="panel-collapse collapse">
+						<div id="sourcecode" class="panel-collapse collapse in">
 							<div class="panel-body">
 							<?=$algo["source"]?>
 							</div>
@@ -215,7 +218,7 @@ $jsFile = "algo2749-20140327094019.js";
 										<td><code>len</code></td>
 										<td>
 											<div class="btn-group">
-												<input type="button" class="btn btn-default"
+												<input type="button" class="btn btn-default" id="btn-len"
 													disabled="disabled" value="9" />
 											</div>
 										</td>

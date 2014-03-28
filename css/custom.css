@@ -24,3 +24,15 @@
 	border-top: black solid 2px;
 	border-top-left-radius: 5px;
 }
+
+.highlight-write {
+	color: #fff;
+	background-color: #5cb85c;
+	border-color: #4cae4c;
+}
+
+.highlight-compare {
+	color: #fff;
+	background-color: #f0ad4e;
+	border-color: #eea236;
+}

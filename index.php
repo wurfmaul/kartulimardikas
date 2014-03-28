@@ -93,16 +93,6 @@
 				positive) integers, also known as the greatest common factor (GCF)
 				or highest common factor (HCF)... <a href="view.php?aid=1457">read more</a></dd>
 		</dl>
-		<div class="well well-sm" style="text-align: center;">
-			<ul class="pagination">
-				<li class="disabled"><a href="#">&laquo;</a></li>
-				<li class="active"><a href="#page1">1 <span class="sr-only">(current)</span>
-				</a></li>
-				<li><a href="#page2">2 <span class="sr-only">(current)</span> </a></li>
-				<li><a href="#page2">&raquo;</a></li>
-			</ul>
-		</div>
-		
 		<ul class="pager">
 		  <li class="previous"><a href="../pres/#/prototype">&larr; Back to presentation</a></li>
 		</ul>
