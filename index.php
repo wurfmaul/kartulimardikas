@@ -94,7 +94,7 @@
 				or highest common factor (HCF)... <a href="view.php?aid=1457">read more</a></dd>
 		</dl>
 		<ul class="pager">
-		  <li class="previous"><a href="../pres/#/prototype">&larr; Back to presentation</a></li>
+		  <li class="previous"><a href="../pres/#/overview">&larr; Back to presentation</a></li>
 		</ul>
 	</div>
 	<script src="js/jquery.min.js"></script>

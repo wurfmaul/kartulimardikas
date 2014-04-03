@@ -31,10 +31,10 @@ function generate($id) {
 		if(file_put_contents ( FOLDER . $filename, $content )) {
 			//echo "JavaScript file '$filename' successfully generated!";
 		} else {
-			throw new Exception("Could not write generated file!");
+			echo "<h1>Error: could not write generated file!</h1>";
 		}
 	} else {
-		throw new Exception("Could not read frame file!");
+		echo "<h1>Could not read frame file!</h1>";
 	}
 }
 ?>
