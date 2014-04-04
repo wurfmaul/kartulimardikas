@@ -306,6 +306,9 @@ $jsFile = "algo.js";
 				</div>
 			</div>
 		</div>
+		<ul class="pager">
+		  <li class="previous"><a href="../pres/#/overview">&larr; Back to presentation</a></li>
+		</ul>
 	</div>
 	<script src="js/jquery.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
