@@ -39,7 +39,9 @@ function reset() {
 	// reset result
 	done = false;
 	// reset controls
+	pause();
 	ctrl.set(ctrl.BEGIN);
+	display.reset();
 }
 
 /**
@@ -59,7 +61,7 @@ function play() {
 	// transform play-button to pause-button
 	$("#btn-play").prop("title", "Pause");
 	document.getElementById("btn-play").setAttribute("onclick", "pause()"); // TODO jQuery somehow
-	$("#img-play").toggleClass("glyphicon-play glyphicon-pause");
+	$("#img-play").removeClass("glyphicon-play").addClass("glyphicon-pause");
 	// disable manual stepping
 	ctrl.set(ctrl.PLAY);
 }
@@ -74,7 +76,7 @@ function pause() {
 	// transform pause-button to play-button
 	$("#btn-play").prop("title", "Play");
 	document.getElementById("btn-play").setAttribute("onclick", "play()");
-	$("#img-play").toggleClass("glyphicon-pause glyphicon-play");
+	$("#img-play").removeClass("glyphicon-pause").addClass("glyphicon-play");
 	// enable manual stepping
 	ctrl.set(ctrl.PAUSE);
 }
