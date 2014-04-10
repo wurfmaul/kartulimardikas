@@ -5,7 +5,7 @@ $algo ["source"] = file_get_contents ( 'db/algo_code.html' );
 $algo ["desc"] = file_get_contents ( 'db/algo_desc.html' );
 
 include_once 'machine/generator.php';
-generate(123);
+generate ( 123 );
 
 $jsFile = "algo.js";
 ?>
@@ -93,33 +93,33 @@ $jsFile = "algo.js";
 								<div class="btn-group btn-group-justified">
 									<div class="btn-group">
 										<button type="button" class="btn btn-default"
-											title="Back to beginning" id="btn-reset" onclick="reset()"
+											title="Back to beginning" id="btn-reset"
 											disabled="disabled">
 											<span class="glyphicon glyphicon-fast-backward"></span>
 										</button>
 									</div>
 									<div class="btn-group">
 										<button type="button" class="btn btn-default"
-											title="Step back" id="btn-stepback" onclick="stepback()"
+											title="Step back" id="btn-stepback"
 											disabled="disabled">
 											<span class="glyphicon glyphicon-step-backward"></span>
 										</button>
 									</div>
 									<div class="btn-group">
 										<button type="button" class="btn btn-default" title="Play"
-											id="btn-play" onclick="play()">
+											id="btn-play" data-toggle="button">
 											<span class="glyphicon glyphicon-play" id="img-play"></span>
 										</button>
 									</div>
 									<div class="btn-group">
 										<button type="button" class="btn btn-default"
-											title="Step forward" id="btn-step" onclick="step()">
+											title="Step forward" id="btn-step">
 											<span class="glyphicon glyphicon-step-forward"></span>
 										</button>
 									</div>
 									<div class="btn-group">
 										<button type="button" class="btn btn-default"
-											title="Forward to end" id="btn-finish" onclick="finish()">
+											title="Forward to end" id="btn-finish">
 											<span class="glyphicon glyphicon-fast-forward"></span>
 										</button>
 									</div>
@@ -307,7 +307,8 @@ $jsFile = "algo.js";
 			</div>
 		</div>
 		<ul class="pager">
-		  <li class="previous"><a href="../pres/#/overview">&larr; Back to presentation</a></li>
+			<li class="previous"><a href="../pres/#/overview">&larr; Back to
+					presentation</a></li>
 		</ul>
 	</div>
 	<script src="js/jquery.min.js"></script>
