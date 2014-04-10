@@ -29,9 +29,9 @@
 			<div class="collapse navbar-collapse"
 				id="bs-example-navbar-collapse-1">
 				<ul class="nav navbar-nav">
-					<li><a href="view.php">View</a>
+					<li><a href="view.php#">View</a>
 					</li>
-					<li><a href="new.php">New</a>
+					<li><a href="new.php#">New</a>
 					</li>
 				</ul>
 				<form class="navbar-form navbar-right" role="form">

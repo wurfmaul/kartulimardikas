@@ -35,13 +35,13 @@ $jsFile = "algo.js";
 						class="icon-bar"></span> <span class="icon-bar"></span> <span
 						class="icon-bar"></span>
 				</button>
-				<a class="navbar-brand" href="index.php">Kartulimardikas</a>
+				<a class="navbar-brand" href="index.php#">Kartulimardikas</a>
 			</div>
 			<div class="collapse navbar-collapse"
 				id="bs-example-navbar-collapse-1">
 				<ul class="nav navbar-nav">
 					<li class="active"><a href="#">View</a></li>
-					<li><a href="new.php">New</a></li>
+					<li><a href="new.php#">New</a></li>
 				</ul>
 				<form class="navbar-form navbar-right" role="form">
 					<div class="form-group">

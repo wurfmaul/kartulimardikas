@@ -36,3 +36,15 @@
 	background-color: #f0ad4e;
 	border-color: #eea236;
 }
+
+.panel-topless {
+	border-top: none;
+	border-top-left-radius: 0px;
+	border-top-right-radius: 0px;
+}
+
+.btn-size {
+	padding-left: 0px;
+	padding-right: 0px;
+	text-align: center;
+}
