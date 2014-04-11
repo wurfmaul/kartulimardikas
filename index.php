@@ -60,7 +60,7 @@
 			<p>Welcome to an interactive platform to discuss, demonstrate and
 				compare common algorithms.</p>
 			<p>
-				<a class="btn btn-primary btn-lg" role="button" href="new.php">Define
+				<a class="btn btn-primary btn-lg" role="button" href="new.php#">Define
 					new algorithm</a>
 			</p>
 		</div>
