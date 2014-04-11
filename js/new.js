@@ -1,14 +1,16 @@
 /**
  * jQUERY - ADD EVENT HANDLERS
  */
-var theme = new ModalTheme();
+var modal = new DataStructureModal();
+var valid = new Validator();
+var template = new Template();
 
 // warn to prevent data loss
 // $(window).bind('beforeunload', function() {
 // return 'Are you sure you want to leave? Unsaved changes may get lost!';
 // });
 $("#addRegisterCheck").click(function() {
-    toggleDisability();
+    modal.toggleDisability();
 });
 
 $(".btn-size").click(function() {
@@ -19,8 +21,8 @@ $(".btn-size").click(function() {
 
 $("#btn-addDataStructure").click(function() {
     // prepare modal for adding
-    theme.addStructure();
-    $("#addStructureModal").modal('show');
+    modal.themeAdd();
+    modal.show();
 });
 
 /**
@@ -36,11 +38,11 @@ var site = $("#placeStructuresHere");
  * Redraw the table of data structures
  */
 function reDraw() {
-    html = "";
+    var html = "";
     for (var i = 0; i < struc.length; i++) {
-	name = struc[i].name;
-	value = struc[i].value;
-	html += templateRegisterRow(name, value);
+	var name = struc[i].name;
+	var value = struc[i].value;
+	html += template.registerRow(name, value);
     }
     site.html(html);
 
@@ -51,8 +53,8 @@ function reDraw() {
 
     // add edit functionality
     $(".data-edit").click(function() {
-	theme.editStructure($(this).prop("value"));
-	$("#addStructureModal").modal('show');
+	modal.themeEdit($(this).prop("value"));
+	modal.show();
     });
 }
 
@@ -60,15 +62,14 @@ function reDraw() {
  * Add new register
  */
 function addRegister() {
-    console.log("addRegister() called");
-    
+    // get name from input field
     var name = $("#addRegisterName").prop("value");
-    if (!checkName(name))
+    if (!valid.checkName(name))
 	return;
 
     // all checks passed
     $("#addRegisterNameField").removeClass("has-error");
-    $("#addStructureModal").modal('hide');
+    modal.hide();
 
     // retrieve value
     var value = "?";
@@ -83,16 +84,14 @@ function addRegister() {
 }
 
 function editRegister(oldName) {
-    console.log("editRegister("+oldName+") called");
-    
+    // get name from input field
     var name = $("#addRegisterName").prop("value");
-    
-    if (!checkName(name, oldName))
+    if (!valid.checkName(name, oldName))
 	return;
 
     // all checks passed
     $("#addRegisterNameField").removeClass("has-error");
-    $("#addStructureModal").modal('hide');
+    modal.hide();
 
     // retrieve value
     var value = "?";
@@ -123,11 +122,20 @@ function removeStructure(name) {
 	    return;
 	}
     }
-    $("#alert-dataStructureDoesNotExist").html(templateWarning("Data structure with name '" + name + "' does not exist any more!"));
+    $("#alert-dataStructureDoesNotExist").html(template.warning("Data structure with name '" + name + "' does not exist any more!"));
 }
 
-function ModalTheme() {
-    this.editStructure = function(name) {
+function DataStructureModal() {
+    
+    this.hide = function() {
+	$("#addStructureModal").modal('hide');
+    };
+    
+    this.show = function() {
+	$("#addStructureModal").modal('show');
+    };
+    
+    this.themeEdit = function(name) {
 	console.log("change theme to EDIT");
 	$("#addStructureModalLabel").text("Edit data structure");
 	$("#addRegisterName").prop("value", name);
@@ -139,7 +147,7 @@ function ModalTheme() {
 	$("#addListName").prop("value", name);
     };
     
-    this.addStructure = function() {
+    this.themeAdd = function() {
 	console.log("change theme to ADD");
 	$("#addStructureModalLabel").text("Add new data structure");
 	$("#addRegisterSubmit").text("Add register");
@@ -148,50 +156,53 @@ function ModalTheme() {
 	    addRegister();
 	});
     };
-}
-
-/**
- * Enable/disable the input field for new register value
- */
-function toggleDisability() {
-    var elem = $("#addRegisterValue");
-    if ($("#addRegisterCheck").prop("checked")) {
-	elem.prop("disabled", false);
-	elem.attr("placeholder", "value");
-    } else {
-	elem.prop("disabled", true);
-	elem.attr("placeholder", "uninitialized");
-    }
-}
-
-function checkName(name) {
-    return checkName(name, "");
-}
-
-function checkName(name, ignoreName) {
-    console.log("checkName(" + name + ", " + ignoreName + ") called");
     
-    var msg = new Array();
-    // check if name exists
-    for (var i = 0; i < struc.length; i++) {
-	if (struc[i].name != ignoreName && name == struc[i].name) {
-	    msg.push("Name '" + name + "' does already exist!");
-	    break;
+    /**
+     * Enable/disable the input field for new register value
+     */
+    this.toggleDisability = function() {
+	var elem = $("#addRegisterValue");
+	if ($("#addRegisterCheck").prop("checked")) {
+	    elem.prop("disabled", false);
+	    elem.attr("placeholder", "value");
+	} else {
+	    elem.prop("disabled", true);
+	    elem.attr("placeholder", "uninitialized");
 	}
-    }
+    };
+}
 
-    // check validity of name
-    if (name.search(/^\w+$/) == -1)
-	msg.push("Name '" + name + "' is not valid. Allowed characters: [A-Za-z0-9_]");
+function Validator() {
 
-    if (msg.length > 0) {
-	$("#addRegisterNameField").addClass("has-error");
-	while (msg.length > 0) {
-	    $("#alert-dataStructures").html(templateWarning(msg.pop()));
-	}
-	return false;
-    }
-    return true;
+    this.checkName = function(name) {
+        return checkName(name, "");
+    };
+
+    this.checkName = function(name, ignoreName) {
+        console.log("checkName(" + name + ", " + ignoreName + ") called");
+        
+        var msg = new Array();
+        // check if name exists
+        for (var i = 0; i < struc.length; i++) {
+    	if (struc[i].name != ignoreName && name == struc[i].name) {
+    	    msg.push("Name '" + name + "' does already exist!");
+    	    break;
+    	}
+        }
+    
+        // check validity of name
+        if (name.search(/^\w+$/) == -1)
+    	msg.push("Name '" + name + "' is not valid. Allowed characters: [A-Za-z0-9_]");
+    
+        if (msg.length > 0) {
+    	$("#addRegisterNameField").addClass("has-error");
+    	while (msg.length > 0) {
+    	    $("#alert-dataStructures").html(template.warning(msg.pop()));
+    	}
+    	return false;
+        }
+        return true;
+    };
 }
 
 function Structure(name, value) {
@@ -200,38 +211,32 @@ function Structure(name, value) {
 }
 
 /**
- * STRING TEMPLATES
- */
-
-/**
  * Template of one table row. The row represents one single data structure.
- * 
- * @param name
- * @param value
- * @returns {String} HTML code of table row
  */
-function templateRegisterRow(name, value) {
-    //@formatter:off
-    return '<tr>' 
-    	+ '	<td><code>' + name + '</code></td>' 
-    	+ '	<td><div class="btn-group">'
-	+ '		<input type="button" class="btn btn-default" id="btn-len" disabled="disabled" value="' + value + '" />' 
-	+ '	</div></td>'
-	+ '	<td>' 
-	+ '		<button type="button" class="btn btn-default data-edit" title="edit register" value="' + name + '">'
-	+ '			<span class="glyphicon glyphicon-pencil"></span>' 
-	+ '		</button>&nbsp;'
-	+ '		<button type="button" class="btn btn-default data-remove" title="remove register" value="' + name + '">'
-	+ '			<span class="glyphicon glyphicon-remove"></span>' 
-	+ '		</button>' 
-	+ '	</td>' 
-	+ '<tr>';
-    // @formatter:on
-}
+function Template() {
+    this.registerRow = function(name, value) {
+        //@formatter:off
+        return '<tr>' 
+        	+ '	<td><code>' + name + '</code></td>' 
+        	+ '	<td><div class="btn-group">'
+    	+ '		<input type="button" class="btn btn-default" id="btn-len" disabled="disabled" value="' + value + '" />' 
+    	+ '	</div></td>'
+    	+ '	<td>' 
+    	+ '		<button type="button" class="btn btn-default data-edit" title="edit register" value="' + name + '">'
+    	+ '			<span class="glyphicon glyphicon-pencil"></span>' 
+    	+ '		</button>&nbsp;'
+    	+ '		<button type="button" class="btn btn-default data-remove" title="remove register" value="' + name + '">'
+    	+ '			<span class="glyphicon glyphicon-remove"></span>' 
+    	+ '		</button>' 
+    	+ '	</td>' 
+    	+ '<tr>';
+        // @formatter:on
+    };
 
-function templateWarning(message) {
-    return '<div class="alert alert-warning alert-dismissable" id="alert-dataDoesNotExist">'
-	+ '	<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>'
-	+ '	<strong>Warning!</strong> ' + message 
-	+ '</div>';
+    this.warning = function(message) {
+        return '<div class="alert alert-warning alert-dismissable" id="alert-dataDoesNotExist">'
+    	+ '	<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>'
+    	+ '	<strong>Warning!</strong> ' + message 
+    	+ '</div>';
+    };
 }
