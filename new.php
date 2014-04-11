@@ -80,7 +80,7 @@ define ( "LIST_DEFAULT_SIZE", 7 );
 												<input type="text" class="form-control" id="addRegisterName" placeholder="name">
 											</div>
 										</div>
-										<div class="form-group">
+										<div class="form-group" id="addRegisterValueField">
 											<label for="addRegisterValue" class="col-sm-2 control-label">Value</label>
 											<div class="col-sm-10">
 												<div class="input-group">

@@ -64,17 +64,21 @@ function reDraw() {
 function addRegister() {
     // get name from input field
     var name = $("#addRegisterName").prop("value");
-    if (!valid.checkName(name))
-	return;
-
-    // all checks passed
-    $("#addRegisterNameField").removeClass("has-error");
-    modal.hide();
+    var check = valid.checkName(name);
 
     // retrieve value
     var value = "?";
-    if ($("#addRegisterCheck").prop("checked"))
+    if ($("#addRegisterCheck").prop("checked")) {
 	value = $("#addRegisterValue").prop("value");
+	check = valid.checkValue(value) && check;
+    }
+    if(!check)
+	return;
+    
+    // all checks passed
+    $(".has-error").removeClass("has-error");
+    modal.hide();
+
 
     // add register to internal structure
     struc[struc.length] = new Structure(name, value);
@@ -86,17 +90,20 @@ function addRegister() {
 function editRegister(oldName) {
     // get name from input field
     var name = $("#addRegisterName").prop("value");
-    if (!valid.checkName(name, oldName))
-	return;
-
-    // all checks passed
-    $("#addRegisterNameField").removeClass("has-error");
-    modal.hide();
+    var check = valid.checkName(name, oldName);
 
     // retrieve value
     var value = "?";
-    if ($("#addRegisterCheck").prop("checked"))
+    if ($("#addRegisterCheck").prop("checked")) {
 	value = $("#addRegisterValue").prop("value");
+	check = valid.checkValue(value) && check;
+    }
+    if (!check)
+	return;
+    
+    // all checks passed
+    $(".has-error").removeClass("has-error");
+    modal.hide();
 
     // add register to internal structure
     for (var i = 0; i < struc.length; i++) {
@@ -136,7 +143,6 @@ function DataStructureModal() {
     };
     
     this.themeEdit = function(name) {
-	console.log("change theme to EDIT");
 	$("#addStructureModalLabel").text("Edit data structure");
 	$("#addRegisterName").prop("value", name);
 	$("#addRegisterSubmit").text("Save changes");
@@ -148,7 +154,6 @@ function DataStructureModal() {
     };
     
     this.themeAdd = function() {
-	console.log("change theme to ADD");
 	$("#addStructureModalLabel").text("Add new data structure");
 	$("#addRegisterSubmit").text("Add register");
 	$("#addRegisterSubmit").off("click");
@@ -179,27 +184,47 @@ function Validator() {
     };
 
     this.checkName = function(name, ignoreName) {
-        console.log("checkName(" + name + ", " + ignoreName + ") called");
-        
         var msg = new Array();
         // check if name exists
-        for (var i = 0; i < struc.length; i++) {
-    	if (struc[i].name != ignoreName && name == struc[i].name) {
-    	    msg.push("Name '" + name + "' does already exist!");
-    	    break;
-    	}
-        }
+	for (var i = 0; i < struc.length; i++) {
+	    if (struc[i].name != ignoreName && name == struc[i].name) {
+		msg.push("Name '" + name + "' does already exist!");
+		break;
+	    }
+	}
     
         // check validity of name
-        if (name.search(/^\w+$/) == -1)
-    	msg.push("Name '" + name + "' is not valid. Allowed characters: [A-Za-z0-9_]");
+        if (name.search(/^[a-zA-Z]\w*$/) == -1) // \w = [A-Za-z0-9_]
+    	    msg.push("Name '" + name + "' is not valid. Allowed characters: [A-Za-z0-9_], starting with letter.");
+        
+        if (msg.length > 0) {
+            $("#addRegisterNameField").addClass("has-error");
+            while (msg.length > 0) {
+        	$("#alert-dataStructures").html(template.warning(msg.pop()));
+            }
+            return false;
+        }
+        return true;
+    };
+    
+    this.checkValue = function(value) {
+        var msg = new Array();
+        
+        // check for string
+	var check = value.search(/^["'][A-ZÄÖÜa-zäöü0-9_ ]*["']$/) == 0;
+	// check for integer
+	check |= value.search(/^\d+$/) == 0; // [0-9]
+	
+	
+        if (!check)
+            msg.push("Value '" + value + "' is not valid. Allowed: strings and ints");
     
         if (msg.length > 0) {
-    	$("#addRegisterNameField").addClass("has-error");
-    	while (msg.length > 0) {
-    	    $("#alert-dataStructures").html(template.warning(msg.pop()));
-    	}
-    	return false;
+            $("#addRegisterValueField").addClass("has-error");
+            while (msg.length > 0) {
+        	$("#alert-dataStructures").html(template.warning(msg.pop()));
+            }
+            return false;
         }
         return true;
     };
@@ -216,27 +241,27 @@ function Structure(name, value) {
 function Template() {
     this.registerRow = function(name, value) {
         //@formatter:off
-        return '<tr>' 
-        	+ '	<td><code>' + name + '</code></td>' 
-        	+ '	<td><div class="btn-group">'
-    	+ '		<input type="button" class="btn btn-default" id="btn-len" disabled="disabled" value="' + value + '" />' 
-    	+ '	</div></td>'
-    	+ '	<td>' 
-    	+ '		<button type="button" class="btn btn-default data-edit" title="edit register" value="' + name + '">'
-    	+ '			<span class="glyphicon glyphicon-pencil"></span>' 
-    	+ '		</button>&nbsp;'
-    	+ '		<button type="button" class="btn btn-default data-remove" title="remove register" value="' + name + '">'
-    	+ '			<span class="glyphicon glyphicon-remove"></span>' 
-    	+ '		</button>' 
-    	+ '	</td>' 
-    	+ '<tr>';
-        // @formatter:on
+	return '<tr>' 
+	+ '	<td><code>' + name + '</code></td>' 
+	+ '	<td><div class="btn-group">'
+	+ '		<input type="button" class="btn btn-default" id="btn-len" disabled="disabled" value="' + value + '" />' 
+	+ '	</div></td>'
+	+ '	<td>' 
+	+ '		<button type="button" class="btn btn-default data-edit" title="edit register" value="' + name + '">'
+	+ '			<span class="glyphicon glyphicon-pencil"></span>' 
+	+ '		</button>&nbsp;'
+	+ '		<button type="button" class="btn btn-default data-remove" title="remove register" value="' + name + '">'
+	+ '			<span class="glyphicon glyphicon-remove"></span>' 
+	+ '		</button>' 
+	+ '	</td>' 
+	+ '<tr>';
+	// @formatter:on
     };
 
     this.warning = function(message) {
-        return '<div class="alert alert-warning alert-dismissable" id="alert-dataDoesNotExist">'
-    	+ '	<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>'
-    	+ '	<strong>Warning!</strong> ' + message 
-    	+ '</div>';
+	return '<div class="alert alert-warning alert-dismissable" id="alert-dataDoesNotExist">'
+	+ '	<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>'
+	+ '	<strong>Warning!</strong> ' + message 
+	+ '</div>';
     };
 }
