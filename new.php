@@ -62,7 +62,7 @@ define ( "LIST_DEFAULT_SIZE", 7 );
 					<h4 class="modal-title" id="addStructureModalLabel">Add new data structure</h4>
 				</div>
 				<div class="modal-body">
-					<ul class="nav nav-tabs">
+					<ul class="nav nav-tabs" id="addStructureTab">
 						<li class="active"><a href="#add-register" data-toggle="tab">Register</a></li>
 						<li><a href="#add-list" data-toggle="tab">List</a></li>
 					</ul>
@@ -73,7 +73,7 @@ define ( "LIST_DEFAULT_SIZE", 7 );
 							<div class="panel panel-default panel-topless">
 								<div class="panel-body">
 									<form class="form-horizontal" role="form">
-										<div id="alert-dataStructures"></div>
+										<div id="alert-register"></div>
 										<div class="form-group" id="addRegisterNameField">
 											<label for="addRegisterName" class="col-sm-2 control-label">Name</label>
 											<div class="col-sm-10">
@@ -93,7 +93,7 @@ define ( "LIST_DEFAULT_SIZE", 7 );
 										</div>
 										<div class="form-group">
 											<div class="col-sm-offset-2 col-sm-10">
-												<button type="submit" class="btn btn-primary" id="addRegisterSubmit">
+												<button type="button" class="btn btn-primary" id="addRegisterSubmit">
 													Add Register
 												</button>
 											</div>
@@ -108,7 +108,8 @@ define ( "LIST_DEFAULT_SIZE", 7 );
 							<div class="panel panel-default panel-topless">
 								<div class="panel-body">
 									<form class="form-horizontal" role="form">
-										<div class="form-group">
+										<div id="alert-list"></div>
+										<div class="form-group" id="addListNameField">
 											<label for="addListName" class="col-sm-2 control-label">Name</label>
 											<div class="col-sm-10">
 												<input type="text" class="form-control" id="addListName" placeholder="name">
@@ -119,7 +120,7 @@ define ( "LIST_DEFAULT_SIZE", 7 );
 											<div class="col-sm-10">
 												<div class="btn-group btn-group-justified" data-toggle="buttons">
 												<?php for($i = LIST_MIN_SIZE; $i <= LIST_MAX_SIZE; $i ++) { ?>
-													<label
+													<label id="addListSizeBtn<?=$i?>"
 														class="btn btn-default btn-size<?=$i == LIST_DEFAULT_SIZE? " active" : "" ?>">
 														<input type="radio" name="options" id="addListSize<?=$i?>"><?=$i?>
 													</label>
@@ -127,10 +128,10 @@ define ( "LIST_DEFAULT_SIZE", 7 );
 												</div>
 											</div>
 										</div>
-										<div class="form-group">
+										<div class="form-group" id="addListValuesField">
 											<label for="addListValue" class="col-sm-2 control-label">Values</label>
 											<div class="col-sm-10">
-												<ul class="nav nav-tabs">
+												<ul class="nav nav-tabs" id="addListInitTab">
 													<li class="active"><a href="#addListUninitialized" data-toggle="tab">uninitialized</a></li>
 													<li><a href="#addListRandomized" data-toggle="tab">randomized</a></li>
 													<li><a href="#addListCustomized" data-toggle="tab">customized</a></li>
@@ -168,7 +169,7 @@ define ( "LIST_DEFAULT_SIZE", 7 );
 										</div>
 										<div class="form-group">
 											<div class="col-sm-offset-2 col-sm-10">
-												<button type="submit" class="btn btn-primary" id="addListSubmit">
+												<button type="button" class="btn btn-primary" id="addListSubmit">
 													Add List
 												</button>
 											</div>
@@ -236,7 +237,6 @@ define ( "LIST_DEFAULT_SIZE", 7 );
 							</div>
 							<div id="data" class="panel-collapse collapse in">
 								<div class="panel-body">
-									<div id="alert-dataStructureDoesNotExist"></div>
 									<table class="table table-hover table-bordered">
 										<thead>
 											<tr>
