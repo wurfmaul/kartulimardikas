@@ -8,7 +8,7 @@
 //});
 
 $("#addRegisterCheck").click(function() {
-    modal.setDisability();
+    dataModal.setPlaceholder();
 });
 
 $(".btn-size").click(function() {
@@ -17,10 +17,43 @@ $(".btn-size").click(function() {
     $("#addListMaxValue").text(listSize - 1);
 });
 
-$("#btn-addDataStructure").click(function() {
+$(".activate-input").click(function() {
+    var elem = $("#" + $(this).prop("value"));
+    if ($(this).prop("checked")) {
+	elem.prop("disabled", false);
+	elem.focus();
+    } else {
+	elem.prop("disabled", true);
+	elem.prop("value", "");
+    }
+});
+
+$("#addAssignTarget").click(function() {
+    var elem = $(this).prop("value");
+    if(elem != '' && vars.isArray(elem))
+	$("#addAssignTargetIndexField").show("slow");
+    else
+	$("#addAssignTargetIndexField").hide("slow");
+});
+
+$("#addAssignVar").click(function() {
+    var elem = $(this).prop("value");
+    if(elem != '' && vars.isArray(elem))
+	$("#addAssignVarIndexField").show("slow");
+    else
+	$("#addAssignVarIndexField").hide("slow");
+});
+
+$("#btn-addVariable").click(function() {
     // prepare modal for adding
-    modal.themeAdd();
-    modal.show();
+    dataModal.themeAdd();
+    dataModal.show();
+});
+
+$("#btn-addInstruction").click(function() {
+    // prepare modal for adding
+    instModal.themeAdd();
+    instModal.show();
 });
 
 /**
@@ -29,59 +62,67 @@ $("#btn-addDataStructure").click(function() {
 
 /** Represents delimiter of list elements in customized view. */
 var DELIM = ';';
-/** Specifies the site, where data structures are to place. */
-var SITE = $("#placeStructuresHere");
+/** Specifies the site, where variables are to place. */
+var SITE = $("#placeVariablesHere");
 
-/** The main window for adding/editing data structures. */
-var modal = new DataStructureModal();
+/** The main window for adding/editing variables. */
+var dataModal = new VariableModal();
+/** The main window for adding/editing instructions. */
+var instModal = new InstructionModal();
 /** The default validator for input values. */
 var valid = new Validator();
 /** Provides a set of HTML templates for enhancing site content. */
 var template = new Template();
-/** Represents the collection of existing data structures */
-var struc = new Structure();
+/** Represents the collection of existing variables */
+var vars = new Variables();
+
+var instr = new Instructions();
 /** Provides an interface for adding/editing registers. */
 var registers = new Register();
 /** Provides an interface for adding/editing lists. */
 var lists = new List();
 
 /**
- * Redraw the table of data structures. Each element is displayed in a single
+ * Redraw the table of variables. Each element is displayed in a single
  * table row.
  */
 function reDraw() {
-    // compute a table row for every data structure
+    // compute a table row for every variable
     var html = "";
-    for (var i = 0; i < struc.size(); i++) {
-	var name = struc.getName(i);
-	var value = struc.getValue(i);
-	if($.isArray(value))
-	    html += template.listCells(name, value);
-	else
-	    html += template.registerCell(name, value);
+    if (vars.size() > 0) {
+	for (var i = 0; i < vars.size(); i++) {
+	    var name = vars.getName(i);
+	    var value = vars.getValue(i);
+	    if($.isArray(value))
+		html += template.listCells(name, value);
+	    else
+		html += template.registerCell(name, value);
+	}
+    } else {
+	html = '<tr><td colspan="3" style="color: gray;">No variables defined yet!</td></tr>';
     }
     // write the content to the page's HTML content.
     SITE.html(html);
 
     // add remove functionality to button
     $(".data-remove").click(function() {
-	removeStructure($(this).prop("value"));
+	removeVariable($(this).prop("value"));
     });
 
     // add edit functionality to button
     $(".data-edit").click(function() {
-	modal.themeEdit($(this).prop("value"));
-	modal.show();
+	dataModal.themeEdit($(this).prop("value"));
+	dataModal.show();
     });
 }
 
 /**
- * Remove data structure, identified by unique name
+ * Remove variable, identified by unique name
  * 
  * @param name Identifier of element.
  */
-function removeStructure(name) {
-    struc.remove(name);
+function removeVariable(name) {
+    vars.remove(name);
     reDraw();
 }
 
@@ -89,7 +130,7 @@ function removeStructure(name) {
  * This class provides an interface for operations on registers. When submitting
  * the main add/edit form, the actions are evaluated here. The values are read
  * from the HTML content. The data is checked and written to the collection of
- * data structures.
+ * variables.
  */
 function Register() {
     /** The name of the currently edited register. */
@@ -102,7 +143,7 @@ function Register() {
     /** The default value of a register's name. */
     this.DEFAULTNAME = "";
     /** The default method for a register's initialization. */
-    this.DEFAULTINIT = struc.UNINITIALIZED;
+    this.DEFAULTINIT = vars.UNINITIALIZED;
     /** The default value for a register's value. */
     this.DEFAULTVALUE = "";
 
@@ -111,7 +152,7 @@ function Register() {
 	// check input fields
 	if(this.check(null)) {
 	    // add register to internal structure
-	    struc.add(this.name, this.value, this.init);
+	    vars.add(this.name, this.value, this.init);
 	    // redraw data table
 	    reDraw();
 	}
@@ -127,7 +168,7 @@ function Register() {
 	// check input fields
 	if(this.check(oldName)) {
 	    // add register to internal structure
-	    struc.edit(oldName, this.name, this.value, this.init);
+	    vars.edit(oldName, this.name, this.value, this.init);
 	    // redraw data table
 	    reDraw();
 	}
@@ -143,6 +184,10 @@ function Register() {
     this.check = function(oldName) {
 	// tell the validator that we are dealing with registers
 	valid.target(valid.REGISTER);
+	
+	// clear all errors
+	$(".has-error").removeClass("has-error");
+	$(".alert").alert('close');
 
 	// get name from input field
 	this.name = $("#addRegisterName").prop("value");
@@ -154,14 +199,12 @@ function Register() {
 	if ($("#addRegisterCheck").prop("checked")) {
 	    this.value = $("#addRegisterValue").prop("value");
 	    check = valid.checkValue(this.value) && check;
-	    this.init = struc.CUSTOMIZED;
+	    this.init = vars.CUSTOMIZED;
 	}
 
 	if(check) {
 	    // all checks passed
-	    $(".has-error").removeClass("has-error");
-	    $(".alert").alert('close');
-	    modal.hide();
+	    dataModal.hide();
 	}
 
 	return check;
@@ -171,8 +214,7 @@ function Register() {
 /**
  * This class provides an interface for operations on lists. When submitting the
  * main add/edit form, the actions are evaluated here. The values are read from
- * the HTML content. The data is checked and written to the collection of data
- * structures.
+ * the HTML content. The data is checked and written to the collection of variables.
  */
 function List() {
     /** The name of the currently edited list. */
@@ -189,7 +231,7 @@ function List() {
     /** The default size of a list. */
     this.DEFAULTSIZE = 7;
     /** The default value of a register's initialization method. */
-    this.DEFAULTINIT = struc.UNINITIALIZED;
+    this.DEFAULTINIT = vars.UNINITIALIZED;
     /** The default value of a list's values. */
     this.DEFAULTVALUES = "";
 
@@ -198,7 +240,7 @@ function List() {
 	// check input fields
 	if(this.check(null)) {
 	    // add register to internal structure
-	    struc.add(this.name, this.values, this.init);
+	    vars.add(this.name, this.values, this.init);
 	    // redraw data table
 	    reDraw();
 	}
@@ -214,7 +256,7 @@ function List() {
 	// check input fields
 	if(this.check(oldName)) {
 	    // add register to internal structure
-	    struc.edit(oldName, this.name, this.values, this.init);
+	    vars.edit(oldName, this.name, this.values, this.init);
 	    // redraw data table
 	    reDraw();
 	}
@@ -230,6 +272,10 @@ function List() {
     this.check = function(oldName) {
 	// tell validator that we are dealing with lists
 	valid.target(valid.LIST);
+	
+	// clear errors
+	$(".has-error").removeClass("has-error");
+	$(".alert").alert('close');
 
 	// get name from input field
 	this.name = $("#addListName").prop("value");
@@ -244,13 +290,13 @@ function List() {
 	    for(var i = 0; i < this.size; i++) {
 		this.values.push("?");
 	    }
-	    this.init = struc.UNINITIALIZED;
+	    this.init = vars.UNINITIALIZED;
 	} else if ($("#addListRandomized").hasClass("active")) {
 	    for(var i = 0; i < this.size; i++) {
 		this.values.push(i);
 	    }
 	    shuffle(this.values);
-	    this.init = struc.RANDOMIZED;
+	    this.init = vars.RANDOMIZED;
 	} else if ($("#addListCustomized").hasClass("active")) {
 	    var tokens = $("#addListValues").prop("value").split(DELIM);
 	    if (tokens.length < this.size) {
@@ -272,16 +318,14 @@ function List() {
 		    check = false;
 		}
 	    }
-	    this.init = struc.CUSTOMIZED;
+	    this.init = vars.CUSTOMIZED;
 	} else {
 	    $("#alert-list").append(template.error("List has to be initialized!"));
 	}
 
 	if(check) {
 	    // all checks passed
-	    $(".has-error").removeClass("has-error");
-	    $(".alert").alert('close');
-	    modal.hide();
+	    dataModal.hide();
 	}
 	return check;
     };
@@ -289,53 +333,97 @@ function List() {
 }
 
 /**
- * This class represents the main data-structure modification form. In order to
+ * This class represents the main variable modification form. In order to
  * reduce traffic, the form for editing and adding is the same one but with
  * different "themes". The labels and functionality of certain elements is
  * replaced dynamically according to the given purpose.
  */
-function DataStructureModal() {
+function VariableModal() {
 
     /** Hides the window. */
     this.hide = function() {
-	$("#addStructureModal").modal('hide');
+	$("#addVariableModal").modal('hide');
     };
 
     /** Shows the window. */
     this.show = function() {
-	$("#addStructureModal").modal('show');
+	$("#addVariableModal").modal('show');
     };
 
     /**
-     * This is the theme for editing data structures. Given a valid name, the
+     * This is the theme for adding new variables. The form's input fields
+     * are initialized by default values.
+     */
+    this.themeAdd = function() {
+	// default tab: very left
+	$('#addVariableTab a:first').tab('show');
+
+	$("#addVariableModalLabel").text("Add new variable");
+	// REGISTER TAB
+	// setup default values
+	$("#addRegisterName").prop("value", registers.DEFAULTNAME);
+	$("#addRegisterCheck").prop("checked", registers.DEFAULTINIT == vars.CUSTOMIZED);
+	this.setPlaceholder();
+	$("#addRegisterValue").prop("value", registers.DEFAULTVALUE);
+	// setup labels
+	$("#addRegisterSubmit").text("Add register");
+	$("#addRegisterSubmit").off("click");
+	$("#addRegisterSubmit").click(function() {
+	    registers.add();
+	});
+
+	// LIST TAB
+	// setup default values
+	$("#addListName").prop("value", lists.DEFAULTNAME);
+	$(".btn-size").removeClass("active");
+	$("#addListSizeBtn" + lists.DEFAULTSIZE).addClass("active");
+	if(lists.DEFAULTINIT == vars.UNINITIALIZED) {
+	    $('#addListInitTab a[href="#addListUninitialized"]').tab('show');
+	} else if(lists.DEFAULTINIT == vars.RANDOMIZED) {
+	    $('#addListInitTab a[href="#addListRandomized"]').tab('show');
+	} else if(lists.DEFAULTINIT == vars.CUSTOMIZED) {
+	    $('#addListInitTab a[href="#addListCustomized"]').tab('show');
+	}
+	$("#addListValues").prop("value", lists.DEFAULTVALUES);
+
+	// setup labels
+	$("#addListSubmit").text("Add List");
+	$("#addListSubmit").off("click");
+	$("#addListSubmit").click(function() {
+	    lists.add();
+	});
+    };
+    
+    /**
+     * This is the theme for editing variables. Given a valid name, the
      * values of the element that is to be edited are used as default values for
      * the modification form.
      * 
      * @param name
-     *                The unique identifier of the data structure.
+     *                The unique identifier of the variable.
      */
     this.themeEdit = function(name) {
 	// tab rsgister/list
-	if ($.isArray(struc.getValueByName(name)))
-	    $('#addStructureTab a[href="#add-list"]').tab('show');
+	if ($.isArray(vars.getValueByName(name)))
+	    $('#addVariableTab a[href="#add-list"]').tab('show');
 	else
-	    $('#addStructureTab a[href="#add-register"]').tab('show');
+	    $('#addVariableTab a[href="#add-register"]').tab('show');
 
-	var init = struc.getInitByName(name);
-	var value = struc.toString(name);
+	var init = vars.getInitByName(name);
+	var value = vars.toString(name);
 
-	$("#addStructureModalLabel").text("Edit data structure");
+	$("#addVariableModalLabel").text("Edit variable");
 
 	// REGISTER TAB
 	// setup values
 	$("#addRegisterName").prop("value", name);
-	if (init == struc.CUSTOMIZED) {
+	if (init == vars.CUSTOMIZED) {
 	    $("#addRegisterCheck").prop("checked", true);
 	    $("#addRegisterValue").prop("value", value);
 	} else {
 	    $("#addRegisterCheck").prop("checked", false);
 	}
-	this.setDisability();
+	this.setPlaceholder();
 
 	// setup labels
 	var btnRegSubmit = $("#addRegisterSubmit");
@@ -348,15 +436,15 @@ function DataStructureModal() {
 	// LIST TAB
 	// setup values
 	$("#addListName").prop("value", name);
-	var size = struc.getValueByName(name).length;
+	var size = vars.getValueByName(name).length;
 	$(".btn-size").removeClass("active");
 	$("#addListSizeBtn" + size).addClass("active");
 
-	if(init == struc.UNINITIALIZED) {
+	if(init == vars.UNINITIALIZED) {
 	    $('#addListInitTab a[href="#addListUninitialized"]').tab('show');
-	} else if(init == struc.RANDOMIZED) {
+	} else if(init == vars.RANDOMIZED) {
 	    $('#addListInitTab a[href="#addListRandomized"]').tab('show');
-	} else if(init == struc.CUSTOMIZED) {
+	} else if(init == vars.CUSTOMIZED) {
 	    $('#addListInitTab a[href="#addListCustomized"]').tab('show');
 	    $("#addListValues").prop("value", value);
 	} else {
@@ -372,62 +460,41 @@ function DataStructureModal() {
     };
 
     /**
-     * This is the theme for adding new data structures. The form's input fields
-     * are initialized by default values.
-     */
-    this.themeAdd = function() {
-	// default tab: very left
-	$('#addStructureTab a:first').tab('show');
-
-	$("#addStructureModalLabel").text("Add new data structure");
-	// REGISTER TAB
-	// setup default values
-	$("#addRegisterName").prop("value", registers.DEFAULTNAME);
-	$("#addRegisterCheck").prop("checked", registers.DEFAULTINIT == struc.CUSTOMIZED);
-	this.setDisability();
-	$("#addRegisterValue").prop("value", registers.DEFAULTVALUE);
-	// setup labels
-	$("#addRegisterSubmit").text("Add register");
-	$("#addRegisterSubmit").off("click");
-	$("#addRegisterSubmit").click(function() {
-	    registers.add();
-	});
-
-	// LIST TAB
-	// setup default values
-	$("#addListName").prop("value", lists.DEFAULTNAME);
-	$(".btn-size").removeClass("active");
-	$("#addListSizeBtn" + lists.DEFAULTSIZE).addClass("active");
-	if(lists.DEFAULTINIT == struc.UNINITIALIZED) {
-	    $('#addListInitTab a[href="#addListUninitialized"]').tab('show');
-	} else if(lists.DEFAULTINIT == struc.RANDOMIZED) {
-	    $('#addListInitTab a[href="#addListRandomized"]').tab('show');
-	} else if(lists.DEFAULTINIT == struc.CUSTOMIZED) {
-	    $('#addListInitTab a[href="#addListCustomized"]').tab('show');
-	}
-	$("#addListValues").prop("value", lists.DEFAULTVALUES);
-
-	// setup labels
-	$("#addListSubmit").text("Add List");
-	$("#addListSubmit").off("click");
-	$("#addListSubmit").click(function() {
-	    lists.add();
-	});
-    };
-
-    /**
      * Enable/disable the input field for new register value
      */
-    this.setDisability = function() {
+    this.setPlaceholder = function() {
 	var elem = $("#addRegisterValue");
 	if ($("#addRegisterCheck").prop("checked")) {
-	    elem.prop("disabled", false);
 	    elem.attr("placeholder", "value");
 	} else {
-	    elem.prop("disabled", true);
-	    elem.prop("value", "");
 	    elem.attr("placeholder", "uninitialized");
 	}
+    };
+}
+
+function InstructionModal() {
+    /** Hides the window. */
+    this.hide = function() {
+	$("#addInstructionModal").modal('hide');
+    };
+
+    /** Shows the window. */
+    this.show = function() {
+	$("#addInstructionModal").modal('show');
+    };
+    
+    this.themeAdd = function() {
+	var options = "";
+	for (var i = 0; i < vars.size(); i++) {
+	    options += "<option>" + vars.getName(i) + "</option>";
+	}
+	$(".slct-allVars").html(options);
+	$(".slct-allInsts").html("<option>not implemented yet!</option>"); // TODO options for all insts
+	$(".slct-allBools").html("<option>not implemented yet!</option>"); // TODO options for all bools
+	
+	$("#addAssignSubmit").click(function() {
+	    instr.addAssign();
+	});
     };
 }
 
@@ -442,9 +509,9 @@ function Validator() {
     /** Enum value for lists. */
     this.LIST = 1;
 
-    /** This is the form's input field for the data structure's name. */
+    /** This is the form's input field for the variable's name. */
     this.nameField;
-    /** This is the form's input field for the data structure's value. */
+    /** This is the form's input field for the variable's value. */
     this.valueField;
     /** This is the area in the form where the error message should be shown. */
     this.errorField;
@@ -454,7 +521,7 @@ function Validator() {
      * checks if the name does already exist.
      * 
      * @param name
-     *                The entered string for the data structure's name.
+     *                The entered string for the variable's name.
      * 
      * @param ignoreName
      *                Optionally a name that is ignored by the
@@ -463,8 +530,8 @@ function Validator() {
     this.checkName = function(name, ignoreName) {
 	var msg = new Array();
 	// check if name exists
-	for (var i = 0; i < struc.size(); i++) {
-	    var curName = struc.getName(i);
+	for (var i = 0; i < vars.size(); i++) {
+	    var curName = vars.getName(i);
 	    if (curName != ignoreName && name == curName) {
 		msg.push("Name '" + name + "' does already exist!");
 		break;
@@ -489,7 +556,7 @@ function Validator() {
      * This method checks whether the entered value is valid or not.
      * 
      * @param value
-     *                The entered string for the data structure's value.
+     *                The entered string for the variable's value.
      */
     this.checkValue = function(value) {
 	// check for integer
@@ -509,7 +576,7 @@ function Validator() {
     /**
      * Dependent on whether a register or a list is currently checked, the HTML
      * elements in the page differ. Therefore there has to be a mode for every
-     * different data structure, providing information on where input is taken
+     * different variable, providing information on where input is taken
      * from and errors are written to.
      */
     this.target = function(mode) {
@@ -522,7 +589,7 @@ function Validator() {
 
 	case this.LIST:
 	    this.nameField = $("#addListNameField");
-	    this.valueField = $("#addListValuesField"); // FIXME does not work
+	    this.valueField = $("#addListValuesField"); // FIXME: does not work
 	    this.errorField = $("#alert-list");
 	    break;
 
@@ -534,10 +601,10 @@ function Validator() {
 }
 
 /**
- * This class is the central collection of all available data structures. It is
+ * This class is the central collection of all available variables. It is
  * simply an implementation of a collection of key-value pairs.
  */
-function Structure() {
+function Variables() {
     /** Initialization method number 1: no initialization. */
     this.UNINITIALIZED = 0;
     /** Initialization method number 2: random initialization. */
@@ -546,24 +613,24 @@ function Structure() {
     this.CUSTOMIZED = 2;
 
     /** The basic array to store all the values. */
-    this.structures = new Array();
+    this.vars = new Array();
 
     /**
-     * Adds a new data structure to the list.
+     * Adds a new variable to the list.
      * 
      * @param name
-     *                The name of the new data structure.
+     *                The name of the new variable.
      * @param value
-     *                The value of the new data structure.
+     *                The value of the new variable.
      * @param init
-     *                The initialization method of the new data structure.
+     *                The initialization method of the new variable.
      */
     this.add = function(name, value, init) {
-	this.structures[this.size()] = new this.Data(name, value, init);
+	this.vars[this.size()] = new this.Data(name, value, init);
     };
 
     /**
-     * Edits an existing data structure in the list.
+     * Edits an existing variable in the list.
      * 
      * @param oldName
      *                The name that was the data strucutre's unique identifier
@@ -572,7 +639,7 @@ function Structure() {
      *                The name that will be the data strucutre's unique
      *                identifier after editing.
      * @param newValue
-     *                The value that is connected with the data structure.
+     *                The value that is connected with the variable.
      * @param init
      *                The initialization method that is connected to the data
      *                structure.
@@ -580,8 +647,8 @@ function Structure() {
      */
     this.edit = function(oldName, newName, newValue, init) {
 	for (var i = 0; i < this.size(); i++) {
-	    if (this.structures[i].name == oldName) {
-		this.structures[i] = new this.Data(newName, newValue, init);
+	    if (this.vars[i].name == oldName) {
+		this.vars[i] = new this.Data(newName, newValue, init);
 		return true;
 	    }
 	}
@@ -593,20 +660,20 @@ function Structure() {
      * initialization method.
      */
     this.getInit = function(i) {
-	return this.structures[i].init;
+	return this.vars[i].init;
     };
     
     /**
-     * Get the initialization method for a data structure, identified by a
+     * Get the initialization method for a variable, identified by a
      * given name.
      * 
      * @param name
-     *                The data structure's name.
+     *                The variable's name.
      */
     this.getInitByName = function(name) {
 	for (var i = 0; i < this.size(); i++) {
-	    if (name == this.structures[i].name) {
-		return this.structures[i].init;
+	    if (name == this.vars[i].name) {
+		return this.vars[i].init;
 	    }
 	}
 	return -1;
@@ -616,42 +683,46 @@ function Structure() {
      * This method finds the i<sup>th</sup> element and returns its name.
      */
     this.getName = function(i) {
-	return this.structures[i].name;
+	return this.vars[i].name;
     };
 
     /**
      * This method finds the i<sup>th</sup> element and returns its value.
      */
     this.getValue = function(i) {
-	return this.structures[i].value;
+	return this.vars[i].value;
     };
     
     /**
-     * Get the value for a data structure, identified bygiven name.
+     * Get the value for a variable, identified bygiven name.
      * 
      * @param name
-     *                The data structure's name.
+     *                The variable's name.
      */
     this.getValueByName = function(name) {
 	for (var i = 0; i < this.size(); i++) {
-	    if (this.structures[i].name == name) {
-		return this.structures[i].value;
+	    if (this.vars[i].name == name) {
+		return this.vars[i].value;
 	    }
 	}
 	console.log("Name '" + name + "' could not be found!");
+    };
+    
+    this.isArray = function(name) {
+	return $.isArray(this.getValueByName(name));
     };
 
     /**
      * This method removes the element, given its name.
      * 
      * @param name
-     *                The name of the data structure that is to be deleted.
+     *                The name of the variable that is to be deleted.
      * @returns True if the element was found and removed, false otherwise.
      */
     this.remove = function(name) {
 	for (var i = 0; i < this.size(); i++) {
-	    if (name == this.structures[i].name) {
-		this.structures.splice(i, 1);
+	    if (name == this.vars[i].name) {
+		this.vars.splice(i, 1);
 		return true;
 	    }
 	}
@@ -659,17 +730,17 @@ function Structure() {
     };
 
     /**
-     * Returns the number of currently available data structures.
+     * Returns the number of currently available variables.
      */
     this.size = function() {
-	return this.structures.length;
+	return this.vars.length;
     };
 
     /**
-     * Returns a string representation of the data structure's value.
+     * Returns a string representation of the variable's value.
      * 
      * @param name
-     *                The name of the data structure.
+     *                The name of the variable.
      */
     this.toString = function(name) {
 	var value = this.getValueByName(name);
@@ -697,6 +768,31 @@ function Structure() {
     };
 }
 
+function Instructions() {
+    this.REFVAR = 0;
+    this.REFINDEX = 1;
+    this.REFINST = 2;
+    this.VALUE = 3;
+    
+    this.addAssign = function() {
+	// TODO do :=)
+	
+    };
+    
+    this.Assign = function(targetType, target, targetIndex, valueType, value, valueIndex) {
+	this.targetType;
+	this.target;
+	this.targetIndex;
+	this.valueType;
+	this.value;
+	this.valueIndex;
+    };
+    
+    this.Inst = function() {
+	
+    };
+}
+
 /**
  * This class provides several templates for HTML content that is inserted to
  * the page dynamically.
@@ -708,9 +804,9 @@ function Template() {
      * of several such cells.
      * 
      * @param name
-     *                The name of the data structure
+     *                The name of the variable
      * @param value
-     *                The value of the data structure.
+     *                The value of the variable.
      */
     this.defaultCell = function(name, value) {
 	return '<input type="button" class="btn btn-default" id="btn-' + name + '" disabled="disabled" value="' + value + '" />';
@@ -750,9 +846,9 @@ function Template() {
      * row.
      * 
      * @param name
-     *                The name of the data structure.
+     *                The name of the variable.
      * @param cells
-     *                HTML code for the memory content of the data structure.
+     *                HTML code for the memory content of the variable.
      */
     this.structureRow = function(name, cells) {
 	return '<tr>' 
