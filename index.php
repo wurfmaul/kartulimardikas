@@ -40,11 +40,13 @@
 							type="email" class="form-control" id="exampleInputEmail2"
 							placeholder="Username">
 					</div>
+					<!-- 
 					<div class="form-group">
 						<label class="sr-only" for="exampleInputPassword2">Password</label>
 						<input type="password" class="form-control"
 							id="exampleInputPassword2" placeholder="Password">
 					</div>
+					-->
 					<button type="submit" class="btn btn-default">Sign in</button>
 					<button type="button" class="btn btn-link">Register</button>
 				</form>
