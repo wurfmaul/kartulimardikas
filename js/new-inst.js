@@ -10,6 +10,7 @@ var instr = new Instructions();
 var maxId = 0;
 
 var assignFactory = new AssignFactory();
+var incFactory = new IncFactory();
 
 function redrawInst() {
     if(instr.size() > 0) {
@@ -61,8 +62,7 @@ function InstructionModal() {
 	
 	if(vars.size() >= 1 && vars.isArray(0)) {
 	    // show index fields
-	    $("#addAssignTargetIndexField").show();
-	    $("#addAssignVarIndexField").show();
+	    $(".index-field").show();
 	}
 	
 	$(".slct-allVars").html(options);
@@ -73,6 +73,12 @@ function InstructionModal() {
 	btnAddAssign.off("click");
 	btnAddAssign.click(function() {
 	    assignFactory.create();
+	});
+	
+	var btnAddInc = $("#addIncrementSubmit");
+	btnAddInc.off("click");
+	btnAddInc.click(function() {
+	    incFactory.create();
 	});
     };
     
@@ -195,6 +201,56 @@ function AssignFactory() {
 	    default:
 		console.log("unknown valueType: " + this.valueType);
 	    }
+	    return ret;
+	};
+    };
+}
+
+function IncFactory() {
+    this.create = function() {
+	// set up validation environment
+	var check = true;
+	$(".has-error").removeClass("has-error");
+	$(".alert").alert('close');
+	
+	// get inputs
+	var target = vars.getByName($("#addIncrementVar").prop("value"));
+	var index = -1;
+	if (vars.isArrayByName(target.name)) {
+	    index = $("#addIncVarIndex").prop("value");
+	    // check index
+	    valid.target("#addIncVarIndexField", "#alert-inc");
+	    check = valid.checkIndex(index, target.value.length - 1);
+	}
+	
+	var inst = new this.Inc(instr.REFVAR, target.id, index, $("#addIncBtn").hasClass("active"));
+	
+	if(!check || inst == null)
+	    return;
+	
+	instr.add(inst);
+	redrawInst();
+	instModal.hide();
+    };
+    
+    this.Inc = function(targetType, target, targetIndex, inc) {
+	this.id = maxId++;
+	this.targetType = targetType;
+	this.target = target;
+	this.targetIndex = targetIndex;
+	this.inc = inc;
+	
+	this.toString = function() {
+	    // generate string representation
+	    var ret = vars.getById(this.target).name;
+	    if(this.targetIndex != -1)
+		ret += "[" + this.targetIndex + "]";
+	    
+	    if(this.inc)
+		ret += "++";
+	    else
+		ret += "--";
+	    
 	    return ret;
 	};
     };
