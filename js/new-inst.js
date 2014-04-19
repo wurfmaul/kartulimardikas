@@ -11,6 +11,47 @@ var maxId = 0;
 
 var assignFactory = new AssignFactory();
 var incFactory = new IncFactory();
+var cmpFactory = new CompareFactory();
+
+$("#addAssignTarget").click(function() {
+    var elem = $(this).prop("value");
+    if(elem != '' && vars.isArrayByName(elem))
+	$("#addAssignTargetIndexField").show("slow");
+    else
+	$("#addAssignTargetIndexField").hide("slow");
+});
+
+$("#addAssignVar").click(function() {
+    var elem = $(this).prop("value");
+    if(elem != '' && vars.isArrayByName(elem))
+	$("#addAssignVarIndexField").show("slow");
+    else
+	$("#addAssignVarIndexField").hide("slow");
+});
+
+$("#addIncrementVar").click(function() {
+    var elem = $(this).prop("value");
+    if(elem != '' && vars.isArrayByName(elem))
+	$("#addIncVarIndexField").show("slow");
+    else
+	$("#addIncVarIndexField").hide("slow");
+});
+
+$("#addCompareLeftVar").click(function() {
+    var elem = $(this).prop("value");
+    if(elem != '' && vars.isArrayByName(elem))
+	$("#addCompareLeftVarIndexField").show("slow");
+    else
+	$("#addCompareLeftVarIndexField").hide("slow");
+});
+
+$("#addCompareRightVar").click(function() {
+    var elem = $(this).prop("value");
+    if(elem != '' && vars.isArrayByName(elem))
+	$("#addCompareRightVarIndexField").show("slow");
+    else
+	$("#addCompareRightVarIndexField").hide("slow");
+});
 
 function redrawInst() {
     if(instr.size() > 0) {
@@ -80,6 +121,12 @@ function InstructionModal() {
 	btnAddInc.click(function() {
 	    incFactory.create();
 	});
+	
+	var btnAddCmp = $("#addCompareSubmit");
+	btnAddCmp.off("click");
+	btnAddCmp.click(function() {
+	    cmpFactory.create();
+	});
     };
     
     this.themeEdit = function(iid) {
@@ -91,6 +138,7 @@ function Instructions() {
     this.REFVAR = 0;
     this.REFINST = 1;
     this.VALUE = 2;
+    this.NULL = 3;
     
     this.insts = new Array();
     
@@ -206,6 +254,111 @@ function AssignFactory() {
     };
 }
 
+function CompareFactory() {
+    this.create = function() {
+	// set up validation environment
+	var check = true;
+	$(".has-error").removeClass("has-error");
+	$(".alert").alert('close');
+	
+	// get left operand
+	var leftType = null;
+	var left = null;
+	var leftIndex = -1;
+	
+	if($("#addCompareLeftValueTab").hasClass("active")) {
+	    // tab "value"
+	    leftType = instr.VALUE;
+	    valid.target("#addCompareLeftValueField", "#alert-compare");
+	    left = $("#addCompareLeftValue").prop("value");
+	    check = valid.checkValue(left) && check;
+	} else if($("#addCompareLeftVarTab").hasClass("active")) {
+	    // tab "var"
+	    leftType = instr.REFVAR;
+	    var varLeft = vars.getByName($("#addCompareLeftVar").prop("value"));
+	    if (vars.isArrayByName(varLeft.name) && $("#addCompareLeftVarIndexCheck").prop("checked")) {
+		leftIndex = $("#addCompareLeftVarIndex").prop("value");
+		valid.target("#addCompareLeftVarIndexField", "#alert-compare");
+		check = valid.checkIndex(leftIndex, varLeft.value.length - 1) && check;
+	    }
+	    left = varLeft.id;
+	} else if($("#addCompareLeftNullTab").hasClass("active")) {
+	    // tab "null"
+	    leftType = instr.NULL;
+	} else {
+	    console.log("No tab selected for left compare operand!");
+	}
+	
+	// get operator
+	var op;
+	switch ($(".btn-cmpOp.active").prop("id")) {
+	case "addCompareOpLt": op = "<"; break;
+	case "addCompareOpLeq": op = "<="; break;
+	case "addCompareOpEq": op = "=="; break;
+	case "addCompareOpNeq": op = "!="; break;
+	case "addCompareOpGeq": op = ">="; break;
+	case "addCompareOgGt": op = ">"; break;
+	default:
+	    console.log("No operator chosen!");
+	    check = false;
+	    op = "";
+	}
+	
+	// get right operand
+	var rightType = null;
+	var right = null;
+	var rightIndex = -1;
+	
+	if($("#addCompareRightValueTab").hasClass("active")) {
+	    // tab "value"
+	    rightType = instr.VALUE;
+	    valid.target("#addCompareRightValueField", "#alert-compare");
+	    right = $("#addCompareRightValue").prop("value");
+	    check = valid.checkValue(right) && check;
+	} else if($("#addCompareRightVarTab").hasClass("active")) {
+	    // tab "var"
+	    rightType = instr.REFVAR;
+	    var varRight = vars.getByName($("#addCompareRightVar").prop("value"));
+	    if (vars.isArrayByName(varRight.name) && $("#addCompareRightVarIndexCheck").prop("checked")) {
+		rightIndex = $("#addCompareRightVarIndex").prop("value");
+		valid.target("#addCompareRightVarIndexField", "#alert-compare");
+		check = valid.checkIndex(rightIndex, varRight.value.length - 1) && check;
+	    }
+	} else if($("#addCompareRightNullTab").hasClass("active")) {
+	    // tab "null"
+	    rightType = instr.NULL;
+	} else {
+	    console.log("No tab selected for right compare operand!");
+	}
+	
+	if(!check)
+	    return;
+	
+	var inst = new this.Compare(leftType, left, leftIndex, rightType, right, rightIndex, op);
+	instr.add(inst);
+	redrawInst();
+	instModal.hide();
+    };
+    
+    this.Compare = function(leftType, left, leftIndex, rightType, right, rightIndex, op) {
+	this.id = maxId++;
+	this.leftType = leftType;
+	this.left = left;
+	this.leftIndex = leftIndex;
+	this.rightType = rightType;
+	this.right = right;
+	this.rightIndex = rightIndex;
+	this.op = op;
+	
+	this.toString = function() {
+	    // generate string representation
+	    var ret = this.left + " " + this.op + " " + this.right;
+	    // FIXME references!
+	    return ret;
+	};
+    };
+}
+
 function IncFactory() {
     this.create = function() {
 	// set up validation environment
@@ -223,11 +376,10 @@ function IncFactory() {
 	    check = valid.checkIndex(index, target.value.length - 1);
 	}
 	
-	var inst = new this.Inc(instr.REFVAR, target.id, index, $("#addIncBtn").hasClass("active"));
-	
-	if(!check || inst == null)
+	if(!check)
 	    return;
 	
+	var inst = new this.Inc(instr.REFVAR, target.id, index, $("#addIncBtn").hasClass("active"));
 	instr.add(inst);
 	redrawInst();
 	instModal.hide();

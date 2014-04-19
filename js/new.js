@@ -28,22 +28,6 @@ $(".activate-input").click(function() {
     }
 });
 
-$("#addAssignTarget").click(function() {
-    var elem = $(this).prop("value");
-    if(elem != '' && vars.isArrayByName(elem))
-	$("#addAssignTargetIndexField").show("slow");
-    else
-	$("#addAssignTargetIndexField").hide("slow");
-});
-
-$("#addAssignVar").click(function() {
-    var elem = $(this).prop("value");
-    if(elem != '' && vars.isArrayByName(elem))
-	$("#addAssignVarIndexField").show("slow");
-    else
-	$("#addAssignVarIndexField").hide("slow");
-});
-
 $("#btn-addVariable").click(function() {
     // prepare modal for adding
     dataModal.themeAdd();

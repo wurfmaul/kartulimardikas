@@ -139,11 +139,9 @@
 										</div>
 									</div>
 									<div class="form-group index-field" id="addIncVarIndexField" style="display: none;">
-										<label for="addIncVarIndex"
-											class="col-sm-2 control-label">Index</label>
+										<label for="addIncVarIndex" class="col-sm-2 control-label">Index</label>
 										<div class="col-sm-10">
-												<input type="text" id="addIncVarIndex"
-													class="form-control" placeholder="index" />
+											<input type="text" id="addIncVarIndex" class="form-control" placeholder="index" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -179,17 +177,69 @@
 							<div class="panel-body">
 								<form class="form-horizontal" role="form">
 									<div id="alert-compare"></div>
-									<div class="form-group" id="addCompareNameField">
-										<label for="addCompareVars" class="col-sm-2 control-label">Variables</label>
-										<div class="col-sm-5">
-											<select class="form-control slct-allVars"></select>
-										</div>
-										<div class="col-sm-5">
-											<select class="form-control slct-allVars"></select>
+									<div class="form-group" id="addCompareLeftField">
+										<label for="addCompareLeftValueTabs" class="col-sm-2 control-label">Left operand</label>
+										<div class="col-sm-10">
+											<ul class="nav nav-tabs" id="addCompareLeftValueTabs">
+												<li class="active"><a href="#addCompareLeftValueTab" data-toggle="tab">value</a></li>
+												<li><a href="#addCompareLeftVarTab" data-toggle="tab">variable</a></li>
+												<li><a href="#addCompareLeftNullTab" data-toggle="tab">null</a></li>
+											</ul>
+											<div class="tab-content">
+												<!-- Tab Value -->
+												<div class="tab-pane active" id="addCompareLeftValueTab">
+													<div class="panel panel-default panel-topless">
+														<div class="panel-body">
+															<div class="form-group" id="addCompareLeftValueField">
+																<div class="col-sm-12">
+																	<input type="text" class="form-control"
+																		id="addCompareLeftValue" placeholder="42">
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+												<!-- Tab Variable -->
+												<div class="tab-pane" id="addCompareLeftVarTab">
+													<div class="panel panel-default panel-topless">
+														<div class="panel-body">
+															<div class="form-group">
+																<div class="col-sm-12">
+																	<select class="form-control slct-allVars"
+																		id="addCompareLeftVar"></select>
+																</div>
+															</div>
+															<div class="form-group index-field" id="addCompareLeftVarIndexField" style="display: none;">
+																<label for="addCompareLeftVarIndex"
+																	class="col-sm-2 control-label">Index</label>
+																<div class="col-sm-10">
+																	<div class="input-group">
+																		<span class="input-group-addon"> <input
+																			type="checkbox" value="addCompareLeftVarIndex"
+																			class="activate-input" id="addCompareLeftVarIndexCheck" />
+																		</span> <input type="text" id="addCompareLeftVarIndex"
+																			class="form-control" disabled placeholder="index" />
+																	</div>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+												<!-- Tab null -->
+												<div class="tab-pane" id="addCompareLeftNullTab">
+													<div class="panel panel-default panel-topless">
+														<div class="panel-body">
+															<div class="form-group col-sm-10">
+																<p>Use the <code>null</code> value for this comparison. Allowed operations: <code>=</code> and <code>&ne;</code>.</p>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="addCompareOp" class="col-sm-2 control-label">Comparison</label>
+										<label for="addCompareOp" class="col-sm-2 control-label">Operator</label>
 										<div class="col-sm-10">
 											<div class="btn-group btn-group-justified"
 												data-toggle="buttons">
@@ -200,7 +250,10 @@
 													name="options" id="addCompareOgLeq">&le;
 												</label> <label id="addCompareOpEq"
 													class="btn btn-default btn-cmpOp active"> <input
-													type="radio" name="options" id="addCompareOgEq">==
+													type="radio" name="options" id="addCompareOgEq">=
+												</label> <label id="addCompareOpNeq"
+													class="btn btn-default btn-cmpOp"> <input
+													type="radio" name="options" id="addCompareOgNeqq">&ne;
 												</label> <label id="addCompareOpGeq"
 													class="btn btn-default btn-cmpOp"> <input type="radio"
 													name="options" id="addCompareOgGeq">&ge;
@@ -208,6 +261,67 @@
 													class="btn btn-default btn-cmpOp"> <input type="radio"
 													name="options" id="addCompareOgGt">&gt;
 												</label>
+											</div>
+										</div>
+									</div>
+									<div class="form-group" id="addCompareRightField">
+										<label for="addCompareRightValueTabs" class="col-sm-2 control-label">Right operand</label>
+										<div class="col-sm-10">
+											<ul class="nav nav-tabs" id="addCompareRightValueTabs">
+												<li class="active"><a href="#addCompareRightValueTab" data-toggle="tab">value</a></li>
+												<li><a href="#addCompareRightVarTab" data-toggle="tab">variable</a></li>
+												<li><a href="#addCompareRightNullTab" data-toggle="tab">null</a></li>
+											</ul>
+											<div class="tab-content">
+												<!-- Tab Value -->
+												<div class="tab-pane active" id="addCompareRightValueTab">
+													<div class="panel panel-default panel-topless">
+														<div class="panel-body">
+															<div class="form-group" id="addCompareRightValueField">
+																<div class="col-sm-12">
+																	<input type="text" class="form-control"
+																		id="addCompareRightValue" placeholder="42">
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+												<!-- Tab Variable -->
+												<div class="tab-pane" id="addCompareRightVarTab">
+													<div class="panel panel-default panel-topless">
+														<div class="panel-body">
+															<div class="form-group">
+																<div class="col-sm-12">
+																	<select class="form-control slct-allVars"
+																		id="addCompareRightVar"></select>
+																</div>
+															</div>
+															<div class="form-group index-field" id="addCompareRightVarIndexField" style="display: none;">
+																<label for="addCompareRightVarIndex"
+																	class="col-sm-2 control-label">Index</label>
+																<div class="col-sm-10">
+																	<div class="input-group">
+																		<span class="input-group-addon"> <input
+																			type="checkbox" value="addCompareRightVarIndex"
+																			class="activate-input" id="addCompareRightVarIndexCheck" />
+																		</span> <input type="text" id="addCompareRightVarIndex"
+																			class="form-control" disabled placeholder="index" />
+																	</div>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+												<!-- Tab null -->
+												<div class="tab-pane" id="addCompareRightNullTab">
+													<div class="panel panel-default panel-topless">
+														<div class="panel-body">
+															<div class="form-group col-sm-10">
+																<p>Use the <code>null</code> value for this comparison. Allowed operations: <code>=</code> and <code>&ne;</code>.</p>
+															</div>
+														</div>
+													</div>
+												</div>
 											</div>
 										</div>
 									</div>
