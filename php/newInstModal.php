@@ -108,7 +108,7 @@
 														<div class="panel-body">
 															<p>Assign the result of another instruction to the
 																variable.</p>
-															<select class="form-control slct-allInsts"></select>
+															<select class="form-control slct-allInsts" id="addAssignInst"></select>
 														</div>
 													</div>
 												</div>
@@ -361,7 +361,7 @@
 															<div class="form-group" id="addIfCondField">
 																<label for="addIfCond" class="col-sm-2 control-label">Condition</label>
 																<div class="col-sm-10">
-																	<select class="form-control slct-allBools"></select>
+																	<select class="form-control slct-allBools" id="addIfCond"></select>
 																</div>
 															</div>
 														</div>
@@ -376,7 +376,7 @@
 																<label for="addElseIfCond"
 																	class="col-sm-2 control-label">Condition</label>
 																<div class="col-sm-10">
-																	<select class="form-control slct-allBools"></select>
+																	<select class="form-control slct-allBools" id="addElseIfCond"></select>
 																</div>
 															</div>
 														</div>

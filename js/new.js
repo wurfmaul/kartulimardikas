@@ -61,6 +61,15 @@ function Validator() {
     /** This is the area in the form where the error message should be shown. */
     this.errorLoc;
     
+    this.checkExists = function(id) {
+	if (id == "" || typeof id == "undefined") {
+	    this.inputField.addClass("has-error");
+	    this.errorLoc.append(err.error("No valid variable/intruction selected."));
+	    return false;
+	}
+	return true;
+    };
+    
     this.checkIndex = function(value, maxIndex) {
 	if (value.search(/^\d+$/) != 0) {
 	    this.inputField.addClass("has-error");

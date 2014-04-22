@@ -12,6 +12,7 @@ var maxId = 0;
 var assignFactory = new AssignFactory();
 var incFactory = new IncFactory();
 var cmpFactory = new CompareFactory();
+var condFactory = new ConditionFactory();
 
 $("#addAssignTarget").click(function() {
     var elem = $(this).prop("value");
@@ -96,19 +97,40 @@ function InstructionModal() {
     };
     
     this.themeAdd = function() {
-	var options = "";
+	var optionsVars = "";
 	for (var i = 0; i < vars.size(); i++) {
-	    options += "<option>" + vars.get(i).name + "</option>";
+	    optionsVars += "<option>" + vars.get(i).name + "</option>";
 	}
+	$(".slct-allVars").html(optionsVars);
 	
+	var optionsInsts = "";
+	for (var i = 0; i < instr.size(); i++) {
+	    var inst = instr.get(i);
+	    if (inst.retType != instr.RETVOID) {
+		optionsInsts += '<option value="' + inst.id + '">' + inst.toString() + "</option>";
+	    }
+	}
+	$(".slct-allInsts").html(optionsInsts);
+	
+	var optionsBool = "";
+	for (var i = 0; i < vars.size(); i++) {
+	    var curVar = vars.get(i);
+	    optionsVars += '<option value="v' + curVar.id + '">' + curVar.toString() + "</option>";
+	}
+	for (var i = 0; i < instr.size(); i++) {
+	    var inst = instr.get(i);
+	    if (inst.retType == instr.RETBOOL) {
+		optionsBool += '<option value="i' + inst.id + '">' + inst.toString() + "</option>";
+	    }
+	}
+	$(".slct-allBools").html(optionsBool);
+
+	// activate index fields if first variable is an array!
 	if(vars.size() >= 1 && vars.isArray(0)) {
-	    // show index fields
 	    $(".index-field").show();
+	} else {
+	    $(".index-field").hide();
 	}
-	
-	$(".slct-allVars").html(options);
-	$(".slct-allInsts").html("<option>not implemented yet!</option>"); // TODO options for all insts
-	$(".slct-allBools").html("<option>not implemented yet!</option>"); // TODO options for all bools
 	
 	var btnAddAssign = $("#addAssignSubmit");
 	btnAddAssign.off("click");
@@ -127,6 +149,12 @@ function InstructionModal() {
 	btnAddCmp.click(function() {
 	    cmpFactory.create();
 	});
+	
+	var btnAddCond = $("#addCondSubmit");
+	btnAddCond.off("click");
+	btnAddCond.click(function() {
+	    condFactory.create();
+	});
     };
     
     this.themeEdit = function(iid) {
@@ -138,7 +166,11 @@ function Instructions() {
     this.REFVAR = 0;
     this.REFINST = 1;
     this.VALUE = 2;
-    this.NULL = 3;
+    this.NULL = 4;
+    
+    this.RETVOID = 32;
+    this.RETBOOL = 64;
+    this.RETDIV = 128;
     
     this.insts = new Array();
     
@@ -148,6 +180,14 @@ function Instructions() {
     
     this.get = function(i) {
 	return this.insts[i];
+    };
+    
+    this.getById = function(id) {
+	for (var i = 0; i < this.size(); i++) {
+	    if (this.get(i).id == id)
+		return this.get(i);
+	}
+	return null;
     };
     
     this.remove = function(id) {
@@ -169,13 +209,16 @@ function AssignFactory() {
     this.create = function() {
 	// set up validation environment
 	var check = true;
+	valid.target("#addAssignVarField", "#alert-assign");
 	$(".has-error").removeClass("has-error");
 	$(".alert").alert('close');
 	
 	// get inputs
 	var target = vars.getByName($("#addAssignTarget").prop("value"));
+	check = valid.checkExists(target) && check;
+	
 	var index = -1;
-	if ($("#addAssignTargetIndexCheck").prop("checked")) {
+	if (check && vars.isArrayByName(target.name) && $("#addAssignTargetIndexCheck").prop("checked")) {
 	    index = $("#addAssignTargetIndex").prop("value");
 	    // check index
 	    valid.target("#addAssignTargetIndexField", "#alert-assign");
@@ -183,17 +226,18 @@ function AssignFactory() {
 	}
 	
 	var inst = null;
+	valid.target("#addAssignValueField", "#alert-assign");
 	if($("#addAssignValueTab").hasClass("active")) {
 	    // tab "value"
-	    valid.target("#addAssignValueField", "#alert-assign");
 	    var value = $("#addAssignValue").prop("value");
 	    check = valid.checkValue(value) && check;
 	    inst = new this.Assign(instr.REFVAR, target.id, index, instr.VALUE, value, -1);
 	} else if($("#addAssignVarTab").hasClass("active")) {
 	    // tab "var"
 	    var source = vars.getByName($("#addAssignVar").prop("value"));
+	    check = valid.checkExists(source) && check;
 	    var sourceIdx = -1;
-	    if ($("#addAssignVarIndexCheck").prop("checked")) {
+	    if (check && vars.isArrayByName(source.name) && $("#addAssignVarIndexCheck").prop("checked")) {
 		sourceIdx = $("#addAssignVarIndex").prop("value");
 		valid.target("#addAssignVarIndexField", "#alert-assign");
 		check = valid.checkIndex(sourceIdx, source.value.length - 1) && check;
@@ -201,7 +245,9 @@ function AssignFactory() {
 	    inst = new this.Assign(instr.REFVAR, target.id, index, instr.REFVAR, source.id, sourceIdx);
 	} else if($("#addAssignInstTab").hasClass("active")) {
 	    // tab "inst"
-	    // TODO inst support
+	    var sourceId = $("#addAssignInst").prop("value");
+	    check = valid.checkExists(sourceId) && check;
+	    inst = new this.Assign(instr.REFVAR, target.id, index, instr.REFINST, sourceId, -1);
 	} else {
 	    console.log("No tab selected for assign value!");
 	}
@@ -222,6 +268,7 @@ function AssignFactory() {
 	this.valueType = valueType;
 	this.value = value;
 	this.valueIndex = valueIndex;
+	this.retType = instr.RETBOOL;
 	
 	this.toString = function() {
 	    // generate string representation
@@ -238,8 +285,7 @@ function AssignFactory() {
 		break;
 
 	    case instr.REFINST:
-		// TODO inst support
-		ret += "<INST>";
+		ret += "(" + instr.getById(this.value).toString() + ")";
 		break;
 
 	    case instr.VALUE:
@@ -324,6 +370,7 @@ function CompareFactory() {
 		valid.target("#addCompareRightVarIndexField", "#alert-compare");
 		check = valid.checkIndex(rightIndex, varRight.value.length - 1) && check;
 	    }
+	    right = varRight.id;
 	} else if($("#addCompareRightNullTab").hasClass("active")) {
 	    // tab "null"
 	    rightType = instr.NULL;
@@ -349,11 +396,122 @@ function CompareFactory() {
 	this.right = right;
 	this.rightIndex = rightIndex;
 	this.op = op;
+	this.retType = instr.RETBOOL;
 	
 	this.toString = function() {
-	    // generate string representation
-	    var ret = this.left + " " + this.op + " " + this.right;
-	    // FIXME references!
+	    // left operand
+	    var ret = "";
+	    switch (this.leftType) {
+	    case instr.REFVAR:
+		ret += vars.getById(this.left).name;
+		if (this.leftIndex != -1)
+		    ret += "[" + this.leftIndex + "]";
+		break;
+		
+	    case instr.VALUE:
+		ret += this.left;
+		break;
+		
+	    case instr.NULL:
+		ret += "null";
+		break;
+		
+	    default:
+		console.log("Error: wrong type!");
+	    }
+	    
+	    // operator
+	    ret += " " + this.op + " ";
+
+	    // right operand
+	    switch (this.rightType) {
+	    case instr.REFVAR:
+		ret += vars.getById(this.right).name;
+		if (this.rightIndex != -1)
+		    ret += "[" + this.rightIndex + "]";
+		break;
+		
+	    case instr.VALUE:
+		ret += this.right;
+		break;
+		
+	    case instr.NULL:
+		ret += "null";
+		break;
+		
+	    default:
+		console.log("Error: wrong type!");
+	    }
+	    return ret;
+	};
+    };
+}
+
+function ConditionFactory() {
+    var IF = 0;
+    var ELSIF = 1;
+    var ELSE = 2;
+    
+    this.create = function() {
+	// set up validation environment
+	var check = true;
+	$(".has-error").removeClass("has-error");
+	$(".alert").alert('close');
+	
+	var inst = null;
+	if ($("#addIfTab").hasClass("active")) {
+	    // tab if
+	    var id = $("#addIfCond").prop("value");
+	    var type;
+	    if (id.charAt(0) == 'v') // var
+		type = instr.REFVAR;
+	    else
+		type = instr.REFINST;
+	    
+	    id = id.substring(1, id.length - 1);
+	    inst = new this.Condition(IF, type, id);
+	    
+	} else if ($("#addElseIfTab").hasClass("active")) {
+	    // tab elsif
+	    
+	} else if ($("#addElseTab").hasClass("active")) {
+	    // tab else
+	    
+	} else {
+	    console.log("No tab chosen!");
+	}
+	
+	if(!check || inst == null)
+	    return;
+	
+	instr.add(inst);
+	redrawInst();
+	instModal.hide();
+    };
+    
+    this.Condition = function(kind, condType, condId) {
+	this.id = maxId++;
+	this.kind = kind;
+	this.condType = condType;
+	this.condId = condId;
+	this.retType = instr.RETVOID;
+	
+	this.toString = function() {
+	    var ret = "";
+	    if (this.kind == ELSE)
+		ret += "else";
+	    else if (this.kind == ELSIF)
+		ret += "else ";
+	    
+	    if (this.kind == IF || this.kind == ELSIF) {
+		ret += "if (";
+		if (this.condType == instr.REFVAR)
+		    ret += vars.getById(this.condId).toString();
+		else if (this.condType == instr.REFINST)
+		    ret += instr.getById(this.condId).toString();
+		ret += ")";
+	    }
+		
 	    return ret;
 	};
     };
@@ -391,6 +549,7 @@ function IncFactory() {
 	this.target = target;
 	this.targetIndex = targetIndex;
 	this.inc = inc;
+	this.retType = instr.RETBOOL;
 	
 	this.toString = function() {
 	    // generate string representation
@@ -420,7 +579,7 @@ function InstTemplate() {
 	return '<tr>' 
 	+ '	<td><code>' + inst + '</code></td>' 
 	+ '	<td style="text-align: right;">' 
-	+ '		<button type="button" class="btn btn-default inst-edit" title="edit instruction" value="' + iid + '">'
+	+ '		<button type="button" disabled class="btn btn-default inst-edit" title="edit instruction" value="' + iid + '">'
 	+ '			<span class="glyphicon glyphicon-pencil"></span>' 
 	+ '		</button>&nbsp;'
 	+ '		<button type="button" class="btn btn-default inst-remove" title="remove instruction" value="' + iid + '">'
