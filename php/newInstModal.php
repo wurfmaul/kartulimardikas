@@ -108,7 +108,7 @@
 														<div class="panel-body">
 															<p>Assign the result of another instruction to the
 																variable.</p>
-															<select class="form-control slct-allInsts" id="addAssignInst"></select>
+															<select class="form-control slct-allNonVoidInsts" id="addAssignInst"></select>
 														</div>
 													</div>
 												</div>
@@ -145,18 +145,13 @@
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="addIncDec"
-											class="col-sm-2 control-label">Inc/Dec</label>
-										<div class="col-sm-2">
-											<div class="btn-group btn-group-justified" id="addIncDec"
-												data-toggle="buttons">
-												<label id="addIncBtn"
-													class="btn btn-default btn-narrow active"> <input
-													type="radio" name="options">++
-												</label> <label id="addDecBtn"
-													class="btn btn-default btn-narrow"> <input type="radio"
-													name="options">--
-												</label>
+										<label for="addIncDec" class="col-sm-2 control-label">Inc/Dec</label>
+										<div class="col-sm-10">
+											<div class="btn-group btn-group-justified" id="addIncDec" data-toggle="buttons">
+												<label id="addPreDecBtn" class="btn btn-default btn-narrow"> <input type="radio" name="options">--var</label>
+												<label id="addPostDecBtn" class="btn btn-default btn-narrow"> <input type="radio" name="options">var--</label>
+												<label id="addPreIncBtn" class="btn btn-default btn-narrow"> <input type="radio" name="options">++var</label> 
+												<label id="addPostIncBtn" class="btn btn-default btn-narrow active"> <input type="radio" name="options">var++</label> 
 											</div>
 										</div>
 									</div>
@@ -190,12 +185,7 @@
 												<div class="tab-pane active" id="addCompareLeftValueTab">
 													<div class="panel panel-default panel-topless">
 														<div class="panel-body">
-															<div class="form-group" id="addCompareLeftValueField">
-																<div class="col-sm-12">
-																	<input type="text" class="form-control"
-																		id="addCompareLeftValue" placeholder="42">
-																</div>
-															</div>
+															<input type="text" class="form-control" id="addCompareLeftValue" placeholder="42">
 														</div>
 													</div>
 												</div>
@@ -203,12 +193,7 @@
 												<div class="tab-pane" id="addCompareLeftVarTab">
 													<div class="panel panel-default panel-topless">
 														<div class="panel-body">
-															<div class="form-group">
-																<div class="col-sm-12">
-																	<select class="form-control slct-allVars"
-																		id="addCompareLeftVar"></select>
-																</div>
-															</div>
+															<select class="form-control slct-allVars" id="addCompareLeftVar"></select>
 															<div class="form-group index-field" id="addCompareLeftVarIndexField" style="display: none;">
 																<label for="addCompareLeftVarIndex"
 																	class="col-sm-2 control-label">Index</label>
@@ -277,12 +262,7 @@
 												<div class="tab-pane active" id="addCompareRightValueTab">
 													<div class="panel panel-default panel-topless">
 														<div class="panel-body">
-															<div class="form-group" id="addCompareRightValueField">
-																<div class="col-sm-12">
-																	<input type="text" class="form-control"
-																		id="addCompareRightValue" placeholder="42">
-																</div>
-															</div>
+															<input type="text" class="form-control" id="addCompareRightValue" placeholder="42">
 														</div>
 													</div>
 												</div>
@@ -290,12 +270,7 @@
 												<div class="tab-pane" id="addCompareRightVarTab">
 													<div class="panel panel-default panel-topless">
 														<div class="panel-body">
-															<div class="form-group">
-																<div class="col-sm-12">
-																	<select class="form-control slct-allVars"
-																		id="addCompareRightVar"></select>
-																</div>
-															</div>
+															<select class="form-control slct-allVars" id="addCompareRightVar"></select>
 															<div class="form-group index-field" id="addCompareRightVarIndexField" style="display: none;">
 																<label for="addCompareRightVarIndex"
 																	class="col-sm-2 control-label">Index</label>
@@ -356,8 +331,7 @@
 												<div class="tab-pane active" id="addIfTab">
 													<div class="panel panel-default panel-topless">
 														<div class="panel-body">
-															<p>Create the beginning of an if, using the conditiopn
-																below.</p>
+															<p>Create the beginning of an if, using the condition below.</p>
 															<div class="form-group" id="addIfCondField">
 																<label for="addIfCond" class="col-sm-2 control-label">Condition</label>
 																<div class="col-sm-10">
@@ -370,8 +344,7 @@
 												<div class="tab-pane" id="addElseIfTab">
 													<div class="panel panel-default panel-topless">
 														<div class="panel-body">
-															<p>Create the beginning of an if, using the conditiopn
-																below.</p>
+															<p>Create an alternative branch, using the condition below.</p>
 															<div class="form-group" id="addElseIfCondField">
 																<label for="addElseIfCond"
 																	class="col-sm-2 control-label">Condition</label>
@@ -409,10 +382,10 @@
 							<div class="panel-body">
 								<form class="form-horizontal" role="form">
 									<div id="alert-loop"></div>
-									<div class="form-group" id="addCondNameField">
+									<div class="form-group" id="addLoopCondField">
 										<label for="addCondVars" class="col-sm-2 control-label">Condition</label>
 										<div class="col-sm-10">
-											<select class="form-control slct-allBools"></select>
+											<select class="form-control slct-allBools" id="addLoopCond"></select>
 										</div>
 									</div>
 									<div class="form-group" id="addLoopTypeField">
@@ -444,14 +417,14 @@
 																<label for="addForLoopInit"
 																	class="col-sm-2 control-label">Init</label>
 																<div class="col-sm-10">
-																	<select class="form-control slct-allInsts"></select>
+																	<select class="form-control slct-allNonVoidInsts" id="addForLoopInit"></select>
 																</div>
 															</div>
-															<div class="form-group" id="addRegisterValueField">
+															<div class="form-group" id="addForLoopAfterField">
 																<label for="addRegisterValue"
 																	class="col-sm-2 control-label">After</label>
 																<div class="col-sm-10">
-																	<select class="form-control slct-allInsts"></select>
+																	<select class="form-control slct-allNonVoidInsts" id="addForLoopAfter"></select>
 																</div>
 															</div>
 														</div>

@@ -41,7 +41,8 @@ function redrawVars() {
 	$("#varTable").show("slow");
 	// add remove functionality to button
 	$(".data-remove").click(function() {
-	    removeVariable($(this).prop("value"));
+	    vars.remove($(this).prop("value"));
+	    redrawVars();
 	});
 	// add edit functionality to button
 	$(".data-edit").click(function() {
@@ -52,16 +53,7 @@ function redrawVars() {
 	VARSITE.html("");
 	$("#varTable").hide("slow");
     }
-}
-
-/**
- * Remove variable, identified by unique name
- * 
- * @param name Identifier of element.
- */
-function removeVariable(name) {
-    vars.remove(name);
-    redrawVars();
+    redrawInst();
 }
 
 /**
@@ -364,7 +356,7 @@ function VariableModal() {
 	} else {
 	    $("#addRegisterCheck").prop("checked", false);
 	}
-	this.setPlaceholder(); // FIXME
+	this.setPlaceholder();
 
 	// setup labels
 	var btnRegSubmit = $("#addRegisterSubmit");
@@ -609,10 +601,10 @@ function VarTemplate() {
     this.structureRow = function(name, cells) {
 	return '<tr>' 
 	+ '	<td><code>' + name + '</code></td>' 
-	+ '	<td><div class="btn-group">'
+	+ '	<td style="border-right: none;"><div class="btn-group">'
 	+ cells 
 	+ '	</div></td>'
-	+ '	<td style="text-align: right;">' 
+	+ '	<td style="border-left: none; text-align: right;">' 
 	+ '		<button type="button" class="btn btn-default data-edit" title="edit register" value="' + name + '">'
 	+ '			<span class="glyphicon glyphicon-pencil"></span>' 
 	+ '		</button>&nbsp;'

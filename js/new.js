@@ -40,10 +40,60 @@ $("#btn-addInstruction").click(function() {
     instModal.show();
 });
 
+$("#btn-addLine").click(function() {
+    // prepare modal for adding
+    scriptModal.themeAdd();
+    scriptModal.show();
+});
+
 /** The default validator for input values. */
 var valid = new Validator();
 /** Provides a set of HTML templates for enhancing site content. */
 var err = new ErrorTemplate();
+
+function updateSelects() {
+    var optionsVars = "";
+    for (var i = 0; i < vars.size(); i++) {
+	optionsVars += "<option>" + vars.get(i).name + "</option>";
+    }
+    $(".slct-allVars").html(optionsVars);
+
+    var optionsNonVoidInsts = "";
+    for (var i = 0; i < instr.size(); i++) {
+	var inst = instr.get(i);
+	if (inst.retType != instr.RETVOID) {
+	    optionsNonVoidInsts += '<option value="' + inst.id + '">' + inst.toString() + "</option>";
+	}
+    }
+    $(".slct-allNonVoidInsts").html(optionsNonVoidInsts);
+    
+    var optionsAllInsts = "";
+    for (var i = 0; i < instr.size(); i++) {
+	var inst = instr.get(i);
+	optionsAllInsts += '<option value="' + inst.id + '">' + inst.toString() + "</option>";
+    }
+    $(".slct-allInsts").html(optionsAllInsts);
+    
+    var optionsLines = "";
+    for (var i = 0; i < lines.size(); i++) {
+	var inst = lines.get(i);
+	optionsLines += '<option value="' + inst.id + '">' + inst.toString() + "</option>";
+    }
+    $(".slct-allLines").html(optionsLines);
+
+    var optionsBool = "";
+    for (var i = 0; i < vars.size(); i++) {
+	var curVar = vars.get(i);
+	optionsVars += '<option value="v' + curVar.id + '">' + curVar.toString() + "</option>";
+    }
+    for (var i = 0; i < instr.size(); i++) {
+	var inst = instr.get(i);
+	if (inst.retType == instr.RETBOOL) {
+	    optionsBool += '<option value="i' + inst.id + '">' + inst.toString() + "</option>";
+	}
+    }
+    $(".slct-allBools").html(optionsBool);
+}
 
 /**
  * This class provides a validator for the client-provided text input. It offers

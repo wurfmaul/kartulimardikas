@@ -2,6 +2,8 @@
 define ( "LIST_MIN_SIZE", 2 );
 define ( "LIST_MAX_SIZE", 13 );
 define ( "LIST_DEFAULT_SIZE", 7 );
+define ( "LINE_MIN_LEVEL", 0 );
+define ( "LINE_MAX_LEVEL", 10);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -61,7 +63,10 @@ define ( "LIST_DEFAULT_SIZE", 7 );
 	<?php require_once 'php/newVarModal.php'; ?>
 
 	<!-- MODAL - NEW INSTRUCTION -->
-	<?php require_once 'php/newInstModal.php';?>
+	<?php require_once 'php/newInstModal.php'; ?>
+	
+	<!-- MODAL - NEW SCRIPT LINE -->
+	<?php require_once 'php/newScriptModal.php'; ?>
 
 	<div class="container">
 		<!-- HEADER -->
@@ -120,16 +125,13 @@ define ( "LIST_DEFAULT_SIZE", 7 );
 										<thead>
 											<tr>
 												<th>Variable</th>
-												<th>Contents</th>
-												<th style="text-align: right;">Modify</th>
+												<th style="border-right: none;">Contents</th>
+												<th style="border-left: none; text-align: right;">Modify</th>
 											</tr>
 										</thead>
 										<tbody id="placeVariablesHere"></tbody>
 									</table>
-
-									<!-- Button trigger modal -->
-									<button class="btn btn-primary btn-lg"
-										id="btn-addVariable">+ variable</button>
+									<button class="btn btn-primary btn-lg" id="btn-addVariable">+ variable</button>
 								</div>
 							</div>
 						</div>
@@ -146,8 +148,8 @@ define ( "LIST_DEFAULT_SIZE", 7 );
 									<table class="table table-hover table-bordered" id="instTable" style="display: none;">
 										<thead>
 											<tr>
-												<th>Instruction</th>
-												<th style="text-align: right;">Modify</th>
+												<th style="border-right: none;">Instruction</th>
+												<th style="border-left: none; text-align: right;">Modify</th>
 											</tr>
 										</thead>
 										<tbody id="placeInstructionsHere"></tbody>
@@ -164,8 +166,13 @@ define ( "LIST_DEFAULT_SIZE", 7 );
 									<a data-toggle="collapse" href="#script"> Script </a>
 								</h4>
 							</div>
-							<div id="script" class="panel-collapse collapse">
-								<div class="panel-body"></div>
+							<div id="script" class="panel-collapse collapse in">
+								<div class="panel-body">
+									<table class="table table-hover" id="scriptTable" style="display: none;">
+										<tbody id="placeLinesHere"></tbody>
+									</table>
+									<button class="btn btn-primary btn-lg" id="btn-addLine">+ line</button>
+								</div>
 							</div>
 						</div>
 
@@ -177,7 +184,7 @@ define ( "LIST_DEFAULT_SIZE", 7 );
 								</h4>
 							</div>
 							<div id="steps" class="panel-collapse collapse">
-								<div class="panel-body"></div>
+								<div class="panel-body">Not yet implemented!</div>
 							</div>
 						</div>
 					</div>
@@ -194,5 +201,6 @@ define ( "LIST_DEFAULT_SIZE", 7 );
 	<script src="js/new.js"></script>
 	<script src="js/new-var.js"></script>
 	<script src="js/new-inst.js"></script>
+	<script src="js/new-script.js"></script>
 </body>
 </html>
