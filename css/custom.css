@@ -48,3 +48,9 @@
 	padding-right: 0px;
 	text-align: center;
 }
+
+.cell {
+	text-align: center;
+	vertical-align: middle;
+	padding: 6px;
+}

@@ -8,66 +8,32 @@ var DELIM = ';';
 /** Specifies the site, where variables are to place. */
 var VARSITE = $("#placeVariablesHere");
 /** The main window for adding/editing variables. */
-var dataModal = new VariableModal();
+var varForm = new VariableForm();
 /** Represents the collection of existing variables */
 var vars = new Variables();
-/** The main window for adding/editing instructions. */
+
 /** Provides an interface for adding/editing registers. */
-var registers = new Register();
+var elementFactory = new ElementFactory();
 /** Provides an interface for adding/editing lists. */
-var lists = new List();
+var arrayfactory = new ArrayFactory();
 
-var template = new VarTemplate();
+var varTemplate = new VarTemplate();
+var maxVarId = 0;
 
-/**
- * Redraw the table of variables. Each element is displayed in a single
- * table row.
- */
-function redrawVars() {
-    // compute a table row for every variable
-    if (vars.size() > 0) {
-	var html = "";
-	for (var i = 0; i < vars.size(); i++) {
-	    var name = vars.get(i).name;
-	    var value = vars.get(i).value;
-	    if(vars.isArray(i))
-		html += template.listCells(name, value);
-	    else
-		html += template.registerCell(name, value);
-	}
-	// write the content to the page's HTML content.
-	VARSITE.html(html);
-	// make table visible
-	$("#varTable").show("slow");
-	// add remove functionality to button
-	$(".data-remove").click(function() {
-	    vars.remove($(this).prop("value"));
-	    redrawVars();
-	});
-	// add edit functionality to button
-	$(".data-edit").click(function() {
-	    dataModal.themeEdit($(this).prop("value"));
-	    dataModal.show();
-	});
-    } else {
-	VARSITE.html("");
-	$("#varTable").hide("slow");
-    }
-    redrawInst();
-}
+$(".panel-heading").click(function() {
+    $(this).find("span").toggleClass("glyphicon-chevron-right glyphicon-chevron-down");
+});
 
-/**
- * This class provides an interface for operations on registers. When submitting
- * the main add/edit form, the actions are evaluated here. The values are read
- * from the HTML content. The data is checked and written to the collection of
- * variables.
- */
-function Register() {
-    /** The name of the currently edited register. */
+$("#btn-addVar").click(function() {
+    $(this).hide();
+    $("#placeVariablesHere").show("slow");
+    varForm.addRowBelow(-1);
+});
+
+function ElementFactory() {
+    this.id;
     this.name;
-    /** The initialization method of the currently edited register. */
     this.init;
-    /** The value of the currently edited register. */
     this.value;
 
     /** The default value of a register's name. */
@@ -77,77 +43,48 @@ function Register() {
     /** The default value for a register's value. */
     this.DEFAULTVALUE = "";
 
-    /** Add the register that was specified by the HTML add form. */
-    this.add = function() {
+    this.create = function(id, init) {
+	this.id = id;
+	this.init = init;
 	// check input fields
 	if(this.check(null)) {
 	    // add register to internal structure
-	    vars.add(this.name, this.value, this.init);
-	    // redraw data table
-	    redrawVars();
+	    vars.add(this.id, this.name, this.value, this.init);
+	    varForm.themeShow(this.id);
 	}
     };
 
-    /**
-     * Edit the register that was specified by the HTML add form.
-     * 
-     * @param oldName
-     *                The unique name of the register that is to be edited.
-     */
     this.edit = function(oldName) {
 	// check input fields
 	if(this.check(oldName)) {
 	    // add register to internal structure
-	    vars.edit(oldName, this.name, this.value, this.init);
-	    // redraw data table
-	    redrawVars();
+	    vars.edit(this.id, oldName, this.name, this.value, this.init);
+	    varForm.themeShow(this.id);
 	}
     };
 
-    /**
-     * Check the data that was provided by the HTML add/edit form by the
-     * validator.
-     * 
-     * @param oldName
-     *                The unique name of the register that is to be checked.
-     */
     this.check = function(oldName) {
-	// tell the validator that we are dealing with registers
-	valid.target("#addRegisterNameField", "#alert-register");
+	valid.target("#var-" + this.id + "-nameField", "#alert-var");
+	valid.reset();
 	
-	// clear all errors
-	$(".has-error").removeClass("has-error");
-	$(".alert").alert('close');
-
 	// get name from input field
-	this.name = $("#addRegisterName").prop("value");
+	this.name = $("#var-" + this.id + "-name").val();
 	var check = valid.checkName(this.name, oldName);
 
 	// retrieve value
-	this.value = "?";
-	this.init = this.DEFAULTINIT;
-	if ($("#addRegisterCheck").prop("checked")) {
-	    this.value = $("#addRegisterValue").prop("value");
-	    this.init = vars.CUSTOMIZED;
-	    valid.target("#addRegisterValueField", "#alert-register");
+	if (this.init == vars.CUSTOMIZED) {
+	    this.value = $("#var-" + this.id + "-value").val();
+	    valid.target("#var-" + this.id + "-valueField", "#alert-var");
 	    check = valid.checkValue(this.value) && check;
+	} else {
+	    this.value = "?";
 	}
-
-	if(check) {
-	    // all checks passed
-	    dataModal.hide();
-	}
-
 	return check;
     };
 }
 
-/**
- * This class provides an interface for operations on lists. When submitting the
- * main add/edit form, the actions are evaluated here. The values are read from
- * the HTML content. The data is checked and written to the collection of variables.
- */
-function List() {
+function ArrayFactory() {
+    this.id;
     /** The name of the currently edited list. */
     this.name;
     /** The size of the currently edited list. */
@@ -167,11 +104,13 @@ function List() {
     this.DEFAULTVALUES = "";
 
     /** Add the list that was specified by the HTML add form. */
-    this.add = function() {
+    this.create = function(id, init) {
+	this.id = id;
+	this.init = init;
 	// check input fields
 	if(this.check(null)) {
 	    // add register to internal structure
-	    vars.add(this.name, this.values, this.init);
+	    vars.add(this.id, this.name, this.values, this.init);
 	    // redraw data table
 	    redrawVars();
 	}
@@ -209,7 +148,7 @@ function List() {
 	$(".alert").alert('close');
 
 	// get name from input field
-	this.name = $("#addListName").prop("value");
+	this.name = $("#addListName").val();
 	var check = valid.checkName(this.name, oldName);
 
 	// retrieve size
@@ -229,7 +168,7 @@ function List() {
 	    shuffle(this.values);
 	    this.init = vars.RANDOMIZED;
 	} else if ($("#addListCustomized").hasClass("active")) {
-	    var tokens = $("#addListValues").prop("value").split(DELIM);
+	    var tokens = $("#addListValues").val().split(DELIM);
 	    if (tokens.length < this.size) {
 		$("#alert-list").append(err.error("Too few values for list!"));
 		$("#addListValues").addClass("has-error");
@@ -257,153 +196,145 @@ function List() {
 
 	if(check) {
 	    // all checks passed
-	    dataModal.hide();
+	    varForm.hide();
 	}
 	return check;
     };
 
 }
 
-/**
- * This class represents the main variable modification form. In order to
- * reduce traffic, the form for editing and adding is the same one but with
- * different "themes". The labels and functionality of certain elements is
- * replaced dynamically according to the given purpose.
- */
-function VariableModal() {
-
-    /** Hides the window. */
-    this.hide = function() {
-	$("#addVariableModal").modal('hide');
-    };
-
-    /** Shows the window. */
-    this.show = function() {
-	$("#addVariableModal").modal('show');
-    };
-
-    /**
-     * This is the theme for adding new variables. The form's input fields
-     * are initialized by default values.
-     */
-    this.themeAdd = function() {
-	// default tab: very left
-	$('#addVariableTab a:first').tab('show');
-	$("#addVariableModalLabel").text("Add new variable");
-	
-	// REGISTER TAB
-	// setup default values
-	$("#addRegisterName").prop("value", registers.DEFAULTNAME);
-	$("#addRegisterCheck").prop("checked", registers.DEFAULTINIT == vars.CUSTOMIZED);
-	this.setPlaceholder();
-	$("#addRegisterValue").prop("value", registers.DEFAULTVALUE);
-	// setup labels
-	var btnAdd = $("#addRegisterSubmit");
-	btnAdd.text("Add register");
-	btnAdd.off("click");
-	btnAdd.click(function() {
-	    registers.add();
-	});
-
-	// LIST TAB
-	// setup default values
-	$("#addListName").prop("value", lists.DEFAULTNAME);
-	$(".btn-size").removeClass("active");
-	$("#addListSizeBtn" + lists.DEFAULTSIZE).addClass("active");
-	if(lists.DEFAULTINIT == vars.UNINITIALIZED) {
-	    $('#addListInitTab a[href="#addListUninitialized"]').tab('show');
-	} else if(lists.DEFAULTINIT == vars.RANDOMIZED) {
-	    $('#addListInitTab a[href="#addListRandomized"]').tab('show');
-	} else if(lists.DEFAULTINIT == vars.CUSTOMIZED) {
-	    $('#addListInitTab a[href="#addListCustomized"]').tab('show');
+function VariableForm() {
+    this.addRowBelow = function(id) {
+	if (id == -1) { // first row
+	    $("#placeVariablesHere").append(varTemplate.varRow(maxId));
+	} else {
+	    $("#var-" + id).after(varTemplate.varRow(maxId));
 	}
-	$("#addListValues").prop("value", lists.DEFAULTVALUES);
-	// setup labels
-	btnAdd = $("#addListSubmit");
-	btnAdd.text("Add List");
-	btnAdd.off("click");
-	btnAdd.click(function() {
-	    lists.add();
-	});
+	this.themeEdit(maxId++);
+    };
+
+    this.removeRow = function(id) {
+	$("#var-" + id).hide("slow");
+	$("#var-" + id).remove();
+	if ($("#placeVariablesHere").html() == "<tbody></tbody>"){ // TODO dirty!
+	    $("#placeVariablesHere").hide();
+	    $("#btn-addVar").show("slow");
+	}
     };
     
-    /**
-     * This is the theme for editing variables. Given a valid name, the
-     * values of the element that is to be edited are used as default values for
-     * the modification form.
-     * 
-     * @param name
-     *                The unique identifier of the variable.
-     */
-    this.themeEdit = function(name) {
-	// tab rsgister/list
-	if (vars.isArrayByName(name))
-	    $('#addVariableTab a[href="#add-list"]').tab('show');
-	else
-	    $('#addVariableTab a[href="#add-register"]').tab('show');
-
-	var init = vars.getByName(name).init;
-	var value = vars.toString(name);
-
-	$("#addVariableModalLabel").text("Edit variable");
-
-	// REGISTER TAB
-	// setup values
-	$("#addRegisterName").prop("value", name);
-	if (init == vars.CUSTOMIZED) {
-	    $("#addRegisterCheck").prop("checked", true);
-	    $("#addRegisterValue").prop("value", value);
-	} else {
-	    $("#addRegisterCheck").prop("checked", false);
+    this.moveRowUp = function(id) {
+	var curRow = $("#var-" + id);
+	if (curRow.prev().length != 0) {
+	    curRow.prev().before(curRow.clone());
+	    curRow.remove();
+	    this.updateActionHandlers(id);
 	}
-	this.setPlaceholder();
-
-	// setup labels
-	var btnRegSubmit = $("#addRegisterSubmit");
-	btnRegSubmit.text("Save changes");
-	btnRegSubmit.off("click");
-	btnRegSubmit.click(function() {
-	    registers.edit(name);
-	});
-
-	// LIST TAB
-	// setup values
-	$("#addListName").prop("value", name);
-	var size = vars.getByName(name).value.length;
-	if(size == 1) // if not a list
-	    size = lists.DEFAULTSIZE;
-	$(".btn-size").removeClass("active");
-	$("#addListSizeBtn" + size).addClass("active");
-	
-	if(init == vars.UNINITIALIZED) {
-	    $('#addListInitTab a[href="#addListUninitialized"]').tab('show');
-	} else if(init == vars.RANDOMIZED) {
-	    $('#addListInitTab a[href="#addListRandomized"]').tab('show');
-	} else if(init == vars.CUSTOMIZED) {
-	    $('#addListInitTab a[href="#addListCustomized"]').tab('show');
-	    $("#addListValues").prop("value", value);
-	} else {
-	    console.log("init mode not yet implemented: " + init);
-	}
-	// setup labels
-	var btnListSubmit = $("#addListSubmit");
-	btnListSubmit.text("Save changes");
-	btnListSubmit.off("click");
-	btnListSubmit.click(function() {
-	    lists.edit(name);
-	});
     };
-
-    /**
-     * Enable/disable the input field for new register value
-     */
-    this.setPlaceholder = function() {
-	var elem = $("#addRegisterValue");
-	if ($("#addRegisterCheck").prop("checked")) {
-	    elem.attr("placeholder", "value");
-	} else {
-	    elem.attr("placeholder", "uninitialized");
+    
+    this.moveRowDown = function(id) {
+	var curRow = $("#var-" + id);
+	if (curRow.next().length != 0) {
+	    curRow.next().after(curRow.clone());
+	    curRow.remove();
+	    this.updateActionHandlers(id);
 	}
+    };
+    
+    // TODO left/right
+
+    this.checkAndCreateVar = function(id) {
+	switch($("#slct-var-" + id + "-init").val()) {
+	case "elem-?":
+	    elementFactory.create(id, vars.UNINITIALIZED);
+	    break;
+	case "elem-value":
+	    elementFactory.create(id, vars.CUSTOMIZED);
+	    break;
+	case "array-?":
+	    arrayfactory.create(id, vars.UNINITIALIZED);
+	    break;
+	case "array-random":
+	    arrayfactory.create(id, vars.RANDOMIZED);
+	    break;
+	case "array-custom":
+	    arrayfactory.create(id, vars.CUSTOMIZED);
+	    break;
+	}
+    };
+    
+    this.themeShow = function(id) {
+	var leftCell = $("#var-" + id + "-left");
+	var rightCell = $("#var-" + id + "-right");
+	
+	var variable = vars.getById(id);
+	if (vars.isArrayById(id))
+	    leftCell.html(varTemplate.arrayCell(variable.name, variable.value));
+	else
+	    leftCell.html(varTemplate.elementCell(variable.name, variable.value));
+	rightCell.html(varTemplate.buttonsShow(id));
+	this.updateActionHandlers(id);
+    };
+    
+    this.themeEdit = function(id) {
+	var leftCell = $("#var-" + id + "-left");
+	var rightCell = $("#var-" + id + "-right");
+	
+	// FIXME: variable like in themeShow
+	leftCell.html(varTemplate.inputEdit(id));
+	rightCell.html(varTemplate.buttonsEdit(id));
+	this.updateActionHandlers(id);
+    };
+    
+    this.updateActionHandlers = function(id) {
+	var curAddButton = $("#btn-var-" + id + "-add");
+	var curRemoveButton = $("#btn-var-" + id + "-remove");
+	var curEditButton = $("#btn-var-" + id + "-edit");
+	var curCheckButton = $("#btn-var-" + id + "-check");
+	var curMoveUpButton = $("#btn-var-" + id + "-up");
+	var curMoveDownButton = $("#btn-var-" + id + "-down");
+	var curValueSelect = $("#slct-var-" + id + "-init");
+	
+	curAddButton.off("click");
+	curRemoveButton.off("click");
+	curEditButton.off("click");
+	curCheckButton.off("click");
+	curMoveUpButton.off("click");
+	curMoveDownButton.off("click");
+	curValueSelect.off("click");
+	
+	curAddButton.click(function() {
+	    varForm.addRowBelow(id); 
+	});
+
+	curRemoveButton.click(function() {
+	    vars.removeById(id);
+	    varForm.removeRow(id); 
+	});
+
+	curEditButton.click(function() {
+	    varForm.themeEdit(id);
+	});
+
+	curCheckButton.click(function() {
+	    varForm.checkAndCreateVar(id);
+	});
+
+	curMoveUpButton.click(function() {
+	    varForm.moveRowUp(id);
+	});
+	
+	curMoveDownButton.click(function() {
+	    varForm.moveRowDown(id);
+	});
+	
+	curValueSelect.click(function() {
+	    var value = $(this).val();
+	    var target = $($(this).data("options").target);
+	    if (value == "elem-value" || value == "array-custom")
+		target.show("slow");
+	    else
+		target.hide("slow");
+	});
     };
 }
 
@@ -423,35 +354,10 @@ function Variables() {
     this.vars = new Array();
     this.maxId = 0;
 
-    /**
-     * Adds a new variable to the list.
-     * 
-     * @param name
-     *                The name of the new variable.
-     * @param value
-     *                The value of the new variable.
-     * @param init
-     *                The initialization method of the new variable.
-     */
-    this.add = function(name, value, init) {
-	this.vars.push(new this.Data(this.maxId++, name, value, init));
+    this.add = function(id, name, value, init) {
+	this.vars.push(new this.Data(id, name, value, init));
     };
 
-    /**
-     * Edits an existing variable in the list.
-     * 
-     * @param oldName
-     *                The name that was the data strucutre's unique identifier
-     *                before editing.
-     * @param newName
-     *                The name that will be the data strucutre's unique
-     *                identifier after editing.
-     * @param newValue
-     *                The value that is connected with the variable.
-     * @param init
-     *                The initialization method that is connected to the data
-     *                structure.
-     */
     this.edit = function(oldName, newName, newValue, init) {
 	var i = this.find(oldName);
 	var id = this.get(i).id;
@@ -461,6 +367,15 @@ function Variables() {
     this.find = function(name) {
 	for (var i = 0; i < this.size(); i++) {
 	    if (this.vars[i].name == name) {
+		return i;
+	    }
+	}
+	return -1;
+    };
+    
+    this.findId = function(id) {
+	for (var i = 0; i < this.size(); i++) {
+	    if (this.vars[i].id == id) {
 		return i;
 	    }
 	}
@@ -490,30 +405,23 @@ function Variables() {
     this.isArrayByName = function(name) {
 	return $.isArray(this.getByName(name).value);
     };
-
-    /**
-     * This method removes the element, given its name.
-     * 
-     * @param name
-     *                The name of the variable that is to be deleted.
-     */
-    this.remove = function(name) {
-	this.vars.splice(this.find(name), 1);
+    
+    this.isArrayById = function(id) {
+	return $.isArray(this.getById(id).value);
     };
 
-    /**
-     * Returns the number of currently available variables.
-     */
+    this.removeByName = function(name) {
+	this.vars.splice(this.find(name), 1);
+    };
+    
+    this.removeById = function(id) {
+	this.vars.splice(this.findId(id), 1);
+    };
+
     this.size = function() {
 	return this.vars.length;
     };
 
-    /**
-     * Returns a string representation of the variable's value.
-     * 
-     * @param name
-     *                The name of the variable.
-     */
     this.toString = function(name) {
 	var value = this.getByName(name).value;
 	if ($.isArray(value)) {
@@ -529,10 +437,6 @@ function Variables() {
 	}
     };
 
-    /**
-     * This class represents an element in the vollection. Basically it is a
-     * struct, combining name, value and initialization method in one class.
-     */
     this.Data = function(id, name, value, init) {
 	this.id = id;
 	this.name = name;
@@ -547,71 +451,80 @@ function Variables() {
  */
 function VarTemplate() {
 
-    /**
-     * Returns an HTML representation of one single value cell. A list consists
-     * of several such cells.
-     * 
-     * @param name
-     *                The name of the variable
-     * @param value
-     *                The value of the variable.
-     */
-    this.defaultCell = function(name, value) {
-	return '<input type="button" class="btn btn-default" id="btn-' + name + '" disabled="disabled" value="' + value + '" />';
+    this.elementCell = function(name, value) {
+	return '<code class="cell">' + name + ' = ' + value + '</code>';
     };
 
-    /**
-     * Returns an HTML representation of a list, consisting of several cells.
-     * 
-     * @param name
-     *                The list's name.
-     * @param values
-     *                An array of values representing the list's values.
-     */
-    this.listCells = function(name, values) {
+    this.arrayCell = function(name, values) {
 	var cells = "";
 	for (var i = 0; i < values.length; i++) {
 	    cells += this.defaultCell(name + i, values[i]);
 	}
 	return this.structureRow(name, cells);
     };
-
-    /**
-     * Returns an HTML representation of a table row containing only one
-     * register representation.
-     * 
-     * @param name
-     *                The register's name.
-     * @param value
-     *                The register's value.
-     */
-    this.registerCell = function(name, value) {
-	return this.structureRow(name, this.defaultCell(name, value));
+    
+    this.varRow = function(id) {
+	return '<tr id="var-' + id + '">'
+	+ '<td style="vertical-align: middle;" id="var-' + id + '-left"></td>'
+	+ '<td style="width: 90pt; text-align: center;" id="var-' + id + '-right"></td>'
+	+ '</tr>';
     };
-
-    /**
-     * Returns an HTML representation of one data strucutre in form of a table
-     * row.
-     * 
-     * @param name
-     *                The name of the variable.
-     * @param cells
-     *                HTML code for the memory content of the variable.
-     */
-    this.structureRow = function(name, cells) {
-	return '<tr>' 
-	+ '	<td><code>' + name + '</code></td>' 
-	+ '	<td style="border-right: none;"><div class="btn-group">'
-	+ cells 
-	+ '	</div></td>'
-	+ '	<td style="border-left: none; text-align: right;">' 
-	+ '		<button type="button" class="btn btn-default data-edit" title="edit register" value="' + name + '">'
-	+ '			<span class="glyphicon glyphicon-pencil"></span>' 
-	+ '		</button>&nbsp;'
-	+ '		<button type="button" class="btn btn-default data-remove" title="remove register" value="' + name + '">'
-	+ '			<span class="glyphicon glyphicon-remove"></span>' 
-	+ '		</button>' 
-	+ '	</td>' 
-	+ '<tr>';
+    
+    this.inputEdit = function(id) {
+	return ''
+	+ '<div class="col-xs-3">'
+	+ '	<div class="form-group" id="var-' + id + '-nameField">'
+	+ '		<label class="sr-only" for="var-' + id + '-name">Variable name</label>'
+	+ '		<input type="text" class="form-control" id="var-' + id + '-name" placeholder="name">'
+	+ '	</div>'
+	+ '</div>'
+	+ '<div class="col-xs-2" style="text-align: center;">'
+	+ '	<div class="cell"><code>=</code></div>'
+	+ '</div>'
+	+ '<div class="col-xs-3">'
+	+ '	<div class="form-group">'
+	+ '		<label class="sr-only" for="var-' + id + '-init">Initialization</label>'
+	+ '		<select class="form-control" id="slct-var-' + id + '-init" data-options=\'{"target":"#var-' + id + '-valueField"}\'>'
+	+ '			<optgroup label="Element">'
+	+ '				<option value="elem-?">uninitialized</option>'
+	+ '				<option value="elem-value">value</option>'
+	+ '			</optgroup>'
+	+ '			<optgroup label="Array">'
+	+ '				<option value="array-?">uninitialized</option>'
+	+ '				<option value="array-random">random</option>'
+	+ '				<option value="array-custom">custom</option>'
+	+ '			</optgroup>'
+	+ '		</select>'
+	+ '	</div>'
+	+ '</div>'
+	+ '<div class="col-xs-4">'
+	+ '	<div class="form-group" id="var-' + id + '-valueField" style="margin-left: 0px; display: none;">'
+	+ '		<label class="sr-only" for="var-' + id + '-value">Initial value</label>'
+	+ '		<input type="text" class="form-control" id="var-' + id + '-value" placeholder="value">'
+	+ '	</div>'
+	+ '</div>'
+	+ '';
+    };
+    
+    this.buttonsEdit = function(id) {
+	return '<div class="btn-group btn-group-xs">'
+	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-check" value="' + id + '"><span class="glyphicon glyphicon-ok"></span></button>'
+	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-add" value="' + id + '"><span class="glyphicon glyphicon-plus"></span></button>'
+	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-remove" value="' + id + '"><span class="glyphicon glyphicon-minus"></span></button>'
+	+ '</div>'
+	+ '<div class="btn-group btn-group-xs" style="margin-top: 5pt;">'
+	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-left" value="' + id + '"><span class="glyphicon glyphicon-arrow-left"></span></button>'
+	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-right" value="' + id + '"><span class="glyphicon glyphicon-arrow-right"></span></button>'
+	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-up" value="' + id + '"><span class="glyphicon glyphicon-arrow-up"></span></button>'
+	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-down" value="' + id + '"><span class="glyphicon glyphicon-arrow-down"></span></button>'
+	+ '</div>';
+    };
+    
+    this.buttonsShow = function(id) {
+	return '<div class="btn-group btn-group-xs">'
+	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-edit" value="' + id + '"><span class="glyphicon glyphicon-pencil"></span></button>'
+	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-add" value="' + id + '"><span class="glyphicon glyphicon-plus"></span></button>'
+	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-remove" value="' + id + '"><span class="glyphicon glyphicon-minus"></span></button>'
+	+ '</div>';
     };
 }

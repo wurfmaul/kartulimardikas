@@ -59,9 +59,6 @@ define ( "LINE_MAX_LEVEL", 10);
 		</div>
 	</nav>
 
-	<!-- MODAL - NEW VARIABLE -->
-	<?php require_once 'php/newVarModal.php'; ?>
-
 	<!-- MODAL - NEW INSTRUCTION -->
 	<?php require_once 'php/newInstModal.php'; ?>
 	
@@ -77,7 +74,6 @@ define ( "LINE_MAX_LEVEL", 10);
 		</div>
 		<!-- CONTENT -->
 		<div class="row">
-
 			<!-- LEFT COLUMN -->
 			<div class="col-md-6">
 				<form class="form-horizontal" role="form">
@@ -114,24 +110,16 @@ define ( "LINE_MAX_LEVEL", 10);
 
 						<!-- TAB - VARIABLES -->
 						<div class="panel panel-default">
-							<div class="panel-heading">
+							<div class="panel-heading" data-toggle="collapse" data-target="#varPanel">
 								<h4 class="panel-title">
-									<a data-toggle="collapse" href="#data"> Variables </a>
+									<span class="glyphicon glyphicon-chevron-down"></span> Variables
 								</h4>
 							</div>
-							<div id="data" class="panel-collapse collapse in">
+							<div id="varPanel" class="panel-collapse collapse in">
 								<div class="panel-body">
-									<table class="table table-hover table-bordered" id="varTable" style="display: none;">
-										<thead>
-											<tr>
-												<th>Variable</th>
-												<th style="border-right: none;">Contents</th>
-												<th style="border-left: none; text-align: right;">Modify</th>
-											</tr>
-										</thead>
-										<tbody id="placeVariablesHere"></tbody>
-									</table>
-									<button class="btn btn-primary btn-lg" id="btn-addVariable">+ variable</button>
+									<div id="alert-var"></div>
+									<table class="table table-hover table-condensed table-striped" id="placeVariablesHere" style="display: none;"></table>
+									<button class="btn btn-primary btn-lg" id="btn-addVar">+ variable</button>
 								</div>
 							</div>
 						</div>
@@ -143,9 +131,10 @@ define ( "LINE_MAX_LEVEL", 10);
 									<a data-toggle="collapse" href="#instructions"> Instructions </a>
 								</h4>
 							</div>
-							<div id="instructions" class="panel-collapse collapse in">
+							<div id="instructions" class="panel-collapse collapse">
 								<div class="panel-body">
-									<table class="table table-hover table-bordered" id="instTable" style="display: none;">
+									<table class="table table-hover table-bordered" id="instTable"
+										style="display: none;">
 										<thead>
 											<tr>
 												<th style="border-right: none;">Instruction</th>
@@ -154,7 +143,8 @@ define ( "LINE_MAX_LEVEL", 10);
 										</thead>
 										<tbody id="placeInstructionsHere"></tbody>
 									</table>
-									<button class="btn btn-primary btn-lg" id="btn-addInstruction">+ instruction</button>
+									<button class="btn btn-primary btn-lg" id="btn-addInstruction">+
+										instruction</button>
 								</div>
 							</div>
 						</div>
@@ -166,9 +156,10 @@ define ( "LINE_MAX_LEVEL", 10);
 									<a data-toggle="collapse" href="#script"> Script </a>
 								</h4>
 							</div>
-							<div id="script" class="panel-collapse collapse in">
+							<div id="script" class="panel-collapse collapse">
 								<div class="panel-body">
-									<table class="table table-hover" id="scriptTable" style="display: none;">
+									<table class="table table-hover" id="scriptTable"
+										style="display: none;">
 										<tbody id="placeLinesHere"></tbody>
 									</table>
 									<button class="btn btn-primary btn-lg" id="btn-addLine">+ line</button>

@@ -1,15 +1,4 @@
-	<div class="modal fade" id="addVariableModal" tabindex="-1"
-		role="dialog" aria-labelledby="Add another data structure"
-		aria-hidden="true">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal"
-						aria-hidden="true">&times;</button>
-					<h4 class="modal-title" id="addVariableModalLabel">Add new
-						variable</h4>
-				</div>
-				<div class="modal-body">
+
 					<ul class="nav nav-tabs" id="addVariableTab">
 						<li class="active"><a href="#add-register" data-toggle="tab">Register</a></li>
 						<li><a href="#add-list" data-toggle="tab">List</a></li>
@@ -129,11 +118,3 @@
 							</div>
 						</div>
 					</div>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">
-						Dismiss changes</button>
-				</div>
-			</div>
-		</div>
-	</div>

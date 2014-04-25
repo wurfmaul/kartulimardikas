@@ -200,6 +200,11 @@ function Validator() {
 	this.inputField = $(inputField);
 	this.errorLoc = $(errorLocation);
     };
+    
+    this.reset = function() {
+	$(".has-error").removeClass("has-error");
+	$(".alert").alert('close');
+    };
 }
 
 function ErrorTemplate() {
