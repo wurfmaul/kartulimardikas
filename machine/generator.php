@@ -7,10 +7,10 @@ generate(2749);
 
 function generate($id) {
 	// compute filename
-	$filename = "algo$id-";
-	$stamp = new DateTime ( "now", new DateTimeZone ( "UTC" ) );
-	$filename .= $stamp->format ( "YmdHis" );
-	$filename .= ".js";
+// 	$filename = "algo$id-";
+// 	$stamp = new DateTime ( "now", new DateTimeZone ( "UTC" ) );
+// 	$filename .= $stamp->format ( "YmdHis" );
+// 	$filename .= ".js";
 	
 	$filename = "algo.js";
 	// FIXME remove static name!
@@ -28,8 +28,9 @@ function generate($id) {
 		$content = str_replace ( "//~VARDECL~//", $varDecl, $content );
 		$content = str_replace ( "//~VARRESET~//", $varInit, $content );
 		$content = str_replace ( "//~STATEMACHINE~//", $states, $content );
+		
 		if(file_put_contents ( FOLDER . $filename, $content )) {
-			//echo "JavaScript file '$filename' successfully generated!";
+// 			echo "JavaScript file '$filename' successfully generated!";
 		} else {
 			echo "<h1>Error: could not write generated file!</h1>";
 		}

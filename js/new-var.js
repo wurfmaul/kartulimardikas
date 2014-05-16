@@ -111,8 +111,7 @@ function ArrayFactory() {
 	if(this.check(null)) {
 	    // add register to internal structure
 	    vars.add(this.id, this.name, this.values, this.init);
-	    // redraw data table
-	    redrawVars();
+	    varForm.themeShow(this.id);
 	}
     };
 
@@ -141,62 +140,56 @@ function ArrayFactory() {
      */
     this.check = function(oldName) {
 	// tell validator that we are dealing with lists
-	valid.target("#addListNameField", "#alert-list");
+	valid.target("#var-" + this.id + "-nameField", "#alert-var");
 	
 	// clear errors
 	$(".has-error").removeClass("has-error");
 	$(".alert").alert('close');
 
 	// get name from input field
-	this.name = $("#addListName").val();
+	this.name = $("#var-" + this.id + "-name").val();
 	var check = valid.checkName(this.name, oldName);
-
-	// retrieve size
-	this.size = $(".btn-size.active").text();
 
 	// retrieve values
 	this.values = new Array();
-	if ($("#addListUninitialized").hasClass("active")){
+	switch (this.init) {
+	case vars.UNINITIALIZED:
+	    this.size = $("#var-" + this.id + "-size").val();
 	    for(var i = 0; i < this.size; i++) {
 		this.values.push("?");
 	    }
-	    this.init = vars.UNINITIALIZED;
-	} else if ($("#addListRandomized").hasClass("active")) {
+	    break;
+	case vars.RANDOMIZED:
+	    this.size = $("#var-" + this.id + "-size").val();
 	    for(var i = 0; i < this.size; i++) {
 		this.values.push(i);
 	    }
 	    shuffle(this.values);
-	    this.init = vars.RANDOMIZED;
-	} else if ($("#addListCustomized").hasClass("active")) {
-	    var tokens = $("#addListValues").val().split(DELIM);
-	    if (tokens.length < this.size) {
-		$("#alert-list").append(err.error("Too few values for list!"));
-		$("#addListValues").addClass("has-error");
-		return;
-	    } else if(tokens.length > this.size) {
-		$("#alert-list").append(err.warning("Too many values for list! Values were truncated!"));
-	    }
+	    break;
+	case vars.CUSTOMIZED:
+	    var values = $("#var-" + this.id + "-values").val();
+	    valid.target("#var-" + this.id + "-valueField", "#alert-var");
+	    if (valid.checkNotEmpty(values)) {
+		var tokens = values.split(DELIM);
+		this.size = tokens.length;
 
-	    for(var i = 0; i < this.size; i++) {
-		// trim
-		var value = tokens[i].replace(/ /, "");
-		// check value
-		valid.target("#addListValuesField", "#alert-list");
-		if (valid.checkValue(value)) {
-		    this.values[i] = value;
-		} else {
-		    this.values[i] = "?";
-		    check = false;
+		for(var i = 0; i < this.size; i++) {
+		    // trim
+		    var value = tokens[i].replace(/ /, "");
+		    // check value
+		    if (valid.checkValue(value)) {
+			this.values[i] = value;
+		    } else {
+			this.values[i] = "?";
+			check = false;
+		    }
 		}
+	    } else {
+		check = false;
 	    }
-	    this.init = vars.CUSTOMIZED;
-	} else {
-	    $("#alert-list").append(err.error("List has to be initialized!"));
-	}
-
-	if(check) {
-	    // all checks passed
-	    varForm.hide();
+	    break;
+	default:
+	    $("#alert-var").append(err.error("List has to be initialized!"));
 	}
 	return check;
     };
@@ -267,10 +260,7 @@ function VariableForm() {
 	var rightCell = $("#var-" + id + "-right");
 	
 	var variable = vars.getById(id);
-	if (vars.isArrayById(id))
-	    leftCell.html(varTemplate.arrayCell(variable.name, variable.value));
-	else
-	    leftCell.html(varTemplate.elementCell(variable.name, variable.value));
+	leftCell.html(varTemplate.elementCell(variable.name, variable.value));
 	rightCell.html(varTemplate.buttonsShow(id));
 	this.updateActionHandlers(id);
     };
@@ -329,11 +319,24 @@ function VariableForm() {
 	
 	curValueSelect.click(function() {
 	    var value = $(this).val();
-	    var target = $($(this).data("options").target);
-	    if (value == "elem-value" || value == "array-custom")
-		target.show("slow");
-	    else
-		target.hide("slow");
+	    var targetVal = $($(this).data("options").targetVal);
+	    var targetSize = $($(this).data("options").targetSize);
+	    
+	    switch (value) {
+	    case "elem-value":
+	    case "array-custom":
+		targetVal.show("slow");
+		targetSize.hide("slow");
+		break;
+	    case "array-?":
+	    case "array-random":
+		targetVal.hide("slow");
+		targetSize.show("slow");
+		break;
+	    default:
+		targetVal.hide("slow");
+	    	targetSize.hide("slow");
+	    }
 	});
     };
 }
@@ -454,14 +457,6 @@ function VarTemplate() {
     this.elementCell = function(name, value) {
 	return '<code class="cell">' + name + ' = ' + value + '</code>';
     };
-
-    this.arrayCell = function(name, values) {
-	var cells = "";
-	for (var i = 0; i < values.length; i++) {
-	    cells += this.defaultCell(name + i, values[i]);
-	}
-	return this.structureRow(name, cells);
-    };
     
     this.varRow = function(id) {
 	return '<tr id="var-' + id + '">'
@@ -484,7 +479,8 @@ function VarTemplate() {
 	+ '<div class="col-xs-3">'
 	+ '	<div class="form-group">'
 	+ '		<label class="sr-only" for="var-' + id + '-init">Initialization</label>'
-	+ '		<select class="form-control" id="slct-var-' + id + '-init" data-options=\'{"target":"#var-' + id + '-valueField"}\'>'
+	+ '		<select class="form-control" id="slct-var-' + id + '-init" '
+	+ '			data-options=\'{"targetVal":"#var-' + id + '-valueField", "targetSize":"#var-' + id + '-sizeField"}\'>'
 	+ '			<optgroup label="Element">'
 	+ '				<option value="elem-?">uninitialized</option>'
 	+ '				<option value="elem-value">value</option>'
@@ -501,6 +497,16 @@ function VarTemplate() {
 	+ '	<div class="form-group" id="var-' + id + '-valueField" style="margin-left: 0px; display: none;">'
 	+ '		<label class="sr-only" for="var-' + id + '-value">Initial value</label>'
 	+ '		<input type="text" class="form-control" id="var-' + id + '-value" placeholder="value">'
+	+ '	</div>'
+	+ '	<div class="form-group" id="var-' + id + '-sizeField" style="margin-left: 0px; display: none;">'
+	+ '		<label class="sr-only" for="var-' + id + '-size">Array size</label>'
+	+ '		<select class="form-control" id="var-' + id + '-size">'
+	+ '			<optgroup label="Size">'
+	+ '				<option>2</option><option>3</option><option>4</option><option>5</option>'
+	+ '				<option>6</option><option>7</option><option>8</option><option>9</option>'
+	+ '				<option>10</option><option>11</option><option>12</option><option>13</option>'
+	+ '			</optgroup>'
+	+ '		</select>'
 	+ '	</div>'
 	+ '</div>'
 	+ '';

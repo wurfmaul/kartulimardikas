@@ -111,6 +111,15 @@ function Validator() {
     /** This is the area in the form where the error message should be shown. */
     this.errorLoc;
     
+    this.checkNotEmpty = function(value) {
+	if (typeof value == "undefined" || value.replace(/ /, "") == "") {
+	    this.inputField.addClass("has-error");
+	    this.errorLoc.append(err.error("Empty value is not allowed!"));
+	    return false;
+	}
+	return true;
+    };
+    
     this.checkExists = function(id) {
 	if (id == "" || typeof id == "undefined") {
 	    this.inputField.addClass("has-error");

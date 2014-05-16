@@ -4,10 +4,10 @@
 
 // constants
 var TIMEOUT = 200;
-// ~NOOFSTATES~//
+//~NOOFSTATES~//
 
 // variables
-// ~VARDECL~//
+//~VARDECL~//
 
 // internals
 /** Stores the current state */
@@ -50,7 +50,7 @@ $("#btn-finish").click(function() {
  */
 function reset() {
     // reset variables
-    // ~VARRESET~//
+    //~VARRESET~//
 
     // reset state
     state = 0;
@@ -122,7 +122,7 @@ function performStep() {
     // store previous state
     prevState = state;
 
-    // ~STATEMACHINE~//
+    //~STATEMACHINE~//
     stepCursor();
 }
 

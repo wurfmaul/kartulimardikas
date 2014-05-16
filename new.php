@@ -119,7 +119,7 @@ define ( "LINE_MAX_LEVEL", 10);
 								<div class="panel-body">
 									<div id="alert-var"></div>
 									<table class="table table-hover table-condensed table-striped" id="placeVariablesHere" style="display: none;"></table>
-									<button class="btn btn-primary btn-lg" id="btn-addVar">+ variable</button>
+									<button class="btn btn-primary btn-sm" id="btn-addVar">+ variable</button>
 								</div>
 							</div>
 						</div>

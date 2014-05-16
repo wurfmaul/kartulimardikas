@@ -4,8 +4,8 @@ $algo ["words"] = file_get_contents ( 'db/algo_words.html' );
 $algo ["source"] = file_get_contents ( 'db/algo_code.html' );
 $algo ["desc"] = file_get_contents ( 'db/algo_desc.html' );
 
-include_once 'machine/generator.php';
-generate ( 123 );
+require_once 'machine/generator.php';
+//generate ( 123 );
 
 $jsFile = "algo.js";
 ?>
