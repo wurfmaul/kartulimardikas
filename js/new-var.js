@@ -4,7 +4,7 @@
  */
 
 /** Represents delimiter of list elements in customized view. */
-var DELIM = ';';
+var DELIM = ',';
 /** Specifies the site, where variables are to place. */
 var VARSITE = $("#placeVariablesHere");
 /** The main window for adding/editing variables. */
@@ -54,11 +54,14 @@ function ElementFactory() {
 	}
     };
 
-    this.edit = function(oldName) {
+    this.edit = function(id, init) {
+	this.id = id;
+	this.init = init;
+	var oldName = vars.getById(id).name;
 	// check input fields
 	if(this.check(oldName)) {
 	    // add register to internal structure
-	    vars.edit(this.id, oldName, this.name, this.value, this.init);
+	    vars.edit(this.id, this.name, this.value, this.init);
 	    varForm.themeShow(this.id);
 	}
     };
@@ -121,13 +124,16 @@ function ArrayFactory() {
      * @param oldName
      *                The unique name of the list that is to be edited.
      */
-    this.edit = function(oldName) {
+    this.edit = function(id, init) {
+	this.id = id;
+	this.init = init;
+	
+	var oldName = vars.getById(id).name;
 	// check input fields
 	if(this.check(oldName)) {
 	    // add register to internal structure
-	    vars.edit(oldName, this.name, this.values, this.init);
-	    // redraw data table
-	    redrawVars();
+	    vars.edit(this.id, this.name, this.values, this.init);
+	    varForm.themeShow(this.id);
 	}
     };
 
@@ -167,9 +173,9 @@ function ArrayFactory() {
 	    shuffle(this.values);
 	    break;
 	case vars.CUSTOMIZED:
-	    var values = $("#var-" + this.id + "-values").val();
+	    var values = $("#var-" + this.id + "-value").val();
 	    valid.target("#var-" + this.id + "-valueField", "#alert-var");
-	    if (valid.checkNotEmpty(values)) {
+	    if (valid.checkValues(values)) {
 		var tokens = values.split(DELIM);
 		this.size = tokens.length;
 
@@ -255,6 +261,26 @@ function VariableForm() {
 	}
     };
     
+    this.checkAndEditVar = function(id) {
+	switch($("#slct-var-" + id + "-init").val()) {
+	case "elem-?":
+	    elementFactory.edit(id, vars.UNINITIALIZED);
+	    break;
+	case "elem-value":
+	    elementFactory.edit(id, vars.CUSTOMIZED);
+	    break;
+	case "array-?":
+	    arrayfactory.edit(id, vars.UNINITIALIZED);
+	    break;
+	case "array-random":
+	    arrayfactory.edit(id, vars.RANDOMIZED);
+	    break;
+	case "array-custom":
+	    arrayfactory.edit(id, vars.CUSTOMIZED);
+	    break;
+	}
+    };
+    
     this.themeShow = function(id) {
 	var leftCell = $("#var-" + id + "-left");
 	var rightCell = $("#var-" + id + "-right");
@@ -269,7 +295,6 @@ function VariableForm() {
 	var leftCell = $("#var-" + id + "-left");
 	var rightCell = $("#var-" + id + "-right");
 	
-	// FIXME: variable like in themeShow
 	leftCell.html(varTemplate.inputEdit(id));
 	rightCell.html(varTemplate.buttonsEdit(id));
 	this.updateActionHandlers(id);
@@ -305,9 +330,17 @@ function VariableForm() {
 	    varForm.themeEdit(id);
 	});
 
-	curCheckButton.click(function() {
-	    varForm.checkAndCreateVar(id);
-	});
+	if (vars.findId(id) != -1) {
+	    // var already exists
+	    curCheckButton.click(function() {
+		varForm.checkAndEditVar(id);
+	    });
+	} else {
+	    curCheckButton.click(function() {
+		varForm.checkAndCreateVar(id);
+	    });
+	}
+	
 
 	curMoveUpButton.click(function() {
 	    varForm.moveRowUp(id);
@@ -361,9 +394,8 @@ function Variables() {
 	this.vars.push(new this.Data(id, name, value, init));
     };
 
-    this.edit = function(oldName, newName, newValue, init) {
-	var i = this.find(oldName);
-	var id = this.get(i).id;
+    this.edit = function(id, newName, newValue, init) {
+	var i = this.findId(id);
 	this.vars[i] = new this.Data(id, newName, newValue, init);
     };
     
@@ -466,11 +498,57 @@ function VarTemplate() {
     };
     
     this.inputEdit = function(id) {
+	var variable = vars.getById(id);
+
+	var name = "";
+	var elemUninitSelected = "";
+	var elemValueSelected = "";
+	var arrayUninitSelected = "";
+	var arrayRandomSelected = "";
+	var arrayCustomSelected = "";
+	var valueInvisible = " display: none;";
+	var value = "";
+	var sizeInvisible = " display: none;";
+	var sizeSelected = new Array(13);
+	for (var i = 0; i < 13; i++)
+	    sizeSelected[i] = "";
+	
+	if (typeof variable != "undefined") {
+	    // write name
+	    name = variable.name;
+	    
+	    // write init/value
+	    var sel = " selected";
+	    switch (variable.init) {
+	    case vars.UNINITIALIZED:
+		if (vars.isArrayById(id)) {
+		    arrayUninitSelected = sel;
+		    sizeInvisible = "";
+		    sizeSelected[variable.value.length] = sel;
+		} else
+		    elemUninitSelected = sel;
+		break;
+	    case vars.RANDOMIZED:
+		arrayRandomSelected = sel;
+		sizeInvisible = "";
+		sizeSelected[variable.value.length] = sel;
+		break;
+	    case vars.CUSTOMIZED:
+		if (vars.isArrayById(id))
+		    arrayCustomSelected = sel;
+		else
+		    elemValueSelected = sel;
+		valueInvisible = "";
+		value = variable.value;
+		break;
+	    }
+	}
+	
 	return ''
 	+ '<div class="col-xs-3">'
 	+ '	<div class="form-group" id="var-' + id + '-nameField">'
 	+ '		<label class="sr-only" for="var-' + id + '-name">Variable name</label>'
-	+ '		<input type="text" class="form-control" id="var-' + id + '-name" placeholder="name">'
+	+ '		<input type="text" class="form-control" id="var-' + id + '-name" value="' + name + '" placeholder="name">'
 	+ '	</div>'
 	+ '</div>'
 	+ '<div class="col-xs-2" style="text-align: center;">'
@@ -482,29 +560,32 @@ function VarTemplate() {
 	+ '		<select class="form-control" id="slct-var-' + id + '-init" '
 	+ '			data-options=\'{"targetVal":"#var-' + id + '-valueField", "targetSize":"#var-' + id + '-sizeField"}\'>'
 	+ '			<optgroup label="Element">'
-	+ '				<option value="elem-?">uninitialized</option>'
-	+ '				<option value="elem-value">value</option>'
+	+ '				<option value="elem-?"' + elemUninitSelected + '>uninitialized</option>'
+	+ '				<option value="elem-value"' + elemValueSelected + '>value</option>'
 	+ '			</optgroup>'
 	+ '			<optgroup label="Array">'
-	+ '				<option value="array-?">uninitialized</option>'
-	+ '				<option value="array-random">random</option>'
-	+ '				<option value="array-custom">custom</option>'
+	+ '				<option value="array-?"' + arrayUninitSelected + '>uninitialized</option>'
+	+ '				<option value="array-random"' + arrayRandomSelected + '>random</option>'
+	+ '				<option value="array-custom"' + arrayCustomSelected + '>custom</option>'
 	+ '			</optgroup>'
 	+ '		</select>'
 	+ '	</div>'
 	+ '</div>'
 	+ '<div class="col-xs-4">'
-	+ '	<div class="form-group" id="var-' + id + '-valueField" style="margin-left: 0px; display: none;">'
+	+ '	<div class="form-group" id="var-' + id + '-valueField" style="margin-left: 0px;' + valueInvisible + '">'
 	+ '		<label class="sr-only" for="var-' + id + '-value">Initial value</label>'
-	+ '		<input type="text" class="form-control" id="var-' + id + '-value" placeholder="value">'
+	+ '		<input type="text" class="form-control" id="var-' + id + '-value" value="' + value + '" placeholder="value">'
 	+ '	</div>'
-	+ '	<div class="form-group" id="var-' + id + '-sizeField" style="margin-left: 0px; display: none;">'
+	+ '	<div class="form-group" id="var-' + id + '-sizeField" style="margin-left: 0px;' + sizeInvisible + '">'
 	+ '		<label class="sr-only" for="var-' + id + '-size">Array size</label>'
 	+ '		<select class="form-control" id="var-' + id + '-size">'
 	+ '			<optgroup label="Size">'
-	+ '				<option>2</option><option>3</option><option>4</option><option>5</option>'
-	+ '				<option>6</option><option>7</option><option>8</option><option>9</option>'
-	+ '				<option>10</option><option>11</option><option>12</option><option>13</option>'
+	+ '				<option' + sizeSelected[2] + '>2</option><option' + sizeSelected[3] + '>3</option>'
+	+ '				<option' + sizeSelected[4] + '>4</option><option' + sizeSelected[5] + '>5</option>'
+	+ '				<option' + sizeSelected[6] + '>6</option><option' + sizeSelected[7] + '>7</option>'
+	+ '				<option' + sizeSelected[8] + '>8</option><option' + sizeSelected[9] + '>9</option>'
+	+ '				<option' + sizeSelected[10] + '>10</option><option' + sizeSelected[11] + '>11</option>'
+	+ '				<option' + sizeSelected[12] + '>12</option><option' + sizeSelected[13] + '>13</option>'
 	+ '			</optgroup>'
 	+ '		</select>'
 	+ '	</div>'

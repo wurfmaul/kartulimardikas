@@ -114,7 +114,7 @@ function Validator() {
     this.checkNotEmpty = function(value) {
 	if (typeof value == "undefined" || value.replace(/ /, "") == "") {
 	    this.inputField.addClass("has-error");
-	    this.errorLoc.append(err.error("Empty value is not allowed!"));
+	    this.errorLoc.append(err.error("Value is not allowed: '" + value + "'"));
 	    return false;
 	}
 	return true;
@@ -186,7 +186,7 @@ function Validator() {
      */
     this.checkValue = function(value) {
 	// check for integer
-	var check = value.search(/^-?\d+$/) == 0; // \d = [0-9]
+	var check = value.search(/^\s*-?\s*\d+\s*$/) == 0; // \d = [0-9]
 
 	// check for string
 	// check |= value.search(/^["'][A-ZÄÖÜa-zäöü0-9_ ]*["']$/) == 0;
@@ -194,6 +194,16 @@ function Validator() {
 	if (!check) {
 	    this.inputField.addClass("has-error");
 	    this.errorLoc.append(err.error("Value '" + value + "' is not valid. Allowed: integers"));
+	    return false;
+	}
+	return true;
+    };
+    
+    this.checkValues = function(values) {
+	var check = values.search(/^(-?\d+\s*,\s*)+(-?\d+\s*,?\s*)$/) == 0; // \d = [0-9], \s = white
+	if (!check) {
+	    this.inputField.addClass("has-error");
+	    this.errorLoc.append(err.error("Values '" + values + "' are not valid. Allowed: integers. Separator: ,"));
 	    return false;
 	}
 	return true;
