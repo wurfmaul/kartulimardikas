@@ -203,6 +203,8 @@ function ArrayFactory() {
 }
 
 function VariableForm() {
+    this.noOfRows = 0;
+    
     this.addRowBelow = function(id) {
 	if (id == -1) { // first row
 	    $("#placeVariablesHere").append(varTemplate.varRow(maxId));
@@ -210,15 +212,16 @@ function VariableForm() {
 	    $("#var-" + id).after(varTemplate.varRow(maxId));
 	}
 	this.themeEdit(maxId++);
+	this.noOfRows++;
     };
 
     this.removeRow = function(id) {
 	$("#var-" + id).hide("slow");
 	$("#var-" + id).remove();
-	if ($("#placeVariablesHere").html() == "<tbody></tbody>"){ // TODO dirty!
-	    $("#placeVariablesHere").hide();
-	    $("#btn-addVar").show("slow");
+	if (--this.noOfRows == 0){
+	    this.addRowBelow(-1);
 	}
+	
     };
     
     this.moveRowUp = function(id) {
@@ -238,8 +241,6 @@ function VariableForm() {
 	    this.updateActionHandlers(id);
 	}
     };
-    
-    // TODO left/right
 
     this.checkAndCreateVar = function(id) {
 	switch($("#slct-var-" + id + "-init").val()) {
@@ -493,7 +494,7 @@ function VarTemplate() {
     this.varRow = function(id) {
 	return '<tr id="var-' + id + '">'
 	+ '<td style="vertical-align: middle;" id="var-' + id + '-left"></td>'
-	+ '<td style="width: 90pt; text-align: center;" id="var-' + id + '-right"></td>'
+	+ '<td style="width: 95pt; text-align: center;" id="var-' + id + '-right"></td>'
 	+ '</tr>';
     };
     
@@ -596,20 +597,18 @@ function VarTemplate() {
     this.buttonsEdit = function(id) {
 	return '<div class="btn-group btn-group-xs">'
 	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-check" value="' + id + '"><span class="glyphicon glyphicon-ok"></span></button>'
-	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-add" value="' + id + '"><span class="glyphicon glyphicon-plus"></span></button>'
-	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-remove" value="' + id + '"><span class="glyphicon glyphicon-minus"></span></button>'
-	+ '</div>'
-	+ '<div class="btn-group btn-group-xs" style="margin-top: 5pt;">'
-	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-left" value="' + id + '"><span class="glyphicon glyphicon-arrow-left"></span></button>'
-	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-right" value="' + id + '"><span class="glyphicon glyphicon-arrow-right"></span></button>'
 	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-up" value="' + id + '"><span class="glyphicon glyphicon-arrow-up"></span></button>'
 	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-down" value="' + id + '"><span class="glyphicon glyphicon-arrow-down"></span></button>'
+	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-add" value="' + id + '"><span class="glyphicon glyphicon-plus"></span></button>'
+	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-remove" value="' + id + '"><span class="glyphicon glyphicon-minus"></span></button>'
 	+ '</div>';
     };
     
     this.buttonsShow = function(id) {
 	return '<div class="btn-group btn-group-xs">'
 	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-edit" value="' + id + '"><span class="glyphicon glyphicon-pencil"></span></button>'
+	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-up" value="' + id + '"><span class="glyphicon glyphicon-arrow-up"></span></button>'
+	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-down" value="' + id + '"><span class="glyphicon glyphicon-arrow-down"></span></button>'
 	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-add" value="' + id + '"><span class="glyphicon glyphicon-plus"></span></button>'
 	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-remove" value="' + id + '"><span class="glyphicon glyphicon-minus"></span></button>'
 	+ '</div>';
