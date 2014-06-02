@@ -20,13 +20,9 @@ var arrayfactory = new ArrayFactory();
 var varTemplate = new VarTemplate();
 var maxVarId = 0;
 
-$(".panel-heading").click(function() {
-    $(this).find("span").toggleClass("glyphicon-chevron-right glyphicon-chevron-down");
-});
-
 $("#btn-addVar").click(function() {
     $(this).hide();
-    $("#placeVariablesHere").show("slow");
+    $("#placeVariablesHere").show();
     varForm.addRowBelow(-1);
 });
 
@@ -207,11 +203,11 @@ function VariableForm() {
     
     this.addRowBelow = function(id) {
 	if (id == -1) { // first row
-	    $("#placeVariablesHere").append(varTemplate.varRow(maxId));
+	    VARSITE.html(varTemplate.varRow(maxVarId));
 	} else {
-	    $("#var-" + id).after(varTemplate.varRow(maxId));
+	    $("#var-" + id).after(varTemplate.varRow(maxVarId));
 	}
-	this.themeEdit(maxId++);
+	this.themeEdit(maxVarId++);
 	this.noOfRows++;
     };
 

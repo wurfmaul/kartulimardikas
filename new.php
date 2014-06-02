@@ -1,10 +1,3 @@
-<?php
-define ( "LIST_MIN_SIZE", 2 );
-define ( "LIST_MAX_SIZE", 13 );
-define ( "LIST_DEFAULT_SIZE", 7 );
-define ( "LINE_MIN_LEVEL", 0 );
-define ( "LINE_MAX_LEVEL", 10);
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -59,12 +52,6 @@ define ( "LINE_MAX_LEVEL", 10);
 		</div>
 	</nav>
 
-	<!-- MODAL - NEW INSTRUCTION -->
-	<?php require_once 'php/newInstModal.php'; ?>
-	
-	<!-- MODAL - NEW SCRIPT LINE -->
-	<?php require_once 'php/newScriptModal.php'; ?>
-
 	<div class="container">
 		<!-- HEADER -->
 		<div class="page-header">
@@ -81,12 +68,12 @@ define ( "LINE_MAX_LEVEL", 10);
 
 						<!-- TAB - GENERAL INFORMATION -->
 						<div class="panel panel-default">
-							<div class="panel-heading">
+							<div class="panel-heading" data-toggle="collapse" data-target="#genPanel">
 								<h4 class="panel-title">
-									<a data-toggle="collapse" href="#general">General Information</a>
+									<span class="glyphicon glyphicon-chevron-right"></span> General Information
 								</h4>
 							</div>
-							<div id="general" class="panel-collapse collapse">
+							<div id="genPanel" class="panel-collapse collapse">
 								<div class="panel-body">
 									<div class="form-group">
 										<label for="in-name" class="control-label col-sm-3">Algorithm
@@ -119,68 +106,28 @@ define ( "LINE_MAX_LEVEL", 10);
 								<div class="panel-body">
 									<div id="alert-var"></div>
 									<table class="table table-hover table-condensed table-striped" id="placeVariablesHere" style="display: none;"></table>
-									<button class="btn btn-primary btn-sm" id="btn-addVar">+ variable</button>
-								</div>
-							</div>
-						</div>
-
-						<!-- TAB - INSTRUCTIONS -->
-						<div class="panel panel-default">
-							<div class="panel-heading">
-								<h4 class="panel-title">
-									<a data-toggle="collapse" href="#instructions"> Instructions </a>
-								</h4>
-							</div>
-							<div id="instructions" class="panel-collapse collapse">
-								<div class="panel-body">
-									<table class="table table-hover table-bordered" id="instTable"
-										style="display: none;">
-										<thead>
-											<tr>
-												<th style="border-right: none;">Instruction</th>
-												<th style="border-left: none; text-align: right;">Modify</th>
-											</tr>
-										</thead>
-										<tbody id="placeInstructionsHere"></tbody>
-									</table>
-									<button class="btn btn-primary btn-lg" id="btn-addInstruction">+
-										instruction</button>
-								</div>
-							</div>
-						</div>
-
-						<!-- TAB - SCRIPT -->
-						<div class="panel panel-default">
-							<div class="panel-heading">
-								<h4 class="panel-title">
-									<a data-toggle="collapse" href="#script"> Script </a>
-								</h4>
-							</div>
-							<div id="script" class="panel-collapse collapse">
-								<div class="panel-body">
-									<table class="table table-hover" id="scriptTable"
-										style="display: none;">
-										<tbody id="placeLinesHere"></tbody>
-									</table>
-									<button class="btn btn-primary btn-lg" id="btn-addLine">+ line</button>
+									<button class="btn btn-primary" id="btn-addVar">+ variable</button>
 								</div>
 							</div>
 						</div>
 
 						<!-- TAB - STEPS -->
 						<div class="panel panel-default">
-							<div class="panel-heading">
+							<div class="panel-heading" data-toggle="collapse" data-target="#stepPanel">
 								<h4 class="panel-title">
-									<a data-toggle="collapse" href="#steps"> Steps </a>
+									<span class="glyphicon glyphicon-chevron-down"></span> Steps
 								</h4>
 							</div>
-							<div id="steps" class="panel-collapse collapse">
-								<div class="panel-body">Not yet implemented!</div>
+							<div id="stepPanel" class="panel-collapse collapse in">
+								<div class="panel-body">
+									<table class="table table-hover table-condensed table-bordered" id="placeStepsHere" style="display: none;"></table>
+									<button class="btn btn-primary" id="btn-addStep">+ step</button>
+								</div>
 							</div>
 						</div>
 					</div>
 
-					<button type="submit" class="btn btn-primary">Save</button>
+					<button type="submit" class="btn btn-primary btn-lg">Save</button>
 
 				</form>
 			</div>
@@ -191,7 +138,6 @@ define ( "LINE_MAX_LEVEL", 10);
 	<script src="js/custom.js"></script>
 	<script src="js/new.js"></script>
 	<script src="js/new-var.js"></script>
-	<script src="js/new-inst.js"></script>
-	<script src="js/new-script.js"></script>
+	<script src="js/new-step.js"></script>
 </body>
 </html>

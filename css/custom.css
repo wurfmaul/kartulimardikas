@@ -37,6 +37,10 @@
 	border-color: #eea236;
 }
 
+.panel-heading {
+	cursor: pointer;
+}
+
 .panel-topless {
 	border-top: none;
 	border-top-left-radius: 0px;

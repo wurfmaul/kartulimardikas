@@ -7,49 +7,14 @@
 //    return 'Are you sure you want to leave? Unsaved changes get lost!';
 //});
 
-$("#addRegisterCheck").click(function() {
-    dataModal.setPlaceholder();
-});
-
-$(".btn-size").click(function() {
-    // update maximum list value
-    var listSize = $(this).text();
-    $("#addListMaxValue").text(listSize - 1);
-});
-
-$(".activate-input").click(function() {
-    var elem = $("#" + $(this).prop("value"));
-    if ($(this).prop("checked")) {
-	elem.prop("disabled", false);
-	elem.focus();
-    } else {
-	elem.prop("disabled", true);
-	elem.prop("value", "");
-    }
-});
-
-$("#btn-addVariable").click(function() {
-    // prepare modal for adding
-    dataModal.themeAdd();
-    dataModal.show();
-});
-
-$("#btn-addInstruction").click(function() {
-    // prepare modal for adding
-    instModal.themeAdd();
-    instModal.show();
-});
-
-$("#btn-addLine").click(function() {
-    // prepare modal for adding
-    scriptModal.themeAdd();
-    scriptModal.show();
-});
-
 /** The default validator for input values. */
 var valid = new Validator();
 /** Provides a set of HTML templates for enhancing site content. */
 var err = new ErrorTemplate();
+
+$(".panel-heading").click(function() {
+    $(this).find("span").toggleClass("glyphicon-chevron-right glyphicon-chevron-down");
+});
 
 function updateSelects() {
     var optionsVars = "";
