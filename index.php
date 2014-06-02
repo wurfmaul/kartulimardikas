@@ -6,12 +6,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kartulimardikas</title>
 
-<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="lib/css/bootstrap.min.css" rel="stylesheet">
 <link href="css/custom.css" rel="stylesheet">
 <!--[if lt IE 9]>
-      <script src="js/html5shiv.js"></script>
-      <script src="js/respond.min.js"></script>
-    <![endif]-->
+      <script src="lib/js/html5shiv.min.js"></script>
+      <script src="lib/js/respond.min.js"></script>
+<![endif]-->
 </head>
 <body>
 	<!-- NAVIGATION BAR -->
@@ -96,8 +96,8 @@
 				or highest common factor (HCF)... <a href="view.php?aid=1457">read more</a></dd>
 		</dl>
 	</div>
-	<script src="js/jquery.min.js"></script>
-	<script src="js/bootstrap.min.js"></script>
+	<script src="lib/js/jquery.min.js"></script>
+	<script src="lib/js/bootstrap.min.js"></script>
 	<script src="js/custom.js"></script>
 </body>
 </html>
