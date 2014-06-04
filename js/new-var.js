@@ -20,12 +20,6 @@ var arrayfactory = new ArrayFactory();
 var varTemplate = new VarTemplate();
 var maxVarId = 0;
 
-$("#btn-addVar").click(function() {
-    $(this).hide();
-    $("#placeVariablesHere").show();
-    varForm.addRowBelow(-1);
-});
-
 function ElementFactory() {
     this.id;
     this.name;
@@ -207,7 +201,7 @@ function VariableForm() {
 	} else {
 	    $("#var-" + id).after(varTemplate.varRow(maxVarId));
 	}
-	this.themeEdit(maxVarId++);
+	maxVarId++;
 	this.noOfRows++;
     };
 
@@ -216,25 +210,6 @@ function VariableForm() {
 	$("#var-" + id).remove();
 	if (--this.noOfRows == 0){
 	    this.addRowBelow(-1);
-	}
-	
-    };
-    
-    this.moveRowUp = function(id) {
-	var curRow = $("#var-" + id);
-	if (curRow.prev().length != 0) {
-	    curRow.prev().before(curRow.clone());
-	    curRow.remove();
-	    this.updateActionHandlers(id);
-	}
-    };
-    
-    this.moveRowDown = function(id) {
-	var curRow = $("#var-" + id);
-	if (curRow.next().length != 0) {
-	    curRow.next().after(curRow.clone());
-	    curRow.remove();
-	    this.updateActionHandlers(id);
 	}
     };
 
@@ -302,16 +277,12 @@ function VariableForm() {
 	var curRemoveButton = $("#btn-var-" + id + "-remove");
 	var curEditButton = $("#btn-var-" + id + "-edit");
 	var curCheckButton = $("#btn-var-" + id + "-check");
-	var curMoveUpButton = $("#btn-var-" + id + "-up");
-	var curMoveDownButton = $("#btn-var-" + id + "-down");
 	var curValueSelect = $("#slct-var-" + id + "-init");
 	
 	curAddButton.off("click");
 	curRemoveButton.off("click");
 	curEditButton.off("click");
 	curCheckButton.off("click");
-	curMoveUpButton.off("click");
-	curMoveDownButton.off("click");
 	curValueSelect.off("click");
 	
 	curAddButton.click(function() {
@@ -337,15 +308,6 @@ function VariableForm() {
 		varForm.checkAndCreateVar(id);
 	    });
 	}
-	
-
-	curMoveUpButton.click(function() {
-	    varForm.moveRowUp(id);
-	});
-	
-	curMoveDownButton.click(function() {
-	    varForm.moveRowDown(id);
-	});
 	
 	curValueSelect.click(function() {
 	    var value = $(this).val();
@@ -482,19 +444,16 @@ function Variables() {
  * the page dynamically.
  */
 function VarTemplate() {
-
-    this.elementCell = function(name, value) {
-	return '<code class="cell">' + name + ' = ' + value + '</code>';
+    this.rowView = function(id) {
+	var v = vars.getById(id);
+	return '<li class="line">'
+	+ '<div><code class="cell">' + v.name + ' = ' + v.value + '</code></div>'
+	+ '<div style="width: 95pt;" class="btn-group btn-group-xs">'
+	+ '	<button type="button" class="btn btn-default" id="btn-var-' + id + '-edit" value="' + id + '" title="edit row"><span class="glyphicon glyphicon-pencil"></span></button>'
+	+ '</div></li>';
     };
     
-    this.varRow = function(id) {
-	return '<tr id="var-' + id + '">'
-	+ '<td style="vertical-align: middle;" id="var-' + id + '-left"></td>'
-	+ '<td style="width: 95pt; text-align: center;" id="var-' + id + '-right"></td>'
-	+ '</tr>';
-    };
-    
-    this.inputEdit = function(id) {
+    this.rowEdit = function(id) {
 	var variable = vars.getById(id);
 
 	var name = "";
@@ -541,7 +500,7 @@ function VarTemplate() {
 	    }
 	}
 	
-	return ''
+	return '<li class="line">'
 	+ '<div class="col-xs-3">'
 	+ '	<div class="form-group" id="var-' + id + '-nameField" style="margin-bottom:0px">'
 	+ '		<label class="sr-only" for="var-' + id + '-name">Variable name</label>'
@@ -587,26 +546,11 @@ function VarTemplate() {
 	+ '		</select>'
 	+ '	</div>'
 	+ '</div>'
-	+ '';
-    };
-    
-    this.buttonsEdit = function(id) {
-	return '<div class="btn-group btn-group-xs">'
-	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-check" value="' + id + '"><span class="glyphicon glyphicon-ok"></span></button>'
-	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-up" value="' + id + '"><span class="glyphicon glyphicon-arrow-up"></span></button>'
-	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-down" value="' + id + '"><span class="glyphicon glyphicon-arrow-down"></span></button>'
-	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-add" value="' + id + '"><span class="glyphicon glyphicon-plus"></span></button>'
-	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-remove" value="' + id + '"><span class="glyphicon glyphicon-minus"></span></button>'
+	+ '<div class="btn-group btn-group-xs">'
+	+ '	<button type="button" class="btn btn-default" id="btn-var-' + id + '-check" value="' + id + '" title="Check and add/edit variable"><span class="glyphicon glyphicon-ok"></span></button>'
+	+ '	<button type="button" class="btn btn-default" id="btn-var-' + id + '-cancel" value="' + id + '" title="Discard changes"><span class="glyphicon glyphicon-remove"></span></button>'
+	+ '	<button type="button" class="btn btn-default" id="btn-var-' + id + '-remove" value="' + id + '" title="Remove current row"><span class="glyphicon glyphicon-minus"></span></button>'
 	+ '</div>';
-    };
-    
-    this.buttonsShow = function(id) {
-	return '<div class="btn-group btn-group-xs">'
-	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-edit" value="' + id + '"><span class="glyphicon glyphicon-pencil"></span></button>'
-	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-up" value="' + id + '"><span class="glyphicon glyphicon-arrow-up"></span></button>'
-	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-down" value="' + id + '"><span class="glyphicon glyphicon-arrow-down"></span></button>'
-	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-add" value="' + id + '"><span class="glyphicon glyphicon-plus"></span></button>'
-	+ '<button type="button" class="btn btn-default" id="btn-var-' + id + '-remove" value="' + id + '"><span class="glyphicon glyphicon-minus"></span></button>'
-	+ '</div>';
+	+ '</li>';
     };
 }

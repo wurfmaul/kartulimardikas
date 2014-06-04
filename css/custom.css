@@ -1,5 +1,11 @@
 @CHARSET "UTF-8";
 
+li.line {
+	list-style: none;
+/* 	border: 1px solid #e8e8e8; */
+	background-color: #e8e8e8;
+}
+
 .cursor {
 	display: inline-block;
 	min-width: 10px;

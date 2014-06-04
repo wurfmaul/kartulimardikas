@@ -7,6 +7,7 @@
 <title>Kartulimardikas</title>
 
 <link href="lib/css/bootstrap.min.css" rel="stylesheet">
+<link href="lib/css/jquery-ui.min.css" rel="stylesheet">
 <link href="css/custom.css" rel="stylesheet">
 <!--[if lt IE 9]>
       <script src="lib/js/html5shiv.min.js"></script>
@@ -105,8 +106,12 @@
 							<div id="varPanel" class="panel-collapse collapse in">
 								<div class="panel-body">
 									<div id="alert-var"></div>
-									<table class="table table-hover table-condensed table-striped" id="placeVariablesHere" style="display: none;"></table>
-									<button class="btn btn-primary" id="btn-addVar">+ variable</button>
+									<ul>
+										<li id="protoRow" class="line"></li>
+									</ul>
+									<ul id="insertVarsHere">
+										<li>&nbsp;</li>
+									</ul>
 								</div>
 							</div>
 						</div>
@@ -134,6 +139,7 @@
 		</div>
 	</div>
 	<script src="lib/js/jquery.min.js"></script>
+	<script src="lib/js/jquery-ui.min.js"></script>
 	<script src="lib/js/bootstrap.min.js"></script>
 	<script src="js/custom.js"></script>
 	<script src="js/new.js"></script>
