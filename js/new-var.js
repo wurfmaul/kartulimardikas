@@ -20,6 +20,12 @@ var arrayfactory = new ArrayFactory();
 var varTemplate = new VarTemplate();
 var maxVarId = 0;
 
+$("#btn-addVar").click(function() {
+    $(this).hide();
+    $("#placeVariablesHere").show();
+    varForm.addRowBelow(-1);
+});
+
 function ElementFactory() {
     this.id;
     this.name;
@@ -40,8 +46,9 @@ function ElementFactory() {
 	if(this.check(null)) {
 	    // add register to internal structure
 	    vars.add(this.id, this.name, this.value, this.init);
-	    varForm.themeShow(this.id);
+	    return true;
 	}
+	return false;
     };
 
     this.edit = function(id, init) {
@@ -52,8 +59,9 @@ function ElementFactory() {
 	if(this.check(oldName)) {
 	    // add register to internal structure
 	    vars.edit(this.id, this.name, this.value, this.init);
-	    varForm.themeShow(this.id);
+	    return true;
 	}
+	return false;
     };
 
     this.check = function(oldName) {
@@ -104,8 +112,9 @@ function ArrayFactory() {
 	if(this.check(null)) {
 	    // add register to internal structure
 	    vars.add(this.id, this.name, this.values, this.init);
-	    varForm.themeShow(this.id);
+	    return true;
 	}
+	return false;
     };
 
     /**
@@ -123,8 +132,9 @@ function ArrayFactory() {
 	if(this.check(oldName)) {
 	    // add register to internal structure
 	    vars.edit(this.id, this.name, this.values, this.init);
-	    varForm.themeShow(this.id);
+	    return true;
 	}
+	return false;
     };
 
     /**
@@ -194,42 +204,57 @@ function ArrayFactory() {
 
 function VariableForm() {
     this.noOfRows = 0;
-    
-    this.addRowBelow = function(id) {
-	if (id == -1) { // first row
-	    VARSITE.html(varTemplate.varRow(maxVarId));
-	} else {
-	    $("#var-" + id).after(varTemplate.varRow(maxVarId));
-	}
-	maxVarId++;
-	this.noOfRows++;
-    };
 
     this.removeRow = function(id) {
 	$("#var-" + id).hide("slow");
 	$("#var-" + id).remove();
 	if (--this.noOfRows == 0){
-	    this.addRowBelow(-1);
+	    $("#insertVarsHere").html(varTemplate.dummyRow());
 	}
     };
-
+    
+    this.checkForNewRow = function() {
+	// get the number of html rows in the tbody
+	var n = $("#insertVarsHere").children();
+	n = n.size();
+	n --; // exclude dummy row
+	n -= $(".ui-sortable-placeholder").size(); // exclude placeholders
+	
+	
+	if (n == this.noOfRows + 1) {
+	    $("#dummyRow").remove();
+	    $("#protoRow").html(varTemplate.rowEdit(maxVarId + 1));
+	    this.noOfRows++;
+	    
+	    //FIXME: very dirty delay
+	    $(this).delay(500).queue(function() {
+		varForm.updateActionHandlers(maxVarId);
+		maxVarId++;
+	    });
+	}
+    };
+    
     this.checkAndCreateVar = function(id) {
+	var success;
 	switch($("#slct-var-" + id + "-init").val()) {
 	case "elem-?":
-	    elementFactory.create(id, vars.UNINITIALIZED);
+	    success = elementFactory.create(id, vars.UNINITIALIZED);
 	    break;
 	case "elem-value":
-	    elementFactory.create(id, vars.CUSTOMIZED);
+	    success = elementFactory.create(id, vars.CUSTOMIZED);
 	    break;
 	case "array-?":
-	    arrayfactory.create(id, vars.UNINITIALIZED);
+	    success = arrayfactory.create(id, vars.UNINITIALIZED);
 	    break;
 	case "array-random":
-	    arrayfactory.create(id, vars.RANDOMIZED);
+	    success = arrayfactory.create(id, vars.RANDOMIZED);
 	    break;
 	case "array-custom":
-	    arrayfactory.create(id, vars.CUSTOMIZED);
+	    success = arrayfactory.create(id, vars.CUSTOMIZED);
 	    break;
+	}
+	if (success) {
+	    
 	}
     };
     
@@ -253,41 +278,16 @@ function VariableForm() {
 	}
     };
     
-    this.themeShow = function(id) {
-	var leftCell = $("#var-" + id + "-left");
-	var rightCell = $("#var-" + id + "-right");
-	
-	var variable = vars.getById(id);
-	leftCell.html(varTemplate.elementCell(variable.name, variable.value));
-	rightCell.html(varTemplate.buttonsShow(id));
-	this.updateActionHandlers(id);
-    };
-    
-    this.themeEdit = function(id) {
-	var leftCell = $("#var-" + id + "-left");
-	var rightCell = $("#var-" + id + "-right");
-	
-	leftCell.html(varTemplate.inputEdit(id));
-	rightCell.html(varTemplate.buttonsEdit(id));
-	this.updateActionHandlers(id);
-    };
-    
     this.updateActionHandlers = function(id) {
-	var curAddButton = $("#btn-var-" + id + "-add");
 	var curRemoveButton = $("#btn-var-" + id + "-remove");
 	var curEditButton = $("#btn-var-" + id + "-edit");
 	var curCheckButton = $("#btn-var-" + id + "-check");
 	var curValueSelect = $("#slct-var-" + id + "-init");
 	
-	curAddButton.off("click");
 	curRemoveButton.off("click");
 	curEditButton.off("click");
 	curCheckButton.off("click");
 	curValueSelect.off("click");
-	
-	curAddButton.click(function() {
-	    varForm.addRowBelow(id); 
-	});
 
 	curRemoveButton.click(function() {
 	    vars.removeById(id);
@@ -444,13 +444,19 @@ function Variables() {
  * the page dynamically.
  */
 function VarTemplate() {
-    this.rowView = function(id) {
-	var v = vars.getById(id);
-	return '<li class="line">'
-	+ '<div><code class="cell">' + v.name + ' = ' + v.value + '</code></div>'
-	+ '<div style="width: 95pt;" class="btn-group btn-group-xs">'
-	+ '	<button type="button" class="btn btn-default" id="btn-var-' + id + '-edit" value="' + id + '" title="edit row"><span class="glyphicon glyphicon-pencil"></span></button>'
-	+ '</div></li>';
+    this.rowShow = function(id) {
+	return ''
+//	+ '<tr id="var-' + id + '">'
+	+ '  <td style="vertical-align: middle;" id="var-' + id + '-left">'
+	+ '    <code class="cell">' + name + ' = ' + value + '</code>'
+	+ '  </td>'
+	+ '  <td style="width: 95pt; text-align: center;" id="var-' + id + '-right">'
+	+ '    <div class="btn-group btn-group-xs">'
+	+ '      <button type="button" class="btn btn-default" id="btn-var-' + id + '-edit" value="' + id + '"><span class="glyphicon glyphicon-pencil"></span></button>'
+	+ '    </div>'
+	+ '  </td>'
+//	+ '</tr>'
+	+ '';
     };
     
     this.rowEdit = function(id) {
@@ -500,7 +506,9 @@ function VarTemplate() {
 	    }
 	}
 	
-	return '<li class="line">'
+	return ''
+//	+ '<tr id="var-' + id + '">'
+	+ '<td style="vertical-align: middle;">'
 	+ '<div class="col-xs-3">'
 	+ '	<div class="form-group" id="var-' + id + '-nameField" style="margin-bottom:0px">'
 	+ '		<label class="sr-only" for="var-' + id + '-name">Variable name</label>'
@@ -546,11 +554,19 @@ function VarTemplate() {
 	+ '		</select>'
 	+ '	</div>'
 	+ '</div>'
+	+ '</td>'
+	+ '<td style="width: 95pt; text-align: center;">'
 	+ '<div class="btn-group btn-group-xs">'
 	+ '	<button type="button" class="btn btn-default" id="btn-var-' + id + '-check" value="' + id + '" title="Check and add/edit variable"><span class="glyphicon glyphicon-ok"></span></button>'
 	+ '	<button type="button" class="btn btn-default" id="btn-var-' + id + '-cancel" value="' + id + '" title="Discard changes"><span class="glyphicon glyphicon-remove"></span></button>'
-	+ '	<button type="button" class="btn btn-default" id="btn-var-' + id + '-remove" value="' + id + '" title="Remove current row"><span class="glyphicon glyphicon-minus"></span></button>'
-	+ '</div>';
-	+ '</li>';
+	+ '	<button type="button" class="btn btn-default" id="btn-var-' + id + '-remove" value="' + id + '" title=""><span class="glyphicon glyphicon-minus"></span></button>'
+	+ '</div>'
+	+ '</td>'
+//	+ '</tr>'
+	+ '';
+    };
+    
+    this.dummyRow = function() {
+	return '<tr id="dummyRow"><td>Drag prototype from above to create first line.</td><td></td></tr>';
     };
 }

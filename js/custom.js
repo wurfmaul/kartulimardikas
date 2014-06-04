@@ -2,18 +2,22 @@
 //$('button').tooltip();
 
 $(function() {
+    $("#insertVarsHere").html(varTemplate.dummyRow());
     $("#insertVarsHere").sortable({
 	axis : "y",
 	revert : true
     });
+    $("#protoRow").html(varTemplate.rowEdit(maxVarId));
+    $("#protoRow").disableSelection();
     $("#protoRow").draggable({
 	axis : "y",
 	connectToSortable : "#insertVarsHere",
 	helper : "clone",
-	revert : "invalid"
+	revert : "invalid",
+	stop : function(event, ui) {
+	    varForm.checkForNewRow();
+	}
     });
-    $("#protoRow").html(varTemplate.rowEdit(0));
-    $("#protoRow").disableSelection();
 });
 
 

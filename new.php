@@ -106,12 +106,12 @@
 							<div id="varPanel" class="panel-collapse collapse in">
 								<div class="panel-body">
 									<div id="alert-var"></div>
-									<ul>
-										<li id="protoRow" class="line"></li>
-									</ul>
-									<ul id="insertVarsHere">
-										<li>&nbsp;</li>
-									</ul>
+									<table class="table table-hover table-condensed table-bordered">
+										<thead>
+											<tr id="protoRow"></tr>
+										</thead>
+										<tbody id="insertVarsHere"></tbody>
+									</table>
 								</div>
 							</div>
 						</div>
