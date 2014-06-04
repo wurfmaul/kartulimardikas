@@ -61,37 +61,23 @@ function StepForm() {
 	}
     };
 
-    this.checkAndCreateStep = function(id) { // TODO
+    this.checkAndCreateStep = function(id) {
 	switch($("#slct-step-" + id + "-type").val()) {
-	case "assignVarToVal":
+	case "assignValToVar":
 	    assignFactory.create(id);
 	    break;
 	case "assignVarToVar":
 	    assignFactory.create(id);
 	    break;
 	default:
+	    // TODO all kinds of operations
 	    console.log("not yet supported: " + $("#slct-step-" + id + "-type").val());
 	}
     };
     
-    this.checkAndEditStep = function(id) { // TODO
-	switch($("#slct-var-" + id + "-init").val()) {
-	case "elem-?":
-	    elementFactory.edit(id, vars.UNINITIALIZED);
-	    break;
-	case "elem-value":
-	    elementFactory.edit(id, vars.CUSTOMIZED);
-	    break;
-	case "array-?":
-	    arrayfactory.edit(id, vars.UNINITIALIZED);
-	    break;
-	case "array-random":
-	    arrayfactory.edit(id, vars.RANDOMIZED);
-	    break;
-	case "array-custom":
-	    arrayfactory.edit(id, vars.CUSTOMIZED);
-	    break;
-	}
+    this.checkAndEditStep = function(id) {
+	// TODO editStep
+	console.log("not yet implemented!");
     };
     
     this.themeShow = function(id) {
@@ -121,7 +107,6 @@ function StepForm() {
 	var curMoveUpButton = $("#btn-step-" + id + "-up");
 	var curMoveDownButton = $("#btn-step-" + id + "-down");
 	var curTypeSelect = $("#slct-step-" + id + "-type");
-	var curTargetSelect = $("#slct-step-" + id + "-targetVar");
 	
 	curAddButton.off("click");
 	curRemoveButton.off("click");
@@ -164,6 +149,11 @@ function StepForm() {
 	    stepForm.moveRowDown(id);
 	});
 	
+	var curTargetVarSelect = $("#slct-step-" + id + "-targetVar");
+	var curTargetIdxSelect = $("#slct-step-" + id + "-targetIdx");
+	var curSourceVarSelect = $("#slct-step-" + id + "-sourceVar");
+	var curSourceIdxSelect = $("#slct-step-" + id + "-sourceIdx");
+	
 	var targetVar = $("#step-" + id + "-targetVarField");
 	var targetIdx = $("#step-" + id + "-targetIdxField");
 	var sourceVal = $("#step-" + id + "-sourceValField");
@@ -176,29 +166,46 @@ function StepForm() {
 	    switch (value) {
 	    case "assignValToVar":
 		targetVar.show();
-		targetIdx.hide();
 		sourceVal.show();
 		sourceVar.hide();
 		sourceIdx.hide();
+		curTargetVarSelect.html(stepTemplate.varOptions());
+		curTargetVarSelect.click();
 		break;
 	    case "assignVarToVar":
 		targetVar.show();
-		targetIdx.hide();
 		sourceVal.hide();
 		sourceVar.show();
-		sourceIdx.hide();
+		curTargetVarSelect.html(stepTemplate.varOptions());
+		curSourceVarSelect.html(stepTemplate.varOptions());
+		curTargetVarSelect.click();
+		curSourceVarSelect.click();
 	    default:
 	    }
 	});
 	
-	curTargetSelect.click(function() {
+	curTargetVarSelect.click(function() {
 	    var vid = $(this).val();
-	    if (vid != null && vars.isArrayById(vid)) {
-		targetIdx.show();
-	    } else {
-		targetIdx.hide();
+	    if (vid != null) {
+		if (vars.isArrayById(vid)) {
+		    curTargetIdxSelect.html(stepTemplate.arrayOptions(vid));
+		    targetIdx.show();
+		} else {
+		    targetIdx.hide();
+		}
 	    }
-	    //XXX
+	});
+	
+	curSourceVarSelect.click(function() {
+	    var vid = $(this).val();
+	    if (vid != null) {
+		if (vars.isArrayById(vid)) {
+		    curSourceIdxSelect.html(stepTemplate.arrayOptions(vid));
+		    sourceIdx.show();
+		} else {
+		    sourceIdx.hide();
+		}
+	    }
 	});
     };
 }
@@ -754,12 +761,6 @@ function StepTemplate() {
 	    //TODO edit template
 	}
 	
-	var allVars = "";
-	for (var i = 0; i < vars.vars.length; i++) {
-	    var v = vars.vars[i];
-	    allVars += '<option value="' + v.id + '">' + v.name + '</option>';
-	}
-	
 	return ''
 	+ '<div class="col-xs-3">'
 	+ '	<div class="form-group" style="margin-bottom:0px">'
@@ -789,7 +790,7 @@ function StepTemplate() {
 	+ '	<div class="form-group" id="step-' + id + '-targetVarField" style="margin-bottom:0px;' + targetVarInvisible + '">'
 	+ '		<label class="sr-only" for="slct-step-' + id + '-var">Target variable</label>'
 	+ '		<select class="form-control" id="slct-step-' + id + '-targetVar">'
-	+ '			' + allVars 
+	+ '			' + this.varOptions()
 	+ '		</select>'
 	+ '	</div>'
 	+ '</div>'
@@ -806,7 +807,7 @@ function StepTemplate() {
 	+ '	<div class="form-group" id="step-' + id + '-sourceVarField" style="margin-bottom:0px;' + sourceVarInvisible + '">'
 	+ '		<label class="sr-only" for="slct-step-' + id + '-var">Source variable</label>'
 	+ '		<select class="form-control" id="slct-step-' + id + '-sourceVar">'
-	+ '			' + allVars 
+	+ '			' + this.varOptions()
 	+ '		</select>'
 	+ '	</div>'
 	+ '</div>'
@@ -855,5 +856,26 @@ function StepTemplate() {
 	+ '	<button type="button" class="btn btn-default" id="btn-step-' + id + '-add" value="' + id + '"><span class="glyphicon glyphicon-plus"></span></button>'
 	+ '	<button type="button" class="btn btn-default" id="btn-step-' + id + '-remove" value="' + id + '"><span class="glyphicon glyphicon-minus"></span></button>'
 	+ '</div>';
+    };
+    
+    this.arrayOptions = function(vid) {
+	var size = vars.getById(vid).value.length;
+	var opt = '<optgroup label="Use Array">'
+	+ '	<option value="-1"></option>'
+	+ '</optgroup>'
+	+ '<optgroup label="Use Index">';
+	for (var i = 0; i < size; i++)
+	    opt += '	<option value="' + i + '">[' + i + ']</option>';
+	opt += '</optgroup>';
+	return opt;
+    };
+    
+    this.varOptions = function() {
+	var allVars = "";
+	for (var i = 0; i < vars.vars.length; i++) {
+	    var v = vars.vars[i];
+	    allVars += '<option value="' + v.id + '">' + v.name + '</option>';
+	}
+	return allVars;
     };
 }
