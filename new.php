@@ -107,9 +107,7 @@
 								<div class="panel-body">
 									<div id="alert-var"></div>
 									<table class="table table-hover table-condensed table-bordered">
-										<thead>
-											<tr id="protoRow"></tr>
-										</thead>
+										<thead id="insertProtoHere"></thead>
 										<tbody id="insertVarsHere"></tbody>
 									</table>
 								</div>
