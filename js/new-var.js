@@ -216,13 +216,6 @@ function VariableForm() {
 	maxVarId++;
     };
     
-    this.removeRow = function(vid) {
-	vars.removeById(vid); // FIXME call factory for deletion
-	$("#var-" + vid).hide("slow");
-	$("#var-" + vid).remove();
-	this.updatePlaceholders();
-    };
-    
     this.checkAndCreateVar = function(vid) {
 	var success = false;
 	switch($("#slct-var-" + vid + "-init").val()) {
@@ -314,11 +307,78 @@ function VariableForm() {
 	}
     };
     
-    this.removeSelectedRows = function() {
-	$("#insertVarsHere tr.ui-selected").each(function() {
+    this.performActionOnSelection = function(mode) {
+	var selection = $("#insertVarsHere tr.ui-selected");
+	this.clearSelection();
+	
+	selection.each(function() {
 	    var vid = $(this).prop("id").split("-")[1];
-	    varForm.removeRow(vid);
+	    switch (mode) {
+	    case "remove":
+		varForm.performRemove(vid);
+		break;
+	    case "cancel":
+		varForm.performCancel(vid);
+		break;
+	    case "check":
+		varForm.performCheck(vid);
+		break;
+	    default:
+		break;
+	    }
 	});
+    };
+    
+    this.performCancel = function(vid) {
+	if (vars.findId(vid) == -1) {
+	    // variable does not exist yet -> reset form
+	    $("#var-" + vid).replaceWith(varTemplate.rowEdit(vid));
+	} else {
+	    // variable exists -> discard changes
+	    $("#var-" + vid).replaceWith(varTemplate.rowShow(vid));
+	}
+	this.updateActionHandlers(vid);
+	this.select(vid);
+    };
+    
+    this.performCheck = function(vid) {
+	if (vars.findId(vid) != -1) {
+	    // var already exists
+	    if(this.checkAndEditVar(vid)) {
+		$("#var-" + vid).replaceWith(varTemplate.rowShow(vid));
+	    }
+	} else {
+	    if (this.checkAndCreateVar(vid)) {
+		$("#var-" + vid).replaceWith(varTemplate.rowShow(vid));
+	    }
+	}
+	this.updateActionHandlers(vid);
+	this.select(vid);
+    };
+    
+    this.performEdit = function(vid) {
+	$("#var-" + vid).replaceWith(varTemplate.rowEdit(vid));
+	this.updateActionHandlers(vid);
+	this.select(vid);
+    };
+    
+    this.performRemove = function(vid) {
+	vars.removeById(vid); // FIXME call factory for deletion
+	try {
+	    var nextVid = $("#var-" + vid).next().next().prop("id").split("-")[1];
+	    this.select(nextVid);
+	} catch (e) {
+	}
+	$("#var-" + vid).remove();
+	this.updatePlaceholders();
+    };
+
+    this.clearSelection = function() {
+	$(".ui-selected").removeClass("ui-selected");
+    };
+    
+    this.select = function(vid) {
+	$("#var-" + vid).addClass("ui-selected");
     };
     
     this.updateActionHandlers = function(vid) {
@@ -336,41 +396,23 @@ function VariableForm() {
 	curValueSelect.off("click");
 
 	curRemoveButton.click(function() {
-	    console.log("remove " + vid);
-	    varForm.removeRow(vid); 
+	    varForm.clearSelection();
+	    varForm.performRemove(vid); 
 	});
 
 	curCancelButton.click(function() {
-	    console.log("cancel " + vid);
-	    if (vars.findId(vid) == -1) {
-		// variable does not exist yet -> reset form
-		$("#var-" + vid).replaceWith(varTemplate.rowEdit(vid));
-	    } else {
-		// variable exists -> discard changes
-		$("#var-" + vid).replaceWith(varTemplate.rowShow(vid));
-	    }
-	    varForm.updateActionHandlers(vid);
+	    varForm.clearSelection();
+	    varForm.performCancel(vid);
 	});
 	
 	curEditButton.click(function() {
-	    console.log("edit " + vid);
-	    $("#var-" + vid).replaceWith(varTemplate.rowEdit(vid));
-	    varForm.updateActionHandlers(vid);
+	    varForm.clearSelection();
+	    varForm.performEdit(vid);
 	});
 
 	curCheckButton.click(function() {
-	    console.log("check " + vid);
-	    if (vars.findId(vid) != -1) {
-		// var already exists
-		if(varForm.checkAndEditVar(vid)) {
-		    $("#var-" + vid).replaceWith(varTemplate.rowShow(vid));
-		}
-	    } else {
-		if (varForm.checkAndCreateVar(vid)) {
-		    $("#var-" + vid).replaceWith(varTemplate.rowShow(vid));
-		}
-	    }
-	    varForm.updateActionHandlers(vid);
+	    varForm.clearSelection();
+	    varForm.performCheck(vid);
 	});
 	
 	curValueSelect.click(function() {
@@ -675,11 +717,15 @@ $(function() {
 	}
     });
     varForm.updatePlaceholders();
+    
+    // bind key strokes
     $.keyStroke( 38, function(){ varForm.moveSelectionUp("select"); });
     $.keyStroke( 38, { modKeys: ['altKey'] }, function(){ varForm.moveSelectionUp("move"); });
     $.keyStroke( 38, { modKeys: ['shiftKey'] }, function(){ varForm.moveSelectionUp("extend"); });
     $.keyStroke( 40, function(){ varForm.moveSelectionDown("select"); });
     $.keyStroke( 40, { modKeys: ['altKey'] }, function(){ varForm.moveSelectionDown("move"); });
     $.keyStroke( 40, { modKeys: ['shiftKey'] }, function(){ varForm.moveSelectionDown("extend"); });
-    $.keyStroke( 46, function(){ varForm.removeSelectedRows(); });
+    $.keyStroke( 46, function(){ varForm.performActionOnSelection("remove"); }); // del
+    $.keyStroke( 27, function(){ varForm.performActionOnSelection("cancel"); }); // esc
+    $.keyStroke( 13, function(){ varForm.performActionOnSelection("check"); }); // return
 });

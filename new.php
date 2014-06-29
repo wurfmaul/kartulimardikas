@@ -109,7 +109,7 @@
 									<div class="btn-group">
   									<div class="btn btn-success btn-lg" id="btnAddVar"><span class="glyphicon glyphicon-plus" style="width: 100px;"></span></div>
 									</div>
-									<table class="table table-condensed table-bordered" style="margin-top: 10px;">
+									<table class="table table-condensed table-bordered" style="margin-top: 10px; margin-bottom: 0px;">
 										<tbody id="insertVarsHere"></tbody>
 									</table>
 								</div>
