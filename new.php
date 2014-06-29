@@ -104,10 +104,12 @@
 								</h4>
 							</div>
 							<div id="varPanel" class="panel-collapse collapse in">
-								<div class="panel-body">
+								<div class="panel-body" style="text-align: center;">
 									<div id="alert-var"></div>
-									<table class="table table-hover table-condensed table-bordered">
-										<thead id="insertProtoHere"></thead>
+									<div class="btn-group">
+  									<div class="btn btn-success btn-lg" id="btnAddVar"><span class="glyphicon glyphicon-plus" style="width: 100px;"></span></div>
+									</div>
+									<table class="table table-condensed table-bordered" style="margin-top: 10px;">
 										<tbody id="insertVarsHere"></tbody>
 									</table>
 								</div>
@@ -118,10 +120,10 @@
 						<div class="panel panel-default">
 							<div class="panel-heading" data-toggle="collapse" data-target="#stepPanel">
 								<h4 class="panel-title">
-									<span class="glyphicon glyphicon-chevron-down"></span> Steps
+									<span class="glyphicon glyphicon-chevron-right"></span> Steps
 								</h4>
 							</div>
-							<div id="stepPanel" class="panel-collapse collapse in">
+							<div id="stepPanel" class="panel-collapse collapse">
 								<div class="panel-body">
 									<table class="table table-hover table-condensed table-bordered" id="placeStepsHere" style="display: none;"></table>
 									<button class="btn btn-primary" id="btn-addStep">+ step</button>
@@ -138,6 +140,7 @@
 	</div>
 	<script src="lib/js/jquery.min.js"></script>
 	<script src="lib/js/jquery-ui.min.js"></script>
+	<script src="lib/js/jquery.keystroke.min.js"></script>
 	<script src="lib/js/bootstrap.min.js"></script>
 	<script src="js/custom.js"></script>
 	<script src="js/new.js"></script>

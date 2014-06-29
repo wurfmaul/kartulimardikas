@@ -59,6 +59,19 @@
 	padding: 6px;
 }
 
-#insertProtoHere {
-	background-color: yellow;
+.ui-selected {
+	background: lightgray;
+}
+
+.handle {
+	font-size: 23px;
+}
+
+.dummyRow {
+	background: #b3eaae;
+}
+
+.dummyRow-hover {
+	border: 2px dashed #25c318;
+	height: 35px;
 }

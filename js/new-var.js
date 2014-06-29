@@ -203,128 +203,175 @@ function ArrayFactory() {
 }
 
 function VariableForm() {
-    this.noOfRows = 0;
-
-    this.removeRow = function(id) {
-	$("#var-" + id).hide("slow");
-	$("#var-" + id).remove();
-	if (--this.noOfRows == 0){
-	    $("#insertVarsHere").html(varTemplate.dummyRow());
+    
+    this.addRow = function(lastRow) {
+	if (typeof lastRow.prop("id") === "undefined") {
+	    // if it is the first line
+	    $("#insertVarsHere").append(varTemplate.rowEdit(maxVarId));
+	} else {
+	    lastRow.after(varTemplate.rowEdit(maxVarId));
 	}
+	this.updateActionHandlers(maxVarId);
+	this.updatePlaceholders();
+	maxVarId++;
     };
     
-    this.checkForNewRow = function() {
-	var protoId = $("#var-" + maxVarId).attr("id");
-	// FIXME: find the new row!
-	var newRow = $(".newrow:not(#" + protoId + "):not(.ui-sortable-placeholder):not(.ui-sortable-helper");
-	if (newRow.size() == 1) {
-	    this.noOfRows++;
-	    var curId = maxVarId++;
-	    $("#dummyRow").remove();
-	    
-	    this.newPrototype(maxVarId);
-	    newRow.removeClass("newrow");
-	    newRow.attr("id", protoId);
-	    varForm.updateActionHandlers(curId);
-	}
+    this.removeRow = function(vid) {
+	vars.removeById(vid); // FIXME call factory for deletion
+	$("#var-" + vid).hide("slow");
+	$("#var-" + vid).remove();
+	this.updatePlaceholders();
     };
     
-    this.checkAndCreateVar = function(id) {
+    this.checkAndCreateVar = function(vid) {
 	var success = false;
-	switch($("#slct-var-" + id + "-init").val()) {
+	switch($("#slct-var-" + vid + "-init").val()) {
 	case "elem-?":
-	    success = elementFactory.create(id, vars.UNINITIALIZED);
+	    success = elementFactory.create(vid, vars.UNINITIALIZED);
 	    break;
 	case "elem-value":
-	    success = elementFactory.create(id, vars.CUSTOMIZED);
+	    success = elementFactory.create(vid, vars.CUSTOMIZED);
 	    break;
 	case "array-?":
-	    success = arrayfactory.create(id, vars.UNINITIALIZED);
+	    success = arrayfactory.create(vid, vars.UNINITIALIZED);
 	    break;
 	case "array-random":
-	    success = arrayfactory.create(id, vars.RANDOMIZED);
+	    success = arrayfactory.create(vid, vars.RANDOMIZED);
 	    break;
 	case "array-custom":
-	    success = arrayfactory.create(id, vars.CUSTOMIZED);
+	    success = arrayfactory.create(vid, vars.CUSTOMIZED);
 	    break;
 	}
 	return success;
     };
     
-    this.checkAndEditVar = function(id) {
+    this.checkAndEditVar = function(vid) {
 	var success = false;
-	switch($("#slct-var-" + id + "-init").val()) {
+	switch($("#slct-var-" + vid + "-init").val()) {
 	case "elem-?":
-	    success = elementFactory.edit(id, vars.UNINITIALIZED);
+	    success = elementFactory.edit(vid, vars.UNINITIALIZED);
 	    break;
 	case "elem-value":
-	    success = elementFactory.edit(id, vars.CUSTOMIZED);
+	    success = elementFactory.edit(vid, vars.CUSTOMIZED);
 	    break;
 	case "array-?":
-	    success = arrayfactory.edit(id, vars.UNINITIALIZED);
+	    success = arrayfactory.edit(vid, vars.UNINITIALIZED);
 	    break;
 	case "array-random":
-	    success = arrayfactory.edit(id, vars.RANDOMIZED);
+	    success = arrayfactory.edit(vid, vars.RANDOMIZED);
 	    break;
 	case "array-custom":
-	    success = arrayfactory.edit(id, vars.CUSTOMIZED);
+	    success = arrayfactory.edit(vid, vars.CUSTOMIZED);
 	    break;
 	}
 	return success;
     };
     
-    this.newPrototype = function(id) {
-	$("#insertProtoHere").html(varTemplate.rowEdit(id));
-	$("#var-" + id).addClass("newrow");
-	$("#var-" + id).disableSelection();
-	$("#var-" + id).draggable({
-	    axis : "y",
-	    connectToSortable : "#insertVarsHere",
-	    helper : "clone",
-	    revert : "invalid",
-	    stop : function(event, ui) {
-		varForm.checkForNewRow();
+    this.moveSelectionDown = function(mode) {
+	var selection = $("#insertVarsHere tr.ui-selected");
+	if (typeof selection.last().prop("id") !== "undefined") {
+	    // if some line is selected
+	    // get next line, step over placeholder
+	    var nextLine = selection.last().next().next(); // next(".varRow")
+	    if (typeof nextLine.prop("id") !== "undefined") {
+		// if there is a line below
+		
+		switch (mode) {
+		case "move":
+		    nextLine.detach();
+		    selection.first().before(nextLine);
+		    break;
+		case "select":
+		    $("#insertVarsHere .ui-selected").removeClass("ui-selected");
+		case "extend":
+		    nextLine.addClass("ui-selected");
+		}
+		this.updatePlaceholders();
 	    }
+	}
+    };
+    
+    this.moveSelectionUp = function(mode) {
+	var selection = $("#insertVarsHere tr.ui-selected");
+	if (typeof selection.first().prop("id") !== "undefined") {
+	    // if some line is selected
+	    // get previous line, step over placeholder
+	    var prevLine = selection.first().prev().prev(); // prev(".varRow")
+	    if (typeof prevLine.prop("id") !== "undefined") {
+		// if there is a line above
+		switch (mode) {
+		case "move":
+		    prevLine.detach();
+		    selection.last().after(prevLine);
+		    break;
+		case "select":
+		    $("#insertVarsHere .ui-selected").removeClass("ui-selected");
+		case "extend":
+		    prevLine.addClass("ui-selected");
+		}
+		this.updatePlaceholders();
+	    }
+	}
+    };
+    
+    this.removeSelectedRows = function() {
+	$("#insertVarsHere tr.ui-selected").each(function() {
+	    var vid = $(this).prop("id").split("-")[1];
+	    varForm.removeRow(vid);
 	});
     };
     
-    this.updateActionHandlers = function(id) {
-	var curRemoveButton = $("#btn-var-" + id + "-remove");
-	var curEditButton = $("#btn-var-" + id + "-edit");
-	var curCheckButton = $("#btn-var-" + id + "-check");
-	var curValueSelect = $("#slct-var-" + id + "-init");
+    this.updateActionHandlers = function(vid) {
+	var curRemoveButton = $("#btn-var-" + vid + "-remove");
+	var curEditButton = $("#btn-var-" + vid + "-edit");
+	var curCheckButton = $("#btn-var-" + vid + "-check");
+	var curCancelButton = $("#btn-var-" + vid + "-cancel");
+	var curValueSelect = $("#slct-var-" + vid + "-init");
 	
+	// deactivate old action handlers
 	curRemoveButton.off("click");
 	curEditButton.off("click");
 	curCheckButton.off("click");
+	curCancelButton.off("click");
 	curValueSelect.off("click");
 
 	curRemoveButton.click(function() {
-	    vars.removeById(id);
-	    varForm.removeRow(id); 
+	    console.log("remove " + vid);
+	    varForm.removeRow(vid); 
 	});
 
+	curCancelButton.click(function() {
+	    console.log("cancel " + vid);
+	    if (vars.findId(vid) == -1) {
+		// variable does not exist yet -> reset form
+		$("#var-" + vid).replaceWith(varTemplate.rowEdit(vid));
+	    } else {
+		// variable exists -> discard changes
+		$("#var-" + vid).replaceWith(varTemplate.rowShow(vid));
+	    }
+	    varForm.updateActionHandlers(vid);
+	});
+	
 	curEditButton.click(function() {
-	    $("#var-" + id).replaceWith(varTemplate.rowEdit(id));
-	    varForm.updateActionHandlers(id);
+	    console.log("edit " + vid);
+	    $("#var-" + vid).replaceWith(varTemplate.rowEdit(vid));
+	    varForm.updateActionHandlers(vid);
 	});
 
-	if (vars.findId(id) != -1) {
-	    // var already exists
-	    curCheckButton.click(function() {
-		if(varForm.checkAndEditVar(id)) {
-		    $("#var-" + id).replaceWith(varTemplate.rowShow(id));
-		    varForm.updateActionHandlers(id);
+	curCheckButton.click(function() {
+	    console.log("check " + vid);
+	    if (vars.findId(vid) != -1) {
+		// var already exists
+		if(varForm.checkAndEditVar(vid)) {
+		    $("#var-" + vid).replaceWith(varTemplate.rowShow(vid));
 		}
-	    });
-	} else {
-	    curCheckButton.click(function() {
-		if (varForm.checkAndCreateVar(id)) {
-		    $("#var-" + id).replaceWith(varTemplate.rowShow(id));
-		    varForm.updateActionHandlers(id);
+	    } else {
+		if (varForm.checkAndCreateVar(vid)) {
+		    $("#var-" + vid).replaceWith(varTemplate.rowShow(vid));
 		}
-	    });
-	}
+	    }
+	    varForm.updateActionHandlers(vid);
+	});
 	
 	curValueSelect.click(function() {
 	    var value = $(this).val();
@@ -345,6 +392,20 @@ function VariableForm() {
 	    default:
 		targetVal.hide("slow");
 	    	targetSize.hide("slow");
+	    }
+	});
+    };
+    
+    this.updatePlaceholders = function() {
+	$(".dummyRow").remove();
+	$("#insertVarsHere").prepend(varTemplate.dummyRow());
+	$(".varRow").after(varTemplate.dummyRow());
+
+	$(".dummyRow").droppable({
+	    accept: "#btnAddVar",
+	    hoverClass: "dummyRow-hover",
+	    drop: function( event, ui ) {
+		varForm.addRow($(this));
 	    }
 	});
     };
@@ -461,25 +522,26 @@ function Variables() {
  * the page dynamically.
  */
 function VarTemplate() {
-    this.rowShow = function(id) {
-	var v = vars.getById(id);
+    this.rowShow = function(vid) {
+	var v = vars.getById(vid);
 	
 	return ''
-	+ '<tr id="var-' + id + '">'
-	+ '  <td style="vertical-align: middle;">'
-	+ '    <code class="cell">' + v.name + ' = ' + v.value + '</code>'
-	+ '  </td>'
-	+ '  <td style="width: 65pt; text-align: center;">'
-	+ '    <div class="btn-group btn-group-xs">'
-	+ '      <button type="button" class="btn btn-default" id="btn-var-' + id + '-edit" value="' + id + '"><span class="glyphicon glyphicon-pencil"></span></button>'
-	+ '    </div>'
-	+ '  </td>'
+	+ '<tr id="var-' + vid + '" class="varRow">'
+	+ '	<td class="handle" style="cursor: pointer;">⣿</td>'
+	+ '	<td style="vertical-align: middle; text-alignment: left;">'
+	+ '		<code class="cell">' + v.name + ' = ' + v.value + '</code>'
+	+ '	</td>'
+	+ '	<td style="width: 65pt; text-align: center;">'
+	+ '		<div class="btn-group btn-group-xs">'
+	+ '			<button type="button" class="btn btn-default" id="btn-var-' + vid + '-edit" value="' + vid + '"><span class="glyphicon glyphicon-pencil"></span></button>'
+	+ '		</div>'
+	+ '	</td>'
 	+ '</tr>'
 	+ '';
     };
     
-    this.rowEdit = function(id) {
-	var variable = vars.getById(id);
+    this.rowEdit = function(vid) {
+	var variable = vars.getById(vid);
 
 	var name = "";
 	var elemUninitSelected = "";
@@ -502,7 +564,7 @@ function VarTemplate() {
 	    var sel = " selected";
 	    switch (variable.init) {
 	    case vars.UNINITIALIZED:
-		if (vars.isArrayById(id)) {
+		if (vars.isArrayById(vid)) {
 		    arrayUninitSelected = sel;
 		    sizeInvisible = "";
 		    sizeSelected[variable.value.length] = sel;
@@ -515,7 +577,7 @@ function VarTemplate() {
 		sizeSelected[variable.value.length] = sel;
 		break;
 	    case vars.CUSTOMIZED:
-		if (vars.isArrayById(id))
+		if (vars.isArrayById(vid))
 		    arrayCustomSelected = sel;
 		else
 		    elemValueSelected = sel;
@@ -526,12 +588,13 @@ function VarTemplate() {
 	}
 	
 	return ''
-	+ '<tr id="var-' + id + '">'
+	+ '<tr id="var-' + vid + '" class="varRow">'
+	+ '<td class="handle" style="cursor: pointer;">⣿</td>'
 	+ '<td style="vertical-align: middle;">'
 	+ '<div class="col-xs-3">'
-	+ '	<div class="form-group" id="var-' + id + '-nameField" style="margin-bottom:0px">'
-	+ '		<label class="sr-only" for="var-' + id + '-name">Variable name</label>'
-	+ '		<input type="text" class="form-control" id="var-' + id + '-name" value="' + name + '" placeholder="name">'
+	+ '	<div class="form-group" id="var-' + vid + '-nameField" style="margin-bottom:0px">'
+	+ '		<label class="sr-only" for="var-' + vid + '-name">Variable name</label>'
+	+ '		<input type="text" class="form-control" id="var-' + vid + '-name" value="' + name + '" placeholder="name">'
 	+ '	</div>'
 	+ '</div>'
 	+ '<div class="col-xs-2" style="text-align: center;">'
@@ -539,9 +602,9 @@ function VarTemplate() {
 	+ '</div>'
 	+ '<div class="col-xs-3">'
 	+ '	<div class="form-group" style="margin-bottom:0px">'
-	+ '		<label class="sr-only" for="var-' + id + '-init">Initialization</label>'
-	+ '		<select class="form-control" id="slct-var-' + id + '-init" '
-	+ '			data-options=\'{"targetVal":"#var-' + id + '-valueField", "targetSize":"#var-' + id + '-sizeField"}\'>'
+	+ '		<label class="sr-only" for="var-' + vid + '-init">Initialization</label>'
+	+ '		<select class="form-control" id="slct-var-' + vid + '-init" '
+	+ '			data-options=\'{"targetVal":"#var-' + vid + '-valueField", "targetSize":"#var-' + vid + '-sizeField"}\'>'
 	+ '			<optgroup label="Element">'
 	+ '				<option value="elem-?"' + elemUninitSelected + '>uninitialized</option>'
 	+ '				<option value="elem-value"' + elemValueSelected + '>value</option>'
@@ -555,13 +618,13 @@ function VarTemplate() {
 	+ '	</div>'
 	+ '</div>'
 	+ '<div class="col-xs-4">'
-	+ '	<div class="form-group" id="var-' + id + '-valueField" style="margin-left: 0px; margin-bottom:0px;' + valueInvisible + '">'
-	+ '		<label class="sr-only" for="var-' + id + '-value">Initial value</label>'
-	+ '		<input type="text" class="form-control" id="var-' + id + '-value" value="' + value + '" placeholder="value">'
+	+ '	<div class="form-group" id="var-' + vid + '-valueField" style="margin-left: 0px; margin-bottom:0px;' + valueInvisible + '">'
+	+ '		<label class="sr-only" for="var-' + vid + '-value">Initial value</label>'
+	+ '		<input type="text" class="form-control" id="var-' + vid + '-value" value="' + value + '" placeholder="value">'
 	+ '	</div>'
-	+ '	<div class="form-group" id="var-' + id + '-sizeField" style="margin-left: 0px; margin-bottom:0px;' + sizeInvisible + '">'
-	+ '		<label class="sr-only" for="var-' + id + '-size">Array size</label>'
-	+ '		<select class="form-control" id="var-' + id + '-size">'
+	+ '	<div class="form-group" id="var-' + vid + '-sizeField" style="margin-left: 0px; margin-bottom:0px;' + sizeInvisible + '">'
+	+ '		<label class="sr-only" for="var-' + vid + '-size">Array size</label>'
+	+ '		<select class="form-control" id="var-' + vid + '-size">'
 	+ '			<optgroup label="Size">'
 	+ '				<option' + sizeSelected[2] + '>2</option><option' + sizeSelected[3] + '>3</option>'
 	+ '				<option' + sizeSelected[4] + '>4</option><option' + sizeSelected[5] + '>5</option>'
@@ -576,9 +639,9 @@ function VarTemplate() {
 	+ '</td>'
 	+ '<td style="width: 65pt; text-align: center;">'
 	+ '<div class="btn-group btn-group-xs">'
-	+ '	<button type="button" class="btn btn-default" id="btn-var-' + id + '-check" value="' + id + '" title="Check and add/edit variable"><span class="glyphicon glyphicon-ok"></span></button>'
-	+ '	<button type="button" class="btn btn-default" id="btn-var-' + id + '-cancel" value="' + id + '" title="Discard changes"><span class="glyphicon glyphicon-remove"></span></button>'
-	+ '	<button type="button" class="btn btn-default" id="btn-var-' + id + '-remove" value="' + id + '" title=""><span class="glyphicon glyphicon-minus"></span></button>'
+	+ '	<button type="button" class="btn btn-default" id="btn-var-' + vid + '-check" value="' + vid + '" title="Check and add/edit variable"><span class="glyphicon glyphicon-ok"></span></button>'
+	+ '	<button type="button" class="btn btn-default" id="btn-var-' + vid + '-cancel" value="' + vid + '" title="Discard changes"><span class="glyphicon glyphicon-remove"></span></button>'
+	+ '	<button type="button" class="btn btn-default" id="btn-var-' + vid + '-remove" value="' + vid + '" title="Remove variable"><span class="glyphicon glyphicon-trash"></span></button>'
 	+ '</div>'
 	+ '</td>'
 	+ '</tr>'
@@ -586,6 +649,37 @@ function VarTemplate() {
     };
     
     this.dummyRow = function() {
-	return '<tr id="dummyRow"><td>Drag prototype from above to create first line.</td><td></td></tr>';
+	return '<tr class="dummyRow" style="display: none;"><td colspan="3"></td></tr>';
     };
 }
+
+$(function() {
+    $("#insertVarsHere").selectable({
+	cancel: ".handle, .form-control, button"
+    });
+    $("#insertVarsHere").sortable({
+	handle: ".handle",
+	placeholder: "ui-state-highlight"
+    });
+    $("#btnAddVar").click(function() {
+	varForm.addRow($(".varRow").last());
+    });
+    $("#btnAddVar").draggable({
+	helper: "clone",
+	revert: "invalid",
+	start: function( event, ui ) {
+	    $(".dummyRow").show();
+	},
+	stop: function( event, ui ) {
+	    $(".dummyRow").hide();
+	}
+    });
+    varForm.updatePlaceholders();
+    $.keyStroke( 38, function(){ varForm.moveSelectionUp("select"); });
+    $.keyStroke( 38, { modKeys: ['altKey'] }, function(){ varForm.moveSelectionUp("move"); });
+    $.keyStroke( 38, { modKeys: ['shiftKey'] }, function(){ varForm.moveSelectionUp("extend"); });
+    $.keyStroke( 40, function(){ varForm.moveSelectionDown("select"); });
+    $.keyStroke( 40, { modKeys: ['altKey'] }, function(){ varForm.moveSelectionDown("move"); });
+    $.keyStroke( 40, { modKeys: ['shiftKey'] }, function(){ varForm.moveSelectionDown("extend"); });
+    $.keyStroke( 46, function(){ varForm.removeSelectedRows(); });
+});

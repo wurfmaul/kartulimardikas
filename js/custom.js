@@ -1,16 +1,3 @@
-// activate tooltips
-//$('button').tooltip();
-
-$(function() {
-    $("#insertVarsHere").html(varTemplate.dummyRow());
-    $("#insertVarsHere").sortable({
-	axis : "y",
-	revert : true
-    });
-    varForm.newPrototype(maxVarId);
-});
-
-
 /**
  * Unbiased shuffle algorithm for arrays
  * https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
