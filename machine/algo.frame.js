@@ -4,7 +4,6 @@
 
 // constants
 var TIMEOUT = 200;
-//~NOOFSTATES~//
 
 // variables
 //~VARDECL~//

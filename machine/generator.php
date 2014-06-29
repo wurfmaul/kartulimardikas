@@ -16,7 +16,6 @@ function generate($id) {
 	// FIXME remove static name!
 	
 	// contents
-	$noOfStates = "var STATES = 11;";
 	$varDecl = file_get_contents ( "db/algo_vardecl.js" );
 	$varInit = file_get_contents ( "db/algo_init.js" );
 	$states = file_get_contents ( "db/algo_states.js" );
@@ -24,7 +23,6 @@ function generate($id) {
 	// write to file
 	$content = file_get_contents ( "machine/algo.frame.js" );
 	if ($content) {
-		$content = str_replace ( "//~NOOFSTATES~//", $noOfStates, $content );
 		$content = str_replace ( "//~VARDECL~//", $varDecl, $content );
 		$content = str_replace ( "//~VARRESET~//", $varInit, $content );
 		$content = str_replace ( "//~STATEMACHINE~//", $states, $content );

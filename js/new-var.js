@@ -211,6 +211,7 @@ function VariableForm() {
 	} else {
 	    lastRow.after(varTemplate.rowEdit(maxVarId));
 	}
+	$("#var-" + maxVarId).show("slow");
 	this.updateActionHandlers(maxVarId);
 	this.updatePlaceholders();
 	maxVarId++;
@@ -369,6 +370,7 @@ function VariableForm() {
 	    this.select(nextVid);
 	} catch (e) {
 	}
+//	$("#var-" + vid).hide("slow"); FIXME animation on deletion
 	$("#var-" + vid).remove();
 	this.updatePlaceholders();
     };
@@ -630,7 +632,7 @@ function VarTemplate() {
 	}
 	
 	return ''
-	+ '<tr id="var-' + vid + '" class="varRow">'
+	+ '<tr id="var-' + vid + '" class="varRow" style="display: none;">'
 	+ '<td class="handle" style="cursor: pointer;">⣿</td>'
 	+ '<td style="vertical-align: middle;">'
 	+ '<div class="col-xs-3">'
@@ -701,7 +703,8 @@ $(function() {
     });
     $("#insertVarsHere").sortable({
 	handle: ".handle",
-	placeholder: "ui-state-highlight"
+	placeholder: "ui-state-highlight",
+	stop: function() { varForm.updatePlaceholders(); }
     });
     $("#btnAddVar").click(function() {
 	varForm.addRow($(".varRow").last());
