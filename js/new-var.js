@@ -204,12 +204,20 @@ function ArrayFactory() {
 
 function VariableForm() {
     
-    this.addRow = function(lastRow) {
-	if (typeof lastRow.prop("id") === "undefined") {
+    this.addRowBelow = function() {
+	var selection = this.getSelection();
+	if (selection !== null)
+	    this.addRow(selection.last());
+	else
+	    varForm.addRow($(".varRow").last());
+    };
+    
+    this.addRow = function(prevRow) {
+	if (typeof prevRow.prop("id") === "undefined") {
 	    // if it is the first line
 	    $("#insertVarsHere").append(varTemplate.rowEdit(maxVarId));
 	} else {
-	    lastRow.after(varTemplate.rowEdit(maxVarId));
+	    prevRow.after(varTemplate.rowEdit(maxVarId));
 	}
 	$("#var-" + maxVarId).show("slow");
 	this.updateActionHandlers(maxVarId);
@@ -259,6 +267,13 @@ function VariableForm() {
 	    break;
 	}
 	return success;
+    };
+    
+    this.getSelection = function() {
+	var selection = $("#insertVarsHere tr.ui-selected");
+	if (typeof selection.last.prop("id") === "undefined")
+	    return null;
+	return selection;
     };
     
     this.moveSelectionDown = function(mode) {
@@ -707,7 +722,7 @@ $(function() {
 	stop: function() { varForm.updatePlaceholders(); }
     });
     $("#btnAddVar").click(function() {
-	varForm.addRow($(".varRow").last());
+	varForm.addRowBelow();
     });
     $("#btnAddVar").draggable({
 	helper: "clone",
