@@ -15,8 +15,7 @@ https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
     var currentIndex, randomIndex, _ref;
     currentIndex = array.length;
     while (currentIndex !== 0) {
-      randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex -= 1;
+      randomIndex = Math.floor(Math.random() * currentIndex--);
       _ref = [array[randomIndex], array[currentIndex]], array[currentIndex] = _ref[0], array[randomIndex] = _ref[1];
     }
     return array;
