@@ -2,6 +2,7 @@
 This file contains every functionality concerning variable generation and management.
 ###
 
+$ = jQuery
 # Represents delimiter of list elements in customized view.
 DELIM = ','
 # Specifies the site, where variables are to place.
@@ -207,30 +208,34 @@ class ArrayFactory
     check
 
 class VariableForm
-  maxVarId = 0
-
-  constructor: (@vars) ->
-    @elementFactory = new ElementFactory @vars
-    @arrayFactory = new ArrayFactory @vars
+  constructor: ->
+    @maxVarId = 0
+    @vars = new Variables()
+    @varTemplate = new VariableTemplates(@vars)
+    @elementFactory = new ElementFactory(@vars)
+    @arrayFactory = new ArrayFactory(@vars)
 
   addRowBelow: ->
     selection = @getSelection()
-    if (selection?.last()?)
+    if selection
+      # insert row right after selection
       @addRow(selection.last())
       @moveSelectionDown("select")
     else
+      # insert row after the last one
       @addRow($(".varRow").last())
 
   addRow: (prevRow) ->
-    if prevRow.prop("id")?
-      prevRow.after(varTemplate.rowEdit(@maxVarId))
-      $("#var-" + @maxVarId).show("slow")
-      @updateActionHandlers(@maxVarId)
-      @updatePlaceholders()
-      @maxVarId++
+    if prevRow.length > 0
+      prevRow.after(@varTemplate.rowEdit(@maxVarId))
     else
       # if it is the first line
-      $("#insertVarsHere").append(varTemplate.rowEdit(@maxVarId))
+      $("#insertVarsHere").append(@varTemplate.rowEdit(@maxVarId))
+
+    $("#var-" + @maxVarId).show("slow")
+    @updateActionHandlers(@maxVarId)
+    @updatePlaceholders()
+    @maxVarId++
 
   checkAndCreateVar: (vid) ->
     success = false
@@ -256,8 +261,10 @@ class VariableForm
 
   getSelection: ->
     selection = $("#insertVarsHere tr.ui-selected")
-    selection = null if not selection.last().prop("id")?
-    selection
+    if selection.length > 0
+      selection
+    else
+      false
 
   moveSelectionDown: (mode) ->
     selection = @getSelection()
@@ -295,25 +302,25 @@ class VariableForm
         @updatePlaceholders()
 
 
-  performActionOnSelection: (mode) ->
+  performActionOnSelection: (mode) =>
     selection = @getSelection()
     if selection?
       @clearSelection()
-      selection.each ->
+      selection.each =>
         vid = $(this).prop("id").split "-", 1
         switch mode
-          when "remove" then window.varForm.performRemove(vid)
-          when "cancel" then window.varForm.performCancel(vid)
-          when "check" then window.varForm.performCheck(vid)
+          when "remove" then @performRemove(vid)
+          when "cancel" then @performCancel(vid)
+          when "check" then @performCheck(vid)
           else console.log "unknown mode: #{mode}"
 
   performCancel: (vid) ->
     if @vars.findId(vid) is -1
       # variable does not exist yet -> reset form
-      $("#var-" + vid).replaceWith(varTemplate.rowEdit(vid))
+      $("#var-" + vid).replaceWith(@varTemplate.rowEdit(vid))
     else
       # variable exists -> discard changes
-      $("#var-" + vid).replaceWith(varTemplate.rowShow(vid))
+      $("#var-" + vid).replaceWith(@varTemplate.rowShow(vid))
     @updateActionHandlers(vid)
     @select(vid)
 
@@ -321,15 +328,15 @@ class VariableForm
     if @vars.findId(vid) isnt -1
       # var already exists
       if @checkAndEditVar(vid)
-        $("#var-" + vid).replaceWith(varTemplate.rowShow(vid))
+        $("#var-" + vid).replaceWith(@varTemplate.rowShow(vid))
     else
       if @checkAndCreateVar(vid)
-        $("#var-" + vid).replaceWith(varTemplate.rowShow(vid))
+        $("#var-" + vid).replaceWith(@varTemplate.rowShow(vid))
     @updateActionHandlers(vid)
     @select(vid)
 
   performEdit: (vid) ->
-    $("#var-" + vid).replaceWith(varTemplate.rowEdit(vid))
+    $("#var-" + vid).replaceWith(@varTemplate.rowEdit(vid))
     @updateActionHandlers(vid)
     @select(vid)
 
@@ -363,21 +370,21 @@ class VariableForm
     curCancelButton.off("click")
     curValueSelect.off("click")
 
-    curRemoveButton.click ->
-      varForm.clearSelection()
-      varForm.performRemove(vid)
+    curRemoveButton.click =>
+      @clearSelection()
+      @performRemove(vid)
 
-    curCancelButton.click ->
-      varForm.clearSelection()
-      varForm.performCancel(vid)
+    curCancelButton.click =>
+      @clearSelection()
+      @performCancel(vid)
 
-    curEditButton.click ->
-      varForm.clearSelection()
-      varForm.performEdit(vid)
+    curEditButton.click =>
+      @clearSelection()
+      @performEdit(vid)
 
-    curCheckButton.click ->
-      varForm.clearSelection()
-      varForm.performCheck(vid)
+    curCheckButton.click =>
+      @clearSelection()
+      @performCheck(vid)
 
     curValueSelect.click ->
       value = $(this).val()
@@ -396,18 +403,17 @@ class VariableForm
 
   updatePlaceholders: ->
     $(".dummyRow").remove()
-    $("#insertVarsHere").prepend(varTemplate.dummyRow())
-    $(".varRow").after(varTemplate.dummyRow())
+    $("#insertVarsHere").prepend(@varTemplate.dummyRow())
+    $(".varRow").after(@varTemplate.dummyRow())
 
-    $(".dummyRow").droppable ->
+    $(".dummyRow").droppable
       accept: "#btnAddVar"
       hoverClass: "dummyRow-hover"
-      drop: -> varForm.addRow($(this))
+      drop: => @addRow(`$(this)`)
 
 ###
 This class provides several templates for HTML content that is inserted to the page dynamically.
 ###
-
 class VariableTemplates
   constructor: (@vars) ->
 
@@ -501,7 +507,7 @@ class VariableTemplates
         	<div class='form-group' id='var-#{vid}-valueField' style='margin-left: 0px; margin-bottom:0px; #{valueInvisible}'>
         		<label class='sr-only' for='var-#{vid}-value'>Initial value</label>
         		<input type='text' class='form-control' id='var-#{vid}-value' value='#{value}' placeholder='value'>
-        	</div>'
+        	</div>
         	<div class='form-group' id='var-#{vid}-sizeField' style='margin-left: 0px; margin-bottom:0px; #{sizeInvisible}'>
         		<label class='sr-only' for='var-#{vid}-size'>Array size</label>
         		<select class='form-control' id='var-#{vid}-size'>
@@ -534,30 +540,27 @@ class VariableTemplates
 
   dummyRow: -> "<tr class='dummyRow' style='display: none;'><td colspan='3'></td></tr>"
 
+# The main window for adding/editing variables.
+varForm = new VariableForm()
+varForm.updatePlaceholders()
+
 $ ->
-  # The main window for adding/editing variables.
-  vars = new Variables()
-  @varForm = new VariableForm(@vars)
-
-  window.varForm = @varForm
-  window.varTemplate = new VariableTemplates(vars)
-
   $("#insertVarsHere")
     .selectable
         cancel: ".handle, .form-control, button"
     .sortable
         handle: ".handle"
         placeholder: "ui-state-highlight"
-        stop: => @varForm.updatePlaceholders()
+        stop: -> varForm.updatePlaceholders()
 
-  $("#btnAddVar").click => @varForm.addRowBelow()
+  $("#btnAddVar").click ->
+    varForm.addRowBelow()
+
   $("#btnAddVar").draggable
     helper: "clone"
     revert: "invalid"
-    start: () => $(".dummyRow").show()
-    stop: () =>
-      $(".dummyRow").hide()
-      @varForm.updatePlaceholders()
+    start: () -> $(".dummyRow").show()
+    stop: () -> $(".dummyRow").hide()
 
   # bind key strokes
   $.keyStroke 38, -> varForm.moveSelectionUp("select")
