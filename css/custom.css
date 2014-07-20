@@ -1,77 +1,83 @@
 @CHARSET "UTF-8";
 
 .cursor {
-	display: inline-block;
-	min-width: 10px;
-	padding: 3px 7px;
-	font-size: 12px;
-	line-height: 1;
-	color: #fff;
-	white-space: nowrap;
-	vertical-align: baseline;
-	background-color: #999;
-	margin-top: 1px;
+    display: inline-block;
+    min-width: 10px;
+    padding: 3px 7px;
+    font-size: 12px;
+    line-height: 1;
+    color: #fff;
+    white-space: nowrap;
+    vertical-align: baseline;
+    background-color: #999;
+    margin-top: 1px;
 }
 
 .cursor-done {
-	background-color: lightgray;
+    background-color: lightgray;
 }
 
 .cursor-current {
-	font-weight: bold;
-	background-color: #428bca;
-	border-left: black solid 2px;
-	border-top: black solid 2px;
-	border-top-left-radius: 5px;
+    font-weight: bold;
+    background-color: #428bca;
+    border-left: black solid 2px;
+    border-top: black solid 2px;
+    border-top-left-radius: 5px;
 }
 
 .highlight-write {
-	color: #fff;
-	background-color: #5cb85c;
-	border-color: #4cae4c;
+    color: #fff;
+    background-color: #5cb85c;
+    border-color: #4cae4c;
 }
 
 .highlight-compare {
-	color: #fff;
-	background-color: #f0ad4e;
-	border-color: #eea236;
+    color: #fff;
+    background-color: #f0ad4e;
+    border-color: #eea236;
 }
 
 .panel-heading {
-	cursor: pointer;
+    cursor: pointer;
 }
 
 .panel-topless {
-	border-top: none;
-	border-top-left-radius: 0px;
-	border-top-right-radius: 0px;
+    border-top: none;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
 }
 
 .btn-narrow {
-	padding-left: 0px;
-	padding-right: 0px;
-	text-align: center;
+    padding-left: 0px;
+    padding-right: 0px;
+    text-align: center;
 }
 
 .cell {
-	text-align: center;
-	vertical-align: middle;
-	padding: 6px;
+    padding: 6px;
 }
 
 .ui-selected {
-	background: lightgray;
+    background: lightgray;
 }
 
 .handle {
-	font-size: 23px;
+    font-size: 23px;
+    cursor: pointer;
+    width: 32px;
+}
+
+.buttonArea {
+    width: 48pt;
+    text-align: center;
+    vertical-align: middle;
 }
 
 .dummyRow {
-	background: #b3eaae;
+    background: #b3eaae;
 }
 
 .dummyRow-hover {
-	border: 2px dashed #25c318;
-	height: 35px;
+    border: 2px dashed #25c318;
+    height: 35px;
 }

@@ -25,11 +25,10 @@ class Variables
     @maxId = 0
 
   add: (id, name, value, init) ->
-    @vars.push(new @Data(id, name, value, init))
+    @vars.push({id: id, name: name, value: value, init: init})
 
   edit: (id, newName, newValue, init) ->
-    i = @findId(id)
-    @vars[i] = new @Data(id, newName, newValue, init)
+    @vars[@findId(id)] = {id: id, name: newName, value: newValue, init: init}
 
   findName: (name) ->
     for elem, i in @vars
@@ -75,15 +74,9 @@ class Variables
     else
       value
 
-  @Data: (id, name, value, init) ->
-    @id = id
-    @name = name
-    @value = value
-    @init = init
-
 class ElementFactory
   constructor: (@vars) ->
-    @valid = new Validator(@vars)
+    @valid = new window.Validator(@vars)
 
     # The default value of a register's name.
   @DEFAULTNAME = ""
@@ -135,7 +128,7 @@ class ArrayFactory
   @DEFAULTVALUES = ""
 
   constructor: (@vars) ->
-    @valid = new Validator(@vars)
+    @valid = new window.Validator(@vars)
 
     # Add the list that was specified by the HTML add form.
   create: (@id, @init) ->
@@ -181,11 +174,11 @@ class ArrayFactory
     switch @init
       when Variables.UNINITIALIZED
         @size = $("#var-#{@id}-size").val()
-        @values.push("?") for [0..@size]
+        @values.push("?") for [0..@size-1]
 
       when Variables.RANDOMIZED
         @size = $("#var-#{@id}-size").val();
-        @values = shuffle ([0..@size])
+        @values = shuffle ([0..@size-1])
 
       when Variables.CUSTOMIZED
         values = $("#var-#{@id}-value").val()
@@ -193,7 +186,7 @@ class ArrayFactory
         if @valid.checkValues(values)
           tokens = values.split(DELIM)
           @size = tokens.length
-          for i in [0..@size]
+          for i in [0..@size-1]
             # trim
             value = tokens[i].replace /\s/, ""
             # check value
@@ -206,14 +199,14 @@ class ArrayFactory
           check = false
 
       else
-        $("#alert-var").append(err.error("List has to be initialized!"))
+        $("#alert-var").append(window.Templates.error("List has to be initialized!"))
     check
 
 class VariableForm
   constructor: ->
     @maxVarId = 0
     @vars = new Variables()
-    @varTemplate = new VariableTemplates(@vars)
+    @template = new window.Templates(@vars)
     @elementFactory = new ElementFactory(@vars)
     @arrayFactory = new ArrayFactory(@vars)
 
@@ -225,14 +218,16 @@ class VariableForm
       @moveSelectionDown("select")
     else
       # insert row after the last one
-      @addRow($(".varRow").last())
+      vid = @addRow($(".varRow").last())
+      @select("#var-" + vid)
 
   addRow: (prevRow) ->
     if prevRow.length > 0
-      prevRow.after(@varTemplate.rowEdit(@maxVarId))
+      prevRow.after(@template.varRowEdit(@maxVarId))
     else
       # if it is the first line
-      $("#insertVarsHere").append(@varTemplate.rowEdit(@maxVarId))
+      $("#insertVarsHere").append(@template.varRowEdit(@maxVarId))
+
     $("#var-" + @maxVarId).show("slow")
     @updateActionHandlers(@maxVarId)
     @updatePlaceholders()
@@ -240,7 +235,7 @@ class VariableForm
 
   checkAndCreateVar: (vid) ->
     success = false
-    switch $("#slct-var-" + vid + "-init").val()
+    switch $("#slct-var-#{vid}-init").val()
       when "elem-?" then success = @elementFactory.create(vid, Variables.UNINITIALIZED)
       when "elem-value" then success = @elementFactory.create(vid, Variables.CUSTOMIZED)
       when "array-?" then success = @arrayFactory.create(vid, Variables.UNINITIALIZED)
@@ -251,7 +246,7 @@ class VariableForm
 
   checkAndEditVar: (vid) ->
     success = false
-    switch ($("#slct-var-" + vid + "-init").val())
+    switch ($("#slct-var-#{vid}-init").val())
       when "elem-?" then success = @elementFactory.edit(vid, Variables.UNINITIALIZED)
       when "elem-value" then success = @elementFactory.edit(vid, Variables.CUSTOMIZED)
       when "array-?" then success = @arrayFactory.edit(vid, Variables.UNINITIALIZED)
@@ -267,20 +262,31 @@ class VariableForm
     else
       false
 
+  clearSelection: ->
+    $("#insertVarsHere .ui-selected").removeClass("ui-selected")
+
+  # takes the jquery-id (incl. #) of a row ("#var-" + vid) and selects it
+  select: (id) ->
+    $(id).addClass("ui-selected")
+
   moveSelectionDown: (mode) ->
     selection = @getSelection()
     if selection?
       # if some line is selected
       # get next line, step over placeholder
       nextLine = selection.last().next().next() # next(".varRow")
-      if nextLine.prop("id")?
+      id = nextLine.prop("id")
+      if id
         # if there is a line below
         switch mode
           when "move"
             nextLine.detach()
             selection.first().before(nextLine)
-          when "select" then $("#insertVarsHere .ui-selected").removeClass("ui-selected")
-          when "extend" then nextLine.addClass("ui-selected")
+          when "select"
+            @clearSelection()
+            @select("#" + id)
+          when "extend"
+            @select("#" + id)
           else console.log "unknown mode: #{mode}"
         @updatePlaceholders()
 
@@ -291,14 +297,18 @@ class VariableForm
       # if some line is selected
       # get previous line, step over placeholder
       prevLine = selection.first().prev().prev() # prev(".varRow")
-      if prevLine.prop("id")?
+      id = prevLine.prop("id")
+      if id
         # if there is a line above
         switch mode
           when "move"
             prevLine.detach
-            selection.last().after prevLine
-          when "select" then $("#insertVarsHere .ui-selected").removeClass("ui-selected")
-          when "extend" then prevLine.addClass("ui-selected")
+            selection.last().after(prevLine)
+          when "select"
+            @clearSelection()
+            @select("#" + id)
+          when "extend"
+            @select("#" + id)
           else console.log "unknown mode: #{mode}"
         @updatePlaceholders()
 
@@ -308,7 +318,7 @@ class VariableForm
     if selection?
       @clearSelection()
       selection.each =>
-        vid = $(this).prop("id").split "-", 1
+        vid = $(this).prop("id").split("-", 1) # FIXME multi-select + cancel does not work!
         switch mode
           when "remove" then @performRemove(vid)
           when "cancel" then @performCancel(vid)
@@ -318,47 +328,46 @@ class VariableForm
   performCancel: (vid) ->
     if @vars.findId(vid) is -1
       # variable does not exist yet -> reset form
-      $("#var-" + vid).replaceWith(@varTemplate.rowEdit(vid))
+      #$("#var-" + vid).replaceWith(@template.varRowEdit(vid))
+      #$("#var-" + vid).show()
+      @performRemove(vid)
     else
       # variable exists -> discard changes
-      $("#var-" + vid).replaceWith(@varTemplate.rowShow(vid))
+      $("#var-" + vid).replaceWith(@template.varRowShow(vid))
+
     @updateActionHandlers(vid)
-    @select(vid)
+    @select("#var-" + vid)
 
   performCheck: (vid) ->
+    check = false
     if @vars.findId(vid) isnt -1
       # var already exists
-      if @checkAndEditVar(vid)
-        $("#var-" + vid).replaceWith(@varTemplate.rowShow(vid))
+      check = @checkAndEditVar(vid)
     else
-      if @checkAndCreateVar(vid)
-        $("#var-" + vid).replaceWith(@varTemplate.rowShow(vid))
-    @updateActionHandlers(vid)
-    @select(vid)
+      check = @checkAndCreateVar(vid)
+
+    if (check)
+      $("#var-" + vid).replaceWith(@template.varRowShow(vid))
+      @updateActionHandlers(vid)
+      @select("#var-" + vid)
 
   performEdit: (vid) ->
-    $("#var-" + vid).replaceWith(@varTemplate.rowEdit(vid))
+    $("#var-" + vid).replaceWith(@template.varRowEdit(vid))
+    $("#var-" + vid).show()
     @updateActionHandlers(vid)
-    @select(vid)
+    @select("#var-" + vid)
 
   performRemove: (vid) ->
     @vars.removeById(vid) # FIXME call factory for deletion
     try
-      nextVid = $("#var-" + vid).next().next().prop("id").split("-", 1)
-      @select(nextVid)
+      nextVid = $("#var-" + vid).next().next().prop("id")
+      @select("#" + nextVid)
     catch e
     #	$("#var-" + vid).hide("slow"); FIXME animation on deletion
     $("#var-" + vid).remove()
     @updatePlaceholders()
 
-  clearSelection: ->
-    $(".ui-selected").removeClass("ui-selected")
-
-  select: (vid) ->
-    $("#var-" + vid).addClass("ui-selected")
-
   updateActionHandlers: (vid) ->
-    console.log "update #{vid}"
     curRemoveButton = $("#btn-var-#{vid}-remove")
     curEditButton = $("#btn-var-#{vid}-edit")
     curCheckButton = $("#btn-var-#{vid}-check")
@@ -405,141 +414,13 @@ class VariableForm
 
   updatePlaceholders: ->
     $(".dummyRow").remove()
-    $("#insertVarsHere").prepend(@varTemplate.dummyRow())
-    $(".varRow").after(@varTemplate.dummyRow())
+    $("#insertVarsHere").prepend(@template.varDummyRow())
+    $(".varRow").after(@template.varDummyRow())
 
     $(".dummyRow").droppable
       accept: "#btnAddVar"
       hoverClass: "dummyRow-hover"
       drop: => @addRow(`$(this)`)
-
-###
-This class provides several templates for HTML content that is inserted to the page dynamically.
-###
-class VariableTemplates
-  constructor: (@vars) ->
-
-  rowShow: (vid) ->
-    v = @vars.getById(vid)
-    "<tr id='var-#{vid}' class='varRow'>
-          <td class='handle' style='cursor: pointer;'>⣿</td>
-          <td style='vertical-align: middle; text-alignment: left;'>
-            <code class='cell'>#{v.name} = #{v.value}</code>
-          </td>
-          <td style='width: 65pt; text-align: center;'>
-            <div class='btn-group btn-group-xs'>
-              <button type='button' class='btn btn-default' id='btn-var-#{vid}-edit' value='#{vid}'><span class='glyphicon glyphicon-pencil'></span></button>
-            </div>'
-          </td>'
-        </tr>"
-
-  rowEdit: (vid) ->
-    variable = @vars.getById(vid)
-    name = ""
-    elemUninitSelected = ""
-    elemValueSelected = ""
-    arrayUninitSelected = ""
-    arrayRandomSelected = ""
-    arrayCustomSelected = ""
-    valueInvisible = " display: none;"
-    value = ""
-    sizeInvisible = " display: none;"
-    sizeSelected = new Array()
-    sizeSelected.push("") for [0..13]
-
-    if variable?
-      # write name
-      name = variable.name
-      # write init/value
-      sel = " selected"
-      switch variable.init
-        when Variables.UNINITIALIZED
-          if @vars.isArrayById(vid)
-            arrayUninitSelected = sel
-            sizeInvisible = ""
-            sizeSelected[variable.value.length] = sel
-          else
-            elemUninitSelected = sel
-
-        when Variables.RANDOMIZED
-          arrayRandomSelected = sel
-          sizeInvisible = ""
-          sizeSelected[variable.value.length] = sel
-
-        when Variables.CUSTOMIZED
-          if @vars.isArrayById(vid)
-            arrayCustomSelected = sel
-          else
-            elemValueSelected = sel
-          valueInvisible = ""
-          value = variable.value
-
-        else console.log "unknown initialization #{variable.init}"
-
-    "<tr id='var-#{vid}' class='varRow' style='display: none;'>
-        <td class='handle' style='cursor: pointer;'>⣿</td>
-        <td style='vertical-align: middle;'>
-        <div class='col-xs-3'>
-        	<div class='form-group' id='var-#{vid}-nameField' style='margin-bottom:0px'>
-        		<label class='sr-only' for='var-#{vid}-name'>Variable name</label>
-        		<input type='text' class='form-control' id='var-#{vid}-name' value='#{name}' placeholder='name'>
-        	</div>
-        </div>
-        <div class='col-xs-2' style='text-align: center;'>
-        	<div class='cell'><code>=</code></div>
-        </div>
-        <div class='col-xs-3'>
-        	<div class='form-group' style='margin-bottom:0px'>
-        		<label class='sr-only' for='var-#{vid}-init'>Initialization</label>
-        		<select class='form-control' id='slct-var-#{vid}-init'>
-        			<optgroup label='Element'>
-        				<option value='elem-?' #{elemUninitSelected}>uninitialized</option>
-        				<option value='elem-value' #{elemValueSelected}>value</option>
-        			</optgroup>
-        			<optgroup label='Array'>
-        				<option value='array-?' #{arrayUninitSelected}>uninitialized</option>
-        				<option value='array-random' #{arrayRandomSelected}>random</option>
-        				<option value='array-custom' #{arrayCustomSelected}>custom</option>
-        			</optgroup>
-        		</select>
-        	</div>
-        </div>
-        <div class='col-xs-4'>
-        	<div class='form-group' id='var-#{vid}-valueField' style='margin-left: 0px; margin-bottom:0px; #{valueInvisible}'>
-        		<label class='sr-only' for='var-#{vid}-value'>Initial value</label>
-        		<input type='text' class='form-control' id='var-#{vid}-value' value='#{value}' placeholder='value'>
-        	</div>
-        	<div class='form-group' id='var-#{vid}-sizeField' style='margin-left: 0px; margin-bottom:0px; #{sizeInvisible}'>
-        		<label class='sr-only' for='var-#{vid}-size'>Array size</label>
-        		<select class='form-control' id='var-#{vid}-size'>
-        			<optgroup label='Size'>
-        				<option #{sizeSelected[2]}>2</option><option #{sizeSelected[3]}>3</option>
-        				<option #{sizeSelected[4]}>4</option><option #{sizeSelected[5]}>5</option>
-        				<option #{sizeSelected[6]}>6</option><option #{sizeSelected[7]}>7</option>
-        				<option #{sizeSelected[8]}>8</option><option #{sizeSelected[9]}>9</option>
-        				<option #{sizeSelected[10]}>10</option><option #{sizeSelected[11]}>11</option>
-        				<option #{sizeSelected[12]}>12</option><option #{sizeSelected[13]}>13</option>
-        			</optgroup>
-        		</select>
-        	</div>
-        </div>
-        </td>
-        <td style='width: 65pt; text-align: center;'>
-        <div class='btn-group btn-group-xs'>
-        	<button type='button' class='btn btn-default' id='btn-var-#{vid}-check' value='#{vid}' title='Check and add/edit variable'>
-            <span class='glyphicon glyphicon-ok'></span>
-          </button>
-        	<button type='button' class='btn btn-default' id='btn-var-#{vid}-cancel' value='#{vid}' title='Discard changes'>
-            <span class='glyphicon glyphicon-remove'></span>
-          </button>
-        	<button type='button' class='btn btn-default' id='btn-var-#{vid}-remove' value='#{vid}' title='Remove variable'>
-            <span class='glyphicon glyphicon-trash'></span>
-          </button>
-        </div>
-        </td>
-        </tr>"
-
-  dummyRow: -> "<tr class='dummyRow' style='display: none;'><td colspan='3'></td></tr>"
 
 # The main window for adding/editing variables.
 varForm = new VariableForm()

@@ -3,13 +3,18 @@
     <properties>
       <sourceFilesUrls>
         <item url="file://$PROJECT_DIR$/js/custom.js" />
-        <item url="file://$PROJECT_DIR$/js/new-var.js" />
+        <item url="file://$PROJECT_DIR$/js/new.js" />
+        <item url="file://$PROJECT_DIR$/js/templates.js" />
+        <item url="file://$PROJECT_DIR$/js/new-step.js" />
         <item url="file://$PROJECT_DIR$/js/new-var.js" />
       </sourceFilesUrls>
     </properties>
     <CLASSES>
-      <root url="file://$PROJECT_DIR$/js/new-var.js" />
+      <root url="file://$PROJECT_DIR$/js/templates.js" />
       <root url="file://$PROJECT_DIR$/js/custom.js" />
+      <root url="file://$PROJECT_DIR$/js/new.js" />
+      <root url="file://$PROJECT_DIR$/js/templates.js" />
+      <root url="file://$PROJECT_DIR$/js/new-step.js" />
       <root url="file://$PROJECT_DIR$/js/new-var.js" />
     </CLASSES>
     <SOURCES />

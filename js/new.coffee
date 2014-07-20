@@ -1,6 +1,4 @@
 ###
- * jQUERY - MANAGE EVENT HANDLERS
- */
 // FIXME: find something that works!
 //$(window).bind('beforeunload', function() {
 //    //warn before page is left, to prevent data loss
@@ -9,7 +7,7 @@
 ###
 
 $ ->
-  $(".panel-heading").click: ->
+  $(".panel-heading").click ->
     $(this).find("span").toggleClass("glyphicon-chevron-right glyphicon-chevron-down")
 
 ###
@@ -61,7 +59,7 @@ function updateSelects() {
 ###
  This class provides a validator for the client-provided text input. It offers the possibillity to check the correctness of the input fields of the main form.
 ###
-class Validator
+class window.Validator
   # Enum value for registers (see this.target).
   @REGISTER: 0
   # Enum value for lists.
@@ -76,25 +74,25 @@ class Validator
   checkNotEmpty: (value) ->
     if (not value? or value.replace(/\s+/g, "") is "")
       @inputField.addClass("has-error");
-      @errorLoc.append(err.error("Value is not allowed: '#{value}'"));
+      @errorLoc.append(Templates.error("Value is not allowed: '#{value}'"));
       return false
     true
 
   checkExists: (id) ->
     if (id?)
       @inputField.addClass("has-error")
-      @errorLoc.append(err.error("No valid variable/intruction selected."))
+      @errorLoc.append(Templates.error("No valid variable/intruction selected."))
       return false
     true
 
   checkIndex: (value, maxIndex) ->
     if (value.search(/^\d+$/) isnt 0)
       @inputField.addClass("has-error")
-      @errorLoc.append(err.error("Index '#{value}' is not valid. Must be integer."))
+      @errorLoc.append(Templates.error("Index '#{value}' is not valid. Must be integer."))
       return false
     else if (value > maxIndex)
       @inputField.addClass("has-error")
-      @errorLoc.append(err.error("Index '#{value}' is out of range (max. #{maxIndex})"))
+      @errorLoc.append(Templates.error("Index '#{value}' is out of range (max. #{maxIndex})"))
       return false
     true
 
@@ -122,7 +120,7 @@ class Validator
     # print messages
     if (msg.length > 0)
       @inputField.addClass("has-error")
-      @errorLoc.append(err.error(msg.pop())) while (msg.length > 0)
+      @errorLoc.append(Templates.error(msg.pop())) while (msg.length > 0)
       return false
     true
 
@@ -141,7 +139,7 @@ class Validator
 
     if (!check)
       @inputField.addClass("has-error")
-      @errorLoc.append(err.error("Value '" + value + "' is not valid. Allowed: integers"))
+      @errorLoc.append(Templates.error("Value '" + value + "' is not valid. Allowed: integers"))
       return false
     true
 
@@ -150,7 +148,7 @@ class Validator
     check = values.search(/^(-?\d+\s*,\s*)+(-?\d+\s*,?\s*)$/) == 0
     if (!check)
       @inputField.addClass("has-error")
-      @errorLoc.append(err.error("Values '#{values}' are not valid. Allowed: integers. Separator: ,"))
+      @errorLoc.append(Templates.error("Values '#{values}' are not valid. Allowed: integers. Separator: ,"))
       return false
     true
 
@@ -168,7 +166,142 @@ class Validator
     $(".has-error").removeClass("has-error")
     $(".alert").alert('close')
 
-class ErrorTemplate
+###
+This class provides several templates for HTML content that is inserted to the page dynamically.
+###
+class window.Templates
+  constructor: (@vars) ->
+
+  varRowShow: (vid) ->
+    v = @vars.getById(vid)
+    """
+    <tr id="var-#{vid}" class="varRow">
+      <td class="handle">⣿</td>
+      <td style="vertical-align: middle; text-align: left;">
+        <code class="cell">#{v.name} = #{v.value}</code>
+      </td>
+      <td class='buttonArea'>
+        <div class="btn-group btn-group-xs">
+          <button type="button" class="btn btn-default" id="btn-var-#{vid}-edit" value="#{vid}">
+            <span class="glyphicon glyphicon-pencil"></span>
+          </button>
+          <button type="button" class="btn btn-default" id="btn-var-#{vid}-remove" value="#{vid}" title="Remove variable">
+            <span class="glyphicon glyphicon-trash"></span>
+          </button>
+        </div>
+      </td>
+    </tr>
+    """
+
+  varRowEdit: (vid) ->
+    variable = @vars.getById(vid)
+    name = ""
+    elemUninitSelected = ""
+    elemValueSelected = ""
+    arrayUninitSelected = ""
+    arrayRandomSelected = ""
+    arrayCustomSelected = ""
+    valueInvisible = " display: none;"
+    value = ""
+    sizeInvisible = " display: none;"
+    sizeSelected = new Array()
+    sizeSelected.push("") for [0..13]
+
+    if variable?
+      # write name
+      name = variable.name
+      # write init/value
+      sel = " selected"
+      switch variable.init
+        when @vars.constructor.UNINITIALIZED
+          if @vars.isArrayById(vid)
+            arrayUninitSelected = sel
+            sizeInvisible = ""
+            sizeSelected[variable.value.length] = sel
+          else
+            elemUninitSelected = sel
+
+        when @vars.constructor.RANDOMIZED
+          arrayRandomSelected = sel
+          sizeInvisible = ""
+          sizeSelected[variable.value.length] = sel
+
+        when @vars.constructor.CUSTOMIZED
+          if @vars.isArrayById(vid)
+            arrayCustomSelected = sel
+          else
+            elemValueSelected = sel
+          valueInvisible = ""
+          value = variable.value
+
+        else
+          console.log "unknown initialization #{variable.init}"
+
+    """
+    <tr id="var-#{vid}" class="varRow" style="display: none;">
+      <td class="handle">⣿</td>
+      <td style="vertical-align: middle;">
+        <div class="col-xs-3">
+          <div class="form-group" id="var-#{vid}-nameField" style="margin-bottom:0px">
+            <label class="sr-only" for="var-#{vid}-name">Variable name</label>
+            <input type="text" class="form-control" id="var-#{vid}-name" value="#{name}" placeholder="name">
+          </div>
+        </div>
+        <div class="col-xs-2" style="text-align: center;">
+          <div class="cell"><code>=</code></div>
+        </div>
+        <div class="col-xs-3">
+          <div class="form-group" style="margin-bottom:0px">
+            <label class="sr-only" for="var-#{vid}-init">Initialization</label>
+            <select class="form-control" id="slct-var-#{vid}-init">
+              <optgroup label="Element">
+                <option value="elem-?" #{elemUninitSelected}>uninitialized</option>
+                <option value="elem-value" #{elemValueSelected}>value</option>
+              </optgroup>
+              <optgroup label="Array">
+                <option value="array-?" #{arrayUninitSelected}>uninitialized</option>
+                <option value="array-random" #{arrayRandomSelected}>random</option>
+                <option value="array-custom" #{arrayCustomSelected}>custom</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+        <div class="col-xs-4">
+          <div class="form-group" id="var-#{vid}-valueField" style="margin-left: 0px; margin-bottom:0px; #{valueInvisible}">
+            <label class="sr-only" for="var-#{vid}-value">Initial value</label>
+            <input type="text" class="form-control" id="var-#{vid}-value" value="#{value}" placeholder="value">
+          </div>
+          <div class="form-group" id="var-#{vid}-sizeField" style="margin-left: 0px; margin-bottom:0px; #{sizeInvisible}">
+            <label class="sr-only" for="var-#{vid}-size">Array size</label>
+            <select class="form-control" id="var-#{vid}-size">
+              <optgroup label="Size">
+                <option #{sizeSelected[2]}>2</option><option #{sizeSelected[3]}>3</option>
+                <option #{sizeSelected[4]}>4</option><option #{sizeSelected[5]}>5</option>
+                <option #{sizeSelected[6]}>6</option><option #{sizeSelected[7]}>7</option>
+                <option #{sizeSelected[8]}>8</option><option #{sizeSelected[9]}>9</option>
+                <option #{sizeSelected[10]}>10</option><option #{sizeSelected[11]}>11</option>
+                <option #{sizeSelected[12]}>12</option><option #{sizeSelected[13]}>13</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+      </td>
+      <td class='buttonArea'>
+        <div class="btn-group btn-group-xs">
+          <button type="button" class="btn btn-default" id="btn-var-#{vid}-check" value="#{vid}" title="Check and add/edit variable">
+            <span class="glyphicon glyphicon-ok"></span>
+          </button>
+          <button type="button" class="btn btn-default" id="btn-var-#{vid}-cancel" value="#{vid}" title="Discard changes">
+            <span class="glyphicon glyphicon-remove"></span>
+          </button>
+        </div>
+      </td>
+    </tr>
+    """
+
+  varDummyRow: ->
+    """<tr class="dummyRow" style="display: none;"><td colspan="3"></td></tr>"""
+
   ###
    * Returns an HTML representation of an error message.
    *
@@ -176,10 +309,12 @@ class ErrorTemplate
    *                The message that is to be displayed.
   ###
   @error: (message) ->
-    "<div class='alert alert-danger alert-dismissable'>
-            <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>&times;</button>
-            <strong>Error!</strong> #{message}
-          </div>"
+    """
+    <div class="alert alert-danger alert-dismissable">
+      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+      <strong>Error!</strong> #{message}
+    </div>
+    """
 
   ###
    * Returns an HTML representation of a warning message.
@@ -187,8 +322,10 @@ class ErrorTemplate
    * @param message
    *                The message that is to be displayed.
   ###
-    @warning: (message) ->
-      "<div class='alert alert-warning alert-dismissable'>
-                <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>&times;</button>
-                <strong>Warning!</strong> #{message}
-              </div>"
+  @warning: (message) ->
+    """
+    <div class="alert alert-warning alert-dismissable">
+      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+      <strong>Warning!</strong> #{message}
+    </div>
+    """
