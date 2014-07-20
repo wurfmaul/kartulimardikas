@@ -31,24 +31,24 @@ class Variables
     i = @findId(id)
     @vars[i] = new @Data(id, newName, newValue, init)
 
-  find: (name) ->
-    for i in [0..@size()]
-      if @vars[i].name is name
+  findName: (name) ->
+    for elem, i in @vars
+      if elem.name is name
         return i
     -1
 
   findId: (id) ->
-    for i in [0..@size()]
-      if @vars[i].id is id
+    for elem, i in @vars
+      if elem.id is id
         return i
     -1
 
   get: (i) -> @vars[i]
 
   getById: (id) ->
-    for i in [0..@size()]
-      if @vars[i]?.id is id
-        return @vars[i]
+    for elem in @vars
+      if elem.id is id
+        return elem
 
   getByName: (name) -> @vars[@find(name)]
 
@@ -83,6 +83,7 @@ class Variables
 
 class ElementFactory
   constructor: (@vars) ->
+    @valid = new Validator(@vars)
 
     # The default value of a register's name.
   @DEFAULTNAME = ""
@@ -109,16 +110,16 @@ class ElementFactory
     false
 
   check: (oldName) ->
-    valid.target("#var-#{@id}-nameField", "#alert-var")
-    valid.reset()
+    @valid.target("#var-#{@id}-nameField", "#alert-var")
+    @valid.reset()
     # get name from input field
     @name = $("#var-#{@id}-name").val()
-    check = valid.checkName(@name, oldName)
+    check = @valid.checkName(@name, oldName)
     # retrieve value
     if @init is Variables.CUSTOMIZED
       @value = $("#var-#{@id}-value").val()
-      valid.target("#var-#{@id}-valueField", "#alert-var")
-      check = valid.checkValue(@value) && check
+      @valid.target("#var-#{@id}-valueField", "#alert-var")
+      check = @valid.checkValue(@value) && check
     else
       @value = "?"
     check
@@ -134,6 +135,7 @@ class ArrayFactory
   @DEFAULTVALUES = ""
 
   constructor: (@vars) ->
+    @valid = new Validator(@vars)
 
     # Add the list that was specified by the HTML add form.
   create: (@id, @init) ->
@@ -164,7 +166,7 @@ class ArrayFactory
   ###
   check: (oldName) ->
     # tell validator that we are dealing with lists
-    valid.target("#var-#{@id}-nameField", "#alert-var")
+    @valid.target("#var-#{@id}-nameField", "#alert-var")
 
     # clear errors
     $(".has-error").removeClass("has-error")
@@ -172,7 +174,7 @@ class ArrayFactory
 
     # get name from input field
     @name = $("#var-#{@id}-name").val()
-    check = valid.checkName(@name, oldName)
+    check = @valid.checkName(@name, oldName)
 
     # retrieve values
     @values = new Array()
@@ -187,15 +189,15 @@ class ArrayFactory
 
       when Variables.CUSTOMIZED
         values = $("#var-#{@id}-value").val()
-        valid.target "#var-#{@id}-valueField", "#alert-var"
-        if valid.checkValues(values)
+        @valid.target "#var-#{@id}-valueField", "#alert-var"
+        if @valid.checkValues(values)
           tokens = values.split(DELIM)
           @size = tokens.length
           for i in [0..@size]
             # trim
             value = tokens[i].replace /\s/, ""
             # check value
-            if valid.checkValue(value)
+            if @valid.checkValue(value)
               @values[i] = value
             else
               @values[i] = "?"
@@ -231,7 +233,6 @@ class VariableForm
     else
       # if it is the first line
       $("#insertVarsHere").append(@varTemplate.rowEdit(@maxVarId))
-
     $("#var-" + @maxVarId).show("slow")
     @updateActionHandlers(@maxVarId)
     @updatePlaceholders()
@@ -357,11 +358,15 @@ class VariableForm
     $("#var-" + vid).addClass("ui-selected")
 
   updateActionHandlers: (vid) ->
+    console.log "update #{vid}"
     curRemoveButton = $("#btn-var-#{vid}-remove")
     curEditButton = $("#btn-var-#{vid}-edit")
     curCheckButton = $("#btn-var-#{vid}-check")
     curCancelButton = $("#btn-var-#{vid}-cancel")
     curValueSelect = $("#slct-var-#{vid}-init")
+
+    curValueField = $("#var-#{vid}-valueField")
+    curSizeField = $("#var-#{vid}-sizeField")
 
     # deactivate old action handlers
     curRemoveButton.off("click")
@@ -387,19 +392,16 @@ class VariableForm
       @performCheck(vid)
 
     curValueSelect.click ->
-      value = $(this).val()
-      targetVal = $($(this).data("options").targetVal)
-      targetSize = $($(this).data("options").targetSize)
-      switch value
+      switch $(this).val()
         when "elem-value", "array-custom"
-          targetVal.show("slow")
-          targetSize.hide("slow")
+          curValueField.show("slow")
+          curSizeField.hide("slow")
         when "array-?", "array-random"
-          targetVal.hide("slow")
-          targetSize.show("slow")
+          curValueField.hide("slow")
+          curSizeField.show("slow")
         else
-          targetVal.hide("slow")
-          targetSize.hide("slow")
+          curValueField.hide("slow")
+          curSizeField.hide("slow")
 
   updatePlaceholders: ->
     $(".dummyRow").remove()
@@ -489,8 +491,7 @@ class VariableTemplates
         <div class='col-xs-3'>
         	<div class='form-group' style='margin-bottom:0px'>
         		<label class='sr-only' for='var-#{vid}-init'>Initialization</label>
-        		<select class='form-control' id='slct-var-#{vid}-init'
-        			data-options=\"{'targetVal':'#var-#{vid}-valueField', 'targetSize':'#var-#{vid}-sizeField'}\">
+        		<select class='form-control' id='slct-var-#{vid}-init'>
         			<optgroup label='Element'>
         				<option value='elem-?' #{elemUninitSelected}>uninitialized</option>
         				<option value='elem-value' #{elemValueSelected}>value</option>
