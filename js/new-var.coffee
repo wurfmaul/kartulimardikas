@@ -178,7 +178,7 @@ class ArrayFactory
 
       when Variables.RANDOMIZED
         @size = $("#var-#{@id}-size").val();
-        @values = shuffle ([0..@size-1])
+        @values = shuffle([0..@size-1])
 
       when Variables.CUSTOMIZED
         values = $("#var-#{@id}-value").val()
@@ -317,8 +317,8 @@ class VariableForm
     selection = @getSelection()
     if selection?
       @clearSelection()
-      selection.each =>
-        vid = $(this).prop("id").split("-", 1) # FIXME multi-select + cancel does not work!
+      selection.each (index, element) =>
+        vid = $(element).prop("id").split("-")[1]
         switch mode
           when "remove" then @performRemove(vid)
           when "cancel" then @performCancel(vid)

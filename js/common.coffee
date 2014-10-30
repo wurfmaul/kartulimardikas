@@ -5,7 +5,7 @@ https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
   @param array the unshuffled array
   @returns the shuffled array
 ###
-shuffle = (array) ->
+window.shuffle = (array) ->
   currentIndex = array.length
 
   # While there remain elements to shuffle...

@@ -57,7 +57,8 @@ function updateSelects() {
 ###
 
 ###
- This class provides a validator for the client-provided text input. It offers the possibillity to check the correctness of the input fields of the main form.
+ This class provides a validator for the client-provided text input. It offers the possibillity to check the
+ correctness of the input fields of the main form.
 ###
 class window.Validator
   # Enum value for registers (see this.target).

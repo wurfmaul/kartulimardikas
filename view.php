@@ -12,17 +12,13 @@ $jsFile = "algo.js";
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kartulimardikas</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kartulimardikas</title>
 
-<link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-<link href="css/custom.css" rel="stylesheet">
-<!--[if lt IE 9]>
-      <script src="lib/html5shiv/html5shiv.min.js"></script>
-      <script src="lib/respond/respond.min.js"></script>
-<![endif]-->
+    <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/custom.css" rel="stylesheet">
 </head>
 <body>
 	<!-- NAVIGATION BAR -->
@@ -313,9 +309,14 @@ $jsFile = "algo.js";
 					presentation</a></li>
 		</ul>
 	</div>
+
+    <!--[if lt IE 9]>
+    <script src="lib/html5shiv/html5shiv.min.js"></script>
+    <script src="lib/respond/respond.min.js"></script>
+    <![endif]-->
 	<script src="lib/jquery/jquery.min.js"></script>
 	<script src="lib/bootstrap/js/bootstrap.min.js"></script>
-	<script src="js/custom.js"></script>
+	<script src="js/common.js"></script>
 	<script src="js-gen/<?=$jsFile?>"></script>
 </body>
 </html>
