@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<?php define('ACTION', isset($_GET['action']) ? $_GET['action'] : 'index') ?><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -8,6 +8,10 @@
 
     <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="css/custom.css" rel="stylesheet">
+
+    <?php if (ACTION == 'edit'): ?>
+    <link href="lib/jquery-ui-interactions/jquery-ui.min.css" rel="stylesheet">
+    <?php endif ?>
 </head>
 <body>
 	<!-- NAVIGATION BAR -->
@@ -20,15 +24,16 @@
 						class="icon-bar"></span> <span class="icon-bar"></span> <span
 						class="icon-bar"></span>
 				</button>
-				<a class="navbar-brand" href="index.php">Kartulimardikas</a>
+				<a class="navbar-brand" href="index.php?action=index">Kartulimardikas</a>
 			</div>
-			<div class="collapse navbar-collapse"
-				id="bs-example-navbar-collapse-1">
+			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 				<ul class="nav navbar-nav">
-					<li><a href="view.php#">View</a>
-					</li>
-					<li><a href="new.php#">New</a>
-					</li>
+                    <!-- VIEW -->
+                    <?php if (ACTION == 'view'): ?><li class="active"><a href="#">View</a></li>
+                    <?php else: ?><li><a href="index.php?action=view">View</a></li><?php endif ?>
+                    <!-- EDIT -->
+                    <?php if (ACTION == 'edit'): ?><li class="active"><a href="#">Edit</a></li>
+                    <?php else: ?><li><a href="index.php?action=edit">Edit</a></li><?php endif ?>
 				</ul>
 				<form class="navbar-form navbar-right" role="form">
 					<div class="form-group">
@@ -49,48 +54,13 @@
 			</div>
 		</div>
 	</nav>
-	<div class="container">
-		<!-- HEADER -->
-		<div class="jumbotron">
-			<h1>
-				Kartulimardikas <small>Online collection of algorithms</small>
-			</h1>
-			<p>Welcome to an interactive platform to discuss, demonstrate and
-				compare common algorithms.</p>
-			<p>
-				<a class="btn btn-primary btn-lg" role="button" href="new.php#">Define
-					new algorithm</a>
-			</p>
-		</div>
-		<div class="page-header">
-			<h1>Latest algorithms</h1>
-		</div>
-		<!-- CONTENT -->
 
-		<dl class="dl-horizontal">
-			<dt>
-				<a href="view.php?aid=2749">Selection sort</a> <span
-					class="label label-default">NEW</span>
-			</dt>
-			<dd>Selection sort is a sorting algorithm, specifically an in-place
-				comparison sort. It has O(n2) time complexity, making it inefficient
-				on large lists, and generally performs worse than the similar
-				insertion sort. Selection sort is noted for its simplicity, ... <a href="view.php?aid=2749">read more</a></dd>
-			<dt>
-				<a href="view.php?aid=6930">Insertion sort</a>
-			</dt>
-			<dd>Insertion sort is a simple sorting algorithm that builds the
-				final sorted array (or list) one item at a time. It is much less
-				efficient on large lists than more advanced algorithms such as
-				quicksort, heapsort, or merge sort... <a href="view.php?aid=6930">read more</a></dd>
-			<dt>
-				<a href="view.php?aid=1457">Euclidean algorithm</a>
-			</dt>
-			<dd>The Euclidean algorithm[a], or Euclid's algorithm, is a method
-				for computing the greatest common divisor (GCD) of two (usually
-				positive) integers, also known as the greatest common factor (GCF)
-				or highest common factor (HCF)... <a href="view.php?aid=1457">read more</a></dd>
-		</dl>
+	<div class="container">
+        <?php switch(ACTION) {
+            case 'index': require_once 'partials/index.phtml'; break;
+            case 'edit': require_once 'partials/edit.phtml'; break;
+            case 'view': require_once 'partials/view.phtml'; break;
+        } ?>
 	</div>
 
     <!--[if lt IE 9]>
@@ -100,5 +70,15 @@
 	<script src="lib/jquery/jquery.min.js"></script>
 	<script src="lib/bootstrap/js/bootstrap.min.js"></script>
 	<script src="js/common.js"></script>
+
+<?php if (ACTION == 'edit'): ?>
+    <script src="lib/jquery-ui-interactions/jquery-ui.min.js"></script>
+    <script src="lib/js-keystroke/jquery.keystroke.min.js"></script>
+    <script src="js/edit.js"></script>
+    <script src="js/edit-var.js"></script>
+    <script src="js/edit-step.js"></script>
+<?php elseif (ACTION == 'view'): ?>
+    <script src="js-gen/<?=$jsFile?>"></script>
+<?php endif ?>
 </body>
 </html>
