@@ -1,7 +1,17 @@
-<?php if (!defined('ACTION')) die('You cannot call this script directly !'); ?>
+<?php
+    if (!defined('ACTION')) die('You cannot call this script directly !');
+
+    $aid = isset($_GET['aid']) ? $_GET['aid'] : -1;
+?>
+
+<div id="aid" style="display: none"><?= $aid ?></div>
 <!-- HEADER -->
 <div class="page-header">
+    <?php if ($aid > -1): ?>
+    <h1>Edit algorithm <small></small></h1>
+    <?php else: ?>
     <h1>New algorithm <small>Define your own algorithm!</small></h1>
+    <?php endif ?>
 </div>
 <!-- CONTENT -->
 <div class="row">
@@ -34,7 +44,7 @@
                                            placeholder="Description in a couple of words">
                                 </div>
                             </div>
-                            <textarea class="form-control" rows="3">Long description...</textarea>
+                            <textarea class="form-control" id="in-desc" rows="3">Long description...</textarea>
                         </div>
                     </div>
                 </div>

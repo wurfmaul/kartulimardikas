@@ -11,14 +11,25 @@ $ ->
     $(this).find("span").toggleClass("glyphicon-chevron-right glyphicon-chevron-down")
 
   $("#saveAlgorithm").click ->
-    console.log window.$_GET(['aid'])
-    $.get 'api/save-algorithm.php', (data) ->
-      if (data? and data is 'success')
-        $('#saveSuccess').show('slow')
+    # compute the api url
+    url = "api/save-algorithm.php?aid=#{ $.base64.encode($('#aid').text()) }"
+    url += "&name=#{ $.base64.encode($('#in-name').val()) }"
+    url += "&desc=#{ $.base64.encode($('#in-title').val()) }"
+    url += "&long=#{ $.base64.encode($('#in-desc').val()) }"
+
+    # send request and evaluate response
+    request = $.get url
+    request.success (data) -> # if response arrived...
+      if (data? and data is '0') # ... and everything worked
         $('#saveError').hide()
-      else
+        $('#saveSuccess').show('slow')
+      else # ... and something failed
         $('#saveSuccess').hide()
         $('#saveError').show('slow')
+    request.error (jqXHR, textStatus, errorThrown) -> # if request failed
+      $('#saveSuccess').hide()
+      $('#saveError').html("Request Error: " + errorThrown)
+      $('#saveError').show('slow')
 
 ###
  This class provides a validator for the client-provided text input. It offers the possibillity to check the
@@ -46,7 +57,7 @@ class window.Validator
   checkExists: (id) ->
     if (id?)
       @inputField.addClass("has-error")
-      @errorLoc.append(Templates.error("No valid variable/intruction selected."))
+      @errorLoc.append(Templates.error("No valid variable/instruction selected."))
       return false
     true
 

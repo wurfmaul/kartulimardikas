@@ -74,6 +74,7 @@
 <?php if (ACTION == 'edit'): ?>
     <script src="lib/jquery-ui-interactions/jquery-ui.min.js"></script>
     <script src="lib/js-keystroke/jquery.keystroke.min.js"></script>
+    <script src="lib/jquery-base64/jquery.base64.js"></script>
     <script src="js/edit.js"></script>
     <script src="js/edit-var.js"></script>
     <script src="js/edit-step.js"></script>
