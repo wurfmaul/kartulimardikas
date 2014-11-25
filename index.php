@@ -1,4 +1,23 @@
-<?php define('ACTION', isset($_GET['action']) ? $_GET['action'] : 'index') ?><!DOCTYPE html>
+<?php
+    define('ACTION', isset($_GET['action']) ? $_GET['action'] : 'index');
+
+    require_once 'includes/authentication.php';
+    secure_session_start();
+
+    if (isset($_POST['signInBtn']) && isset($_POST['username']) && isset($_POST['password'])) {
+        // SIGN IN
+        $username = $_POST['username'];
+        $password = $_POST['password'];
+        if (signin($username, $password))
+            $successMsg = "Successfully signed in as '$username'.";
+        else
+            $errorMsg = "Username and password do not seem to be valid.";
+    } elseif (isset($_POST['signOutBtn'])) {
+        // SIGN OUT
+        signout();
+        $successMsg = "Successfully logged out.";
+    }
+?><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -18,11 +37,11 @@
 	<nav class="navbar navbar-default" role="navigation">
 		<div class="container-fluid">
 			<div class="navbar-header">
-				<button type="button" class="navbar-toggle" data-toggle="collapse"
-					data-target="#bs-example-navbar-collapse-1">
-					<span class="sr-only">Toggle navigation</span> <span
-						class="icon-bar"></span> <span class="icon-bar"></span> <span
-						class="icon-bar"></span>
+				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+					<span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
 				</button>
 				<a class="navbar-brand" href="index.php?action=index">Kartulimardikas</a>
 			</div>
@@ -35,31 +54,46 @@
                     <?php if (ACTION == 'edit'): ?><li class="active"><a href="#">Edit</a></li>
                     <?php else: ?><li><a href="index.php?action=edit">Edit</a></li><?php endif ?>
 				</ul>
-				<form class="navbar-form navbar-right" role="form">
-					<div class="form-group">
-						<label class="sr-only" for="exampleInputEmail2">Username</label> <input
-							type="email" class="form-control" id="exampleInputEmail2"
-							placeholder="Username">
-					</div>
-					<!-- 
-					<div class="form-group">
-						<label class="sr-only" for="exampleInputPassword2">Password</label>
-						<input type="password" class="form-control"
-							id="exampleInputPassword2" placeholder="Password">
-					</div>
-					-->
-					<button type="submit" class="btn btn-default">Sign in</button>
-					<button type="button" class="btn btn-link">Register</button>
+				<form class="navbar-form navbar-right" role="form" method="post">
+                    <?php if (isSignedIn()): ?>
+                        Hello, <?= $_SESSION['username'] ?>!
+                        <button type="submit" name="signOutBtn" href="#" class="btn btn-default">Sign out</button>
+                    <?php else: ?>
+                        <div class="form-group">
+                            <label class="sr-only" for="username">Username</label>
+                            <input class="form-control" name="username" placeholder="Username">
+                        </div>
+                        <div class="form-group">
+                            <label class="sr-only" for="password">Password</label>
+                            <input type="password" class="form-control" name="password" placeholder="Password">
+                        </div>
+                        <button type="submit" name="signInBtn" href="#" class="btn btn-default">Sign in</button>
+                        <a class="btn btn-link" href="index.php?action=register">Register</a>
+                    <?php endif ?>
 				</form>
 			</div>
 		</div>
 	</nav>
 
 	<div class="container">
+        <?php if (isset($errorMsg)): ?>
+        <div id="generalAlert" class="alert alert-danger alert-dismissible">
+            <button id="generalAlertClose" type="button" class="close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <strong>Error!</strong> <?= $errorMsg ?>
+        </div>
+        <?php endif ?>
+        <?php if (isset($successMsg)): ?>
+        <div id="generalSuccess" class="alert alert-success alert-dismissible">
+            <button id="generalSuccessClose" type="button" class="close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <strong>Success!</strong> <?= $successMsg ?>
+        </div>
+        <?php endif ?>
+
         <?php switch(ACTION) {
-            case 'index': require_once 'partials/index.phtml'; break;
             case 'edit': require_once 'partials/edit.phtml'; break;
             case 'view': require_once 'partials/view.phtml'; break;
+            case 'register': require_once 'partials/register.phtml'; break;
+            default: require_once 'partials/index.phtml';
         } ?>
 	</div>
 
@@ -78,6 +112,8 @@
     <script src="js/edit.js"></script>
     <script src="js/edit-var.js"></script>
     <script src="js/edit-step.js"></script>
+<?php elseif (ACTION == 'register'): ?>
+    <script src="js/register.js"></script>
 <?php elseif (ACTION == 'view'): ?>
     <script src="js-gen/<?=$jsFile?>"></script>
 <?php endif ?>

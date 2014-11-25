@@ -12,7 +12,7 @@ $ ->
 
   $("#saveAlgorithm").click ->
     # compute the api url
-    url = "api/save-algorithm.php?aid=#{ $.base64.encode($('#aid').text()) }"
+    url = "api/edit-algorithm.php?aid=#{ $.base64.encode($('#aid').text()) }"
     url += "&name=#{ $.base64.encode($('#in-name').val()) }"
     url += "&desc=#{ $.base64.encode($('#in-title').val()) }"
     url += "&long=#{ $.base64.encode($('#in-desc').val()) }"
