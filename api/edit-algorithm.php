@@ -1,5 +1,5 @@
 <?php
-require_once '../includes/dataModel.php';
+require_once BASEDIR . 'includes/dataModel.php';
 
 // prepare variables
 $aid = base64_decode($_GET['aid']);

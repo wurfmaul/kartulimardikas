@@ -13,7 +13,7 @@ else $response['errorPassword2'] = "Please repeat the password!<br />";
 
 // if every field has been filled:
 if (isset($username, $email, $password1, $password2)) {
-    require_once '../includes/dataModel.php';
+    require_once BASEDIR . 'includes/dataModel.php';
     $model = new DataModel();
 
     $username = htmlentities($username);

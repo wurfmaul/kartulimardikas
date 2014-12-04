@@ -4,8 +4,7 @@ class DataModel {
     private $_sql;
 
     public function __construct() {
-        if (!defined('PROJECT_NAME'))
-            require_once '../config/config.php';
+        require_once BASEDIR . 'config/config.php';
         $this->_sql = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
     }
 

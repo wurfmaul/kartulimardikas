@@ -1,7 +1,7 @@
 <?php
 
 function secure_session_start() {
-    require_once 'config/config.php';
+    require_once BASEDIR . 'config/config.php';
 
     // use cookies for php sessions
     if (ini_set('session.use_only_cookies', 1) === FALSE) {
@@ -18,7 +18,7 @@ function secure_session_start() {
 }
 
 function signin($username, $password) {
-    require_once 'dataModel.php';
+    require_once BASEDIR . 'includes/dataModel.php';
     $model = new DataModel();
     $result = $model->fetchLoginByUsername($username);
 
@@ -50,7 +50,7 @@ function signout() {
 
 function isSignedIn() {
     if (isset($_SESSION['uid'], $_SESSION['username'], $_SESSION['token'])) {
-        require_once 'dataModel.php';
+        require_once BASEDIR . 'includes/dataModel.php';
         $model = new DataModel();
 
         $uid = $_SESSION['uid'];

@@ -1,7 +1,8 @@
 <?php
     define('ACTION', isset($_GET['action']) ? $_GET['action'] : 'index');
+    define('BASEDIR', __DIR__ . '/');
 
-    require_once 'includes/authentication.php';
+    require_once BASEDIR . 'includes/authentication.php';
     secure_session_start();
 
     if (isset($_POST['signInBtn']) && isset($_POST['username']) && isset($_POST['password'])) {
@@ -57,7 +58,7 @@
 				<form class="navbar-form navbar-right" role="form" method="post">
                     <?php if (isSignedIn()): ?>
                         Hello, <?= $_SESSION['username'] ?>!
-                        <button type="submit" name="signOutBtn" href="#" class="btn btn-default">Sign out</button>
+                        <button type="submit" name="signOutBtn" class="btn btn-default">Sign out</button>
                     <?php else: ?>
                         <div class="form-group">
                             <label class="sr-only" for="username">Username</label>
@@ -67,7 +68,7 @@
                             <label class="sr-only" for="password">Password</label>
                             <input type="password" class="form-control" name="password" placeholder="Password">
                         </div>
-                        <button type="submit" name="signInBtn" href="#" class="btn btn-default">Sign in</button>
+                        <button type="submit" name="signInBtn" class="btn btn-default">Sign in</button>
                         <a class="btn btn-link" href="index.php?action=register">Register</a>
                     <?php endif ?>
 				</form>
@@ -90,10 +91,10 @@
         <?php endif ?>
 
         <?php switch(ACTION) {
-            case 'edit': require_once 'partials/edit.phtml'; break;
-            case 'view': require_once 'partials/view.phtml'; break;
-            case 'register': require_once 'partials/register.phtml'; break;
-            default: require_once 'partials/index.phtml';
+            case 'edit':     require_once BASEDIR . 'partials/edit.phtml'; break;
+            case 'view':     require_once BASEDIR . 'partials/view.phtml'; break;
+            case 'register': require_once BASEDIR . 'partials/register.phtml'; break;
+            default:         require_once BASEDIR . 'partials/index.phtml';
         } ?>
 	</div>
 
