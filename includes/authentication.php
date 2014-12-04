@@ -21,6 +21,7 @@ function signin($username, $password) {
     require_once BASEDIR . 'includes/dataModel.php';
     $model = new DataModel();
     $result = $model->fetchLoginByUsername($username);
+    $model->close();
 
     if ($result) {
         $uid = $result->uid;
@@ -56,6 +57,7 @@ function isSignedIn() {
         $uid = $_SESSION['uid'];
         $token = $_SESSION['token'];
         $result = $model->fetchLoginByUID($uid);
+        $model->close();
 
         if ($result) {
             if (password_verify($result->password . $_SERVER['HTTP_USER_AGENT'], $token)) {

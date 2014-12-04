@@ -1,6 +1,6 @@
 <?php
-    define('ACTION', isset($_GET['action']) ? $_GET['action'] : 'index');
     define('BASEDIR', __DIR__ . '/');
+    define('ACTION', isset($_GET['action']) ? $_GET['action'] : 'index');
 
     require_once BASEDIR . 'includes/authentication.php';
     secure_session_start();
@@ -10,13 +10,13 @@
         $username = $_POST['username'];
         $password = $_POST['password'];
         if (signin($username, $password))
-            $successMsg = "Successfully signed in as '$username'.";
+            $successMsg = sprintf($l10n['signed_in'], $username);
         else
-            $errorMsg = "Username and password do not seem to be valid.";
+            $errorMsg = $l10n['credentials_invalid'];
     } elseif (isset($_POST['signOutBtn'])) {
         // SIGN OUT
         signout();
-        $successMsg = "Successfully logged out.";
+        $successMsg = $l10n['signed_out'];
     }
 ?><!DOCTYPE html>
 <html lang="en">
@@ -44,32 +44,32 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
 				</button>
-				<a class="navbar-brand" href="index.php?action=index">Kartulimardikas</a>
+				<a class="navbar-brand" href="index.php?action=index"><?= PROJECT_NAME ?></a>
 			</div>
 			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 				<ul class="nav navbar-nav">
                     <!-- VIEW -->
-                    <?php if (ACTION == 'view'): ?><li class="active"><a href="#">View</a></li>
-                    <?php else: ?><li><a href="index.php?action=view">View</a></li><?php endif ?>
+                    <?php if (ACTION == 'view'): ?><li class="active"><a href="#"><?= $l10n['view'] ?></a></li>
+                    <?php else: ?><li><a href="index.php?action=view"><?= $l10n['view'] ?></a></li><?php endif ?>
                     <!-- EDIT -->
-                    <?php if (ACTION == 'edit'): ?><li class="active"><a href="#">Edit</a></li>
-                    <?php else: ?><li><a href="index.php?action=edit">Edit</a></li><?php endif ?>
+                    <?php if (ACTION == 'edit'): ?><li class="active"><a href="#"><?= $l10n['edit'] ?></a></li>
+                    <?php else: ?><li><a href="index.php?action=edit"><?= $l10n['edit'] ?></a></li><?php endif ?>
 				</ul>
 				<form class="navbar-form navbar-right" role="form" method="post">
                     <?php if (isSignedIn()): ?>
-                        Hello, <?= $_SESSION['username'] ?>!
-                        <button type="submit" name="signOutBtn" class="btn btn-default">Sign out</button>
+                        <?= sprintf($l10n['welcome'], $_SESSION['username']) ?>!
+                        <button type="submit" name="signOutBtn" class="btn btn-default"><?= $l10n['sign_out'] ?></button>
                     <?php else: ?>
                         <div class="form-group">
-                            <label class="sr-only" for="username">Username</label>
-                            <input class="form-control" name="username" placeholder="Username">
+                            <label class="sr-only" for="username"><?= $l10n['username'] ?></label>
+                            <input class="form-control" name="username" placeholder="<?= $l10n['username'] ?>">
                         </div>
                         <div class="form-group">
-                            <label class="sr-only" for="password">Password</label>
-                            <input type="password" class="form-control" name="password" placeholder="Password">
+                            <label class="sr-only" for="password"><?= $l10n['password'] ?></label>
+                            <input type="password" class="form-control" name="password" placeholder="<?= $l10n['password'] ?>">
                         </div>
-                        <button type="submit" name="signInBtn" class="btn btn-default">Sign in</button>
-                        <a class="btn btn-link" href="index.php?action=register">Register</a>
+                        <button type="submit" name="signInBtn" class="btn btn-default"><?= $l10n['sign_in'] ?></button>
+                        <a class="btn btn-link" href="index.php?action=register"><?= $l10n['register'] ?></a>
                     <?php endif ?>
 				</form>
 			</div>
@@ -79,14 +79,18 @@
 	<div class="container">
         <?php if (isset($errorMsg)): ?>
         <div id="generalAlert" class="alert alert-danger alert-dismissible">
-            <button id="generalAlertClose" type="button" class="close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-            <strong>Error!</strong> <?= $errorMsg ?>
+            <button id="generalAlertClose" type="button" class="close">
+                <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
+            </button>
+            <strong><?= $l10n['error'] ?></strong> <?= $errorMsg ?>
         </div>
         <?php endif ?>
         <?php if (isset($successMsg)): ?>
         <div id="generalSuccess" class="alert alert-success alert-dismissible">
-            <button id="generalSuccessClose" type="button" class="close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-            <strong>Success!</strong> <?= $successMsg ?>
+            <button id="generalSuccessClose" type="button" class="close">
+                <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
+            </button>
+            <strong><?= $l10n['success'] ?></strong> <?= $successMsg ?>
         </div>
         <?php endif ?>
 

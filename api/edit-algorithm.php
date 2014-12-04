@@ -1,29 +1,45 @@
 <?php
+define('BASEDIR', realpath('..') . '/');
+require_once BASEDIR . 'config/config.php';
+
+// in order to retrieve the uid we need access to the session
+require_once BASEDIR . 'includes/authentication.php';
+secure_session_start();
+
+// for database actions
 require_once BASEDIR . 'includes/dataModel.php';
+$model = new DataModel();
 
 // prepare variables
-$aid = base64_decode($_GET['aid']);
-$uid = 1; // TODO retrieve uid from cookie
-$name = base64_decode($_GET['name']);
-$desc = base64_decode($_GET['desc']);
-$long = base64_decode($_GET['long']);
+$aid = isset($_POST['aid']) ? $_POST['aid'] : -1;
+$name = isset($_POST['name']) ? $_POST['name'] : null;
+$desc = isset($_POST['title']) ? $_POST['title'] : null;
+$long = isset($_POST['desc']) ? $_POST['desc'] : null;
 $variables = ""; // TODO format and insert blubblub
 $script = "";
 
-// prepare and execute statement
-// @var $sql mysqli defined in dataModel.php
-$stmt = $sql->stmt_init();
-if ($aid == -1) { // create new entry
-    $stmt = $sql->prepare("INSERT INTO algorithms (uid, name, description, long_description, variables, script) VALUES (?, ?, ?, ?, ?, ?)");
-} else { // update entry
-    $stmt = $sql->prepare("UPDATE algorithms SET uid=?, name=?, description=?, long_description=?, variables=?, script=? WHERE aid=$aid");
+// prepare response
+$response = array();
+
+if (isSignedIn()) {
+    $uid = $_SESSION['uid'];
+
+    if ($aid == -1) { // create new entry
+        $aid = $model->insertAlgorithm($uid, $name, $desc, $long, $variables, $script);
+        $response['aid'] = $aid;
+        $response['success'] = $l10n['saved_to_db'];
+    } else { // update entry
+        $owner = $model->fetchAlgorithmByAID($aid)->uid;
+        if ($owner != $uid) {
+            $response['error'] = $l10n['need_to_be_owner'];
+        } else {
+            $model->updateAlgorithm($aid, $uid, $name, $desc, $long, $variables, $script);
+            $response['success'] = $l10n['saved_to_db'];
+        }
+    }
+} else {
+    $response['error'] = $l10n['edit_not_signed_in'];
 }
-$stmt->bind_param("isssbb", $uid, $name, $desc, $long, $variables, $script);
-$stmt->execute();
 
-// tidy up
-$stmt->close();
-
-// print 0 in case of success.
-header('Content-Type: text/plain');
-echo 0;
+$model->close();
+echo json_encode($response);

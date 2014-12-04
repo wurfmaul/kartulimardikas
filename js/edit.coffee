@@ -11,25 +11,27 @@ $ ->
     $(this).find("span").toggleClass("glyphicon-chevron-right glyphicon-chevron-down")
 
   $("#saveAlgorithm").click ->
-    # compute the api url
-    url = "api/edit-algorithm.php?aid=#{ $.base64.encode($('#aid').text()) }"
-    url += "&name=#{ $.base64.encode($('#in-name').val()) }"
-    url += "&desc=#{ $.base64.encode($('#in-title').val()) }"
-    url += "&long=#{ $.base64.encode($('#in-desc').val()) }"
-
-    # send request and evaluate response
-    request = $.get url
-    request.success (data) -> # if response arrived...
-      if (data? and data is '0') # ... and everything worked
-        $('#saveError').hide()
-        $('#saveSuccess').show('slow')
-      else # ... and something failed
+    $.ajax "api/edit-algorithm.php",
+      type: 'POST'
+      data:
+        aid: $('#aid').text()
+        name: $('#in-name').val()
+        title: $('#in-title').val()
+        desc: $('#in-desc').val()
+      dataType: 'json'
+      success: (data) -> # if response arrived...
+        console.log data
+        if data['error']? # if something failed
+          $('#saveSuccess').hide()
+          $('#saveError').text(data['error']).show('slow')
+        else # if everything worked
+          $('#saveError').hide()
+          $('#saveSuccess').text(data['success']).show('slow')
+        if data['aid']? # if a new algorithm was created
+          $('#aid').text(data['aid']);
+      error: (jqXHR, textStatus, errorThrown) -> # if request failed
         $('#saveSuccess').hide()
-        $('#saveError').show('slow')
-    request.error (jqXHR, textStatus, errorThrown) -> # if request failed
-      $('#saveSuccess').hide()
-      $('#saveError').html("Request Error: " + errorThrown)
-      $('#saveError').show('slow')
+        $('#saveError').html("Request Error: " + errorThrown).show('slow')
 
 ###
  This class provides a validator for the client-provided text input. It offers the possibillity to check the

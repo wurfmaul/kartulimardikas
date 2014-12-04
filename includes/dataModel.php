@@ -13,6 +13,19 @@ class DataModel {
     }
 
     /**
+     * @param $aid int
+     * @return object|stdClass
+     */
+    public function fetchAlgorithmByAID($aid) {
+        $stmt = $this->_sql->prepare("SELECT * FROM algorithms WHERE aid = ?");
+        $stmt->bind_param("i", $aid);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return $result->fetch_object();
+    }
+
+    /**
      * @param $username string
      * @return object|stdClass
      */
@@ -74,9 +87,43 @@ class DataModel {
         $stmt = $this->_sql->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
         $stmt->bind_param('sss', $username, $email, $password);
         $stmt->execute();
-        $stmt->get_result();
+        $uid = $stmt->insert_id;
         $stmt->close();
-        // return new uid
-        return $this->fetchLoginByUsername($username)->uid;
+        return $uid;
+    }
+
+    /**
+     * @param $uid int
+     * @param $name string
+     * @param $desc string
+     * @param $long string
+     * @param $variables mixed
+     * @param $script mixed
+     * @return int
+     */
+    public function insertAlgorithm($uid, $name, $desc, $long, $variables, $script) {
+        $stmt = $this->_sql->prepare("INSERT INTO algorithms (uid, name, description, long_description, variables, script)
+            VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("isssbb", $uid, $name, $desc, $long, $variables, $script);
+        $stmt->execute();
+        $aid = $stmt->insert_id;
+        $stmt->close();
+        return $aid;
+    }
+
+    /**
+     * @param $aid int
+     * @param $uid int
+     * @param $name string
+     * @param $desc string
+     * @param $long string
+     * @param $variables mixed
+     * @param $script mixed
+     */
+    public function updateAlgorithm($aid, $uid, $name, $desc, $long, $variables, $script) {
+        $stmt = $this->_sql->prepare("UPDATE algorithms SET uid=?, name=?, description=?, long_description=?, variables=?, script=? WHERE aid=?");
+        $stmt->bind_param("isssbbi", $uid, $name, $desc, $long, $variables, $script, $aid);
+        $stmt->execute();
+        $stmt->close();
     }
 }
