@@ -1,5 +1,5 @@
 <?php
-    if (!defined('ACTION')) die('You cannot call this script directly !');
+    if (!defined('BASEDIR')) die('You cannot call this script directly !');
 
     $aid = isset($_GET['aid']) ? $_GET['aid'] : -1;
 ?>
@@ -7,9 +7,9 @@
 <!-- HEADER -->
 <div class="page-header">
     <?php if ($aid > -1): ?>
-    <h1>Edit algorithm <small></small></h1>
+    <h1><?= $l10n['edit_algo'] ?></h1>
     <?php else: ?>
-    <h1>New algorithm <small>Define your own algorithm!</small></h1>
+    <h1><?= $l10n['new_algo'] ?> <small><?= $l10n['define_algo'] ?></small></h1>
     <?php endif ?>
 </div>
 <!-- CONTENT -->
@@ -23,25 +23,25 @@
                 <div class="panel panel-default">
                     <div class="panel-heading" data-toggle="collapse" data-target="#genPanel">
                         <h4 class="panel-title">
-                            <span class="glyphicon glyphicon-chevron-right"></span> General Information
+                            <span class="glyphicon glyphicon-chevron-right"></span> <?= $l10n['general_info'] ?>
                         </h4>
                     </div>
                     <div id="genPanel" class="panel-collapse collapse">
                         <div class="panel-body">
                             <div id="aid" style="display: none"><?= $aid ?></div>
                             <div class="form-group">
-                                <label for="in-name" class="control-label col-sm-3">Algorithm name</label>
+                                <label for="in-name" class="control-label col-sm-3"><?= $l10n['algo_name'] ?></label>
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="in-name" placeholder="Algorithm name">
+                                    <input type="text" class="form-control" id="in-name" placeholder="<?= $l10n['algo_name'] ?>">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="in-title" class="control-label col-sm-3">Description</label>
+                                <label for="in-title" class="control-label col-sm-3"><?= $l10n['description'] ?></label>
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="in-title" placeholder="Description in a couple of words">
+                                    <input type="text" class="form-control" id="in-title" placeholder="<?= $l10n['description'] ?>">
                                 </div>
                             </div>
-                            <textarea class="form-control" id="in-desc" rows="3">Long description...</textarea>
+                            <textarea class="form-control" id="in-desc" rows="3"><?= $l10n['long_description'] ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -50,17 +50,59 @@
                 <div class="panel panel-default">
                     <div class="panel-heading" data-toggle="collapse" data-target="#varPanel">
                         <h4 class="panel-title">
-                            <span class="glyphicon glyphicon-chevron-down"></span> Variables
+                            <span class="glyphicon glyphicon-chevron-right"></span> <?= $l10n['variables'] ?>
                         </h4>
                     </div>
-                    <div id="varPanel" class="panel-collapse collapse in">
+                    <div id="varPanel" class="panel-collapse collapse">
                         <div class="panel-body" style="text-align: center;">
                             <div id="alert-var"></div>
                             <div class="btn-group">
                                 <div class="btn btn-success btn-lg" id="btnAddVar"><span class="glyphicon glyphicon-plus" style="width: 100px;"></span></div>
                             </div>
                             <table class="table table-condensed table-bordered" style="margin-top: 10px; margin-bottom: 0px;">
-                                <tbody id="insertVarsHere"></tbody>
+                                <tbody id="insertVarsHere">
+
+                                <tr class="dummyRow ui-droppable" style="display: none;"><td colspan="3"></td></tr>
+
+                                <tr id="var-0" class="varRow">
+                                    <td class="handle">⣿</td>
+                                    <td style="vertical-align: middle; text-align: left;">
+                                        <code class="cell">a = 7</code>
+                                    </td>
+                                    <td class="buttonArea">
+                                        <div class="btn-group btn-group-xs">
+                                            <button type="button" class="btn btn-default" id="btn-var-0-edit" value="0">
+                                                <span class="glyphicon glyphicon-pencil"></span>
+                                            </button>
+                                            <button type="button" class="btn btn-default" id="btn-var-0-remove" value="0" title="Remove variable">
+                                                <span class="glyphicon glyphicon-trash"></span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr class="dummyRow ui-droppable" style="display: none;"><td colspan="3"></td></tr>
+
+                                <tr id="var-1" class="varRow ui-selected">
+                                    <td class="handle">⣿</td>
+                                    <td style="vertical-align: middle; text-align: left;">
+                                        <code class="cell">b = 13</code>
+                                    </td>
+                                    <td class="buttonArea">
+                                        <div class="btn-group btn-group-xs">
+                                            <button type="button" class="btn btn-default" id="btn-var-1-edit" value="1">
+                                                <span class="glyphicon glyphicon-pencil"></span>
+                                            </button>
+                                            <button type="button" class="btn btn-default" id="btn-var-1-remove" value="1" title="Remove variable">
+                                                <span class="glyphicon glyphicon-trash"></span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr class="dummyRow ui-droppable" style="display: none;"><td colspan="3"></td></tr>
+
+                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -70,19 +112,162 @@
                 <div class="panel panel-default">
                     <div class="panel-heading" data-toggle="collapse" data-target="#stepPanel">
                         <h4 class="panel-title">
-                            <span class="glyphicon glyphicon-chevron-right"></span> Steps
+                            <span class="glyphicon glyphicon-chevron-down"></span> <?= $l10n['steps'] ?>
                         </h4>
                     </div>
-                    <div id="stepPanel" class="panel-collapse collapse">
+                    <div id="stepPanel" class="panel-collapse collapse in">
                         <div class="panel-body">
-                            <table class="table table-hover table-condensed table-bordered" id="placeStepsHere" style="display: none;"></table>
-                            <button class="btn btn-primary" id="btn-addStep">+ step</button>
+                            <table id="placeAlgorithmHere" style="width: 100%">
+                                <tr>
+                                    <td>
+                                        <!-- IF NODE BEGIN -->
+                                        <table class="step if-node" data-node-type="if">
+                                            <tr>
+                                                <td class="step-box top left">&nbsp;</td>
+                                                <td class="step-box top right bottom full-width">if</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="step-box right left">&nbsp;</td>
+                                                <td class="if-condition">
+                                                    <!-- COMPARE NODE BEGIN -->
+                                                    <table class="step compare-node" data-node-type="compare">
+                                                        <tr>
+                                                            <td class="step-box top left">&nbsp;</td>
+                                                            <td class="step-box top right bottom full-width">compare</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="step-box right left">&nbsp;</td>
+                                                            <td class="compare-left">
+                                                                <!-- VAR NODE BEGIN -->
+                                                                <table class="step var-node" data-node-type="var">
+                                                                    <tr>
+                                                                        <td class="step-box top left bottom">&nbsp;</td>
+                                                                        <td class="step-box top right bottom full-width">
+                                                                            variable:
+                                                                            <select class="var-value">
+                                                                                <option value="var-0">a</option>
+                                                                                <option value="var-1">b</option>
+                                                                            </select>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                                <!-- VAR NODE END -->
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="step-box left">&nbsp;</td>
+                                                            <td class="step-box top right bottom half-width">
+                                                                operation:
+                                                                <select class="compare-operation">
+                                                                    <option value="lt">&lt;</option>
+                                                                    <option value="le">&le;</option>
+                                                                    <option value="eq">&equals;</option>
+                                                                    <option value="ge">&ge;</option>
+                                                                    <option value="gt">&gt;</option>
+                                                                </select>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="step-box right bottom left">&nbsp;</td>
+                                                            <td class="compare-right">
+                                                                <!-- CONSTANT NODE BEGIN -->
+                                                                <table class="step constant-node" data-node-type="constant">
+                                                                    <tr>
+                                                                        <td class="step-box top left bottom">&nbsp;</td>
+                                                                        <td class="step-box top right bottom full-width">
+                                                                            constant: <input class="constant-value" value="12" />
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                                <!-- CONSTANT NODE END -->
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <!-- COMPARE NODE END -->
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="step-box left">&nbsp;</td>
+                                                <td class="step-box top right bottom half-width">then</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="step-box right bottom left">&nbsp;</td>
+                                                <td class="if-body">
+                                                    <!-- ASSIGN NODE BEGIN -->
+                                                    <table class="step assign-node" data-node-type="assign">
+                                                        <tr>
+                                                            <td class="step-box top left">&nbsp;</td>
+                                                            <td class="step-box top right bottom full-width">assign</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="step-box left right">&nbsp;</td>
+                                                            <td class="assign-from">
+                                                                <!-- CONSTANT NODE BEGIN -->
+                                                                <table class="step constant-node" data-node-type="constant">
+                                                                    <tr>
+                                                                        <td class="step-box top left bottom">&nbsp;</td>
+                                                                        <td class="step-box top right bottom full-width">
+                                                                            constant: <input class="constant-value" value="12" />
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                                <!-- CONSTANT NODE END -->
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="step-box left">&nbsp;</td>
+                                                            <td class="step-box top right bottom full-width">&rarr;</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="step-box left right bottom">&nbsp;</td>
+                                                            <td class="assign-to">
+                                                                <!-- VAR NODE BEGIN -->
+                                                                <table class="step var-node" data-node-type="var">
+                                                                    <tr>
+                                                                        <td class="step-box top left bottom">&nbsp;</td>
+                                                                        <td class="step-box top right bottom full-width">
+                                                                            variable:
+                                                                            <select class="var-value">
+                                                                                <option value="var-0">a</option>
+                                                                                <option value="var-1">b</option>
+                                                                            </select>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                                <!-- VAR NODE END -->
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <!-- ASSIGN NODE END -->
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <!-- IF NODE END -->
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <!-- WHILE NODE BEGIN -->
+                                        <table class="step while-node" data-node-type="while">
+                                            <tr>
+                                                <td class="step-box top left">&nbsp;</td>
+                                                <td class="step-box top right bottom full-width">while</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="step-box right bottom left">&nbsp;</td>
+                                                <td></td>
+                                            </tr>
+                                        </table>
+                                        <!-- WHILE NODE END -->
+                                    </td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <span id="saveAlgorithm" class="btn btn-primary btn-lg">Save</span>
+            <span id="saveAlgorithm" class="btn btn-primary btn-lg"><?= $l10n['save_algorithm'] ?></span>
             <span id="saveSuccess" class="label label-success" style="display: none"></span>
             <span id="saveError" class="label label-danger" style="display: none"></span>
         </form>

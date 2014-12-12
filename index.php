@@ -1,10 +1,12 @@
 <?php
+    // setup environment
     define('BASEDIR', __DIR__ . '/');
     define('ACTION', isset($_GET['action']) ? $_GET['action'] : 'index');
-
+    require_once BASEDIR . 'config/config.php';
     require_once BASEDIR . 'includes/authentication.php';
     secure_session_start();
 
+    // deal with authentication
     if (isset($_POST['signInBtn']) && isset($_POST['username']) && isset($_POST['password'])) {
         // SIGN IN
         $username = $_POST['username'];
@@ -24,13 +26,14 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Kartulimardikas</title>
+    <title><?= PROJECT_NAME ?></title>
 
     <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="css/custom.css" rel="stylesheet">
 
     <?php if (ACTION == 'edit'): ?>
-    <link href="lib/jquery-ui-interactions/jquery-ui.min.css" rel="stylesheet">
+    <link href="lib/jquery-ui-interactions/jquery-ui.min.css" rel="stylesheet" />
+    <link href="css/edit.css" rel="stylesheet" />
     <?php endif ?>
 </head>
 <body>
@@ -39,7 +42,7 @@
 		<div class="container-fluid">
 			<div class="navbar-header">
 				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-					<span class="sr-only">Toggle navigation</span>
+					<span class="sr-only"><?= $l10n['toggle_nav'] ?></span>
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>

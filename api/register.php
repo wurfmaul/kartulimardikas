@@ -13,11 +13,6 @@ else $response['errorPassword1'] = $l10n['enter_password'] . "<br />";
 if (isset($_POST['password2']) && !empty(trim($_POST['password2']))) $password2 = $_POST['password2'];
 else $response['errorPassword2'] = $l10n['repeat_password'] . "<br />";
 
-$username = "wurfmaul";
-$email = "wurfmaul";
-$password1 = "oberdepp";
-$password2 = "oberdepp";
-
 // if every field has been filled:
 if (isset($username, $email, $password1, $password2)) {
     require_once BASEDIR . 'includes/dataModel.php';

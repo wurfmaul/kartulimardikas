@@ -11,6 +11,8 @@ $ ->
     $(this).find("span").toggleClass("glyphicon-chevron-right glyphicon-chevron-down")
 
   $("#saveAlgorithm").click ->
+    script = new window.Tree().parseRoot()
+
     $.ajax "api/edit-algorithm.php",
       type: 'POST'
       data:
@@ -18,6 +20,7 @@ $ ->
         name: $('#in-name').val()
         title: $('#in-title').val()
         desc: $('#in-desc').val()
+        script: script
       dataType: 'json'
       success: (data) -> # if response arrived...
         console.log data
@@ -34,7 +37,7 @@ $ ->
         $('#saveError').html("Request Error: " + errorThrown).show('slow')
 
 ###
- This class provides a validator for the client-provided text input. It offers the possibillity to check the
+ This class provides a validator for the client-provided text input. It offers the possibility to check the
  correctness of the input fields of the main form.
 ###
 class window.Validator

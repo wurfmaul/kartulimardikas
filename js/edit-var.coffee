@@ -427,6 +427,10 @@ varForm = new VariableForm()
 varForm.updatePlaceholders()
 
 $ ->
+  # FIXME: remove the following lines, this is a dirty hack for the static content!
+  varForm.updateActionHandlers(0)
+  varForm.updateActionHandlers(1)
+
   $("#insertVarsHere")
     .selectable
         cancel: ".handle, .form-control, button"
