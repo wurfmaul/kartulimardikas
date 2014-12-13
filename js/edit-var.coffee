@@ -71,41 +71,15 @@ class Api
         msg = data['error'] ? ""
         varRow = $('#var-'+vid)
 
-        # check name
-        if data['error-name']?
-          msg += data['error-name']
-          varRow.find('.name-group').addClass('has-error')
-        else
-          varRow.find('.name-group').removeClass('has-error')
-          varRow.find('.name').val(data['name'])
-          varRow.data('name', data['name'])
-
-        # check init
-        if data['error-init']?
-          msg += data['error-init']
-          varRow.find('.init-group').addClass('has-error')
-        else
-          varRow.find('.init-group').removeClass('has-error')
-          varRow.find('.init').val(data['init'])
-          varRow.data('init', data['init'])
-
-        # check value
-        if data['error-value']?
-          msg += data['error-value']
-          varRow.find('.value-group').addClass('has-error')
-        else
-          varRow.find('.value-group').removeClass('has-error')
-          varRow.find('.value').val(data['value'])
-          varRow.data('value', data['value'])
-
-        # check size
-        if data['error-size']?
-          msg += data['error-size']
-          varRow.find('.size-group').addClass('has-error')
-        else
-          varRow.find('.size-group').removeClass('has-error')
-          varRow.find('.size').val(data['size'])
-          varRow.data('size', data['size'])
+        # check for errors
+        for token in ['name', 'init', 'value', 'size']
+          if data['error-' + token]?
+            msg += data['error-' + token]
+            varRow.find(".#{token}-group").addClass('has-error')
+          else
+          varRow.find(".#{token}-group").removeClass('has-error')
+          varRow.find('.' + token).val(data[token])
+          varRow.data(token, data[token])
 
         # set aid if new algorithm was created
         if data['aid']? then $('#aid').text(data['aid']);

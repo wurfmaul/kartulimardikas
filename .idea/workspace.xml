@@ -1,25 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="915d645c-c7c4-4a0f-ae40-e18ab51fcd5a" name="Default" comment="variables: reduction of complexity, api design, database">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/config/l10n.en.php" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/config/l10n.php" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/Generated_files.xml" afterPath="$PROJECT_DIR$/.idea/libraries/Generated_files.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/config/config.php" afterPath="$PROJECT_DIR$/config/config.php" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/css/custom.css" afterPath="$PROJECT_DIR$/css/custom.css" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/includes/dataModel.php" afterPath="$PROJECT_DIR$/includes/dataModel.php" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/config/database.sql" afterPath="$PROJECT_DIR$/config/database.sql" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/api/edit-algorithm.php" afterPath="$PROJECT_DIR$/api/edit-algorithm.php" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/edit-step.coffee" afterPath="$PROJECT_DIR$/js/edit-step.coffee" />
+    <list default="true" id="915d645c-c7c4-4a0f-ae40-e18ab51fcd5a" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/edit-var.coffee" afterPath="$PROJECT_DIR$/js/edit-var.coffee" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/edit.coffee" afterPath="$PROJECT_DIR$/js/edit.coffee" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/css/edit.less" afterPath="$PROJECT_DIR$/css/edit.less" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/partials/edit.phtml" afterPath="$PROJECT_DIR$/partials/edit.phtml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/register.coffee" afterPath="$PROJECT_DIR$/js/register.coffee" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/partials/register.phtml" afterPath="$PROJECT_DIR$/partials/register.phtml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/watcherTasks.xml" afterPath="$PROJECT_DIR$/.idea/watcherTasks.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/api/register.php" afterPath="$PROJECT_DIR$/api/register.php" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="js/custom.js" />
@@ -58,8 +43,8 @@
       <file leaf-file-name="edit-var.coffee" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/js/edit-var.coffee">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.23535791" vertical-offset="893" max-vertical-offset="2145">
-              <caret line="74" column="8" selection-start-line="74" selection-start-column="8" selection-end-line="74" selection-end-column="8" />
+            <state vertical-scroll-proportion="0.36550975" vertical-offset="833" max-vertical-offset="1755">
+              <caret line="78" column="14" selection-start-line="78" selection-start-column="14" selection-end-line="78" selection-end-column="14" />
               <folding />
             </state>
           </provider>
@@ -70,6 +55,26 @@
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="-18.666666" vertical-offset="2837" max-vertical-offset="3735">
               <caret line="219" column="40" selection-start-line="219" selection-start-column="40" selection-end-line="219" selection-end-column="40" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="register.coffee" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/register.coffee">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="645">
+              <caret line="16" column="31" selection-start-line="16" selection-start-column="31" selection-end-line="16" selection-end-column="31" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="register.php" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/api/register.php">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-25.625" vertical-offset="0" max-vertical-offset="960">
+              <caret line="41" column="33" selection-start-line="41" selection-start-column="33" selection-end-line="41" selection-end-column="33" />
               <folding />
             </state>
           </provider>
@@ -103,14 +108,12 @@
         <option value="$PROJECT_DIR$/js/new-var.coffee" />
         <option value="$PROJECT_DIR$/js/new-step.coffee" />
         <option value="$PROJECT_DIR$/js/custom.coffee" />
-        <option value="$PROJECT_DIR$/api/register.php" />
         <option value="$PROJECT_DIR$/js/common.coffee" />
         <option value="$PROJECT_DIR$/css/custom.css" />
         <option value="$PROJECT_DIR$/css/edit.less" />
         <option value="$PROJECT_DIR$/includes/dataModel.php" />
         <option value="$PROJECT_DIR$/config/l10n.php" />
         <option value="$PROJECT_DIR$/config/config.php" />
-        <option value="$PROJECT_DIR$/js/register.coffee" />
         <option value="$PROJECT_DIR$/config/l10n.en.php" />
         <option value="$PROJECT_DIR$/partials/register.phtml" />
         <option value="$PROJECT_DIR$/config/database.sql" />
@@ -120,6 +123,8 @@
         <option value="$PROJECT_DIR$/partials/edit.phtml" />
         <option value="$PROJECT_DIR$/api/edit-algorithm.php" />
         <option value="$PROJECT_DIR$/js/edit-var.coffee" />
+        <option value="$PROJECT_DIR$/api/register.php" />
+        <option value="$PROJECT_DIR$/js/register.coffee" />
       </list>
     </option>
   </component>
@@ -400,7 +405,13 @@
       <option name="project" value="LOCAL" />
       <updated>1418408038991</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="variables: reduction of complexity, api design, database">
+      <created>1418514139497</created>
+      <option name="number" value="00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1418514139497</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -409,6 +420,7 @@
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32982087" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32876712" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32982087" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
@@ -421,7 +433,6 @@
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -454,7 +465,8 @@
     <MESSAGE value="everything coffeefied" />
     <MESSAGE value="remove derived files from vc" />
     <MESSAGE value="first prototype of visual algorithm builder" />
-    <option name="LAST_COMMIT_MESSAGE" value="first prototype of visual algorithm builder" />
+    <MESSAGE value="variables: reduction of complexity, api design, database" />
+    <option name="LAST_COMMIT_MESSAGE" value="variables: reduction of complexity, api design, database" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -628,22 +640,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/api/register.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.21937639" vertical-offset="28" max-vertical-offset="960">
-          <caret line="15" column="16" selection-start-line="15" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/register.coffee">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="885">
-          <caret line="40" column="44" selection-start-line="40" selection-start-column="44" selection-end-line="40" selection-end-column="44" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/config/l10n.en.php">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-18.125" vertical-offset="0" max-vertical-offset="1050">
@@ -708,10 +704,26 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/api/register.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-25.625" vertical-offset="0" max-vertical-offset="960">
+          <caret line="41" column="33" selection-start-line="41" selection-start-column="33" selection-end-line="41" selection-end-column="33" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/register.coffee">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="645">
+          <caret line="16" column="31" selection-start-line="16" selection-start-column="31" selection-end-line="16" selection-end-column="31" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/js/edit-var.coffee">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.23535791" vertical-offset="893" max-vertical-offset="2145">
-          <caret line="74" column="8" selection-start-line="74" selection-start-column="8" selection-end-line="74" selection-end-column="8" />
+        <state vertical-scroll-proportion="0.36550975" vertical-offset="833" max-vertical-offset="1755">
+          <caret line="78" column="14" selection-start-line="78" selection-start-column="14" selection-end-line="78" selection-end-column="14" />
           <folding />
         </state>
       </provider>
