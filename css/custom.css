@@ -56,28 +56,3 @@
 .cell {
     padding: 6px;
 }
-
-.ui-selected {
-    background: lightgray;
-}
-
-.handle {
-    font-size: 23px;
-    cursor: pointer;
-    width: 32px;
-}
-
-.buttonArea {
-    width: 48pt;
-    text-align: center;
-    vertical-align: middle;
-}
-
-.dummyRow {
-    background: #b3eaae;
-}
-
-.dummyRow-hover {
-    border: 2px dashed #25c318;
-    height: 35px;
-}

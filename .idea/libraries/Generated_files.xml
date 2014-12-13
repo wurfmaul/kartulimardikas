@@ -2,11 +2,11 @@
   <library name="Generated files" type="javaScript">
     <properties>
       <sourceFilesUrls>
-        <item url="file://$PROJECT_DIR$/js/new.js" />
-        <item url="file://$PROJECT_DIR$/js/new-step.js" />
-        <item url="file://$PROJECT_DIR$/js/custom.js" />
-        <item url="file://$PROJECT_DIR$/js/new-var.js" />
-        <item url="file://$PROJECT_DIR$/js/custom.js" />
+        <item url="file://$PROJECT_DIR$/js/register.js" />
+        <item url="file://$PROJECT_DIR$/js/edit-var.js" />
+        <item url="file://$PROJECT_DIR$/js/edit-step.js" />
+        <item url="file://$PROJECT_DIR$/js/edit.js" />
+        <item url="file://$PROJECT_DIR$/js/common.js" />
       </sourceFilesUrls>
     </properties>
     <CLASSES>
@@ -17,6 +17,11 @@
       <root url="file://$PROJECT_DIR$/js/custom.js" />
       <root url="file://$PROJECT_DIR$/js/custom.js" />
       <root url="file://$PROJECT_DIR$/js/new-var.js" />
+      <root url="file://$PROJECT_DIR$/js/register.js" />
+      <root url="file://$PROJECT_DIR$/js/edit-var.js" />
+      <root url="file://$PROJECT_DIR$/js/edit-step.js" />
+      <root url="file://$PROJECT_DIR$/js/edit.js" />
+      <root url="file://$PROJECT_DIR$/js/common.js" />
     </CLASSES>
     <SOURCES />
   </library>

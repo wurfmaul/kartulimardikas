@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 06, 2014 at 10:35
+-- Generation Time: Dec 13, 2014 at 12:56 
 -- Server version: 5.6.16
 -- PHP Version: 5.5.9
 
@@ -13,8 +13,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `kartulimardikas`
 --
-CREATE DATABASE IF NOT EXISTS `kartulimardikas` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
-USE `kartulimardikas`;
 
 -- --------------------------------------------------------
 
@@ -33,9 +31,8 @@ CREATE TABLE IF NOT EXISTS `algorithms` (
   `script` longblob,
   PRIMARY KEY (`aid`),
   UNIQUE KEY `aid` (`aid`),
-  KEY `uid` (`uid`),
-  FULLTEXT KEY `long_description` (`long_description`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
+  KEY `uid` (`uid`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=14 ;
 
 -- --------------------------------------------------------
 
@@ -73,9 +70,11 @@ CREATE TABLE IF NOT EXISTS `tag_mapping` (
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE IF NOT EXISTS `users` (
   `uid` int(6) NOT NULL AUTO_INCREMENT COMMENT 'user id',
-  `username` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `username` varchar(64) COLLATE utf8_bin NOT NULL,
   `email` varchar(128) COLLATE utf8_bin DEFAULT NULL,
+  `password` varchar(255) COLLATE utf8_bin NOT NULL,
   `registration_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`uid`),
-  UNIQUE KEY `uid` (`uid`)
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=2 ;

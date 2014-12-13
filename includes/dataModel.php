@@ -30,6 +30,8 @@ class DataModel {
      * @return object|stdClass
      */
     public function fetchUserByUsername($username) {
+        $username = $this->_sql->real_escape_string($username);
+
         $stmt = $this->_sql->prepare("SELECT * FROM users WHERE username = ?");
         $stmt->bind_param("s", $username);
         $stmt->execute();
@@ -43,6 +45,8 @@ class DataModel {
      * @return object|stdClass
      */
     public function fetchUserByMail($email) {
+        $email = $this->_sql->real_escape_string($email);
+
         $stmt = $this->_sql->prepare("SELECT * FROM users WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
@@ -56,6 +60,8 @@ class DataModel {
      * @return object|stdClass
      */
     public function fetchLoginByUsername($username) {
+        $username = $this->_sql->real_escape_string($username);
+
         $stmt = $this->_sql->prepare("SELECT uid, password FROM users WHERE username = ?");
         $stmt->bind_param('s', $username);
         $stmt->execute();
@@ -84,6 +90,10 @@ class DataModel {
      * @return int
      */
     public function insertUser($username, $email, $password) {
+        $username = $this->_sql->real_escape_string($username);
+        $email = $this->_sql->real_escape_string($email);
+        $password = $this->_sql->real_escape_string($password);
+
         $stmt = $this->_sql->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
         $stmt->bind_param('sss', $username, $email, $password);
         $stmt->execute();
@@ -94,17 +104,11 @@ class DataModel {
 
     /**
      * @param $uid int
-     * @param $name string
-     * @param $desc string
-     * @param $long string
-     * @param $variables mixed
-     * @param $script mixed
      * @return int
      */
-    public function insertAlgorithm($uid, $name, $desc, $long, $variables, $script) {
-        $stmt = $this->_sql->prepare("INSERT INTO algorithms (uid, name, description, long_description, variables, script)
-            VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("isssbb", $uid, $name, $desc, $long, $variables, $script);
+    public function insertAlgorithm($uid) {
+        $stmt = $this->_sql->prepare("INSERT INTO algorithms (uid) VALUES (?)");
+        $stmt->bind_param("i", $uid);
         $stmt->execute();
         $aid = $stmt->insert_id;
         $stmt->close();
@@ -113,16 +117,43 @@ class DataModel {
 
     /**
      * @param $aid int
-     * @param $uid int
      * @param $name string
      * @param $desc string
      * @param $long string
+     */
+    public function updateAlgorithmInfo($aid, $name, $desc, $long) {
+        $name = $this->_sql->real_escape_string($name);
+        $desc = $this->_sql->real_escape_string($desc);
+        $long = $this->_sql->real_escape_string($long);
+
+        $stmt = $this->_sql->prepare("UPDATE algorithms SET name=?, description=?, long_description=? WHERE aid=?");
+        $stmt->bind_param("sssi", $name, $desc, $long, $aid);
+        $stmt->execute();
+        $stmt->close();
+    }
+
+    /**
+     * @param $aid int
      * @param $variables mixed
+     */
+    public function updateAlgorithmVariables($aid, $variables) {
+        $null = NULL;
+        $stmt = $this->_sql->prepare("UPDATE algorithms SET variables=? WHERE aid=?");
+        $stmt->bind_param("bi", $null, $aid);
+        $stmt->send_long_data(0, $variables);
+        $stmt->execute();
+        $stmt->close();
+    }
+
+    /**
+     * @param $aid int
      * @param $script mixed
      */
-    public function updateAlgorithm($aid, $uid, $name, $desc, $long, $variables, $script) {
-        $stmt = $this->_sql->prepare("UPDATE algorithms SET uid=?, name=?, description=?, long_description=?, variables=?, script=? WHERE aid=?");
-        $stmt->bind_param("isssbbi", $uid, $name, $desc, $long, $variables, $script, $aid);
+    public function updateAlgorithmScript($aid, $script) {
+        $null = NULL;
+        $stmt = $this->_sql->prepare("UPDATE algorithms SET script=? WHERE aid=?");
+        $stmt->bind_param("bi", $null, $aid);
+        $stmt->send_long_data(0, $script);
         $stmt->execute();
         $stmt->close();
     }

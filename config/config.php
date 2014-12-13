@@ -13,6 +13,9 @@ define('DB_NAME', 'kartulimardikas');
 define('DB_USER', 'root');
 define('DB_PASSWORD', '');
 
+# Algorithm settings
+define('ARRAY_MIN_SIZE', 2);
+define('ARRAY_MAX_SIZE', 13);
+
 # Load language settings
-require_once BASEDIR . 'config/l10n.php';
-$l10n = $lang[LANG];
+require_once BASEDIR . 'config/l10n.' . LANG . '.php';

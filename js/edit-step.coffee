@@ -1,3 +1,6 @@
+# TODO handler
+#script = new window.Tree().parseRoot()
+
 class window.Tree
   parse: (node) =>
     # extract the type

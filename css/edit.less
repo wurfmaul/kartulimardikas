@@ -1,17 +1,57 @@
-@border: 1px solid gray;
-@radius: 5px;
-@form-background-color-factor: 5%;
-@form-border-color-factor: 20%;
-@form-border-style: 1px dashed;
+table.variables {
+  margin-top: 10px;
+  margin-bottom: 0px;
 
-@assign-node-color: #ffb181;
-@compare-node-color: #fff465;
-@constant-node-color: #a6e0ff;
-@if-node-color: #b2e792;
-@var-node-color: #d3d3d3;
-@while-node-color: #d5a2da;
+  .handle {
+    @width: 20px;
+
+    font-size: 20px;
+    color: gray;
+    cursor: pointer;
+    width: @width;
+    min-width: @width;
+    max-width: @width;
+    border-right: none;
+    vertical-align: middle;
+  }
+
+  .content {
+    text-align: left;
+    border-left: none;
+    border-right: none;
+    vertical-align: middle;
+  }
+
+  .buttons {
+    @width: 58px;
+
+    width: @width;
+    min-width: @width;
+    max-width: @width;
+    text-align: center;
+    border-left: none;
+    vertical-align: middle;
+  }
+
+  .form-group {
+    margin: 0px;
+  }
+}
 
 table.step {
+  @border: 1px solid gray;
+  @radius: 5px;
+  @form-background-color-factor: 5%;
+  @form-border-color-factor: 20%;
+  @form-border-style: 1px dashed;
+
+  @assign-node-color: #ffb181;
+  @compare-node-color: #fff465;
+  @constant-node-color: #a6e0ff;
+  @if-node-color: #b2e792;
+  @var-node-color: #d3d3d3;
+  @while-node-color: #d5a2da;
+
   border-collapse: separate;
   padding: 1px;
 
@@ -107,4 +147,17 @@ table.step {
       background-color: @while-node-color;
     }
   }
+}
+
+.ui-selected {
+  background: lightgray;
+}
+
+.dummyRow {
+  background: #b3eaae;
+}
+
+.dummyRow-hover {
+  border: 2px dashed #25c318;
+  height: 35px;
 }

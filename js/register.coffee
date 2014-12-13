@@ -35,8 +35,8 @@ $ ->
         else
           $('#password2-group').removeClass('has-error');
 
-        $('#registerAlertText').html msg
         if (msg isnt "")
+          $('#registerAlertText').html msg
           $('#registerAlert').show('slow')
           $('#registerSuccess').hide('slow')
         else
