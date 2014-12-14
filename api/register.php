@@ -56,4 +56,5 @@ if (isset($username, $email, $password1, $password2)) {
     $model->close();
 }
 
+header('Content-type: application/json; charset=UTF-8');
 echo json_encode($response);

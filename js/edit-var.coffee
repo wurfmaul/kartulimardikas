@@ -21,7 +21,11 @@ $ ->
 
 class VariableForm
   constructor: ->
-    @maxVarId = 0
+    lastVid = $('.varRow') # find all variable rows
+      .not('#var-prototype') # exclude the prototype
+      .last() # pick the last one
+      .data('vid') # extract the vid
+    @maxVarId = if lastVid? then lastVid + 1 else 0
     @api = new Api()
 
   addRow: ->
@@ -29,16 +33,21 @@ class VariableForm
       .attr('id', 'var-' + @maxVarId) # change id
       .data('vid', @maxVarId) # change vid
       .appendTo(VARSITE) # add to the other rows
-      .show("slow")
+    newRow.find('.edit').show()
+    newRow.find('.view').hide()
+    newRow.show("slow")
     @maxVarId++
 
   performCancel: (vid) ->
+    $('#editAlert').hide('slow')
     varRow = $('#var-' + vid)
     if varRow.data('name')?
       varRow.find('.name').val(varRow.data('name'))
       varRow.find('.init').val(varRow.data('init'))
       varRow.find('.value').val(varRow.data('value'))
       varRow.find('.size').val(varRow.data('size'))
+      varRow.find('.edit').hide()
+      varRow.find('.view').show()
     else
       varRow.hide('slow', -> $(this).remove())
 
@@ -67,7 +76,6 @@ class Api
       data: { aid: aid, vid: vid, name: name, init: init, value: value, size: size }
       dataType: 'json'
       success: (data) -> # if response arrived...
-        console.log data
         msg = data['error'] ? ""
         varRow = $('#var-'+vid)
 
@@ -75,11 +83,11 @@ class Api
         for token in ['name', 'init', 'value', 'size']
           if data['error-' + token]?
             msg += data['error-' + token]
-            varRow.find(".#{token}-group").addClass('has-error')
+            varRow.find('.' + token + '-group').addClass('has-error')
           else
-          varRow.find(".#{token}-group").removeClass('has-error')
-          varRow.find('.' + token).val(data[token])
-          varRow.data(token, data[token])
+            varRow.find('.' + token + '-group').removeClass('has-error')
+            varRow.find('.' + token).val(data[token])
+            varRow.data(token, data[token])
 
         # set aid if new algorithm was created
         if data['aid']? then $('#aid').text(data['aid']);
@@ -100,8 +108,6 @@ class Api
       data: { aid: aid, vid: vid }
       dataType: 'json'
       success: (data) -> # if response arrived...
-        console.log data
-
         if data['error']? # if error
           printError(data['error'])
         else

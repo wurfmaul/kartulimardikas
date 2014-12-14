@@ -1,7 +1,28 @@
 <?php
     if (!defined('BASEDIR')) die('You cannot call this script directly !');
 
-    $aid = isset($_GET['aid']) ? $_GET['aid'] : -1;
+    if (isset($_GET['aid'])) {
+        $aid = $_GET['aid'];
+
+        // get algorithm details from database
+        require_once BASEDIR . "includes/dataModel.php";
+        $model = new DataModel();
+        $algo = $model->fetchAlgorithmByAID($aid);
+        $model->close();
+
+        // extract variables
+        $vars = json_decode($algo->variables);
+    } else {
+        $aid = -1;
+        $vars = array();
+    }
+    // add prototype row to variables
+    $prototype = new stdClass();
+    $prototype->name = "";
+    $prototype->init = "elem-?";
+    $prototype->value = "";
+    $prototype->size = 2;
+    $vars['prototype'] = $prototype;
 ?>
 
 <!-- HEADER -->
@@ -38,17 +59,19 @@
                             <div class="form-group">
                                 <label for="in-name" class="control-label col-sm-3"><?= $l10n['algo_name'] ?></label>
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="in-name" placeholder="<?= $l10n['algo_name'] ?>">
+                                    <input type="text" class="form-control" id="in-name" placeholder="<?= $l10n['algo_name'] ?>"
+                                        value="<?= isset($algo) ? $algo->name : "" ?>">
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label for="in-title" class="control-label col-sm-3"><?= $l10n['description'] ?></label>
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="in-title" placeholder="<?= $l10n['description'] ?>">
+                                    <input type="text" class="form-control" id="in-desc" placeholder="<?= $l10n['description'] ?>"
+                                           value="<?= isset($algo) ? $algo->description : "" ?>">
                                 </div>
                             </div>
-                            <textarea class="form-control" id="in-desc" rows="3"
-                                      data-placeholder="<?= $l10n['long_description'] ?>"><?= $l10n['long_description'] ?></textarea>
+                            <textarea class="form-control" id="in-long" rows="3" data-placeholder="<?= $l10n['long_description'] ?>"
+                                ><?= isset($algo) ? $algo->long_description : $l10n['long_description'] ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -60,40 +83,46 @@
                             <span class="glyphicon glyphicon-chevron-right"></span> <?= $l10n['variables'] ?>
                         </h4>
                     </div>
-                    <div id="varPanel" class="panel-collapse collapse in">
+                    <div id="varPanel" class="panel-collapse collapse">
                         <div class="panel-body" style="text-align: center;">
                             <div class="btn btn-success btn-lg" id="btnAddVar">
                                 <span class="glyphicon glyphicon-plus" style="width: 100px;"></span>
                             </div>
                             <table class="table table-condensed table-bordered variables">
                                 <tbody id="insertVarsHere">
-                                    <tr class="dummyRow ui-droppable" style="display: none"><td colspan="2"></td></tr>
-                                </tbody>
-                                <tfoot>
-                                    <tr id="var-prototype" class="varRow" data-vid="" style="display: none">
+                                <?php foreach ($vars as $vid => $var):
+                                    $rowVisible = ($vid === 'prototype') ? 'style="display:none"' : '';
+                                    $selInit = array();
+                                    foreach (['elem-?', 'elem-value', 'array-?', 'array-random', 'array-custom'] as $mode)
+                                        $selInit[$mode] = $var->init === $mode ? 'selected="selected"' : '';
+                                    $valueVisible = ($var->init === 'elem-value' || $var->init === 'array-custom') ? '' : 'style="display:none"';
+                                    $sizeVisible = ($var->init === 'array-?' || $var->init === 'array-random') ? '' : 'style="display:none"';
+                                ?>
+                                    <tr id="var-<?= $vid ?>" class="varRow" data-vid="<?= $vid ?>" <?= $rowVisible ?>
+                                        data-name="<?= $var->name ?>" data-init="<?= $var->init ?>" data-value="<?= $var->value ?>" data-size="<?= $var->size ?>">
                                         <!-- Variable in view mode -->
-                                        <td class="content view" style="display: none">
+                                        <td class="content view">
                                             <div class="col-lg-12">
-                                                <code class="cell"></code>
+                                                <code class="cell"><?= $var->name ?> = <?= $var->value ?></code>
                                             </div>
                                         </td>
-                                        <td class="buttons view" style="display: none">
+                                        <td class="buttons view">
                                             <div class="btn-group btn-group-xs">
-                                                <button type="button" class="btn btn-default btn-var-edit" value="0" title="<?= $l10n['edit_var'] ?>">
+                                                <button type="button" class="btn btn-default btn-var-edit" title="<?= $l10n['edit_var'] ?>">
                                                     <span class="glyphicon glyphicon-pencil"></span>
                                                 </button>
-                                                <button type="button" class="btn btn-default btn-var-remove" value="0" title="<?= $l10n['remove_var'] ?>">
+                                                <button type="button" class="btn btn-default btn-var-remove" title="<?= $l10n['remove_var'] ?>">
                                                     <span class="glyphicon glyphicon-trash"></span>
                                                 </button>
                                             </div>
                                         </td>
 
                                         <!-- Variable in edit mode -->
-                                        <td class="content edit">
+                                        <td class="content edit" style="display: none">
                                             <div class="col-xs-4">
                                                 <div class="form-group name-group">
                                                     <label class="sr-only" for="name"><?= $l10n['var_name'] ?></label>
-                                                    <input class="form-control name" value="" placeholder="<?= $l10n['name'] ?>" type="text">
+                                                    <input class="form-control name" value="<?= $var->name ?>" placeholder="<?= $l10n['name'] ?>" type="text">
                                                 </div>
                                             </div>
                                             <div class="col-xs-1">
@@ -104,46 +133,47 @@
                                                     <label class="sr-only" for="init"><?= $l10n['init'] ?></label>
                                                     <select class="form-control init">
                                                         <optgroup label="Element">
-                                                            <option value="elem-?"><?= $l10n['uninitialized'] ?></option>
-                                                            <option value="elem-value" data-target=".value"><?= $l10n['value'] ?></option>
+                                                            <option value="elem-?" <?= $selInit['elem-?'] ?>><?= $l10n['uninitialized'] ?></option>
+                                                            <option value="elem-value" <?= $selInit['elem-value'] ?> data-target=".value"><?= $l10n['value'] ?></option>
                                                         </optgroup>
                                                         <optgroup label="Array">
-                                                            <option value="array-?" data-target=".size"><?= $l10n['uninitialized'] ?></option>
-                                                            <option value="array-random" data-target=".size"><?= $l10n['random'] ?></option>
-                                                            <option value="array-custom" data-target=".value"><?= $l10n['custom'] ?></option>
+                                                            <option value="array-?"  <?= $selInit['array-?'] ?> data-target=".size"><?= $l10n['uninitialized'] ?></option>
+                                                            <option value="array-random"  <?= $selInit['array-random'] ?> data-target=".size"><?= $l10n['random'] ?></option>
+                                                            <option value="array-custom"  <?= $selInit['array-custom'] ?> data-target=".value"><?= $l10n['custom'] ?></option>
                                                         </optgroup>
                                                     </select>
                                                 </div>
                                             </div>
                                             <div class="col-xs-3">
-                                                <div class="form-group value-group" style="display: none">
+                                                <div class="form-group value-group" <?= $valueVisible ?>>
                                                     <label class="sr-only" for="value"><?= $l10n['init_value'] ?></label>
-                                                    <input class="form-control value" value="" placeholder="<?= $l10n['value'] ?>" type="text">
+                                                    <input class="form-control value" value="<?= $var->value ?>" placeholder="<?= $l10n['value'] ?>" type="text">
                                                 </div>
-                                                <div class="form-group size-group" style="display: none;">
+                                                <div class="form-group size-group" <?= $sizeVisible ?>>
                                                     <label class="sr-only" for="size"><?= $l10n['array_size'] ?></label>
                                                     <select class="form-control size">
                                                         <optgroup label="<?= $l10n['size'] ?>">
                                                             <?php for($i = ARRAY_MIN_SIZE; $i <= ARRAY_MAX_SIZE; $i++): ?>
-                                                            <option><?= $i ?></option>
+                                                            <option <?php if ($var->size == $i): ?>selected="selected"<?php endif ?>><?= $i ?></option>
                                                             <?php endfor ?>
                                                         </optgroup>
                                                     </select>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="buttons edit">
+                                        <td class="buttons edit" style="display: none">
                                             <div class="btn-group btn-group-xs">
-                                                <button type="button" class="btn btn-default btn-var-check" value="0" title="<?= $l10n['check_var'] ?>">
+                                                <button type="button" class="btn btn-default btn-var-check" title="<?= $l10n['check_var'] ?>">
                                                     <span class="glyphicon glyphicon-ok"></span>
                                                 </button>
-                                                <button type="button" class="btn btn-default btn-var-cancel" value="0" title="<?= $l10n['discard_changes'] ?>">
+                                                <button type="button" class="btn btn-default btn-var-cancel" title="<?= $l10n['discard_changes'] ?>">
                                                     <span class="glyphicon glyphicon-remove"></span>
                                                 </button>
                                             </div>
                                         </td>
                                     </tr>
-                                </tfoot>
+                                <?php endforeach ?>
+                                </tbody>
                             </table>
                         </div>
                     </div>

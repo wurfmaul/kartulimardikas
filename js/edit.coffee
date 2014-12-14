@@ -13,15 +13,15 @@ $ ->
   $('#editAlertClose').click ->
     $('#editAlert').hide('slow')
 
-  $('#in-desc')
-    .focus -> $(this).text("") if ($(this).data('placeholder') == $(this).text())
-    .blur -> $(this).text($(this).data('placeholder')) if ($(this).text() == "")
+  $('#in-long')
+    .focus -> $(this).val("") if ($(this).data('placeholder') == $(this).val())
+    .blur -> $(this).val($(this).data('placeholder')) if ($(this).val() == "")
 
-  $("#in-name, #in-title, #in-desc").blur ->
+  $("#in-name, #in-desc, #in-long").blur ->
     aid = $('#aid').text()
     name = $('#in-name').val()
-    desc = $('#in-title').val()
-    long = $('#in-desc').text()
+    desc = $('#in-desc').val()
+    long = $('#in-long').val()
     new Api().editInfo(aid, name, desc, long)
 
 class Api
@@ -31,7 +31,6 @@ class Api
       data: { aid: aid, name: name, desc: desc, long: long }
       dataType: 'json'
       success: (data) -> # if response arrived...
-        console.log data
         if data['error']? then printError(data['error']) else printSuccess(data['success'])
         if data['aid']? then $('#aid').text(data['aid']);
       error: (jqXHR, textStatus, errorThrown) -> # if request failed

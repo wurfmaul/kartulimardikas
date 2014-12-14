@@ -240,4 +240,5 @@ if (isSignedIn()) {
     $response['error'] = $l10n['edit_not_signed_in'];
 }
 
+header('Content-type: application/json; charset=UTF-8');
 echo json_encode($response);
