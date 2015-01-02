@@ -1,50 +1,33 @@
-table.variables {
-  margin-top: 10px;
-  margin-bottom: 0px;
+#varPanel {
+  table.variables {
+    margin-top: 10px;
+    margin-bottom: 0px;
 
-  .handle {
-    @width: 20px;
+    .content {
+      text-align: left;
+      border-left: none;
+      border-right: none;
+      vertical-align: middle;
+    }
 
-    font-size: 20px;
-    color: gray;
-    cursor: pointer;
-    width: @width;
-    min-width: @width;
-    max-width: @width;
-    border-right: none;
-    vertical-align: middle;
-  }
+    .buttons {
+      @width: 58px;
 
-  .content {
-    text-align: left;
-    border-left: none;
-    border-right: none;
-    vertical-align: middle;
-  }
+      width: @width;
+      min-width: @width;
+      max-width: @width;
+      text-align: center;
+      border-left: none;
+      vertical-align: middle;
+    }
 
-  .buttons {
-    @width: 58px;
-
-    width: @width;
-    min-width: @width;
-    max-width: @width;
-    text-align: center;
-    border-left: none;
-    vertical-align: middle;
-  }
-
-  .form-group {
-    margin: 0px;
+    .form-group {
+      margin: 0px;
+    }
   }
 }
 
-table.step {
-  @border: 1px solid gray;
-  @radius: 5px;
-  @form-background-color-factor: 5%;
-  @form-border-color-factor: 20%;
-  @form-border-style: 1px dashed;
-
+#stepPanel {
   @assign-node-color: #ffb181;
   @compare-node-color: #fff465;
   @constant-node-color: #a6e0ff;
@@ -52,112 +35,157 @@ table.step {
   @var-node-color: #d3d3d3;
   @while-node-color: #d5a2da;
 
-  border-collapse: separate;
-  padding: 1px;
+  ul.sortable {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    min-height: 20px;
 
-  .step-box {
-    min-width: 20px;
-    font-family: monospace, Courier;
+    .node {
+      @border: 1px solid gray;
+      @radius: 5px;
+      @form-background-color-factor: 5%;
+      @form-border-color-factor: 20%;
+      @form-border-style: 1px dashed;
 
-    &.full-width {
-      width: 100%;
-    }
-    &.half-width {
-      width: 50%;
-    }
+      list-style-type: none;
 
-    &.top {
-      border-top: @border;
-      &.left {
-        -moz-border-radius-topleft: @radius;
-        -webkit-border-top-left-radius: @radius;
-        border-top-left-radius: @radius;
+      table {
+        border-collapse: separate;
+        padding: 1px;
+        text-align: left;
       }
-      &.right {
-        -moz-border-radius-topright: @radius;
-        -webkit-border-top-right-radius: @radius;
-        border-top-right-radius: @radius;
+
+      .handle {
+        cursor: move;
+      }
+
+      .node-box {
+        min-width: 20px;
+        font-family: monospace, Courier;
+
+        &.full-width {
+          width: 100%;
+        }
+        &.half-width {
+          width: 50%;
+        }
+
+        &.top {
+          border-top: @border;
+          &.left {
+            -moz-border-radius-topleft: @radius;
+            -webkit-border-top-left-radius: @radius;
+            border-top-left-radius: @radius;
+          }
+          &.right {
+            -moz-border-radius-topright: @radius;
+            -webkit-border-top-right-radius: @radius;
+            border-top-right-radius: @radius;
+          }
+        }
+        &.right {
+          border-right: @border;
+        }
+        &.bottom {
+          border-bottom: @border;
+          &.left {
+            -moz-border-radius-bottomleft: @radius;
+            -webkit-border-bottom-left-radius: @radius;
+            border-bottom-left-radius: @radius;
+          }
+          &.right {
+            -moz-border-radius-bottomright: @radius;
+            -webkit-border-bottom-right-radius: @radius;
+            border-bottom-right-radius: @radius;
+          }
+        }
+        &.left {
+          border-left: @border;
+        }
+      }
+
+      &.assign-node > table > tbody > tr > td {
+        &.node-box {
+          background-color: @assign-node-color;
+        }
+      }
+
+      &.compare-node > table > tbody > tr > td {
+        &.node-box {
+          background-color: @compare-node-color;
+        }
+        select {
+          background-color: darken(@compare-node-color, @form-background-color-factor);
+          border: @form-border-style darken(@compare-node-color, @form-border-color-factor);
+        }
+      }
+
+      &.constant-node > table > tbody > tr > td {
+        &.node-box {
+          background-color: @constant-node-color;
+          input {
+            background-color: darken(@constant-node-color, @form-background-color-factor);
+            border: @form-border-style darken(@constant-node-color, @form-border-color-factor);
+          }
+        }
+      }
+
+      &.if-node > table > tbody > tr > td {
+        &.node-box {
+          background-color: @if-node-color;
+        }
+      }
+
+      &.var-node > table > tbody > tr > td {
+        &.node-box {
+          background-color: @var-node-color;
+        }
+        select {
+          background-color: darken(@var-node-color, @form-background-color-factor);
+          border: @form-border-style darken(@var-node-color, @form-border-color-factor);
+        }
+      }
+
+      &.while-node > table > tbody > tr > td {
+        &.node-box {
+          background-color: @while-node-color;
+        }
       }
     }
-    &.right {
-      border-right: @border;
-    }
-    &.bottom {
-      border-bottom: @border;
-      &.left {
-        -moz-border-radius-bottomleft: @radius;
-        -webkit-border-bottom-left-radius: @radius;
-        border-bottom-left-radius: @radius;
-      }
-      &.right {
-        -moz-border-radius-bottomright: @radius;
-        -webkit-border-bottom-right-radius: @radius;
-        border-bottom-right-radius: @radius;
-      }
-    }
-    &.left {
-      border-left: @border;
+    .sortable-highlight {
+      background-color: greenyellow;
+      border: 2px dashed forestgreen;
+      height: 20px;
+      list-style-type: none;
     }
   }
 
-  &.assign-node > tbody > tr > td {
-    &.step-box {
-      background-color: @assign-node-color;
+  #node-btn-group {
+    padding-top: 10px;
+
+    #btn-add-assign {
+      background-color: lighten(@assign-node-color, 10%);
+    }
+
+    #btn-add-compare {
+      background-color: lighten(@compare-node-color, 10%);
+    }
+
+    #btn-add-constant {
+      background-color: lighten(@constant-node-color, 10%);
+    }
+
+    #btn-add-if {
+      background-color: lighten(@if-node-color, 10%);
+    }
+
+    #btn-add-var {
+      background-color: lighten(@var-node-color, 10%);
+    }
+
+    #btn-add-while {
+      background-color: lighten(@while-node-color, 10%);
     }
   }
-
-  &.compare-node > tbody > tr > td {
-    &.step-box {
-      background-color: @compare-node-color;
-    }
-    select {
-      background-color: darken(@compare-node-color, @form-background-color-factor);
-      border: @form-border-style darken(@compare-node-color, @form-border-color-factor);
-    }
-  }
-
-  &.constant-node > tbody > tr > td {
-    &.step-box {
-      background-color: @constant-node-color;
-      input {
-        background-color: darken(@constant-node-color, @form-background-color-factor);
-        border: @form-border-style darken(@constant-node-color, @form-border-color-factor);
-      }
-    }
-  }
-
-  &.if-node > tbody > tr > td {
-    &.step-box {
-      background-color: @if-node-color;
-    }
-  }
-
-  &.var-node > tbody > tr > td {
-    &.step-box {
-      background-color: @var-node-color;
-    }
-    select {
-      background-color: darken(@var-node-color, @form-background-color-factor);
-      border: @form-border-style darken(@var-node-color, @form-border-color-factor);
-    }
-  }
-
-  &.while-node > tbody > tr > td {
-    &.step-box {
-      background-color: @while-node-color;
-    }
-  }
-}
-
-.ui-selected {
-  background: lightgray;
-}
-
-.dummyRow {
-  background: #b3eaae;
-}
-
-.dummyRow-hover {
-  border: 2px dashed #25c318;
-  height: 35px;
 }

@@ -1,7 +1,20 @@
-# TODO handler
-#script = new window.Tree().parseRoot()
+# Specifies the site, where variables are to place.
+SCRIPTSITE = $("#insertStepsHere")
 
-class window.Tree
+# TODO handler
+#script = new Tree().parseRoot()
+
+$ ->
+  $('#node-btn-group').children('button').click -> addNode($(this).data('node'))
+  $('.sortable').sortable(
+    connectWith: ".sortable"
+    placeholder: "sortable-highlight"
+  ).disableSelection()
+
+addNode = (nodeId) ->
+  $('#' + nodeId).clone(true, true).removeAttr('id').appendTo(SCRIPTSITE)
+
+class Tree
   parse: (node) =>
     # extract the type
     type = node.data('node-type')
@@ -21,7 +34,7 @@ class window.Tree
     # prepare return value
     script = {}
     # loop level-1 elements:
-    $('#placeAlgorithmHere > tbody > tr').each((index, element) =>
+    $('#insertAlgorithmHere > tbody > tr').each((index, element) =>
       # find the table element that represents one node
       node = $(element).find('.step:first')
       # and parse the node

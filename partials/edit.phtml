@@ -187,152 +187,134 @@
                         </h4>
                     </div>
                     <div id="stepPanel" class="panel-collapse collapse in">
-                        <div class="panel-body">
-                            <table id="placeAlgorithmHere" style="width: 100%">
-                                <tr>
-                                    <td>
-                                        <!-- IF NODE BEGIN -->
-                                        <table class="step if-node" data-node-type="if">
-                                            <tr>
-                                                <td class="step-box top left">&nbsp;</td>
-                                                <td class="step-box top right bottom full-width">if</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="step-box right left">&nbsp;</td>
-                                                <td class="if-condition">
-                                                    <!-- COMPARE NODE BEGIN -->
-                                                    <table class="step compare-node" data-node-type="compare">
-                                                        <tr>
-                                                            <td class="step-box top left">&nbsp;</td>
-                                                            <td class="step-box top right bottom full-width">compare</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="step-box right left">&nbsp;</td>
-                                                            <td class="compare-left">
-                                                                <!-- VAR NODE BEGIN -->
-                                                                <table class="step var-node" data-node-type="var">
-                                                                    <tr>
-                                                                        <td class="step-box top left bottom">&nbsp;</td>
-                                                                        <td class="step-box top right bottom full-width">
-                                                                            variable:
-                                                                            <select class="var-value">
-                                                                                <option value="var-0">a</option>
-                                                                                <option value="var-1">b</option>
-                                                                            </select>
-                                                                        </td>
-                                                                    </tr>
-                                                                </table>
-                                                                <!-- VAR NODE END -->
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="step-box left">&nbsp;</td>
-                                                            <td class="step-box top right bottom half-width">
-                                                                operation:
-                                                                <select class="compare-operation">
-                                                                    <option value="lt">&lt;</option>
-                                                                    <option value="le">&le;</option>
-                                                                    <option value="eq">&equals;</option>
-                                                                    <option value="ge">&ge;</option>
-                                                                    <option value="gt">&gt;</option>
-                                                                </select>
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="step-box right bottom left">&nbsp;</td>
-                                                            <td class="compare-right">
-                                                                <!-- CONSTANT NODE BEGIN -->
-                                                                <table class="step constant-node" data-node-type="constant">
-                                                                    <tr>
-                                                                        <td class="step-box top left bottom">&nbsp;</td>
-                                                                        <td class="step-box top right bottom full-width">
-                                                                            constant: <input class="constant-value" value="12" />
-                                                                        </td>
-                                                                    </tr>
-                                                                </table>
-                                                                <!-- CONSTANT NODE END -->
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                    <!-- COMPARE NODE END -->
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td class="step-box left">&nbsp;</td>
-                                                <td class="step-box top right bottom half-width">then</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="step-box right bottom left">&nbsp;</td>
-                                                <td class="if-body">
-                                                    <!-- ASSIGN NODE BEGIN -->
-                                                    <table class="step assign-node" data-node-type="assign">
-                                                        <tr>
-                                                            <td class="step-box top left">&nbsp;</td>
-                                                            <td class="step-box top right bottom full-width">assign</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="step-box left right">&nbsp;</td>
-                                                            <td class="assign-from">
-                                                                <!-- CONSTANT NODE BEGIN -->
-                                                                <table class="step constant-node" data-node-type="constant">
-                                                                    <tr>
-                                                                        <td class="step-box top left bottom">&nbsp;</td>
-                                                                        <td class="step-box top right bottom full-width">
-                                                                            constant: <input class="constant-value" value="12" />
-                                                                        </td>
-                                                                    </tr>
-                                                                </table>
-                                                                <!-- CONSTANT NODE END -->
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="step-box left">&nbsp;</td>
-                                                            <td class="step-box top right bottom full-width">&rarr;</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="step-box left right bottom">&nbsp;</td>
-                                                            <td class="assign-to">
-                                                                <!-- VAR NODE BEGIN -->
-                                                                <table class="step var-node" data-node-type="var">
-                                                                    <tr>
-                                                                        <td class="step-box top left bottom">&nbsp;</td>
-                                                                        <td class="step-box top right bottom full-width">
-                                                                            variable:
-                                                                            <select class="var-value">
-                                                                                <option value="var-0">a</option>
-                                                                                <option value="var-1">b</option>
-                                                                            </select>
-                                                                        </td>
-                                                                    </tr>
-                                                                </table>
-                                                                <!-- VAR NODE END -->
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                    <!-- ASSIGN NODE END -->
-                                                </td>
-                                            </tr>
-                                        </table>
-                                        <!-- IF NODE END -->
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <!-- WHILE NODE BEGIN -->
-                                        <table class="step while-node" data-node-type="while">
-                                            <tr>
-                                                <td class="step-box top left">&nbsp;</td>
-                                                <td class="step-box top right bottom full-width">while</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="step-box right bottom left">&nbsp;</td>
-                                                <td></td>
-                                            </tr>
-                                        </table>
-                                        <!-- WHILE NODE END -->
-                                    </td>
-                                </tr>
-                            </table>
+                        <div class="panel-body" style="text-align: center">
+                            <ul id="insertStepsHere" class="sortable"></ul>
+
+                            <div id="node-btn-group" class="btn-group btn-group-lg" role="group" aria-label="Create a Node">
+                                <button id="btn-add-assign" type="button" class="btn btn-default btn-lg" data-node="assign-node">Assign</button>
+                                <button id="btn-add-compare" type="button" class="btn btn-default btn-lg" data-node="compare-node">Compare</button>
+                                <button id="btn-add-constant" type="button" class="btn btn-default btn-lg" data-node="constant-node">Constant</button>
+                                <button id="btn-add-if" type="button" class="btn btn-default btn-lg" data-node="if-node">If</button>
+                                <button id="btn-add-var" type="button" class="btn btn-default btn-lg" data-node="var-node">Var</button>
+                                <button id="btn-add-while" type="button" class="btn btn-default btn-lg" data-node="while-node">While</button>
+                            </div>
+
+                            <ul style="display: none">
+
+                                <!-- ASSIGN NODE -->
+                                <li id="assign-node" class="node assign-node" data-node-type="assign">
+                                    <table>
+                                        <tr>
+                                            <td class="handle node-box top left">&nbsp;</td>
+                                            <td class="node-box top right bottom full-width">assign</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="handle node-box left right">&nbsp;</td>
+                                            <td class="assign-from"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="handle node-box left">&nbsp;</td>
+                                            <td class="node-box top right bottom full-width">&rarr;</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="handle node-box left right bottom">&nbsp;</td>
+                                            <td class="assign-to"></td>
+                                        </tr>
+                                    </table>
+                                </li>
+
+                                <!-- COMPARE NODE -->
+                                <li id="compare-node" class="node compare-node" data-node-type="compare">
+                                    <table>
+                                        <tr>
+                                            <td class="handle node-box top left">&nbsp;</td>
+                                            <td class="node-box top right bottom full-width">compare</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="handle node-box right left">&nbsp;</td>
+                                            <td class="compare-left"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="handle node-box left">&nbsp;</td>
+                                            <td class="node-box top right bottom half-width">operation:
+                                                <select class="compare-operation">
+                                                    <option value="lt">&lt;</option>
+                                                    <option value="le">&le;</option>
+                                                    <option value="eq">&equals;</option>
+                                                    <option value="ge">&ge;</option>
+                                                    <option value="gt">&gt;</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="handle node-box right bottom left">&nbsp;</td>
+                                            <td class="compare-right"></td>
+                                        </tr>
+                                    </table>
+                                </li>
+
+                                <!-- CONSTANT NODE -->
+                                <li id="constant-node" class="node constant-node" data-node-type="constant">
+                                    <table>
+                                        <tr>
+                                            <td class="handle node-box top left bottom">&nbsp;</td>
+                                            <td class="node-box top right bottom full-width">constant:
+                                                <input class="constant-value" value="" />
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </li>
+
+                                <!-- IF NODE -->
+                                <li id="if-node" class="node if-node" data-node-type="if">
+                                    <table>
+                                        <tr>
+                                            <td class="handle node-box top left">&nbsp;</td>
+                                            <td class="node-box top right bottom full-width">if</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="handle node-box right left">&nbsp;</td>
+                                            <td class="if-condition"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="handle node-box left">&nbsp;</td>
+                                            <td class="node-box top right bottom half-width">then</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="handle node-box right bottom left">&nbsp;</td>
+                                            <td><ul class="if-body sortable"></ul></td>
+                                        </tr>
+                                    </table>
+                                </li>
+
+                                <!-- VAR NODE -->
+                                <li id="var-node" class="node var-node" data-node-type="var">
+                                    <table>
+                                        <tr>
+                                            <td class="handle node-box top left bottom">&nbsp;</td>
+                                            <td class="node-box top right bottom full-width">variable:
+                                                <select class="var-value">
+                                                    <option value="var-0">a</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </li>
+
+                                <!-- WHILE NODE -->
+                                <li id="while-node" class="node while-node" data-node-type="while">
+                                    <table>
+                                        <tr>
+                                            <td class="handle node-box top left">&nbsp;</td>
+                                            <td class="node-box top right bottom full-width">while</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="handle node-box right bottom left">&nbsp;</td>
+                                            <td></td>
+                                        </tr>
+                                    </table>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                 </div>

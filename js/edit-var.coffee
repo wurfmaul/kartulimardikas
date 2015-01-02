@@ -1,4 +1,3 @@
-$ = jQuery
 # Specifies the site, where variables are to place.
 VARSITE = $("#insertVarsHere")
 
