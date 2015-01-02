@@ -1,9 +1,19 @@
 <?php
+/**
+ * English language file
+ */
 
-// English language
-$l10n['saved_to_db'] = "Successfully saved to database!";
-$l10n['need_to_be_owner'] = "You need to be the owner in order to change this algorithm!";
-$l10n['edit_not_signed_in'] = "You have to be signed in to publish an algorithm!";
+// GENERAL
+$l10n['welcome'] = "Hello, %s";
+$l10n['close'] = "Close";
+$l10n['error'] = "Error!";
+$l10n['success'] = "Success!";
+$l10n['toggle_nav'] = "Toggle navigation";
+$l10n['edit_algo'] = "Edit algorithm";
+$l10n['new_algo'] = "New algorithm";
+$l10n['define_algo'] = "Define your own algorithm!";
+
+// USER MANAGEMENT
 $l10n['enter_username'] = "Please enter a username!";
 $l10n['enter_email'] = "Please enter a valid email address!";
 $l10n['enter_password'] = "Please enter a password!";
@@ -17,9 +27,6 @@ $l10n['user_not_created'] = "User could not be created.";
 $l10n['signed_in'] = "Successfully signed in as '%s'.";
 $l10n['credentials_invalid'] = "Username and password do not seem to be valid.";
 $l10n['signed_out'] = "Successfully signed out.";
-$l10n['view'] = "View";
-$l10n['edit'] = "Edit";
-$l10n['welcome'] = "Hello, %s";
 $l10n['sign_out'] = "Sign out";
 $l10n['username'] = "Username";
 $l10n['email_address'] = "Email address";
@@ -28,13 +35,31 @@ $l10n['password_again'] = "Password, once again";
 $l10n['sign_in'] = "Sign in";
 $l10n['register'] = "Register";
 $l10n['become_user'] = "Become a new user!";
-$l10n['close'] = "Close";
-$l10n['error'] = "Error!";
-$l10n['success'] = "Success!";
-$l10n['toggle_nav'] = "Toggle navigation";
-$l10n['edit_algo'] = "Edit algorithm";
-$l10n['new_algo'] = "New algorithm";
-$l10n['define_algo'] = "Define your own algorithm!";
+
+// INDEX
+$l10n['subtitle'] = "Online collection of algorithms";
+$l10n['welcome_msg'] = "Welcome to an interactive platform to discuss, demonstrate and compare common algorithms.";
+$l10n['define_new_algo'] = "Define new algorithm";
+$l10n['latest_algos'] = "Latest algorithms";
+$l10n['label_new'] = "NEW";
+$l10n['read_more'] = "read more";
+$l10n['created_note'] = "created %s by %s";
+$l10n['minutes_ago'] = "%d minutes ago";
+$l10n['hours_ago'] = "%d hours ago";
+$l10n['days_ago'] = "%d days ago";
+$l10n['one_minute_ago'] = "a minute ago";
+$l10n['one_hour_ago'] = "1 hour ago";
+$l10n['one_day_ago'] = "1 day ago";
+
+// VIEW
+$l10n['view'] = "View";
+$l10n[''] = "";
+
+// EDIT
+$l10n['edit'] = "Edit";
+$l10n['saved_to_db'] = "Successfully saved to database!";
+$l10n['need_to_be_owner'] = "You need to be the owner in order to change this algorithm!";
+$l10n['edit_not_signed_in'] = "You have to be signed in to publish an algorithm!";
 $l10n['general_info'] = "General Information";
 $l10n['algo_name'] = "Algorithm name";
 $l10n['description'] = "Description";
@@ -61,5 +86,3 @@ $l10n['size_out_of_bounds'] = "The array size has to be between %d and %d.";
 $l10n['empty_value'] = "The value cannot be empty.";
 $l10n['empty_name'] = "The variable name cannot be empty.";
 $l10n['invalid_init'] = "The initialization method seems to be invalid.";
-$l10n[''] = "";
-$l10n[''] = "";

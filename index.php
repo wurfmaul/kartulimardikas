@@ -34,6 +34,8 @@
     <?php if (ACTION == 'edit'): ?>
     <link href="lib/jquery-ui-interactions/jquery-ui.min.css" rel="stylesheet" />
     <link href="css/edit.css" rel="stylesheet" />
+    <?php elseif (ACTION == 'index'): ?>
+    <link href="css/index.css" rel="stylesheet" />
     <?php endif ?>
 </head>
 <body>

@@ -25,6 +25,22 @@ class DataModel {
         return $result->fetch_object();
     }
 
+    public function fetchLatestAlgorithms($amount) {
+        $stmt = $this->_sql->prepare("
+            SELECT aid, name, description, long_description, username, TIMESTAMPDIFF(MINUTE, date_created, NOW()) AS age
+            FROM algorithms a
+            JOIN users u
+            ON a.uid=u.uid
+            ORDER BY date_created DESC
+            LIMIT ?
+        ");
+        $stmt->bind_param("i", $amount);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
     /**
      * @param $username string
      * @return object|stdClass
@@ -107,7 +123,7 @@ class DataModel {
      * @return int
      */
     public function insertAlgorithm($uid) {
-        $stmt = $this->_sql->prepare("INSERT INTO algorithms (uid) VALUES (?)");
+        $stmt = $this->_sql->prepare("INSERT INTO algorithms (uid, date_lastedit) VALUES (?, NOW())");
         $stmt->bind_param("i", $uid);
         $stmt->execute();
         $aid = $stmt->insert_id;
@@ -126,7 +142,7 @@ class DataModel {
         $desc = $this->_sql->real_escape_string($desc);
         $long = $this->_sql->real_escape_string($long);
 
-        $stmt = $this->_sql->prepare("UPDATE algorithms SET name=?, description=?, long_description=? WHERE aid=?");
+        $stmt = $this->_sql->prepare("UPDATE algorithms SET name=?, description=?, long_description=?, date_lastedit=NOW() WHERE aid=?");
         $stmt->bind_param("sssi", $name, $desc, $long, $aid);
         $stmt->execute();
         $stmt->close();
@@ -138,7 +154,7 @@ class DataModel {
      */
     public function updateAlgorithmVariables($aid, $variables) {
         $null = NULL;
-        $stmt = $this->_sql->prepare("UPDATE algorithms SET variables=? WHERE aid=?");
+        $stmt = $this->_sql->prepare("UPDATE algorithms SET variables=?, date_lastedit=NOW() WHERE aid=?");
         $stmt->bind_param("bi", $null, $aid);
         $stmt->send_long_data(0, $variables);
         $stmt->execute();
@@ -152,7 +168,7 @@ class DataModel {
      */
     public function updateAlgorithmScript($aid, $tree, $html) {
         $null = NULL;
-        $stmt = $this->_sql->prepare("UPDATE algorithms SET tree=?, source_html=? WHERE aid=?");
+        $stmt = $this->_sql->prepare("UPDATE algorithms SET tree=?, source_html=?, date_lastedit=NOW() WHERE aid=?");
         $stmt->bind_param("bbi", $null, $null, $aid);
         $stmt->send_long_data(0, $tree);
         $stmt->send_long_data(1, $html);

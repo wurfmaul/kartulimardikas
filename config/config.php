@@ -17,5 +17,10 @@ define('DB_PASSWORD', '');
 define('ARRAY_MIN_SIZE', 2);
 define('ARRAY_MAX_SIZE', 13);
 
+# Index settings
+define('NUMBER_OF_LATEST_ALGORITHMS', 5);
+define('MAX_MINUTES_FOR_LABEL', 120);
+define('MAX_DESCRIPTION_LENGTH', 240);
+
 # Load language settings
 require_once BASEDIR . 'config/l10n.' . LANG . '.php';

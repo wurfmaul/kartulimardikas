@@ -1,42 +1,49 @@
-<?php if (!defined('ACTION')) die('You cannot call this script directly !'); ?>
+<?php
+    if (!defined('BASEDIR')) die('You cannot call this script directly !');
+
+    // ask database for latest algorithms
+    require_once BASEDIR . "includes/dataModel.php";
+    $_model = new DataModel();
+    $algos = $_model->fetchLatestAlgorithms(NUMBER_OF_LATEST_ALGORITHMS);
+    $_model->close();
+?>
+
 <!-- HEADER -->
 <div class="jumbotron">
     <h1>
-        Kartulimardikas <small>Online collection of algorithms</small>
+        <?= PROJECT_NAME ?> <small><?= $l10n['subtitle'] ?></small>
     </h1>
-    <p>Welcome to an interactive platform to discuss, demonstrate and
-        compare common algorithms.</p>
-    <p>
-        <a class="btn btn-primary btn-lg" role="button" href="new.php#">Define
-            new algorithm</a>
-    </p>
+    <p><?= $l10n['welcome_msg'] ?></p>
+    <p><a class="btn btn-primary btn-lg" role="button" href="index.php?action=edit"><?= $l10n['define_new_algo'] ?></a></p>
 </div>
 <div class="page-header">
-    <h1>Latest algorithms</h1>
+    <h1><?= $l10n['latest_algos'] ?></h1>
 </div>
 
 <!-- CONTENT -->
-<dl class="dl-horizontal">
-    <dt>
-        <a href="index.php?action=view&amp;aid=2749">Selection sort</a> <span
-            class="label label-default">NEW</span>
-    </dt>
-    <dd>Selection sort is a sorting algorithm, specifically an in-place
-        comparison sort. It has O(n2) time complexity, making it inefficient
-        on large lists, and generally performs worse than the similar
-        insertion sort. Selection sort is noted for its simplicity, ... <a href="index.php?action=view&amp;aid=2749">read more</a></dd>
-    <dt>
-        <a href="index.php?action=view&amp;aid=6930">Insertion sort</a>
-    </dt>
-    <dd>Insertion sort is a simple sorting algorithm that builds the
-        final sorted array (or list) one item at a time. It is much less
-        efficient on large lists than more advanced algorithms such as
-        quicksort, heapsort, or merge sort... <a href="index.php?action=view&amp;aid=6930">read more</a></dd>
-    <dt>
-        <a href="index.php?action=view&amp;aid=1457">Euclidean algorithm</a>
-    </dt>
-    <dd>The Euclidean algorithm[a], or Euclid's algorithm, is a method
-        for computing the greatest common divisor (GCD) of two (usually
-        positive) integers, also known as the greatest common factor (GCF)
-        or highest common factor (HCF)... <a href="index.php?action=view&amp;aid=1457">read more</a></dd>
-</dl>
+<table id="latest-algorithms" class="table table-striped table-hover">
+<?php foreach ($algos as $algo):
+    $age = $algo['age'];
+    $modified = "";
+    if ($age <= 1) $modified = $l10n['one_minute_ago'];
+    elseif ($age < 60) $modified = sprintf($l10n['minutes_ago'], $age);
+    elseif (intval($age/60) == 1) $modified = $l10n['one_hour_ago'];
+    elseif ($age < 60 * 24) $modified = sprintf($l10n['hours_ago'], $age/60);
+    elseif (intval($age/60/24) == 1) $modified = $l10n['one_day_ago'];
+    else $modified = sprintf($l10n['days_ago'], $age/60/24);
+?>
+    <tr>
+        <td>
+            <span class="name"><a href="index.php?action=view&amp;aid=<?= $algo['aid'] ?>"><?= $algo['name'] ?></a></span>
+            <?php if ($age <= MAX_MINUTES_FOR_LABEL): ?>
+            <span class="label label-default"><?= $l10n['label_new'] ?></span>
+            <?php endif ?>
+            <span class="properties">(<?= sprintf($l10n['created_note'], $modified, $algo['username']) ?>)</span>
+            <hr class="separator" />
+
+            <span class="description"><?= substr($algo['long_description'], 0, MAX_DESCRIPTION_LENGTH) ?>...</span>
+            <span class="link">(<a href="index.php?action=view&amp;aid=<?= $algo['aid'] ?>">&rarr; <?= $l10n['read_more'] ?></a>)</span>
+        </td>
+    </tr>
+<?php endforeach ?>
+</table>
