@@ -189,8 +189,14 @@ class EditManager
 
     private function _processScript()
     {
-        $script = isset($_POST['script']) ? $_POST['script'] : null;
-        // TODO process Script in API
+        if (!isset($_POST['tree'], $_POST['html']))
+            die("Post parameters not set properly!");
+
+        $tree = isset($_POST['tree']) ? $_POST['tree'] : null;
+        $html = isset($_POST['html']) ? $_POST['html'] : null;
+
+        $this->_model->updateAlgorithmScript($this->_aid, json_encode($tree), base64_encode($html));
+        $this->_response['success'] = $this->_l10n['saved_to_db'];
     }
 
     private function _removeVar() {

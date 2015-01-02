@@ -118,8 +118,6 @@
     <script src="lib/js-keystroke/jquery.keystroke.min.js"></script>
     <script src="lib/jquery-base64/jquery.base64.js"></script>
     <script src="js/edit.js"></script>
-    <script src="js/edit-var.js"></script>
-    <script src="js/edit-step.js"></script>
 <?php elseif (ACTION == 'register'): ?>
     <script src="js/register.js"></script>
 <?php elseif (ACTION == 'view'): ?>

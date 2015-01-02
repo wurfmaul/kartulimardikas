@@ -147,13 +147,15 @@ class DataModel {
 
     /**
      * @param $aid int
-     * @param $script mixed
+     * @param $tree mixed
+     * @param $html string
      */
-    public function updateAlgorithmScript($aid, $script) {
+    public function updateAlgorithmScript($aid, $tree, $html) {
         $null = NULL;
-        $stmt = $this->_sql->prepare("UPDATE algorithms SET script=? WHERE aid=?");
-        $stmt->bind_param("bi", $null, $aid);
-        $stmt->send_long_data(0, $script);
+        $stmt = $this->_sql->prepare("UPDATE algorithms SET tree=?, source_html=? WHERE aid=?");
+        $stmt->bind_param("bbi", $null, $null, $aid);
+        $stmt->send_long_data(0, $tree);
+        $stmt->send_long_data(1, $html);
         $stmt->execute();
         $stmt->close();
     }

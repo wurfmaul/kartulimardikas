@@ -6,16 +6,25 @@
 
         // get algorithm details from database
         require_once BASEDIR . "includes/dataModel.php";
-        $model = new DataModel();
-        $algo = $model->fetchAlgorithmByAID($aid);
-        $model->close();
-
+        $_model = new DataModel();
+        $_algo = $_model->fetchAlgorithmByAID($aid);
+        $_model->close();
         // extract variables
-        $vars = json_decode($algo->variables);
+        $name = stripslashes($_algo->name);
+        $description = stripslashes($_algo->description);
+        $long_description = stripslashes($_algo->long_description);
+        $vars = json_decode($_algo->variables);
+        $steps = base64_decode($_algo->source_html);
     } else {
+        // prepare default values
         $aid = -1;
+        $name = "";
+        $description = "";
+        $long_description = $l10n['long_description'];
         $vars = array();
+        $steps = "";
     }
+
     // add prototype row to variables
     $prototype = new stdClass();
     $prototype->name = "";
@@ -23,6 +32,13 @@
     $prototype->value = "";
     $prototype->size = 2;
     $vars['prototype'] = $prototype;
+
+    // open section if it is specified
+    $section = array ('info' => false, 'vars' => false, 'steps' => false);
+    $sectionNum = isset($_GET['section']) ? $_GET['section'] : 1;
+    if ($sectionNum >= 4) { $section['steps'] = true; $sectionNum -= 4; }
+    if ($sectionNum >= 2) { $section['vars'] = true; $sectionNum -= 2; }
+    if ($sectionNum >= 1) { $section['info'] = true; }
 ?>
 
 <!-- HEADER -->
@@ -48,30 +64,34 @@
 
                 <!-- TAB - GENERAL INFORMATION -->
                 <div class="panel panel-default">
-                    <div class="panel-heading" data-toggle="collapse" data-target="#genPanel">
+                    <div class="panel-heading" data-toggle="collapse" data-target="#infoPanel">
                         <h4 class="panel-title">
+                            <?php if ($section['info']): ?>
+                            <span class="glyphicon glyphicon-chevron-down"></span> <?= $l10n['general_info'] ?>
+                            <?php else: ?>
                             <span class="glyphicon glyphicon-chevron-right"></span> <?= $l10n['general_info'] ?>
+                            <?php endif ?>
                         </h4>
                     </div>
-                    <div id="genPanel" class="panel-collapse collapse">
+                    <div id="infoPanel" class="panel-collapse collapse <?= $section['info'] ? 'in' : 'closed' ?>">
                         <div class="panel-body">
                             <div id="aid" style="display: none"><?= $aid ?></div>
                             <div class="form-group">
                                 <label for="in-name" class="control-label col-sm-3"><?= $l10n['algo_name'] ?></label>
                                 <div class="col-sm-9">
                                     <input type="text" class="form-control" id="in-name" placeholder="<?= $l10n['algo_name'] ?>"
-                                        value="<?= isset($algo) ? $algo->name : "" ?>">
+                                        value="<?= $name ?>">
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label for="in-title" class="control-label col-sm-3"><?= $l10n['description'] ?></label>
                                 <div class="col-sm-9">
                                     <input type="text" class="form-control" id="in-desc" placeholder="<?= $l10n['description'] ?>"
-                                           value="<?= isset($algo) ? $algo->description : "" ?>">
+                                           value="<?= $description ?>">
                                 </div>
                             </div>
                             <textarea class="form-control" id="in-long" rows="3" data-placeholder="<?= $l10n['long_description'] ?>"
-                                ><?= isset($algo) ? $algo->long_description : $l10n['long_description'] ?></textarea>
+                                ><?= $long_description ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -80,10 +100,14 @@
                 <div class="panel panel-default">
                     <div class="panel-heading" data-toggle="collapse" data-target="#varPanel">
                         <h4 class="panel-title">
+                            <?php if ($section['vars']): ?>
+                            <span class="glyphicon glyphicon-chevron-down"></span> <?= $l10n['variables'] ?>
+                            <?php else: ?>
                             <span class="glyphicon glyphicon-chevron-right"></span> <?= $l10n['variables'] ?>
+                            <?php endif ?>
                         </h4>
                     </div>
-                    <div id="varPanel" class="panel-collapse collapse">
+                    <div id="varPanel" class="panel-collapse collapse <?= $section['vars'] ? 'in' : 'closed' ?>">
                         <div class="panel-body" style="text-align: center;">
                             <div class="btn btn-success btn-lg" id="btnAddVar">
                                 <span class="glyphicon glyphicon-plus" style="width: 100px;"></span>
@@ -183,12 +207,16 @@
                 <div class="panel panel-default">
                     <div class="panel-heading" data-toggle="collapse" data-target="#stepPanel">
                         <h4 class="panel-title">
+                            <?php if ($section['steps']): ?>
                             <span class="glyphicon glyphicon-chevron-down"></span> <?= $l10n['steps'] ?>
+                            <?php else: ?>
+                            <span class="glyphicon glyphicon-chevron-right"></span> <?= $l10n['steps'] ?>
+                            <?php endif ?>
                         </h4>
                     </div>
-                    <div id="stepPanel" class="panel-collapse collapse in">
+                    <div id="stepPanel" class="panel-collapse collapse <?= $section['steps'] ? 'in' : 'closed' ?>">
                         <div class="panel-body" style="text-align: center">
-                            <ul id="insertStepsHere" class="sortable"></ul>
+                            <ul id="insertStepsHere" class="sortable"><?= $steps ?></ul>
 
                             <div id="node-btn-group" class="btn-group btn-group-lg" role="group" aria-label="Create a Node">
                                 <button id="btn-add-assign" type="button" class="btn btn-default btn-lg" data-node="assign-node">Assign</button>
