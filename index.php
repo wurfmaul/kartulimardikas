@@ -1,32 +1,36 @@
 <?php
-    // setup environment
-    define('BASEDIR', __DIR__ . '/');
+// setup environment
+define('BASEDIR', __DIR__ . '/');
 
-    // setup and verify action
-    $_action = isset($_GET['action']) ? $_GET['action'] : 'index';
-    if (!file_exists(BASEDIR . "partials/$_action.phtml"))
-        $_action = 'index';
-    define('ACTION', $_action);
+// deal with old browsers
+// TODO: IE <= 8 not supported by jquery
 
-    // load configuration and start session
-    require_once BASEDIR . 'config/config.php';
-    require_once BASEDIR . 'includes/authentication.php';
-    secure_session_start();
+// setup and verify action
+$_action = isset($_GET['action']) ? $_GET['action'] : 'index';
+if (!file_exists(BASEDIR . "partials/$_action.phtml"))
+    $_action = 'home';
+define('ACTION', $_action);
 
-    // deal with authentication
-    if (isset($_POST['signInBtn']) && isset($_POST['username']) && isset($_POST['password'])) {
-        // SIGN IN
-        $username = $_POST['username'];
-        $password = $_POST['password'];
-        if (signin($username, $password))
-            $successMsg = sprintf($l10n['signed_in'], $username);
-        else
-            $errorMsg = $l10n['credentials_invalid'];
-    } elseif (isset($_POST['signOutBtn'])) {
-        // SIGN OUT
-        signout();
-        $successMsg = $l10n['signed_out'];
-    }
+// load configuration and start session
+require_once BASEDIR . 'config/config.php';
+require_once BASEDIR . 'api/get-url.php';
+require_once BASEDIR . 'includes/authentication.php';
+secure_session_start();
+
+// deal with authentication
+if (isset($_POST['signInBtn']) && isset($_POST['username']) && isset($_POST['password'])) {
+    // SIGN IN
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+    if (signin($username, $password))
+        $successMsg = sprintf($l10n['signed_in'], $username);
+    else
+        $errorMsg = $l10n['credentials_invalid'];
+} elseif (isset($_POST['signOutBtn'])) {
+    // SIGN OUT
+    signout();
+    $successMsg = $l10n['signed_out'];
+}
 ?><!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,7 +41,9 @@
 
     <link href="<?= BOOTSTRAP_CSS_PATH ?>" rel="stylesheet">
     <link href="css/custom.css" rel="stylesheet">
+    <?php if (file_exists('css/'.ACTION.'.css')): ?>
     <link href="css/<?= ACTION ?>.css" rel="stylesheet" />
+    <?php endif ?>
 </head>
 <body>
 	<!-- NAVIGATION BAR -->
@@ -50,16 +56,16 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
 				</button>
-				<a class="navbar-brand" href="index.php?action=index"><?= PROJECT_NAME ?></a>
+				<a class="navbar-brand" href="<?= url(['action' => 'home']) ?>"><?= PROJECT_NAME ?></a>
 			</div>
 			<div class="collapse navbar-collapse" id="navbar">
 				<ul class="nav navbar-nav">
-                    <!-- VIEW -->
-                    <?php if (ACTION == 'view'): ?><li class="active"><a href="#"><?= $l10n['view'] ?></a></li>
-                    <?php else: ?><li><a href="index.php?action=view"><?= $l10n['view'] ?></a></li><?php endif ?>
-                    <!-- EDIT -->
-                    <?php if (ACTION == 'edit'): ?><li class="active"><a href="#"><?= $l10n['edit'] ?></a></li>
-                    <?php else: ?><li><a href="index.php?action=edit"><?= $l10n['edit'] ?></a></li><?php endif ?>
+                    <li<?php if (ACTION == 'index'): ?> class="active"<?php endif ?>>
+                        <a href="<?= url(['action' => 'index']) ?>"><?= $l10n['index'] ?></a>
+                    </li>
+                    <li<?php if (ACTION == 'new'): ?> class="active"<?php endif ?>>
+                        <a href="<?= url(['action' => 'new']) ?>"><?= $l10n['new'] ?></a>
+                    </li>
 				</ul>
 				<form class="navbar-form navbar-right" role="form" method="post">
                     <?php if (isSignedIn()): ?>
@@ -75,7 +81,7 @@
                             <input type="password" class="form-control" name="password" placeholder="<?= $l10n['password'] ?>">
                         </div>
                         <button type="submit" name="signInBtn" class="btn btn-default"><?= $l10n['sign_in'] ?></button>
-                        <a class="btn btn-link" href="index.php?action=register"><?= $l10n['register'] ?></a>
+                        <a class="btn btn-link" href="<?= url(['action' => 'register']) ?>"><?= $l10n['register'] ?></a>
                     <?php endif ?>
 				</form>
 			</div>
@@ -83,7 +89,23 @@
 	</nav>
 
 	<div class="container">
+        <?php if (isset($_GET['aid'])): $aid = $_GET['aid'] ?>
+        <!-- NAVIGATION MENU FOR ALGORITHMS -->
+        <ul class="nav nav-tabs">
+            <li role="presentation"<?php if (ACTION == 'view'): ?> class="active"<?php endif ?>>
+                <a href="<?= url(['action' => 'view', 'aid' => $aid]) ?>"><?= $l10n['view'] ?></a>
+            </li>
+            <li role="presentation"<?php if (ACTION == 'edit'): ?> class="active"<?php endif ?>>
+                <a href="<?= url(['action' => 'edit', 'aid' => $aid]) ?>"><?= $l10n['edit'] ?></a>
+            </li>
+            <li role="presentation"<?php if (ACTION == 'settings'): ?> class="active"<?php endif ?>>
+                <a href="<?= url(['action' => 'settings', 'aid' => $aid]) ?>"><?= $l10n['settings'] ?></a>
+            </li>
+        </ul>
+        <?php endif ?>
+
         <?php if (isset($errorMsg)): ?>
+        <!-- MESSAGE BOX FOR ERRORS -->
         <div id="generalAlert" class="alert alert-danger alert-dismissible">
             <button id="generalAlertClose" type="button" class="close">
                 <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
@@ -91,7 +113,9 @@
             <strong><?= $l10n['error'] ?></strong> <?= $errorMsg ?>
         </div>
         <?php endif ?>
+
         <?php if (isset($successMsg)): ?>
+        <!-- MESSAGE BOX FOR SUCCESSES -->
         <div id="generalSuccess" class="alert alert-success alert-dismissible">
             <button id="generalSuccessClose" type="button" class="close">
                 <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
@@ -99,22 +123,20 @@
             <strong><?= $l10n['success'] ?></strong> <?= $successMsg ?>
         </div>
         <?php endif ?>
-        <?php require_once BASEDIR . 'partials/' . ACTION . '.phtml' ?>
+
+        <!-- PAGE CONTENT BEGIN -->
+        <?php require_once BASEDIR.'partials/'.ACTION.'.phtml' ?>
+        <!-- PAGE CONTENT END -->
 	</div>
 
-    <!--[if lt IE 9]>
-    <script src="<?= HTML5SHIV_PATH ?>"></script>
-    <script src="<?= RESPOND_PATH ?>"></script>
-    <![endif]-->
 	<script src="<?= JQUERY_PATH ?>"></script>
 	<script src="<?= BOOTSTRAP_JS_PATH ?>"></script>
 	<script src="js/common.js"></script>
+    <?php if (file_exists('js/'.ACTION.'.js')): ?>
     <script src="js/<?= ACTION ?>.js"></script>
-
-<?php if (ACTION == 'edit'): ?>
+    <?php endif ?>
+    <?php if (ACTION == 'edit'): ?>
     <script src="<?= JQUERYUI_JS_PATH ?>"></script>
-<?php elseif (ACTION == 'view'): ?>
-    <script src="js-gen/<?=$jsFile?>"></script>
-<?php endif ?>
+    <?php endif ?>
 </body>
 </html>

@@ -14,7 +14,7 @@
         <?= PROJECT_NAME ?> <small><?= $l10n['subtitle'] ?></small>
     </h1>
     <p><?= $l10n['welcome_msg'] ?></p>
-    <p><a class="btn btn-primary btn-lg" role="button" href="index.php?action=edit"><?= $l10n['define_new_algo'] ?></a></p>
+    <p><a class="btn btn-primary btn-lg" role="button" href="<?= url(['action' => 'new']) ?>"><?= $l10n['define_new_algo'] ?></a></p>
 </div>
 <div class="page-header">
     <h1><?= $l10n['latest_algos'] ?></h1>
@@ -34,7 +34,7 @@
 ?>
     <tr>
         <td>
-            <span class="name"><a href="index.php?action=view&amp;aid=<?= $algo['aid'] ?>"><?= $algo['name'] ?></a></span>
+            <span class="name"><a href="<?= url(['action' => 'view', 'aid' => $algo['aid']]) ?>"><?= $algo['name'] ?></a></span>
             <?php if ($age <= MAX_MINUTES_FOR_LABEL): ?>
             <span class="label label-default"><?= $l10n['label_new'] ?></span>
             <?php endif ?>
@@ -42,7 +42,7 @@
             <hr class="separator" />
 
             <span class="description"><?= substr($algo['long_description'], 0, MAX_DESCRIPTION_LENGTH) ?>...</span>
-            <span class="link">(<a href="index.php?action=view&amp;aid=<?= $algo['aid'] ?>">&rarr; <?= $l10n['read_more'] ?></a>)</span>
+            <span class="link">(<a href="<?= url(['action' => 'view', 'aid' => $algo['aid']]) ?>">&rarr; <?= $l10n['read_more'] ?></a>)</span>
         </td>
     </tr>
 <?php endforeach ?>

@@ -37,6 +37,7 @@ $l10n['register'] = "Register";
 $l10n['become_user'] = "Become a new user!";
 
 // INDEX
+$l10n['index'] = "Index";
 $l10n['subtitle'] = "Online collection of algorithms";
 $l10n['welcome_msg'] = "Welcome to an interactive platform to discuss, demonstrate and compare common algorithms.";
 $l10n['define_new_algo'] = "Define new algorithm";
@@ -57,6 +58,7 @@ $l10n[''] = "";
 
 // EDIT
 $l10n['edit'] = "Edit";
+$l10n['new'] = "New";
 $l10n['saved_to_db'] = "Successfully saved to database!";
 $l10n['need_to_be_owner'] = "You need to be the owner in order to change this algorithm!";
 $l10n['edit_not_signed_in'] = "You have to be signed in to publish an algorithm!";
@@ -86,3 +88,6 @@ $l10n['size_out_of_bounds'] = "The array size has to be between %d and %d.";
 $l10n['empty_value'] = "The value cannot be empty.";
 $l10n['empty_name'] = "The variable name cannot be empty.";
 $l10n['invalid_init'] = "The initialization method seems to be invalid.";
+
+// SETTINGS
+$l10n['settings'] = "Settings";

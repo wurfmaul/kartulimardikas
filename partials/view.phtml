@@ -1,23 +1,31 @@
 <?php
 if (!defined('BASEDIR')) die('You cannot call this script directly !');
+if (!isset($_GET['aid'])) {
+    header("Location:" . url(['action' => 'index']));
+    die();
+}
+// get algorithm id
+$aid = $_GET['aid'];
 
-// FIXME simulates a database as long as it is not implemented
-$algo ["words"] = file_get_contents ( 'db/algo_words.html' );
-$algo ["source"] = file_get_contents ( 'db/algo_code.html' );
-$algo ["desc"] = file_get_contents ( 'db/algo_desc.html' );
+// get algorithm details from database
+require_once BASEDIR . "includes/dataModel.php";
+$_model = new DataModel();
+$_algo = $_model->fetchAlgorithmByAID($aid);
+$_model->close();
 
-require_once 'machine/generator.php';
-//generate ( 123 );
-
-$jsFile = "algo.js";
+// extract variables
+$name = stripslashes($_algo->name);
+$description = stripslashes($_algo->description);
+$long_description = stripslashes($_algo->long_description);
+$vars = json_decode($_algo->variables);
+$steps = base64_decode($_algo->source_html);
 ?>
 
 <!-- HEADER -->
 <div class="page-header">
-    <h1>
-        Selection sort <small>Learn how to apply selection sort to an
-            unordered list!</small>
-    </h1>
+    <?php if (isset($aid)): ?>
+    <h1><?= $name ?> <small><?= $description ?></small></h1>
+    <?php endif ?>
 </div>
 
 <!-- CONTENT -->
@@ -121,6 +129,7 @@ $jsFile = "algo.js";
         </div>
     </div>
 </div>
+<!-- LEFT COLUMN END -->
 
 <!-- RIGHT COLUMN -->
 <div class="col-md-6">
@@ -255,8 +264,12 @@ $jsFile = "algo.js";
         </div>
     </div>
 </div>
+<!-- RIGHT COLUMN END -->
+
 </div>
+<!-- CONTENT END -->
+
+<!-- TODO: remove link after presentation -->
 <ul class="pager">
-    <li class="previous"><a href="../pres/#/overview">&larr; Back to
-            presentation</a></li>
+    <li class="previous"><a href="../pres/#/overview">&larr; Back to presentation</a></li>
 </ul>

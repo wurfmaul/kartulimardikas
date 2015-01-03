@@ -32,6 +32,11 @@ function signin($username, $password) {
             $_SESSION['uid'] = $uid;
             $_SESSION['username'] = $username;
             $_SESSION['token'] = password_hash($hash . $_SERVER['HTTP_USER_AGENT'], PASSWORD_BCRYPT);
+            // log signing process
+            $model->open();
+            $model->updateUserSignInDate($uid);
+            $model->close();
+            // return the user id
             return $uid;
         } elseif (DEBUG_MODE) {
             echo "DEBUG_MODE: Wrong password, new hash: " . password_hash($password, PASSWORD_BCRYPT);

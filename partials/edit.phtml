@@ -1,44 +1,44 @@
 <?php
-    if (!defined('BASEDIR')) die('You cannot call this script directly !');
+if (!defined('BASEDIR')) die('You cannot call this script directly !');
 
-    if (isset($_GET['aid'])) {
-        $aid = $_GET['aid'];
+if (isset($_GET['aid'])) {
+    $aid = $_GET['aid'];
 
-        // get algorithm details from database
-        require_once BASEDIR . "includes/dataModel.php";
-        $_model = new DataModel();
-        $_algo = $_model->fetchAlgorithmByAID($aid);
-        $_model->close();
-        // extract variables
-        $name = stripslashes($_algo->name);
-        $description = stripslashes($_algo->description);
-        $long_description = stripslashes($_algo->long_description);
-        $vars = json_decode($_algo->variables);
-        $steps = base64_decode($_algo->source_html);
-    } else {
-        // prepare default values
-        $aid = -1;
-        $name = "";
-        $description = "";
-        $long_description = $l10n['long_description'];
-        $vars = array();
-        $steps = "";
-    }
+    // get algorithm details from database
+    require_once BASEDIR . "includes/dataModel.php";
+    $_model = new DataModel();
+    $_algo = $_model->fetchAlgorithmByAID($aid);
+    $_model->close();
+    // extract variables
+    $name = stripslashes($_algo->name);
+    $description = stripslashes($_algo->description);
+    $long_description = stripslashes($_algo->long_description);
+    $vars = json_decode($_algo->variables);
+    $steps = base64_decode($_algo->source_html);
+} else {
+    // prepare default values
+    $aid = -1;
+    $name = "";
+    $description = "";
+    $long_description = $l10n['long_description'];
+    $vars = array();
+    $steps = "";
+}
 
-    // add prototype row to variables
-    $prototype = new stdClass();
-    $prototype->name = "";
-    $prototype->init = "elem-?";
-    $prototype->value = "";
-    $prototype->size = 2;
-    $vars['prototype'] = $prototype;
+// add prototype row to variables
+$prototype = new stdClass();
+$prototype->name = "";
+$prototype->init = "elem-?";
+$prototype->value = "";
+$prototype->size = 2;
+$vars['prototype'] = $prototype;
 
-    // open section if it is specified
-    $section = array ('info' => false, 'vars' => false, 'steps' => false);
-    $sectionNum = isset($_GET['section']) ? $_GET['section'] : 1;
-    if ($sectionNum >= 4) { $section['steps'] = true; $sectionNum -= 4; }
-    if ($sectionNum >= 2) { $section['vars'] = true; $sectionNum -= 2; }
-    if ($sectionNum >= 1) { $section['info'] = true; }
+// open section if it is specified
+$section = array ('info' => false, 'vars' => false, 'steps' => false);
+$sectionNum = isset($_GET['section']) ? $_GET['section'] : 1;
+if ($sectionNum >= 4) { $section['steps'] = true; $sectionNum -= 4; }
+if ($sectionNum >= 2) { $section['vars'] = true; $sectionNum -= 2; }
+if ($sectionNum >= 1) { $section['info'] = true; }
 ?>
 
 <!-- HEADER -->
@@ -49,305 +49,318 @@
     <h1><?= $l10n['new_algo'] ?> <small><?= $l10n['define_algo'] ?></small></h1>
     <?php endif ?>
 </div>
+
 <!-- CONTENT -->
 <div class="row">
+    <!-- ERROR MESSAGE -->
+    <div id="editAlert" class="alert alert-danger alert-dismissible" style="display:none">
+        <button id="editAlertClose" type="button" class="close">
+            <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
+        </button>
+        <strong><?= $l10n['error'] ?></strong><div id="editAlertText"></div>
+    </div>
+    <!-- ERROR MESSAGE END -->
+
     <!-- LEFT COLUMN -->
     <div class="col-md-6">
-        <div id="editAlert" class="alert alert-danger alert-dismissible" style="display:none">
-            <button id="editAlertClose" type="button" class="close">
-                <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
-            </button>
-            <strong><?= $l10n['error'] ?></strong><div id="editAlertText"></div>
-        </div>
-        <form class="form-horizontal" role="form" method="post" name="algorithm">
-            <div class="panel-group" id="accordion-left">
-
-                <!-- TAB - GENERAL INFORMATION -->
-                <div class="panel panel-default">
-                    <div class="panel-heading" data-toggle="collapse" data-target="#infoPanel">
-                        <h4 class="panel-title">
-                            <?php if ($section['info']): ?>
-                            <span class="glyphicon glyphicon-chevron-down"></span> <?= $l10n['general_info'] ?>
-                            <?php else: ?>
-                            <span class="glyphicon glyphicon-chevron-right"></span> <?= $l10n['general_info'] ?>
-                            <?php endif ?>
-                        </h4>
-                    </div>
-                    <div id="infoPanel" class="panel-collapse collapse <?= $section['info'] ? 'in' : 'closed' ?>">
-                        <div class="panel-body">
-                            <div id="aid" style="display: none"><?= $aid ?></div>
-                            <div class="form-group">
-                                <label for="in-name" class="control-label col-sm-3"><?= $l10n['algo_name'] ?></label>
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="in-name" placeholder="<?= $l10n['algo_name'] ?>"
-                                        value="<?= $name ?>">
-                                </div>
+        <div class="panel-group" id="accordion-left">
+            <!-- TAB - GENERAL INFORMATION -->
+            <div class="panel panel-default">
+                <div class="panel-heading" data-toggle="collapse" data-target="#infoPanel">
+                    <h4 class="panel-title">
+                        <?php if ($section['info']): ?>
+                        <span class="glyphicon glyphicon-chevron-down"></span> <?= $l10n['general_info'] ?>
+                        <?php else: ?>
+                        <span class="glyphicon glyphicon-chevron-right"></span> <?= $l10n['general_info'] ?>
+                        <?php endif ?>
+                    </h4>
+                </div>
+                <div id="infoPanel" class="panel-collapse collapse <?= $section['info'] ? 'in' : 'closed' ?>">
+                    <div class="panel-body form-horizontal">
+                        <div id="aid" style="display: none"><?= $aid ?></div>
+                        <div class="form-group">
+                            <label for="in-name" class="control-label col-sm-3"><?= $l10n['algo_name'] ?></label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="in-name" placeholder="<?= $l10n['algo_name'] ?>"
+                                    value="<?= $name ?>">
                             </div>
-                            <div class="form-group">
-                                <label for="in-title" class="control-label col-sm-3"><?= $l10n['description'] ?></label>
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="in-desc" placeholder="<?= $l10n['description'] ?>"
-                                           value="<?= $description ?>">
-                                </div>
-                            </div>
-                            <textarea class="form-control" id="in-long" rows="3" data-placeholder="<?= $l10n['long_description'] ?>"
-                                ><?= $long_description ?></textarea>
                         </div>
+                        <div class="form-group">
+                            <label for="in-title" class="control-label col-sm-3"><?= $l10n['description'] ?></label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="in-desc" placeholder="<?= $l10n['description'] ?>"
+                                       value="<?= $description ?>">
+                            </div>
+                        </div>
+                        <textarea class="form-control" id="in-long" rows="3" data-placeholder="<?= $l10n['long_description'] ?>"
+                            ><?= $long_description ?></textarea>
                     </div>
                 </div>
+            </div>
+            <!-- TAB - GENERAL INFORMATION END -->
 
-                <!-- TAB - VARIABLES -->
-                <div class="panel panel-default">
-                    <div class="panel-heading" data-toggle="collapse" data-target="#varPanel">
-                        <h4 class="panel-title">
-                            <?php if ($section['vars']): ?>
-                            <span class="glyphicon glyphicon-chevron-down"></span> <?= $l10n['variables'] ?>
-                            <?php else: ?>
-                            <span class="glyphicon glyphicon-chevron-right"></span> <?= $l10n['variables'] ?>
-                            <?php endif ?>
-                        </h4>
-                    </div>
-                    <div id="varPanel" class="panel-collapse collapse <?= $section['vars'] ? 'in' : 'closed' ?>">
-                        <div class="panel-body" style="text-align: center;">
-                            <div class="btn btn-success btn-lg" id="btnAddVar">
-                                <span class="glyphicon glyphicon-plus" style="width: 100px;"></span>
-                            </div>
-                            <table class="table table-condensed table-bordered variables">
-                                <tbody id="insertVarsHere">
-                                <?php foreach ($vars as $vid => $var):
-                                    $rowVisible = ($vid === 'prototype') ? 'style="display:none"' : '';
-                                    $selInit = array();
-                                    foreach (['elem-?', 'elem-value', 'array-?', 'array-random', 'array-custom'] as $mode)
-                                        $selInit[$mode] = $var->init === $mode ? 'selected="selected"' : '';
-                                    $valueVisible = ($var->init === 'elem-value' || $var->init === 'array-custom') ? '' : 'style="display:none"';
-                                    $sizeVisible = ($var->init === 'array-?' || $var->init === 'array-random') ? '' : 'style="display:none"';
-                                ?>
-                                    <tr id="var-<?= $vid ?>" class="varRow" data-vid="<?= $vid ?>" <?= $rowVisible ?>
-                                        data-name="<?= $var->name ?>" data-init="<?= $var->init ?>" data-value="<?= $var->value ?>" data-size="<?= $var->size ?>">
-                                        <!-- Variable in view mode -->
-                                        <td class="content view">
-                                            <div class="col-lg-12">
-                                                <code class="cell"><?= $var->name ?> = <?= $var->value ?></code>
-                                            </div>
-                                        </td>
-                                        <td class="buttons view">
-                                            <div class="btn-group btn-group-xs">
-                                                <button type="button" class="btn btn-default btn-var-edit" title="<?= $l10n['edit_var'] ?>">
-                                                    <span class="glyphicon glyphicon-pencil"></span>
-                                                </button>
-                                                <button type="button" class="btn btn-default btn-var-remove" title="<?= $l10n['remove_var'] ?>">
-                                                    <span class="glyphicon glyphicon-trash"></span>
-                                                </button>
-                                            </div>
-                                        </td>
-
-                                        <!-- Variable in edit mode -->
-                                        <td class="content edit" style="display: none">
-                                            <div class="col-xs-4">
-                                                <div class="form-group name-group">
-                                                    <label class="sr-only" for="name"><?= $l10n['var_name'] ?></label>
-                                                    <input class="form-control name" value="<?= $var->name ?>" placeholder="<?= $l10n['name'] ?>" type="text">
-                                                </div>
-                                            </div>
-                                            <div class="col-xs-1">
-                                                <div class="cell"><code>=</code></div>
-                                            </div>
-                                            <div class="col-xs-4">
-                                                <div class="form-group init-group">
-                                                    <label class="sr-only" for="init"><?= $l10n['init'] ?></label>
-                                                    <select class="form-control init">
-                                                        <optgroup label="Element">
-                                                            <option value="elem-?" <?= $selInit['elem-?'] ?>><?= $l10n['uninitialized'] ?></option>
-                                                            <option value="elem-value" <?= $selInit['elem-value'] ?> data-target=".value"><?= $l10n['value'] ?></option>
-                                                        </optgroup>
-                                                        <optgroup label="Array">
-                                                            <option value="array-?"  <?= $selInit['array-?'] ?> data-target=".size"><?= $l10n['uninitialized'] ?></option>
-                                                            <option value="array-random"  <?= $selInit['array-random'] ?> data-target=".size"><?= $l10n['random'] ?></option>
-                                                            <option value="array-custom"  <?= $selInit['array-custom'] ?> data-target=".value"><?= $l10n['custom'] ?></option>
-                                                        </optgroup>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-xs-3">
-                                                <div class="form-group value-group" <?= $valueVisible ?>>
-                                                    <label class="sr-only" for="value"><?= $l10n['init_value'] ?></label>
-                                                    <input class="form-control value" value="<?= $var->value ?>" placeholder="<?= $l10n['value'] ?>" type="text">
-                                                </div>
-                                                <div class="form-group size-group" <?= $sizeVisible ?>>
-                                                    <label class="sr-only" for="size"><?= $l10n['array_size'] ?></label>
-                                                    <select class="form-control size">
-                                                        <optgroup label="<?= $l10n['size'] ?>">
-                                                            <?php for($i = ARRAY_MIN_SIZE; $i <= ARRAY_MAX_SIZE; $i++): ?>
-                                                            <option <?php if ($var->size == $i): ?>selected="selected"<?php endif ?>><?= $i ?></option>
-                                                            <?php endfor ?>
-                                                        </optgroup>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="buttons edit" style="display: none">
-                                            <div class="btn-group btn-group-xs">
-                                                <button type="button" class="btn btn-default btn-var-check" title="<?= $l10n['check_var'] ?>">
-                                                    <span class="glyphicon glyphicon-ok"></span>
-                                                </button>
-                                                <button type="button" class="btn btn-default btn-var-cancel" title="<?= $l10n['discard_changes'] ?>">
-                                                    <span class="glyphicon glyphicon-remove"></span>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                <?php endforeach ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+            <!-- TAB - VARIABLES -->
+            <div class="panel panel-default">
+                <div class="panel-heading" data-toggle="collapse" data-target="#varPanel">
+                    <h4 class="panel-title">
+                        <?php if ($section['vars']): ?>
+                        <span class="glyphicon glyphicon-chevron-down"></span> <?= $l10n['variables'] ?>
+                        <?php else: ?>
+                        <span class="glyphicon glyphicon-chevron-right"></span> <?= $l10n['variables'] ?>
+                        <?php endif ?>
+                    </h4>
                 </div>
+                <div id="varPanel" class="panel-collapse collapse <?= $section['vars'] ? 'in' : 'closed' ?>">
+                    <div class="panel-body" style="text-align: center;">
+                        <table class="table table-condensed table-bordered table-hover variables">
+                            <tbody id="insertVarsHere">
+                            <?php foreach ($vars as $vid => $var):
+                                $rowVisible = ($vid === 'prototype') ? 'style="display:none"' : '';
+                                $selInit = array();
+                                foreach (['elem-?', 'elem-value', 'array-?', 'array-random', 'array-custom'] as $mode)
+                                    $selInit[$mode] = $var->init === $mode ? 'selected="selected"' : '';
+                                $valueVisible = ($var->init === 'elem-value' || $var->init === 'array-custom') ? '' : 'style="display:none"';
+                                $sizeVisible = ($var->init === 'array-?' || $var->init === 'array-random') ? '' : 'style="display:none"';
+                            ?>
+                                <tr id="var-<?= $vid ?>" class="varRow" data-vid="<?= $vid ?>" <?= $rowVisible ?>
+                                    data-name="<?= $var->name ?>" data-init="<?= $var->init ?>" data-value="<?= $var->value ?>" data-size="<?= $var->size ?>">
+                                    <!-- Variable in view mode -->
+                                    <td class="content view">
+                                        <div class="col-lg-12">
+                                            <code class="cell"><?= $var->name ?> = <?= $var->value ?></code>
+                                        </div>
+                                    </td>
+                                    <td class="buttons view">
+                                        <div class="btn-group btn-group-xs">
+                                            <button type="button" class="btn btn-default btn-var-edit" title="<?= $l10n['edit_var'] ?>">
+                                                <span class="glyphicon glyphicon-pencil"></span>
+                                            </button>
+                                            <button type="button" class="btn btn-default btn-var-remove" title="<?= $l10n['remove_var'] ?>">
+                                                <span class="glyphicon glyphicon-trash"></span>
+                                            </button>
+                                        </div>
+                                    </td>
 
-                <!-- TAB - STEPS -->
-                <div class="panel panel-default">
-                    <div class="panel-heading" data-toggle="collapse" data-target="#stepPanel">
-                        <h4 class="panel-title">
-                            <?php if ($section['steps']): ?>
-                            <span class="glyphicon glyphicon-chevron-down"></span> <?= $l10n['steps'] ?>
-                            <?php else: ?>
-                            <span class="glyphicon glyphicon-chevron-right"></span> <?= $l10n['steps'] ?>
-                            <?php endif ?>
-                        </h4>
-                    </div>
-                    <div id="stepPanel" class="panel-collapse collapse <?= $section['steps'] ? 'in' : 'closed' ?>">
-                        <div class="panel-body" style="text-align: center">
-                            <ul id="insertStepsHere" class="sortable"><?= $steps ?></ul>
-
-                            <div id="node-btn-group" class="btn-group btn-group-lg" role="group" aria-label="Create a Node">
-                                <button id="btn-add-assign" type="button" class="btn btn-default btn-lg" data-node="assign-node">Assign</button>
-                                <button id="btn-add-compare" type="button" class="btn btn-default btn-lg" data-node="compare-node">Compare</button>
-                                <button id="btn-add-constant" type="button" class="btn btn-default btn-lg" data-node="constant-node">Constant</button>
-                                <button id="btn-add-if" type="button" class="btn btn-default btn-lg" data-node="if-node">If</button>
-                                <button id="btn-add-var" type="button" class="btn btn-default btn-lg" data-node="var-node">Var</button>
-                                <button id="btn-add-while" type="button" class="btn btn-default btn-lg" data-node="while-node">While</button>
-                            </div>
-
-                            <ul style="display: none">
-
-                                <!-- ASSIGN NODE -->
-                                <li id="assign-node" class="node assign-node" data-node-type="assign">
-                                    <table>
-                                        <tr>
-                                            <td class="handle node-box top left">&nbsp;</td>
-                                            <td class="node-box top right bottom full-width">assign</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="handle node-box left right">&nbsp;</td>
-                                            <td class="assign-from"></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="handle node-box left">&nbsp;</td>
-                                            <td class="node-box top right bottom full-width">&rarr;</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="handle node-box left right bottom">&nbsp;</td>
-                                            <td class="assign-to"></td>
-                                        </tr>
-                                    </table>
-                                </li>
-
-                                <!-- COMPARE NODE -->
-                                <li id="compare-node" class="node compare-node" data-node-type="compare">
-                                    <table>
-                                        <tr>
-                                            <td class="handle node-box top left">&nbsp;</td>
-                                            <td class="node-box top right bottom full-width">compare</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="handle node-box right left">&nbsp;</td>
-                                            <td class="compare-left"></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="handle node-box left">&nbsp;</td>
-                                            <td class="node-box top right bottom half-width">operation:
-                                                <select class="compare-operation">
-                                                    <option value="lt">&lt;</option>
-                                                    <option value="le">&le;</option>
-                                                    <option value="eq">&equals;</option>
-                                                    <option value="ge">&ge;</option>
-                                                    <option value="gt">&gt;</option>
+                                    <!-- Variable in edit mode -->
+                                    <td class="content edit" style="display: none">
+                                        <div class="col-xs-4">
+                                            <div class="form-group name-group">
+                                                <label class="sr-only" for="name"><?= $l10n['var_name'] ?></label>
+                                                <input class="form-control name" value="<?= $var->name ?>" placeholder="<?= $l10n['name'] ?>" type="text">
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-1">
+                                            <div class="cell"><code>=</code></div>
+                                        </div>
+                                        <div class="col-xs-4">
+                                            <div class="form-group init-group">
+                                                <label class="sr-only" for="init"><?= $l10n['init'] ?></label>
+                                                <select class="form-control init">
+                                                    <optgroup label="Element">
+                                                        <option value="elem-?" <?= $selInit['elem-?'] ?>><?= $l10n['uninitialized'] ?></option>
+                                                        <option value="elem-value" <?= $selInit['elem-value'] ?> data-target=".value"><?= $l10n['value'] ?></option>
+                                                    </optgroup>
+                                                    <optgroup label="Array">
+                                                        <option value="array-?"  <?= $selInit['array-?'] ?> data-target=".size"><?= $l10n['uninitialized'] ?></option>
+                                                        <option value="array-random"  <?= $selInit['array-random'] ?> data-target=".size"><?= $l10n['random'] ?></option>
+                                                        <option value="array-custom"  <?= $selInit['array-custom'] ?> data-target=".value"><?= $l10n['custom'] ?></option>
+                                                    </optgroup>
                                                 </select>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="handle node-box right bottom left">&nbsp;</td>
-                                            <td class="compare-right"></td>
-                                        </tr>
-                                    </table>
-                                </li>
-
-                                <!-- CONSTANT NODE -->
-                                <li id="constant-node" class="node constant-node" data-node-type="constant">
-                                    <table>
-                                        <tr>
-                                            <td class="handle node-box top left bottom">&nbsp;</td>
-                                            <td class="node-box top right bottom full-width">constant:
-                                                <input class="constant-value" value="" />
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </li>
-
-                                <!-- IF NODE -->
-                                <li id="if-node" class="node if-node" data-node-type="if">
-                                    <table>
-                                        <tr>
-                                            <td class="handle node-box top left">&nbsp;</td>
-                                            <td class="node-box top right bottom full-width">if</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="handle node-box right left">&nbsp;</td>
-                                            <td class="if-condition"></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="handle node-box left">&nbsp;</td>
-                                            <td class="node-box top right bottom half-width">then</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="handle node-box right bottom left">&nbsp;</td>
-                                            <td><ul class="if-body sortable"></ul></td>
-                                        </tr>
-                                    </table>
-                                </li>
-
-                                <!-- VAR NODE -->
-                                <li id="var-node" class="node var-node" data-node-type="var">
-                                    <table>
-                                        <tr>
-                                            <td class="handle node-box top left bottom">&nbsp;</td>
-                                            <td class="node-box top right bottom full-width">variable:
-                                                <select class="var-value">
-                                                    <option value="var-0">a</option>
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-3">
+                                            <div class="form-group value-group" <?= $valueVisible ?>>
+                                                <label class="sr-only" for="value"><?= $l10n['init_value'] ?></label>
+                                                <input class="form-control value" value="<?= $var->value ?>" placeholder="<?= $l10n['value'] ?>" type="text">
+                                            </div>
+                                            <div class="form-group size-group" <?= $sizeVisible ?>>
+                                                <label class="sr-only" for="size"><?= $l10n['array_size'] ?></label>
+                                                <select class="form-control size">
+                                                    <optgroup label="<?= $l10n['size'] ?>">
+                                                        <?php for($i = ARRAY_MIN_SIZE; $i <= ARRAY_MAX_SIZE; $i++): ?>
+                                                        <option <?php if ($var->size == $i): ?>selected="selected"<?php endif ?>><?= $i ?></option>
+                                                        <?php endfor ?>
+                                                    </optgroup>
                                                 </select>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </li>
-
-                                <!-- WHILE NODE -->
-                                <li id="while-node" class="node while-node" data-node-type="while">
-                                    <table>
-                                        <tr>
-                                            <td class="handle node-box top left">&nbsp;</td>
-                                            <td class="node-box top right bottom full-width">while</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="handle node-box right bottom left">&nbsp;</td>
-                                            <td></td>
-                                        </tr>
-                                    </table>
-                                </li>
-                            </ul>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="buttons edit" style="display: none">
+                                        <div class="btn-group btn-group-xs">
+                                            <button type="button" class="btn btn-default btn-var-check" title="<?= $l10n['check_var'] ?>">
+                                                <span class="glyphicon glyphicon-ok"></span>
+                                            </button>
+                                            <button type="button" class="btn btn-default btn-var-cancel" title="<?= $l10n['discard_changes'] ?>">
+                                                <span class="glyphicon glyphicon-remove"></span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach ?>
+                            </tbody>
+                        </table>
+                        <div class="btn btn-success btn-lg" id="btnAddVar">
+                            <span class="glyphicon glyphicon-plus" style="width: 100px;"></span>
                         </div>
                     </div>
                 </div>
             </div>
-            <span id="saveSuccess" class="label label-success" style="display: none"></span>
-        </form>
+            <!-- TAB - VARIABLES END -->
+        </div>
+        <span id="saveSuccess" class="label label-success" style="display: none"></span>
     </div>
+    <!-- LEFT COLUMN END -->
+
+    <!-- RIGHT COLUMN -->
+    <div class="col-md-6">
+        <div class="panel-group" id="accordion-right">
+            <!-- TAB - STEPS -->
+            <div class="panel panel-default">
+                <div class="panel-heading" data-toggle="collapse" data-target="#stepPanel">
+                    <h4 class="panel-title">
+                        <?php if ($section['steps']): ?>
+                        <span class="glyphicon glyphicon-chevron-down"></span> <?= $l10n['steps'] ?>
+                        <?php else: ?>
+                        <span class="glyphicon glyphicon-chevron-right"></span> <?= $l10n['steps'] ?>
+                        <?php endif ?>
+                    </h4>
+                </div>
+                <div id="stepPanel" class="panel-collapse collapse <?= $section['steps'] ? 'in' : 'closed' ?>">
+                    <div class="panel-body" style="text-align: center">
+                        <ul id="insertStepsHere" class="sortable"><?= $steps ?></ul>
+
+                        <div id="node-btn-group" class="btn-group btn-group-lg" role="group" aria-label="Create a Node">
+                            <button id="btn-add-assign" type="button" class="btn btn-default btn-lg" data-node="assign-node">Assign</button>
+                            <button id="btn-add-compare" type="button" class="btn btn-default btn-lg" data-node="compare-node">Compare</button>
+                            <button id="btn-add-constant" type="button" class="btn btn-default btn-lg" data-node="constant-node">Constant</button>
+                            <button id="btn-add-if" type="button" class="btn btn-default btn-lg" data-node="if-node">If</button>
+                            <button id="btn-add-var" type="button" class="btn btn-default btn-lg" data-node="var-node">Var</button>
+                            <button id="btn-add-while" type="button" class="btn btn-default btn-lg" data-node="while-node">While</button>
+                        </div>
+
+                        <ul style="display: none">
+
+                            <!-- ASSIGN NODE -->
+                            <li id="assign-node" class="node assign-node" data-node-type="assign">
+                                <table>
+                                    <tr>
+                                        <td class="handle node-box top left">&nbsp;</td>
+                                        <td class="node-box top right bottom full-width">assign</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="handle node-box left right">&nbsp;</td>
+                                        <td class="assign-from"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="handle node-box left">&nbsp;</td>
+                                        <td class="node-box top right bottom full-width">&rarr;</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="handle node-box left right bottom">&nbsp;</td>
+                                        <td class="assign-to"></td>
+                                    </tr>
+                                </table>
+                            </li>
+
+                            <!-- COMPARE NODE -->
+                            <li id="compare-node" class="node compare-node" data-node-type="compare">
+                                <table>
+                                    <tr>
+                                        <td class="handle node-box top left">&nbsp;</td>
+                                        <td class="node-box top right bottom full-width">compare</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="handle node-box right left">&nbsp;</td>
+                                        <td class="compare-left"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="handle node-box left">&nbsp;</td>
+                                        <td class="node-box top right bottom half-width">operation:
+                                            <select class="compare-operation">
+                                                <option value="lt">&lt;</option>
+                                                <option value="le">&le;</option>
+                                                <option value="eq">&equals;</option>
+                                                <option value="ge">&ge;</option>
+                                                <option value="gt">&gt;</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="handle node-box right bottom left">&nbsp;</td>
+                                        <td class="compare-right"></td>
+                                    </tr>
+                                </table>
+                            </li>
+
+                            <!-- CONSTANT NODE -->
+                            <li id="constant-node" class="node constant-node" data-node-type="constant">
+                                <table>
+                                    <tr>
+                                        <td class="handle node-box top left bottom">&nbsp;</td>
+                                        <td class="node-box top right bottom full-width">constant:
+                                            <input class="constant-value" value="" />
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+
+                            <!-- IF NODE -->
+                            <li id="if-node" class="node if-node" data-node-type="if">
+                                <table>
+                                    <tr>
+                                        <td class="handle node-box top left">&nbsp;</td>
+                                        <td class="node-box top right bottom full-width">if</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="handle node-box right left">&nbsp;</td>
+                                        <td class="if-condition"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="handle node-box left">&nbsp;</td>
+                                        <td class="node-box top right bottom half-width">then</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="handle node-box right bottom left">&nbsp;</td>
+                                        <td><ul class="if-body sortable"></ul></td>
+                                    </tr>
+                                </table>
+                            </li>
+
+                            <!-- VAR NODE -->
+                            <li id="var-node" class="node var-node" data-node-type="var">
+                                <table>
+                                    <tr>
+                                        <td class="handle node-box top left bottom">&nbsp;</td>
+                                        <td class="node-box top right bottom full-width">variable:
+                                            <select class="var-value">
+                                                <option value="var-0">a</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+
+                            <!-- WHILE NODE -->
+                            <li id="while-node" class="node while-node" data-node-type="while">
+                                <table>
+                                    <tr>
+                                        <td class="handle node-box top left">&nbsp;</td>
+                                        <td class="node-box top right bottom full-width">while</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="handle node-box right bottom left">&nbsp;</td>
+                                        <td></td>
+                                    </tr>
+                                </table>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- TAB - STEPS END -->
+        </div>
+    </div>
+    <!-- RIGHT COLUMN END -->
+
 </div>
+<!-- CONTENT END -->
