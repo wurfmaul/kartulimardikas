@@ -1,24 +1,9 @@
 VARSITE = $("#insertVarsHere") # Specifies the site, where variables are to place.
 SCRIPTSITE = $("#insertStepsHere") # Specifies the site, where variables are to place.
 
-updateUrl = ()->
-  # set bits for the sections to specify whether they are closed
-  section = 0
-  section += 1 if (not $('#infoPanel').hasClass('closed'))
-  section += 2 if (not $('#varPanel').hasClass('closed'))
-  section += 4 if (not $('#stepPanel').hasClass('closed'))
-  # generate new url
-  url = 'index.php?action=edit&aid=' + $('#aid').text() + '&section=' + section
-  # use HTML5 technology to manipulate the browser's address bar
-  window.history.pushState(
-    "", # state property (not used)
-    "", # page title (not used)
-    url # new url
-  )
-
 class Api
   editInfo: ->
-    aid = $('#aid').text()
+    aid = $('#aid').data('val')
     name = $('#in-name').val()
     desc = $('#in-desc').val()
     long = $('#in-long').val()
@@ -27,9 +12,6 @@ class Api
       data: {aid: aid, name: name, desc: desc, long: long}
       dataType: 'json'
       success: (data) => # if response arrived...
-        # set aid if new algorithm was created
-        if data['aid']? then @_setAid(data['aid'], 'info')
-
         if data['error']? then @_printError(data['error'])
         else @_printSuccess(data['success'])
       error: (jqXHR, textStatus, errorThrown) => # if request failed
@@ -37,7 +19,7 @@ class Api
 
   editVariable: (vid) ->
     varRow = $('#var-' + vid)
-    aid = $('#aid').text()
+    aid = $('#aid').data('val')
     name = varRow.find('.name').val()
     init = varRow.find('.init').val()
     value = varRow.find('.value').val()
@@ -60,9 +42,6 @@ class Api
             varRow.find('.' + token).val(data[token])
             varRow.data(token, data[token])
 
-        # set aid if new algorithm was created
-        if data['aid']? then @_setAid(data['aid'], 'vars')
-
         if msg isnt "" # if error
           @_printError(msg)
         else
@@ -74,7 +53,7 @@ class Api
         @_printError("Request Error: " + errorThrown)
 
   removeVariable: (vid) ->
-    aid = $('#aid').text()
+    aid = $('#aid').data('val')
     $.ajax "api/edit-algorithm.php?area=var&action=remove",
       type: 'POST'
       data: {aid: aid, vid: vid}
@@ -91,24 +70,17 @@ class Api
         @_printError("Request Error: " + errorThrown)
 
   editScript: (tree) ->
-    aid = $('#aid').text()
+    aid = $('#aid').data('val')
     html = SCRIPTSITE.html()
     $.ajax "api/edit-algorithm.php?area=script",
       type: 'POST'
       data: {aid: aid, tree: tree, html: html}
       dataType: 'json'
       success: (data) => # if response arrived...
-        # set aid if new algorithm was created
-        if data['aid']? then @_setAid(data['aid'], 'steps')
-        # print response
         if data['error']? then @_printError(data['error'])
         else @_printSuccess(data['success'])
       error: (jqXHR, textStatus, errorThrown) => # if request failed
         @_printError("Request Error: " + errorThrown)
-
-  _setAid: (aid) ->
-    $('#aid').text(aid)
-    updateUrl()
 
   _printError: (msg) ->
     $('#editAlertText').html(msg)
@@ -281,10 +253,6 @@ class StepForm
 $ ->
   # GENERAL
   api = new Api()
-  $('.panel-heading').click ->
-    $(this).find("span").toggleClass("glyphicon-chevron-right glyphicon-chevron-down")
-    $($(this).data("target")).toggleClass("closed")
-    updateUrl()
   $('#editAlertClose').click -> $('#editAlert').hide('slow')
 
   # INFORMATION SECTION

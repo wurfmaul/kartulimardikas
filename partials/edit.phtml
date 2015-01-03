@@ -1,29 +1,30 @@
 <?php
 if (!defined('BASEDIR')) die('You cannot call this script directly !');
-
-if (isset($_GET['aid'])) {
-    $aid = $_GET['aid'];
-
-    // get algorithm details from database
-    require_once BASEDIR . "includes/dataModel.php";
-    $_model = new DataModel();
-    $_algo = $_model->fetchAlgorithmByAID($aid);
-    $_model->close();
-    // extract variables
-    $name = stripslashes($_algo->name);
-    $description = stripslashes($_algo->description);
-    $long_description = stripslashes($_algo->long_description);
-    $vars = json_decode($_algo->variables);
-    $steps = base64_decode($_algo->source_html);
-} else {
-    // prepare default values
-    $aid = -1;
-    $name = "";
-    $description = "";
-    $long_description = $l10n['long_description'];
-    $vars = array();
-    $steps = "";
+if (!isset($_GET['aid'])) {
+    header("Location:" . url(['action' => 'new']));
+    die();
 }
+// get algorithm id
+$aid = $_GET['aid'];
+
+// get algorithm details from database
+require_once BASEDIR . "includes/dataModel.php";
+$_model = new DataModel();
+$_algo = $_model->fetchAlgorithmByAID($aid);
+$_model->close();
+
+// check authentication
+if (!isSignedIn() || $_SESSION['uid'] != $_algo->uid){
+    header("Location:" . url(['action' => 'view', 'aid' => $aid]));
+    die();
+}
+
+// extract variables
+$name = stripslashes($_algo->name);
+$description = stripslashes($_algo->description);
+$long_description = stripslashes($_algo->long_description);
+$vars = json_decode($_algo->variables);
+$steps = base64_decode($_algo->source_html);
 
 // add prototype row to variables
 $prototype = new stdClass();
@@ -43,11 +44,10 @@ if ($sectionNum >= 1) { $section['info'] = true; }
 
 <!-- HEADER -->
 <div class="page-header">
-    <?php if ($aid > -1): ?>
-    <h1><?= $l10n['edit_algo'] ?></h1>
-    <?php else: ?>
-    <h1><?= $l10n['new_algo'] ?> <small><?= $l10n['define_algo'] ?></small></h1>
-    <?php endif ?>
+    <h1>
+        <?= $l10n['edit_algo'] ?>
+        <span id="saveSuccess" class="label label-success" style="display: none"></span>
+    </h1>
 </div>
 
 <!-- CONTENT -->
@@ -68,16 +68,12 @@ if ($sectionNum >= 1) { $section['info'] = true; }
             <div class="panel panel-default">
                 <div class="panel-heading" data-toggle="collapse" data-target="#infoPanel">
                     <h4 class="panel-title">
-                        <?php if ($section['info']): ?>
-                        <span class="glyphicon glyphicon-chevron-down"></span> <?= $l10n['general_info'] ?>
-                        <?php else: ?>
-                        <span class="glyphicon glyphicon-chevron-right"></span> <?= $l10n['general_info'] ?>
-                        <?php endif ?>
+                        <span class="glyphicon glyphicon-chevron-<?php if ($section['info']): ?>down<?php else: ?>right<?php endif ?>"></span>
+                        <?= $l10n['general_info'] ?>
                     </h4>
                 </div>
                 <div id="infoPanel" class="panel-collapse collapse <?= $section['info'] ? 'in' : 'closed' ?>">
                     <div class="panel-body form-horizontal">
-                        <div id="aid" style="display: none"><?= $aid ?></div>
                         <div class="form-group">
                             <label for="in-name" class="control-label col-sm-3"><?= $l10n['algo_name'] ?></label>
                             <div class="col-sm-9">
@@ -103,11 +99,8 @@ if ($sectionNum >= 1) { $section['info'] = true; }
             <div class="panel panel-default">
                 <div class="panel-heading" data-toggle="collapse" data-target="#varPanel">
                     <h4 class="panel-title">
-                        <?php if ($section['vars']): ?>
-                        <span class="glyphicon glyphicon-chevron-down"></span> <?= $l10n['variables'] ?>
-                        <?php else: ?>
-                        <span class="glyphicon glyphicon-chevron-right"></span> <?= $l10n['variables'] ?>
-                        <?php endif ?>
+                        <span class="glyphicon glyphicon-chevron-<?php if ($section['vars']): ?>down<?php else: ?>right<?php endif ?>"></span>
+                        <?= $l10n['variables'] ?>
                     </h4>
                 </div>
                 <div id="varPanel" class="panel-collapse collapse <?= $section['vars'] ? 'in' : 'closed' ?>">
@@ -207,7 +200,6 @@ if ($sectionNum >= 1) { $section['info'] = true; }
             </div>
             <!-- TAB - VARIABLES END -->
         </div>
-        <span id="saveSuccess" class="label label-success" style="display: none"></span>
     </div>
     <!-- LEFT COLUMN END -->
 
@@ -218,11 +210,8 @@ if ($sectionNum >= 1) { $section['info'] = true; }
             <div class="panel panel-default">
                 <div class="panel-heading" data-toggle="collapse" data-target="#stepPanel">
                     <h4 class="panel-title">
-                        <?php if ($section['steps']): ?>
-                        <span class="glyphicon glyphicon-chevron-down"></span> <?= $l10n['steps'] ?>
-                        <?php else: ?>
-                        <span class="glyphicon glyphicon-chevron-right"></span> <?= $l10n['steps'] ?>
-                        <?php endif ?>
+                        <span class="glyphicon glyphicon-chevron-<?php if ($section['steps']): ?>down<?php else: ?>right<?php endif ?>"></span>
+                        <?= $l10n['steps'] ?>
                     </h4>
                 </div>
                 <div id="stepPanel" class="panel-collapse collapse <?= $section['steps'] ? 'in' : 'closed' ?>">

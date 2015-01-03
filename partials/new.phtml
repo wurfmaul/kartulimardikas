@@ -1,3 +1,29 @@
 <?php
 if (!defined('BASEDIR')) die('You cannot call this script directly !');
 
+// create a new algorithm and redirect to edit-page if a user is signed in
+if (isSignedIn()) {
+    // create a new algorithm
+    require_once BASEDIR . "includes/dataModel.php";
+    $_model = new DataModel();
+    $aid = $_model->insertAlgorithm($_SESSION['uid']);
+    $_model->close();
+    // redirect to the edit-page
+    header("Location:" . url(['action' => 'edit', 'aid' => $aid]));
+    die();
+}
+?>
+<!-- HEADER -->
+<div class="page-header">
+    <h1><?= $l10n['new_algo'] ?> <small><?= $l10n['define_algo'] ?></small></h1>
+</div>
+<!-- CONTENT -->
+<div class="alert alert-warning" role="alert">
+    <strong><?= $l10n['warning'] ?></strong><br />
+
+    <?= $l10n['message_not_signed_in'] ?>
+    <ul>
+        <li><?= $l10n['use_form_to_signin'] ?></li>
+        <li><?= $l10n['if_no_account'] ?> &rarr; <a href="<?= url(['action' => 'register']) ?>"><?= $l10n['register'] ?></a></li>
+    </ul>
+</div>

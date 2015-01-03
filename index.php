@@ -6,12 +6,11 @@ define('BASEDIR', __DIR__ . '/');
 // TODO: IE <= 8 not supported by jquery
 
 // setup and verify action
-$_action = isset($_GET['action']) ? $_GET['action'] : 'index';
+$_action = isset($_GET['action']) ? $_GET['action'] : 'home';
 if (!file_exists(BASEDIR . "partials/$_action.phtml"))
     $_action = 'home';
-define('ACTION', $_action);
 
-// load configuration and start session
+// load configuration, helpers, authentication and start a new session
 require_once BASEDIR . 'config/config.php';
 require_once BASEDIR . 'api/get-url.php';
 require_once BASEDIR . 'includes/authentication.php';
@@ -30,7 +29,12 @@ if (isset($_POST['signInBtn']) && isset($_POST['username']) && isset($_POST['pas
     // SIGN OUT
     signout();
     $successMsg = $l10n['signed_out'];
+    if ($_action == 'edit' || $_action == 'settings')
+        $_action = 'view';
 }
+
+// make it certain, forever
+define('ACTION', $_action);
 ?><!DOCTYPE html>
 <html lang="en">
 <head>
@@ -90,6 +94,7 @@ if (isset($_POST['signInBtn']) && isset($_POST['username']) && isset($_POST['pas
 
 	<div class="container">
         <?php if (isset($_GET['aid'])): $aid = $_GET['aid'] ?>
+        <?php if (isSignedIn()): ?>
         <!-- NAVIGATION MENU FOR ALGORITHMS -->
         <ul class="nav nav-tabs">
             <li role="presentation"<?php if (ACTION == 'view'): ?> class="active"<?php endif ?>>
@@ -103,6 +108,11 @@ if (isset($_POST['signInBtn']) && isset($_POST['username']) && isset($_POST['pas
             </li>
         </ul>
         <?php endif ?>
+        <!-- The current AID for jquery to use -->
+        <div id="aid" data-val="<?= $aid ?>" style="display: none"></div>
+        <?php endif ?>
+        <!-- The current ACTION for jquery to use -->
+        <div id="action" data-val="<?= ACTION ?>" style="display: none"></div>
 
         <?php if (isset($errorMsg)): ?>
         <!-- MESSAGE BOX FOR ERRORS -->

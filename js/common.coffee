@@ -17,7 +17,41 @@ window.shuffle = (array) ->
     [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]]
   array
 
+updateUrl = (parameters) ->
+  $.ajax "api/get-url.php",
+    type: 'POST'
+    data: {parameters: parameters}
+    dataType: 'text'
+    success: (url) =>
+      # use HTML5 technology to manipulate the browser's address bar
+      window.history.pushState(
+        "", # state property (not used)
+        "", # page title (not used)
+        url # new url
+      )
+    error: (jqXHR, textStatus, errorThrown) => # if request failed
+      @_printError("Request Error: " + errorThrown)
+
 $ ->
+  $('.panel-heading').click ->
+    # change arrow
+    $(this).find("span").toggleClass("glyphicon-chevron-right glyphicon-chevron-down")
+    # toggle signal class
+    $($(this).data("target")).toggleClass("closed")
+
+    # prepare parameters for address bar manipulation
+    section = 0
+    counter = 1
+    $('.panel-collapse').each(->
+      section += counter if (not $(this).hasClass('closed'))
+      counter *= 2
+    )
+    updateUrl(
+      action: $('#action').data('val')
+      aid: $('#aid').data('val')
+      section: section
+    )
+
   $('#generalAlertClose').click ->
     $('#generalAlert').hide('slow')
 

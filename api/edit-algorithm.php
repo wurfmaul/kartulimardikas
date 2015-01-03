@@ -29,15 +29,10 @@ class EditManager
 
     public function process()
     {
-        // create new entry if none exists
-        if ($this->_aid == -1) {
-            $this->_aid = $this->_model->insertAlgorithm($this->_uid);
-            $this->_response['aid'] = $this->_aid;
-        } else {
-            $owner = $this->_model->fetchAlgorithmByAID($this->_aid)->uid;
-            if ($owner != $this->_uid) {
-                $this->_response['error'] = $this->_l10n['need_to_be_owner'];
-            }
+        // fetch algorithm details from database
+        $owner = $this->_model->fetchAlgorithmByAID($this->_aid)->uid;
+        if ($owner != $this->_uid) {
+            $this->_response['error'] = $this->_l10n['need_to_be_owner'];
         }
 
         // partially process data
@@ -231,15 +226,15 @@ class EditManager
     }
 }
 
-if (isSignedIn()) {
+if (!isset($_POST['aid'])) {
+    $response['error'] = $l10n['no_algo_defined'];
+} elseif (!isset($_GET['area'])) {
+    $response['error'] = $l10n['no_area_defined'];
+} elseif (isSignedIn()) {
     // prepare variables
     $uid = $_SESSION['uid'];
-    $aid = isset($_POST['aid']) ? $_POST['aid'] : -1;
-
-    // initialize partial processing
-    if (!isset($_GET['area']))
-        die("You cannot edit everything at once. Define area!");
-
+    $aid = $_POST['aid'];
+    // start processing
     $manager = new EditManager($uid, $aid);
     $response = $manager->process();
 } else {

@@ -1,0 +1,27 @@
+<?php
+if (!defined('BASEDIR')) die('You cannot call this script directly !');
+if (!isset($_GET['aid'])) {
+    header("Location:" . url(['action' => 'new']));
+    die();
+}
+// get algorithm id
+$aid = $_GET['aid'];
+
+// get algorithm details from database
+require_once BASEDIR . "includes/dataModel.php";
+$_model = new DataModel();
+$_algo = $_model->fetchAlgorithmByAID($aid);
+$_model->close();
+
+// check authentication
+if (!isSignedIn() || $_SESSION['uid'] != $_algo->uid){
+    header("Location:" . url(['action' => 'view', 'aid' => $aid]));
+    die();
+}
+?>
+<!-- HEADER -->
+<div class="page-header">
+    <h1><?= $l10n['settings'] ?> <small><?= $l10n['configure_algo'] ?></small></h1>
+</div>
+<!-- CONTENT -->
+<!-- TODO: settings page! -->

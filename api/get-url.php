@@ -12,5 +12,5 @@ function url($parameters) {
 
 if (isset($_POST['parameters'])) {
     header('Content-type: text/plain; charset=UTF-8');
-    echo url(json_decode($_POST['parameters']));
+    echo url($_POST['parameters']);
 }

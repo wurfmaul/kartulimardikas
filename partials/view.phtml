@@ -18,9 +18,19 @@ $name = stripslashes($_algo->name);
 $description = stripslashes($_algo->description);
 $long_description = stripslashes($_algo->long_description);
 $vars = json_decode($_algo->variables);
-$steps = base64_decode($_algo->source_html);
-?>
+$tree = json_decode($_algo->tree);
 
+// open section if it is specified
+$section = array ('controls' => false, 'pseudo' => false, 'source' => false,
+    'desc' => false, 'memory' => false, 'stats' => false);
+$sectionNum = isset($_GET['section']) ? $_GET['section'] : 1;
+if ($sectionNum >= 32) { $section['stats'] = true; $sectionNum -= 32; }
+if ($sectionNum >= 16) { $section['memory'] = true; $sectionNum -= 16; }
+if ($sectionNum >= 8) { $section['desc'] = true; $sectionNum -= 8; }
+if ($sectionNum >= 4) { $section['source'] = true; $sectionNum -= 4; }
+if ($sectionNum >= 2) { $section['pseudo'] = true; $sectionNum -= 2; }
+if ($sectionNum >= 1) { $section['controls'] = true; }
+?>
 <!-- HEADER -->
 <div class="page-header">
     <?php if (isset($aid)): ?>
@@ -39,12 +49,13 @@ $steps = base64_decode($_algo->source_html);
 
         <!-- TAB - CONTROLS -->
         <div class="panel panel-default">
-            <div class="panel-heading">
+            <div class="panel-heading" data-toggle="collapse" data-target="#controls">
                 <h4 class="panel-title">
-                    <a data-toggle="collapse" href="#controls"> Controls </a>
+                    <span class="glyphicon glyphicon-chevron-<?php if ($section['controls']): ?>down<?php else: ?>right<?php endif ?>"></span>
+                    <?= $l10n['controls'] ?>
                 </h4>
             </div>
-            <div id="controls" class="panel-collapse collapse in">
+            <div id="controls" class=" panel-collapse collapse <?= $section['controls'] ? 'in' : 'closed' ?>">
                 <div class="panel-body">
 
                     <!-- STEP CONTROLS -->
@@ -88,42 +99,45 @@ $steps = base64_decode($_algo->source_html);
 
         <!-- TAB - PSEUDOCODE -->
         <div class="panel panel-default">
-            <div class="panel-heading">
+            <div class="panel-heading" data-toggle="collapse" data-target="#pseudocode">
                 <h4 class="panel-title">
-                    <a data-toggle="collapse" href="#pseudocode"> Selection sort </a>
+                    <span class="glyphicon glyphicon-chevron-<?php if ($section['pseudo']): ?>down<?php else: ?>right<?php endif ?>"></span>
+                    <?= $name ?>
                 </h4>
             </div>
-            <div id="pseudocode" class="panel-collapse collapse">
+            <div id="pseudocode" class=" panel-collapse collapse <?= $section['pseudo'] ? 'in' : 'closed' ?>">
                 <div class="panel-body">
-                    <?=$algo["words"]?>
+
                 </div>
             </div>
         </div>
 
         <!-- TAB - SOURCE CODE -->
         <div class="panel panel-default">
-            <div class="panel-heading">
+            <div class="panel-heading" data-toggle="collapse" data-target="#sourcecode">
                 <h4 class="panel-title">
-                    <a data-toggle="collapse" href="#sourcecode"> Source code </a>
+                    <span class="glyphicon glyphicon-chevron-<?php if ($section['source']): ?>down<?php else: ?>right<?php endif ?>"></span>
+                    <?= $l10n['source_code'] ?>
                 </h4>
             </div>
-            <div id="sourcecode" class="panel-collapse collapse in">
+            <div id="sourcecode" class=" panel-collapse collapse <?= $section['source'] ? 'in' : 'closed' ?>">
                 <div class="panel-body">
-                    <?=$algo["source"]?>
+                    <?php print_r($tree) ?>
                 </div>
             </div>
         </div>
 
         <!-- TAB - DESCRIPTION -->
         <div class="panel panel-default">
-            <div class="panel-heading">
+            <div class="panel-heading" data-toggle="collapse" data-target="#description">
                 <h4 class="panel-title">
-                    <a data-toggle="collapse" href="#description"> Description </a>
+                    <span class="glyphicon glyphicon-chevron-<?php if ($section['desc']): ?>down<?php else: ?>right<?php endif ?>"></span>
+                    <?= $l10n['description'] ?>
                 </h4>
             </div>
-            <div id="description" class="panel-collapse collapse">
+            <div id="description" class=" panel-collapse collapse <?= $section['desc'] ? 'in' : 'closed' ?>">
                 <div class="panel-body">
-                    <?=$algo["desc"]?>
+                    <?= $long_description ?>
                 </div>
             </div>
         </div>
@@ -137,87 +151,37 @@ $steps = base64_decode($_algo->source_html);
 
         <!-- TAB - MEMORY -->
         <div class="panel panel-default">
-            <div class="panel-heading">
+            <div class="panel-heading" data-toggle="collapse" data-target="#memory">
                 <h4 class="panel-title">
-                    <a data-toggle="collapse" href="#memory"> Memory </a>
+                    <span class="glyphicon glyphicon-chevron-<?php if ($section['memory']): ?>down<?php else: ?>right<?php endif ?>"></span>
+                    <?= $l10n['memory'] ?>
                 </h4>
             </div>
-            <div id="memory" class="panel-collapse collapse in">
+            <div id="memory" class=" panel-collapse collapse <?= $section['memory'] ? 'in' : 'closed' ?>">
                 <div class="panel-body">
-
                     <table class="table table-hover table-bordered">
                         <tr>
-                            <th style="border-top: none;">Variable</th>
-                            <th style="border-top: none;">Contents</th>
+                            <th style="border-top: none;"><?= $l10n['variable'] ?></th>
+                            <th style="border-top: none;"><?= $l10n['contents'] ?></th>
                         </tr>
+                        <?php foreach($vars as $index => $var): ?>
                         <tr>
-                            <td><code>a</code></td>
+                            <td><code><?= $var->name ?></code></td>
                             <td>
                                 <div class="btn-group">
-                                    <input type="button" class="btn btn-default"
-                                           disabled="disabled" value="7" id="btn-a0" /> <input
-                                        type="button" class="btn btn-default" disabled="disabled"
-                                        value="3" id="btn-a1" /> <input type="button"
-                                                                        class="btn btn-default" disabled="disabled" value="2"
-                                                                        id="btn-a2" /> <input type="button" class="btn btn-default"
-                                                                                              disabled="disabled" value="1" id="btn-a3" /> <input
-                                        type="button" class="btn btn-default" disabled="disabled"
-                                        value="9" id="btn-a4" /> <input type="button"
-                                                                        class="btn btn-default" disabled="disabled" value="6"
-                                                                        id="btn-a5" /> <input type="button" class="btn btn-default"
-                                                                                              disabled="disabled" value="5" id="btn-a6" /> <input
-                                        type="button" class="btn btn-default" disabled="disabled"
-                                        value="4" id="btn-a7" /> <input type="button"
-                                                                        class="btn btn-default" disabled="disabled" value="8"
-                                                                        id="btn-a8" />
+                                    <?php if (substr($var->init, 0, 6) == "array-"): // deal with "array-{?,custom,random}" ?>
+                                        <?php foreach (explode(',', $var->value) as $offset => $value): ?>
+                                            <input type="button" class="btn btn-default" disabled="disabled"
+                                                   value="<?= $value ?>" id="memory-<?= $var->name ?><?= $offset ?>" />
+                                        <?php endforeach ?>
+                                    <?php else: // deal with "elem-{?,value}" ?>
+                                        <input type="button" class="btn btn-default" disabled="disabled"
+                                               value="<?= $var->value ?>" id="memory-<?= $var->name ?>" />
+                                    <?php endif ?>
                                 </div>
                             </td>
                         </tr>
-                        <tr>
-                            <td><code>len</code></td>
-                            <td>
-                                <div class="btn-group">
-                                    <input type="button" class="btn btn-default" id="btn-len"
-                                           disabled="disabled" value="9" />
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><code>i</code></td>
-                            <td>
-                                <div class="btn-group">
-                                    <input type="button" class="btn btn-default" id="btn-i"
-                                           disabled="disabled" value="?" />
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><code>min</code></td>
-                            <td>
-                                <div class="btn-group">
-                                    <input type="button" class="btn btn-default"
-                                           disabled="disabled" id="btn-min" value="?" />
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><code>j</code></td>
-                            <td>
-                                <div class="btn-group">
-                                    <input type="button" class="btn btn-default"
-                                           disabled="disabled" id="btn-j" value="?" />
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><code>t</code></td>
-                            <td>
-                                <div class="btn-group">
-                                    <input type="button" class="btn btn-default"
-                                           disabled="disabled" id="btn-t" value="?" />
-                                </div>
-                            </td>
-                        </tr>
+                        <?php endforeach ?>
                     </table>
                 </div>
             </div>
@@ -225,38 +189,42 @@ $steps = base64_decode($_algo->source_html);
 
         <!-- TAB - STATISTICS -->
         <div class="panel panel-default">
-            <div class="panel-heading">
+            <div class="panel-heading" data-toggle="collapse" data-target="#statistics">
                 <h4 class="panel-title">
-                    <a data-toggle="collapse" href="#statistics"> Statistics </a>
+                    <span class="glyphicon glyphicon-chevron-<?php if ($section['stats']): ?>down<?php else: ?>right<?php endif ?>"></span>
+                    <?= $l10n['statistics'] ?>
                 </h4>
             </div>
-            <div id="statistics" class="panel-collapse collapse">
+            <div id="statistics" class="panel-collapse collapse <?= $section['stats'] ? 'in' : 'closed' ?>">
                 <div class="panel-body">
                     <table class="table table-hover table-bordered">
                         <tr>
-                            <th style="border-top: none;">Metric</th>
-                            <th style="border-top: none;">Count</th>
+                            <th><?= $l10n['metric'] ?></th>
+                            <th><?= $l10n['count'] ?></th>
                         </tr>
                         <tr>
-                            <td>Number of write operations</td>
-                            <td><div class="btn-group">
-                                    <input type="button" class="btn btn-default"
-                                           disabled="disabled" value="0" id="btn-now" />
-                                </div></td>
+                            <td><?= $l10n['nowo'] ?></td>
+                            <td>
+                                <div class="btn-group">
+                                    <input type="button" class="btn btn-default" disabled="disabled" value="0" id="stats-now" />
+                                </div>
+                            </td>
                         </tr>
                         <tr>
-                            <td>Number of compare operations</td>
-                            <td><div class="btn-group">
-                                    <input type="button" class="btn btn-default"
-                                           disabled="disabled" value="0" id="btn-noc" />
-                                </div></td>
+                            <td><?= $l10n['noco'] ?></td>
+                            <td>
+                                <div class="btn-group">
+                                    <input type="button" class="btn btn-default" disabled="disabled" value="0" id="stats-noc" />
+                                </div>
+                            </td>
                         </tr>
                         <tr>
-                            <td>Number of other operations</td>
-                            <td><div class="btn-group">
-                                    <input type="button" class="btn btn-default"
-                                           disabled="disabled" value="0" id="btn-noo" />
-                                </div></td>
+                            <td><?= $l10n['nooo'] ?></td>
+                            <td>
+                                <div class="btn-group">
+                                    <input type="button" class="btn btn-default" disabled="disabled" value="0" id="stats-noo" />
+                                </div>
+                            </td>
                         </tr>
                     </table>
                 </div>

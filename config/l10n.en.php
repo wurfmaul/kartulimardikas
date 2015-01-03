@@ -4,16 +4,14 @@
  */
 
 // GENERAL
-$l10n['welcome'] = "Hello, %s";
 $l10n['close'] = "Close";
 $l10n['error'] = "Error!";
 $l10n['success'] = "Success!";
+$l10n['warning'] = "Warning!";
 $l10n['toggle_nav'] = "Toggle navigation";
-$l10n['edit_algo'] = "Edit algorithm";
-$l10n['new_algo'] = "New algorithm";
-$l10n['define_algo'] = "Define your own algorithm!";
 
 // USER MANAGEMENT
+$l10n['welcome'] = "Hello, %s";
 $l10n['enter_username'] = "Please enter a username!";
 $l10n['enter_email'] = "Please enter a valid email address!";
 $l10n['enter_password'] = "Please enter a password!";
@@ -36,8 +34,7 @@ $l10n['sign_in'] = "Sign in";
 $l10n['register'] = "Register";
 $l10n['become_user'] = "Become a new user!";
 
-// INDEX
-$l10n['index'] = "Index";
+// HOME
 $l10n['subtitle'] = "Online collection of algorithms";
 $l10n['welcome_msg'] = "Welcome to an interactive platform to discuss, demonstrate and compare common algorithms.";
 $l10n['define_new_algo'] = "Define new algorithm";
@@ -52,13 +49,38 @@ $l10n['one_minute_ago'] = "a minute ago";
 $l10n['one_hour_ago'] = "1 hour ago";
 $l10n['one_day_ago'] = "1 day ago";
 
+// INDEX
+$l10n['index'] = "Index";
+$l10n['all_algos'] = "All the defined algorithms.";
+
+// NEW
+$l10n['new'] = "New";
+$l10n['new_algo'] = "New algorithm";
+$l10n['define_algo'] = "Define your own algorithm!";
+$l10n['message_not_signed_in'] = "You need to be signed in to define a new algorithm!";
+$l10n['use_form_to_signin'] = "Use the form in the top right corner to sign in.";
+$l10n['if_no_account'] = "If you have no account yet, please consider a registration:";
+
 // VIEW
 $l10n['view'] = "View";
+$l10n['controls'] = "Controls";
+$l10n['source_code'] = "Source Code";
+$l10n['memory'] = "Memory";
+$l10n['statistics'] = "Statistics";
+$l10n['variable'] = "Variable";
+$l10n['contents'] = "Contents";
+$l10n['metric'] = "Metric";
+$l10n['count'] = "Count";
+$l10n['nowo'] = "Number of write operations";
+$l10n['noco'] = "Number of compare operations";
+$l10n['nooo'] = "Number of other operations";
+$l10n[''] = "";
+$l10n[''] = "";
 $l10n[''] = "";
 
 // EDIT
 $l10n['edit'] = "Edit";
-$l10n['new'] = "New";
+$l10n['edit_algo'] = "Edit algorithm";
 $l10n['saved_to_db'] = "Successfully saved to database!";
 $l10n['need_to_be_owner'] = "You need to be the owner in order to change this algorithm!";
 $l10n['edit_not_signed_in'] = "You have to be signed in to publish an algorithm!";
@@ -88,6 +110,9 @@ $l10n['size_out_of_bounds'] = "The array size has to be between %d and %d.";
 $l10n['empty_value'] = "The value cannot be empty.";
 $l10n['empty_name'] = "The variable name cannot be empty.";
 $l10n['invalid_init'] = "The initialization method seems to be invalid.";
+$l10n['no_algo_defined'] = "No algorithm specified!";
+$l10n['no_area_defined'] = "You cannot edit everything at once. Define area!";
 
 // SETTINGS
 $l10n['settings'] = "Settings";
+$l10n['configure_algo'] = "Configure your algorithm.";

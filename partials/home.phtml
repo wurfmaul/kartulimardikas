@@ -1,13 +1,12 @@
 <?php
-    if (!defined('BASEDIR')) die('You cannot call this script directly !');
+if (!defined('BASEDIR')) die('You cannot call this script directly !');
 
-    // ask database for latest algorithms
-    require_once BASEDIR . "includes/dataModel.php";
-    $_model = new DataModel();
-    $algos = $_model->fetchLatestAlgorithms(NUMBER_OF_LATEST_ALGORITHMS);
-    $_model->close();
+// ask database for latest algorithms
+require_once BASEDIR . "includes/dataModel.php";
+$_model = new DataModel();
+$algos = $_model->fetchLatestAlgorithms(NUMBER_OF_LATEST_ALGORITHMS);
+$_model->close();
 ?>
-
 <!-- HEADER -->
 <div class="jumbotron">
     <h1>
