@@ -22,5 +22,5 @@ define('NUMBER_OF_LATEST_ALGORITHMS', 5);
 define('MAX_MINUTES_FOR_LABEL', 120);
 define('MAX_DESCRIPTION_LENGTH', 240);
 
-# Load language settings
-require_once BASEDIR . 'config/l10n.' . LANG . '.php';
+require_once BASEDIR . 'config/paths.php'; # Load library paths
+require_once BASEDIR . 'config/l10n.' . LANG . '.php'; # Load language settings

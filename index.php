@@ -1,7 +1,14 @@
 <?php
     // setup environment
     define('BASEDIR', __DIR__ . '/');
-    define('ACTION', isset($_GET['action']) ? $_GET['action'] : 'index');
+
+    // setup and verify action
+    $_action = isset($_GET['action']) ? $_GET['action'] : 'index';
+    if (!file_exists(BASEDIR . "partials/$_action.phtml"))
+        $_action = 'index';
+    define('ACTION', $_action);
+
+    // load configuration and start session
     require_once BASEDIR . 'config/config.php';
     require_once BASEDIR . 'includes/authentication.php';
     secure_session_start();
@@ -28,15 +35,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= PROJECT_NAME ?></title>
 
-    <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="<?= BOOTSTRAP_CSS_PATH ?>" rel="stylesheet">
     <link href="css/custom.css" rel="stylesheet">
-
-    <?php if (ACTION == 'edit'): ?>
-    <link href="lib/jquery-ui-interactions/jquery-ui.min.css" rel="stylesheet" />
-    <link href="css/edit.css" rel="stylesheet" />
-    <?php elseif (ACTION == 'index'): ?>
-    <link href="css/index.css" rel="stylesheet" />
-    <?php endif ?>
+    <link href="css/<?= ACTION ?>.css" rel="stylesheet" />
 </head>
 <body>
 	<!-- NAVIGATION BAR -->
@@ -98,30 +99,20 @@
             <strong><?= $l10n['success'] ?></strong> <?= $successMsg ?>
         </div>
         <?php endif ?>
-
-        <?php switch(ACTION) {
-            case 'edit':     require_once BASEDIR . 'partials/edit.phtml'; break;
-            case 'view':     require_once BASEDIR . 'partials/view.phtml'; break;
-            case 'register': require_once BASEDIR . 'partials/register.phtml'; break;
-            default:         require_once BASEDIR . 'partials/index.phtml';
-        } ?>
+        <?php require_once BASEDIR . 'partials/' . ACTION . '.phtml' ?>
 	</div>
 
     <!--[if lt IE 9]>
-    <script src="lib/html5shiv/html5shiv.min.js"></script>
-    <script src="lib/respond/respond.min.js"></script>
+    <script src="<?= HTML5SHIV_PATH ?>"></script>
+    <script src="<?= RESPOND_PATH ?>"></script>
     <![endif]-->
-	<script src="lib/jquery/jquery.min.js"></script>
-	<script src="lib/bootstrap/js/bootstrap.min.js"></script>
+	<script src="<?= JQUERY_PATH ?>"></script>
+	<script src="<?= BOOTSTRAP_JS_PATH ?>"></script>
 	<script src="js/common.js"></script>
+    <script src="js/<?= ACTION ?>.js"></script>
 
 <?php if (ACTION == 'edit'): ?>
-    <script src="lib/jquery-ui-interactions/jquery-ui.min.js"></script>
-    <script src="lib/js-keystroke/jquery.keystroke.min.js"></script>
-    <script src="lib/jquery-base64/jquery.base64.js"></script>
-    <script src="js/edit.js"></script>
-<?php elseif (ACTION == 'register'): ?>
-    <script src="js/register.js"></script>
+    <script src="<?= JQUERYUI_JS_PATH ?>"></script>
 <?php elseif (ACTION == 'view'): ?>
     <script src="js-gen/<?=$jsFile?>"></script>
 <?php endif ?>
