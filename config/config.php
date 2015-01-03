@@ -5,6 +5,7 @@ if (!defined('BASEDIR'))
 # Basic settings
 define('PROJECT_NAME', 'kartulimardikas');
 define('DEBUG_MODE', true);
+define('LIBRARY_MODE', 'LOCAL'); # one of LOCAL, DEBUG, CLOUDFLARE, CDN
 define('LANG', 'en');
 
 # Database settings
