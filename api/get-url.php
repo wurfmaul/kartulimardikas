@@ -10,7 +10,7 @@ function url($parameters) {
     return $_url;
 }
 
-if (isset($_POST['parameters'])) {
+if (isset($_GET['parameters'])) {
     header('Content-type: text/plain; charset=UTF-8');
-    echo url($_POST['parameters']);
+    echo url($_GET['parameters']);
 }

@@ -97,47 +97,50 @@ class Tree
 
     # call proper parsing method
     switch type
-      when 'assign' then response = @parseAssign node
-      when 'compare' then response = @parseCompare node
-      when 'constant' then response = @parseConstant node
-      when 'if' then response = @parseIf node
-      when 'var' then response = @parseVar node
-      when 'while' then response = @parseWhile node
+      when 'assign' then response = @parseAssign(node)
+      when 'compare' then response = @parseCompare(node)
+      when 'constant' then response = @parseConstant(node)
+      when 'if' then response = @parseIf(node)
+      when 'var' then response = @parseVar(node)
+      when 'while' then response = @parseWhile(node)
       else
         console.error "Parse error: Unknown type: '#{type}'"
     response
 
   parseRoot: ->
+    @parseBody(SCRIPTSITE)
+
+  parseBody: (node) =>
     # prepare return value
     script = {}
     # loop level-1 elements:
-    SCRIPTSITE.children('li').each((index, element) =>
-      script[index] = @parse $(element)
+    node.children('li').each((index, element) =>
+      script[index] = @parse($(element))
     )
     script
 
   parseAssign: (node) =>
     console.log 'parsing assign...'
-    from = @parse @findSubNode(node, '.assign-from')
-    to = @parse @findSubNode(node, '.assign-to')
+    from = @parse(@findSubNode(node, '.assign-from'))
+    to = @parse(@findSubNode(node, '.assign-to'))
 
     {
-    node: 'assign'
-    from: from
-    to: to
+      node: 'assign'
+      from: from
+      to: to
     }
 
   parseCompare: (node) =>
     console.log 'parsing compare...'
-    left = @parse @findSubNode(node, '.compare-left')
-    right = @parse @findSubNode(node, '.compare-right')
+    left = @parse(@findSubNode(node, '.compare-left'))
+    right = @parse(@findSubNode(node, '.compare-right'))
     operator = node.find('.compare-operation:first').val()
 
     {
-    node: 'compare'
-    left: left
-    right: right
-    operator: operator
+      node: 'compare'
+      left: left
+      right: right
+      operator: operator
     }
 
   parseConstant: (node) =>
@@ -145,19 +148,19 @@ class Tree
     value = node.find('.constant-value:first').val()
 
     {
-    node: 'constant'
-    value: value
+      node: 'constant'
+      value: value
     }
 
   parseIf: (node) =>
     console.log 'parsing if...'
-    condition = @parse @findSubNode(node, '.if-condition')
-    body = @parse @findSubNode(node, '.if-body')
+    condition = @parse(@findSubNode(node, '.if-condition'))
+    body = @parseBody(@findSubNode(node, '.if-body'))
 
     {
-    node: 'if'
-    condition: condition
-    body: body
+      node: 'if'
+      condition: condition
+      body: body
     }
 
   parseVar: (node) =>
@@ -165,8 +168,8 @@ class Tree
     variable = node.find('.var-value:first').val()
 
     {
-    node: 'var'
-    var: variable
+      node: 'var'
+      var: variable
     }
 
   parseWhile: (node) ->
@@ -174,7 +177,7 @@ class Tree
     'while'
 
   findSubNode: (node, _class) ->
-    node.find(_class + ':first > table')
+    node.find(_class + ':first')
 
 class VariableForm
   constructor: (api) ->

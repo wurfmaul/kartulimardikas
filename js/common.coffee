@@ -19,7 +19,7 @@ window.shuffle = (array) ->
 
 updateUrl = (parameters) ->
   $.ajax "api/get-url.php",
-    type: 'POST'
+    type: 'GET'
     data: {parameters: parameters}
     dataType: 'text'
     success: (url) =>

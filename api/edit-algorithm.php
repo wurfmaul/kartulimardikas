@@ -1,13 +1,12 @@
 <?php
 define('BASEDIR', realpath('..') . '/');
+
 require_once BASEDIR . 'config/config.php';
+require_once BASEDIR . 'includes/authentication.php';
+require_once BASEDIR . 'includes/dataModel.php';
 
 // in order to retrieve the uid we need access to the session
-require_once BASEDIR . 'includes/authentication.php';
 secure_session_start();
-
-// for database actions
-require_once BASEDIR . 'includes/dataModel.php';
 
 class EditManager
 {
