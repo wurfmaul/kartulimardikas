@@ -103,12 +103,14 @@ class Tree
       when 'if' then response = @parseIf(node)
       when 'var' then response = @parseVar(node)
       when 'while' then response = @parseWhile(node)
-      else
-        console.error "Parse error: Unknown type: '#{type}'"
+#      else
+#        console.error "Parse error: Unknown type: '#{type}'"
     response
 
   parseRoot: ->
-    @parseBody(SCRIPTSITE)
+    # if the main body is empty, return empty string, parse tree otherwise
+    if ($(SCRIPTSITE).filter(':empty').length) then ""
+    else @parseBody(SCRIPTSITE)
 
   parseBody: (node) =>
     # prepare return value
@@ -120,7 +122,6 @@ class Tree
     script
 
   parseAssign: (node) =>
-    console.log 'parsing assign...'
     from = @parse(@findSubNode(node, '.assign-from'))
     to = @parse(@findSubNode(node, '.assign-to'))
 
@@ -131,7 +132,6 @@ class Tree
     }
 
   parseCompare: (node) =>
-    console.log 'parsing compare...'
     left = @parse(@findSubNode(node, '.compare-left'))
     right = @parse(@findSubNode(node, '.compare-right'))
     operator = node.find('.compare-operation:first').val()
@@ -144,7 +144,6 @@ class Tree
     }
 
   parseConstant: (node) =>
-    console.log 'parsing constant...'
     value = node.find('.constant-value:first').val()
 
     {
@@ -153,7 +152,6 @@ class Tree
     }
 
   parseIf: (node) =>
-    console.log 'parsing if...'
     condition = @parse(@findSubNode(node, '.if-condition'))
     body = @parseBody(@findSubNode(node, '.if-body'))
 
@@ -164,7 +162,6 @@ class Tree
     }
 
   parseVar: (node) =>
-    console.log 'parsing var...'
     variable = node.find('.var-value:first').val()
 
     {
@@ -173,7 +170,6 @@ class Tree
     }
 
   parseWhile: (node) ->
-    console.log 'parsing while...'
     'while'
 
   findSubNode: (node, _class) ->
@@ -234,24 +230,40 @@ class StepForm
     .removeAttr('id')
     .appendTo(SCRIPTSITE)
 
-    # integrate it into the sortable lists
-    # FIXME: sortable for all the new elements (works only for the first one)
-    #  console.log("destroy...")
-    #  $('.sortable').each(->
-    #    if ($(this).sortable("instance")?)
-    #      $(this).sortable("destroy")
-    #  )
-    #  console.log("init...")
-    $('.sortable').sortable(
-      connectWith: ".sortable"
-      placeholder: "sortable-highlight"
+    # remove sortable completely
+    $('.sortable').each(->
+      if ($(this).sortable("instance")?)
+        $(this).sortable("destroy")
     )
+    # and reinitialize it
+    @updateSortable()
+    # make sure, the action handlers (click...) work for the new element
     @updateActionHandlers(node)
+
+  removeNode: (node) ->
+    # TODO: undo function
+    node.hide('slow', =>
+      node.remove()
+      @api.editScript(@tree.parseRoot())
+    )
 
   updateActionHandlers: (parent) ->
     # update action handlers
-    parent.find('input, select').blur =>
+    parent.find('input, select').off('blur').blur =>
       @api.editScript(@tree.parseRoot())
+    parent.find('.node-remove').off('click').click (event) =>
+      @removeNode($(event.currentTarget).parents('.node:first'))
+
+  updateSortable: ->
+    # FIXME: find combined solution
+    update = () =>
+      @api.editScript(@tree.parseRoot())
+    sortParams =
+      connectWith: ".sortable"
+      placeholder: "sortable-highlight"
+      update: update
+    SCRIPTSITE.sortable(sortParams)
+    SCRIPTSITE.find('.sortable').sortable(sortParams)
 
 $ ->
   # GENERAL
@@ -284,7 +296,8 @@ $ ->
   # STEPS SECTION
   tree = new Tree()
   stepForm = new StepForm(api, tree)
+  stepForm.updateActionHandlers(SCRIPTSITE)
+  stepForm.updateSortable()
   $('#node-btn-group').children('button').click ->
     stepForm.addNode($(this).data('node'))
     api.editScript(tree.parseRoot())
-  stepForm.updateActionHandlers(SCRIPTSITE)

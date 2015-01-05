@@ -234,7 +234,12 @@ if ($sectionNum >= 1) { $section['info'] = true; }
                                 <table>
                                     <tr>
                                         <td class="handle node-box top left">&nbsp;</td>
-                                        <td class="node-box top right bottom full-width">assign</td>
+                                        <td class="node-box top right bottom full-width">
+                                            <?= $l10n['assign_node_title'] ?>
+                                            <button type="button" class="close node-remove" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="handle node-box left right">&nbsp;</td>
@@ -256,7 +261,12 @@ if ($sectionNum >= 1) { $section['info'] = true; }
                                 <table>
                                     <tr>
                                         <td class="handle node-box top left">&nbsp;</td>
-                                        <td class="node-box top right bottom full-width">compare</td>
+                                        <td class="node-box top right bottom full-width">
+                                            <?= $l10n['compare_node_title'] ?>
+                                            <button type="button" class="close node-remove" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="handle node-box right left">&nbsp;</td>
@@ -286,8 +296,12 @@ if ($sectionNum >= 1) { $section['info'] = true; }
                                 <table>
                                     <tr>
                                         <td class="handle node-box top left bottom">&nbsp;</td>
-                                        <td class="node-box top right bottom full-width">constant:
+                                        <td class="node-box top right bottom full-width">
+                                            <?= $l10n['constant_node_title'] ?>
                                             <input class="constant-value" value="" />
+                                            <button type="button" class="close node-remove" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
                                         </td>
                                     </tr>
                                 </table>
@@ -298,7 +312,12 @@ if ($sectionNum >= 1) { $section['info'] = true; }
                                 <table>
                                     <tr>
                                         <td class="handle node-box top left">&nbsp;</td>
-                                        <td class="node-box top right bottom full-width">if</td>
+                                        <td class="node-box top right bottom full-width">
+                                            <?= $l10n['if_node_title'] ?>
+                                            <button type="button" class="close node-remove" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="handle node-box right left">&nbsp;</td>
@@ -320,10 +339,14 @@ if ($sectionNum >= 1) { $section['info'] = true; }
                                 <table>
                                     <tr>
                                         <td class="handle node-box top left bottom">&nbsp;</td>
-                                        <td class="node-box top right bottom full-width">variable:
+                                        <td class="node-box top right bottom full-width">
+                                            <?= $l10n['variable_node_title'] ?>
                                             <select class="var-value">
                                                 <option value="var-0">a</option>
                                             </select>
+                                            <button type="button" class="close node-remove" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
                                         </td>
                                     </tr>
                                 </table>
@@ -334,7 +357,12 @@ if ($sectionNum >= 1) { $section['info'] = true; }
                                 <table>
                                     <tr>
                                         <td class="handle node-box top left">&nbsp;</td>
-                                        <td class="node-box top right bottom full-width">while</td>
+                                        <td class="node-box top right bottom full-width">
+                                            <?= $l10n['while_node_title'] ?>
+                                            <button type="button" class="close node-remove" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="handle node-box right bottom left">&nbsp;</td>
