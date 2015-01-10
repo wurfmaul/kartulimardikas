@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS `algorithm` (
   `tree` longblob COMMENT 'script information in json format',
   `source_html` longblob COMMENT 'base64 hash of the scripts html',
   `creation` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'timestamp of creation',
-  `lastedit` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'timestamp of last modification',
+  `lastedit` timestamp NULL DEFAULT NULL COMMENT 'timestamp of last modification',
   PRIMARY KEY (`aid`),
   KEY `uid` (`uid`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
@@ -53,11 +53,11 @@ CREATE TABLE IF NOT EXISTS `user` (
   `email` varchar(128) COLLATE utf8_bin NOT NULL,
   `password` varchar(255) COLLATE utf8_bin NOT NULL,
   `registration` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'timestamp of registration',
-  `lastsignin` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'timestamp of latest signin',
+  `lastsignin` timestamp NULL DEFAULT NULL COMMENT 'timestamp of latest signin',
   PRIMARY KEY (`uid`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

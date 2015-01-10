@@ -228,148 +228,16 @@ if ($sectionNum >= 1) { $section['info'] = true; }
                         </div>
 
                         <ul style="display: none">
-
-                            <!-- ASSIGN NODE -->
-                            <li id="assign-node" class="node assign-node" data-node-type="assign">
-                                <table>
-                                    <tr>
-                                        <td class="handle node-box top left">&nbsp;</td>
-                                        <td class="node-box top right bottom full-width">
-                                            <?= $l10n['assign_node_title'] ?>
-                                            <button type="button" class="close node-remove" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="handle node-box left right">&nbsp;</td>
-                                        <td class="assign-from"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="handle node-box left">&nbsp;</td>
-                                        <td class="node-box top right bottom full-width">&rarr;</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="handle node-box left right bottom">&nbsp;</td>
-                                        <td class="assign-to"></td>
-                                    </tr>
-                                </table>
-                            </li>
-
-                            <!-- COMPARE NODE -->
-                            <li id="compare-node" class="node compare-node" data-node-type="compare">
-                                <table>
-                                    <tr>
-                                        <td class="handle node-box top left">&nbsp;</td>
-                                        <td class="node-box top right bottom full-width">
-                                            <?= $l10n['compare_node_title'] ?>
-                                            <button type="button" class="close node-remove" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="handle node-box right left">&nbsp;</td>
-                                        <td class="compare-left"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="handle node-box left">&nbsp;</td>
-                                        <td class="node-box top right bottom half-width">operation:
-                                            <select class="compare-operation">
-                                                <option value="lt">&lt;</option>
-                                                <option value="le">&le;</option>
-                                                <option value="eq">&equals;</option>
-                                                <option value="ge">&ge;</option>
-                                                <option value="gt">&gt;</option>
-                                            </select>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="handle node-box right bottom left">&nbsp;</td>
-                                        <td class="compare-right"></td>
-                                    </tr>
-                                </table>
-                            </li>
-
-                            <!-- CONSTANT NODE -->
-                            <li id="constant-node" class="node constant-node" data-node-type="constant">
-                                <table>
-                                    <tr>
-                                        <td class="handle node-box top left bottom">&nbsp;</td>
-                                        <td class="node-box top right bottom full-width">
-                                            <?= $l10n['constant_node_title'] ?>
-                                            <input class="constant-value" value="" />
-                                            <button type="button" class="close node-remove" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </li>
-
-                            <!-- IF NODE -->
-                            <li id="if-node" class="node if-node" data-node-type="if">
-                                <table>
-                                    <tr>
-                                        <td class="handle node-box top left">&nbsp;</td>
-                                        <td class="node-box top right bottom full-width">
-                                            <?= $l10n['if_node_title'] ?>
-                                            <button type="button" class="close node-remove" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="handle node-box right left">&nbsp;</td>
-                                        <td class="if-condition"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="handle node-box left">&nbsp;</td>
-                                        <td class="node-box top right bottom half-width">then</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="handle node-box right bottom left">&nbsp;</td>
-                                        <td><ul class="if-body sortable"></ul></td>
-                                    </tr>
-                                </table>
-                            </li>
-
-                            <!-- VAR NODE -->
-                            <li id="var-node" class="node var-node" data-node-type="var">
-                                <table>
-                                    <tr>
-                                        <td class="handle node-box top left bottom">&nbsp;</td>
-                                        <td class="node-box top right bottom full-width">
-                                            <?= $l10n['variable_node_title'] ?>
-                                            <select class="var-value">
-                                                <option value="var-0">a</option>
-                                            </select>
-                                            <button type="button" class="close node-remove" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </li>
-
-                            <!-- WHILE NODE -->
-                            <li id="while-node" class="node while-node" data-node-type="while">
-                                <table>
-                                    <tr>
-                                        <td class="handle node-box top left">&nbsp;</td>
-                                        <td class="node-box top right bottom full-width">
-                                            <?= $l10n['while_node_title'] ?>
-                                            <button type="button" class="close node-remove" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="handle node-box right bottom left">&nbsp;</td>
-                                        <td></td>
-                                    </tr>
-                                </table>
-                            </li>
+                            <?php
+                            // generate prototypes
+                            require_once BASEDIR . "includes/nodes.php";
+                            AssignNode::getPrototype();
+                            CompareNode::getPrototype();
+                            ConstantNode::getPrototype();
+                            IfNode::getPrototype();
+                            VarNode::getPrototype(['vars' => $vars]);
+                            WhileNode::getPrototype();
+                            ?>
                         </ul>
                     </div>
                 </div>

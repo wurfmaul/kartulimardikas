@@ -42,13 +42,22 @@ class Api
             varRow.find('.' + token).val(data[token])
             varRow.data(token, data[token])
 
-        if msg isnt "" # if error
-          @_printError(msg)
+        if msg isnt "" then @_printError(msg)
         else
           @_printSuccess(data['success'])
+          # change from edit mode to view mode
           varRow.find('.edit').hide()
           varRow.find('.view .cell').text(data['viewMode'])
           varRow.find('.view').show()
+          # update existing var-steps
+          opts = $('.var-value > .var-' + vid)
+          if (opts.length) then opts.html(name) # update the name
+          else $('.var-value').append(
+            $('<option></option>') # append another option
+            .addClass('var-' + vid) # give it a class
+            .val('var-' + vid) # give it a value
+            .html(name) # give it a name
+          )
       error: (jqXHR, textStatus, errorThrown) => # if request failed
         @_printError("Request Error: " + errorThrown)
 
@@ -60,12 +69,13 @@ class Api
       dataType: 'json'
       success: (data) => # if response arrived...
         # print response
-        if data['error']?
-          @_printError(data['error'])
+        if data['error']? then @_printError(data['error'])
         else
           @_printSuccess(data['success'])
+          # hide and remove row
           $('#var-' + vid).hide('slow', -> $(this).remove())
-
+          # update existing var-steps
+          $('.var-value > .var-' + vid).remove()
       error: (jqXHR, textStatus, errorThrown) => # if request failed
         @_printError("Request Error: " + errorThrown)
 
@@ -122,8 +132,8 @@ class Tree
     script
 
   parseAssign: (node) =>
-    from = @parse(@findSubNode(node, '.assign-from'))
-    to = @parse(@findSubNode(node, '.assign-to'))
+    from = @parseBody(@findSubNode(node, '.assign-from'))
+    to = @parseBody(@findSubNode(node, '.assign-to'))
 
     {
       node: 'assign'
@@ -132,8 +142,8 @@ class Tree
     }
 
   parseCompare: (node) =>
-    left = @parse(@findSubNode(node, '.compare-left'))
-    right = @parse(@findSubNode(node, '.compare-right'))
+    left = @parseBody(@findSubNode(node, '.compare-left'))
+    right = @parseBody(@findSubNode(node, '.compare-right'))
     operator = node.find('.compare-operation:first').val()
 
     {
@@ -152,7 +162,7 @@ class Tree
     }
 
   parseIf: (node) =>
-    condition = @parse(@findSubNode(node, '.if-condition'))
+    condition = @parseBody(@findSubNode(node, '.if-condition'))
     body = @parseBody(@findSubNode(node, '.if-body'))
 
     {
@@ -170,7 +180,14 @@ class Tree
     }
 
   parseWhile: (node) ->
-    'while'
+    condition = @parseBody(@findSubNode(node, '.while-condition'))
+    body = @parseBody(@findSubNode(node, '.while-body'))
+
+    {
+    node: 'while'
+    condition: condition
+    body: body
+    }
 
   findSubNode: (node, _class) ->
     node.find(_class + ':first')
@@ -186,12 +203,12 @@ class VariableForm
 
   addRow: ->
     newRow = $('#var-prototype').clone(true)# get prototype
-    .attr('id', 'var-' + @maxVarId)# change id
-    .data('vid', @maxVarId)# change vid
-    .appendTo(VARSITE) # add to the other rows
+      .attr('id', 'var-' + @maxVarId)# change id
+      .data('vid', @maxVarId)# change vid
+      .appendTo(VARSITE) # add to the other rows
     newRow.find('.edit').show()
     newRow.find('.view').hide()
-    newRow.show("slow")
+    newRow.show('slow')
     @maxVarId++
 
   performCancel: (vid) ->
@@ -226,9 +243,9 @@ class StepForm
   addNode: (nodeId) ->
     # create new node from prototype
     node = $('#' + nodeId)
-    .clone(true, true)
-    .removeAttr('id')
-    .appendTo(SCRIPTSITE)
+      .clone(true, true)
+      .removeAttr('id')
+      .appendTo(SCRIPTSITE)
 
     # remove sortable completely
     $('.sortable').each(->

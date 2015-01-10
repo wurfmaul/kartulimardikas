@@ -23,7 +23,7 @@ $tree = json_decode($_algo->tree);
 // open section if it is specified
 $section = array ('controls' => false, 'pseudo' => false, 'source' => false,
     'desc' => false, 'memory' => false, 'stats' => false);
-$sectionNum = isset($_GET['section']) ? $_GET['section'] : 1;
+$sectionNum = isset($_GET['section']) ? $_GET['section'] : 4;
 if ($sectionNum >= 32) { $section['stats'] = true; $sectionNum -= 32; }
 if ($sectionNum >= 16) { $section['memory'] = true; $sectionNum -= 16; }
 if ($sectionNum >= 8) { $section['desc'] = true; $sectionNum -= 8; }

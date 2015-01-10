@@ -5,15 +5,16 @@ define('BASEDIR', __DIR__ . '/');
 // deal with old browsers
 // TODO: IE <= 8 not supported by jquery
 
-// setup and verify action
-$_action = isset($_GET['action']) ? $_GET['action'] : 'home';
-if (!file_exists(BASEDIR . "partials/$_action.phtml"))
-    $_action = 'home';
-
-// load configuration, helpers, authentication and start a new session
+// load configuration, helpers, authentication
 require_once BASEDIR . 'config/config.php';
 require_once BASEDIR . 'api/get-url.php';
 require_once BASEDIR . 'includes/authentication.php';
+
+// setup and verify action
+$_action = isset($_GET['action']) ? $_GET['action'] : DEFAULT_PAGE;
+if (!file_exists(BASEDIR . "partials/$_action.phtml"))
+    $_action = DEFAULT_PAGE;
+
 secure_session_start();
 
 // deal with authentication
