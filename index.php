@@ -29,7 +29,7 @@ if (isset($_POST['signInBtn']) && isset($_POST['username']) && isset($_POST['pas
 } elseif (isset($_POST['signOutBtn'])) {
     // SIGN OUT
     signout();
-    $successMsg = $l10n['signed_out'];
+    $successMsg = $l10n['signed_out']; // TODO: more beautiful system!
     if ($_action == 'edit' || $_action == 'settings')
         $_action = 'view';
 }
@@ -95,7 +95,7 @@ define('ACTION', $_action);
 
 	<div class="container">
         <?php if (isset($_GET['aid'])): $aid = $_GET['aid'] ?>
-        <?php if (isSignedIn()): ?>
+        <?php if (isSignedIn()): // FIXME: only for owners! ?>
         <!-- NAVIGATION MENU FOR ALGORITHMS -->
         <ul class="nav nav-tabs">
             <li role="presentation"<?php if (ACTION == 'view'): ?> class="active"<?php endif ?>>

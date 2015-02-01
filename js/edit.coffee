@@ -90,7 +90,7 @@ class Api
         if data['error']? then @_printError(data['error'])
         else @_printSuccess(data['success'])
       error: (jqXHR, textStatus, errorThrown) => # if request failed
-        @_printError("Request Error: " + errorThrown)
+        @_printError("Storage Error: " + errorThrown)
 
   _printError: (msg) ->
     $('#editAlertText').html(msg)
@@ -98,7 +98,7 @@ class Api
 
   _printSuccess: (msg) ->
     $('#editAlert').hide('slow')
-    $('#saveSuccess').text(msg).show('slow', -> $(this).fadeOut(3000))
+    $('#saveSuccess:hidden').text(msg).show('slow', -> $(this).fadeOut(3000))
 
 class Tree
   parse: (node) =>
@@ -163,12 +163,14 @@ class Tree
 
   parseIf: (node) =>
     condition = @parseBody(@findSubNode(node, '.if-condition'))
-    body = @parseBody(@findSubNode(node, '.if-body'))
+    ifBody = @parseBody(@findSubNode(node, '.if-body'))
+    elseBody = @parseBody(@findSubNode(node, '.if-else'))
 
     {
       node: 'if'
       condition: condition
-      body: body
+      ifBody: ifBody
+      elseBody: elseBody
     }
 
   parseVar: (node) =>
@@ -176,7 +178,8 @@ class Tree
 
     {
       node: 'var'
-      var: variable
+      id: variable
+      name: $('#' + variable).val()
     }
 
   parseWhile: (node) ->

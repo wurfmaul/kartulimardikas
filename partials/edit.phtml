@@ -36,7 +36,7 @@ $vars['prototype'] = $prototype;
 
 // open section if it is specified
 $section = array ('info' => false, 'vars' => false, 'steps' => false);
-$sectionNum = isset($_GET['section']) ? $_GET['section'] : 1;
+$sectionNum = isset($_GET['section']) ? $_GET['section'] : SECTIONS_EDIT;
 if ($sectionNum >= 4) { $section['steps'] = true; $sectionNum -= 4; }
 if ($sectionNum >= 2) { $section['vars'] = true; $sectionNum -= 2; }
 if ($sectionNum >= 1) { $section['info'] = true; }
@@ -231,12 +231,12 @@ if ($sectionNum >= 1) { $section['info'] = true; }
                             <?php
                             // generate prototypes
                             require_once BASEDIR . "includes/nodes.php";
-                            AssignNode::getPrototype();
-                            CompareNode::getPrototype();
-                            ConstantNode::getPrototype();
-                            IfNode::getPrototype();
-                            VarNode::getPrototype(['vars' => $vars]);
-                            WhileNode::getPrototype();
+                            Node::printPrototype(Node::$ASSIGN);
+                            Node::printPrototype(Node::$COMPARE);
+                            Node::printPrototype(Node::$CONSTANT);
+                            Node::printPrototype(Node::$IF);
+                            Node::printPrototype(Node::$VAR, ['vars' => $vars]);
+                            Node::printPrototype(Node::$WHILE);
                             ?>
                         </ul>
                     </div>

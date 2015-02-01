@@ -12,7 +12,7 @@ class AssignNode extends Node {
 		$this->from = $from;
 	}
 
-	public function toHtml($id = null, $params = null) { ?>
+	public function printHtml($id = null, $params = null) { ?>
 		<!-- ASSIGN NODE -->
 		<li<?php if (!is_null($id)): ?> id="<?= $id ?>"<?php endif ?> class="node assign-node" data-node-type="assign">
 			<table>
@@ -29,7 +29,7 @@ class AssignNode extends Node {
 					<td class="handle node-box left right">&nbsp;</td>
 					<td>
 						<ul class="assign-from sortable">
-							<?= $this->isPrototype ? "" : $this->from->toHtml() ?>
+							<?php self::printNode($this->from) ?>
 						</ul>
 					</td>
 				</tr>
@@ -41,20 +41,13 @@ class AssignNode extends Node {
 					<td class="handle node-box left right bottom">&nbsp;</td>
 					<td>
 						<ul class="assign-to sortable">
-							<?= $this->isPrototype ? "" : $this->to->toHtml() ?>
+							<?php self::printNode($this->to) ?>
 						</ul>
 					</td>
 				</tr>
 			</table>
 		</li>
 	<?php }
-
-	public static function getPrototype($params = null)
-	{
-		$node = new self(null, null, null);
-		$node->isPrototype = true;
-		$node->toHtml("assign-node", $params);
-	}
 }
 
 class CompareNode extends Node {
@@ -72,7 +65,7 @@ class CompareNode extends Node {
 		$this->op = $op;
 	}
 
-	public function toHtml($id = null, $params = null) { ?>
+	public function printHtml($id = null, $params = null) { ?>
 		<!-- COMPARE NODE -->
 		<li<?php if (!is_null($id)): ?> id="<?= $id ?>"<?php endif ?> class="node compare-node" data-node-type="compare">
 			<table>
@@ -89,7 +82,7 @@ class CompareNode extends Node {
 					<td class="handle node-box right left">&nbsp;</td>
 					<td>
 						<ul class="compare-left sortable">
-							<?php $this->isPrototype ? "" : $this->left->toHtml() ?>
+							<?php self::printNode($this->left) ?>
 						</ul>
 					</td>
 				</tr>
@@ -111,20 +104,13 @@ class CompareNode extends Node {
 					<td class="handle node-box right bottom left">&nbsp;</td>
 					<td>
 						<ul class="compare-right sortable">
-							<?php $this->isPrototype ? "" : $this->right->toHtml() ?>
+							<?php self::printNode($this->right) ?>
 						</ul>
 					</td>
 				</tr>
 			</table>
 		</li>
 	<?php }
-
-	public static function getPrototype($params = null)
-	{
-		$node = new self(null, null, null);
-		$node->isPrototype = true;
-		$node->toHtml("compare-node", $params);
-	}
 }
 
 class ConstantNode extends Node {
@@ -136,7 +122,7 @@ class ConstantNode extends Node {
 		$this->value = $value;
 	}
 
-	public function toHtml($id = null, $params = null)
+	public function printHtml($id = null, $params = null)
 	{ ?>
 		<!-- CONSTANT NODE -->
 		<li<?php if (!is_null($id)): ?> id="<?= $id ?>"<?php endif ?> class="node constant-node" data-node-type="constant">
@@ -154,13 +140,6 @@ class ConstantNode extends Node {
 			</table>
 		</li>
 	<?php }
-
-	public static function getPrototype($params = null)
-	{
-		$node = new self(null);
-		$node->isPrototype = true;
-		$node->toHtml("constant-node", $params);
-	}
 }
 
 class IfNode extends Node {
@@ -179,7 +158,7 @@ class IfNode extends Node {
 		$this->else = $else;
 	}
 
-	public function toHtml($id = null, $params = null) { ?>
+	public function printHtml($id = null, $params = null) { ?>
 		<!-- IF NODE -->
 		<li<?php if (!is_null($id)): ?> id="<?= $id ?>"<?php endif ?> class="node if-node" data-node-type="if">
 			<table>
@@ -196,7 +175,7 @@ class IfNode extends Node {
 					<td class="handle node-box right left">&nbsp;</td>
 					<td>
 						<ul class="if-condition sortable">
-							<?= $this->isPrototype ? "" : $this->cond->toHtml() ?>
+							<?php self::printNode($this->cond) ?>
 						</ul>
 					</td>
 				</tr>
@@ -208,7 +187,7 @@ class IfNode extends Node {
 					<td class="handle node-box right left">&nbsp;</td>
 					<td>
 						<ul class="if-body sortable">
-							<?= $this->isPrototype ? "" : $this->then->toHtml() ?>
+							<?php self::printNode($this->then) ?>
 						</ul>
 					</td>
 				</tr>
@@ -220,20 +199,13 @@ class IfNode extends Node {
 					<td class="handle node-box right bottom left">&nbsp;</td>
 					<td>
 						<ul class="if-else sortable">
-							<?= $this->isPrototype ? "" : $this->else->toHtml() ?>
+							<?php self::printNode($this->else) ?>
 						</ul>
 					</td>
 				</tr>
 			</table>
 		</li>
 	<?php }
-
-	public static function getPrototype($params = null)
-	{
-		$node = new self(null, null, null);
-		$node->isPrototype = true;
-		$node->toHtml("if-node", $params);
-	}
 }
 
 class VarNode extends Node {
@@ -247,7 +219,7 @@ class VarNode extends Node {
 		$this->name = $varName;
 	}
 
-	public function toHtml($id = null, $params = null)
+	public function printHtml($id = null, $params = null)
 	{ ?>
 		<!-- VAR NODE -->
 		<li<?php if (!is_null($id)): ?> id="<?= $id ?>"<?php endif ?> class="node var-node" data-node-type="var">
@@ -271,13 +243,6 @@ class VarNode extends Node {
 			</table>
 		</li>
 	<?php }
-
-	public static function getPrototype($params = null)
-	{
-		$node = new self(null, null);
-		$node->isPrototype = true;
-		$node->toHtml("var-node", $params);
-	}
 }
 
 class WhileNode extends Node {
@@ -293,7 +258,7 @@ class WhileNode extends Node {
 		$this->body = $body;
 	}
 
-	public function toHtml($id = null, $params = null)
+	public function printHtml($id = null, $params = null)
 	{ ?>
 		<!-- WHILE NODE -->
 		<li<?php if (!is_null($id)): ?> id="<?= $id ?>"<?php endif ?> class="node while-node" data-node-type="while">
@@ -311,7 +276,7 @@ class WhileNode extends Node {
 					<td class="handle node-box right left">&nbsp;</td>
 					<td>
 						<ul class="while-condition sortable">
-							<?= $this->isPrototype ? "" : $this->cond->toHtml() ?>
+							<?php self::printNode($this->cond) ?>
 						</ul>
 					</td>
 				</tr>
@@ -323,20 +288,13 @@ class WhileNode extends Node {
 					<td class="handle node-box right bottom left">&nbsp;</td>
 					<td>
 						<ul class="while-body sortable">
-							<?= $this->isPrototype ? "" : $this->body->toHtml() ?>
+							<?php self::printNode($this->body) ?>
 						</ul>
 					</td>
 				</tr>
 			</table>
 		</li>
 	<?php }
-
-	public static function getPrototype($params = null)
-	{
-		$node = new self(null, null);
-		$node->isPrototype = true;
-		$node->toHtml("while-node", $params);
-	}
 }
 
 /**
@@ -344,15 +302,163 @@ class WhileNode extends Node {
  * @author Wolfgang Küllinger
  */
 abstract class Node {
+	public static $ASSIGN = "assign";
+	public static $COMPARE = "compare";
+	public static $CONSTANT = "constant";
+	public static $IF = "if";
+	public static $VAR = "var";
+	public static $WHILE = "while";
+
 	/** @var bool */
 	protected $isPrototype = false;
+	/** @var bool */
+	protected $isValid = true;
+
+	public function setValid($valid = true) {
+		$this->isValid = $valid;
+	}
 
 	/**
 	 * Returns HTML code which represents the node.
 	 * @param null $id int
 	 * @param null $params array
 	 */
-	public abstract function toHtml($id = null, $params = null);
+	public abstract function printHtml($id = null, $params = null);
 
-	public static function getPrototype($params = null) {}
+	/**
+	 * Calls the printHtml method of the Node $node, if it's not null and not a prototype.
+	 * @param $node Node
+	 * @return bool True if printHtml method was called.
+	 */
+	public static function printNode($node) {
+		// unpack container of one node
+		if (!($node instanceof Node) && sizeof($node) == 1) {
+			$node = $node[0];
+		}
+		// don't handle prototypes and empty nodes
+		if (is_null($node) || $node->isPrototype)
+			return false;
+		// call printHtml() for valid nodes
+		$node->printHtml();
+		return true;
+	}
+
+	public static function printPrototype($type, $params = null) {
+		/** @var $node Node */
+		$node = null;
+		switch ($type) {
+			case self::$ASSIGN: $node = new AssignNode(null, null); break;
+			case self::$COMPARE: $node = new CompareNode(null, null, null); break;
+			case self::$CONSTANT: $node = new ConstantNode(null); break;
+			case self::$IF: $node = new IfNode(null, null, null); break;
+			case self::$VAR: $node = new VarNode(null, null); break;
+			case self::$WHILE: $node = new WhileNode(null, null); break;
+			default: throw new Exception("No prototype prepared for '$type'.");
+		}
+		$node->isPrototype = true;
+		$node->printHtml("$type-node", $params);
+	}
 }
+
+class Tree {
+	/** @var array */
+	private $tree;
+
+	function __construct($tree) {
+		$this->tree = $this->parseBody($tree);
+	}
+
+	public function printHtml() {
+		foreach ($this->tree as $node) {
+			/** @var $node Node */
+			$node->printHtml();
+		}
+	}
+
+	private function parseBody($body) {
+		$nodes = array();
+		foreach ($body as $node) {
+			$nodes[] = $this->parse($node);
+		}
+		return $nodes;
+	}
+
+	/**
+	 * @param $node array
+	 * @return Node
+	 * @throws ParseError if node is unknown
+	 */
+	private function parse($node) {
+		// unpack container of one node
+		if (!isset($node['node']) && sizeof($node) == 1) {
+			$node = $node[0];
+		}
+		// parse node
+		switch ($node['node']) {
+			case Node::$ASSIGN: return $this->parseAssign($node);
+			case Node::$COMPARE: return $this->parseCompare($node);
+			case Node::$CONSTANT: return $this->parseConstant($node);
+			case Node::$IF: return $this->parseIf($node);
+			case Node::$VAR: return $this->parseVar($node);
+			case Node::$WHILE: return $this->parseWhile($node);
+			default: throw new ParseError("Unknown node: " . print_r($node, true));
+		}
+	}
+
+	private function parseAssign($node) {
+		$from = isset($node['from']) ? $this->parse($node['from']) : null;
+		$to = isset($node['to']) ? $this->parse($node['to']) : null;
+
+		$_node = new AssignNode($to, $from);
+		$_node->setValid(isset($node['from'], $node['to']));
+		return $_node;
+	}
+
+	private function parseCompare($node) {
+		$left = isset($node['left']) ? $this->parse($node['left']) : null;
+		$right = isset($node['right']) ? $this->parse($node['right']) : null;
+		$op = isset($node['operator']) ? $node['operator'] : null;
+
+		$_node = new CompareNode($left, $right, $op);
+		$_node->setValid(isset($node['left'], $node['right'], $node['operator']));
+		return $_node;
+	}
+
+	private function parseConstant($node) {
+		$value = isset($node['value']) ? $node['value'] : null;
+
+		$_node = new ConstantNode($value);
+		$_node->setValid(isset($node['value']));
+		return $_node;
+	}
+
+	private function parseIf($node) {
+		$cond = isset($node['condition']) ? $this->parse($node['condition']) : null;
+		$body = isset($node['ifBody']) ? $this->parseBody($node['ifBody']) : null;
+		$else = isset($node['elseBody']) ? $this->parseBody($node['elseBody']) : null;
+
+		$_node = new IfNode($cond, $body, $else);
+		$_node->setValid(isset($node['condition'], $node['ifBody'], $node['elseBody']));
+		return $_node;
+	}
+
+	private function parseVar($node) {
+		$id = isset($node['id']) ? $node['id'] : null;
+		$name = isset($node['name']) ? $node['name'] : null;
+
+		$_node = new VarNode($id, $name);
+		$_node->setValid(isset($node['id'], $node['name']));
+		return $_node;
+	}
+
+	private function parseWhile($node) {
+		$condition = isset($node['condition']) ? $this->parse($node['condition']) : null;
+		$body = isset($node['body']) ? $this->parseBody($node['body']) : null;
+
+		$_node = new WhileNode($condition, $body);
+		$_node->setValid(isset($node['condition'], $node['body']));
+		return $_node;
+	}
+}
+
+class ParseError extends Exception {}

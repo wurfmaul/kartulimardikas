@@ -183,23 +183,28 @@ class EditManager
 
     private function _processScript()
     {
-        if (!isset($_POST['tree'], $_POST['html']))
-            die("Post parameters not set properly!");
+        if (!isset($_POST['tree']))
+            die("Post parameter 'tree' not set properly!");
 
-        $tree = isset($_POST['tree']) ? $_POST['tree'] : null;
-        $html = isset($_POST['html']) ? $_POST['html'] : null;
+        require_once BASEDIR . "includes/nodes.php";
+        $rawTree = $_POST['tree'];
+        try {
+            ob_start();
+            $tree = new Tree($rawTree);
+            ob_clean(); // hide notices
+            $tree->printHtml();
+            $source_edit = ob_get_clean();
 
-        $source_edit = $html;
-
-        // TODO: generate html code
-
-        $this->_model->updateAlgorithmScript($this->_aid, json_encode($tree), base64_encode($source_edit));
-        $this->_response['success'] = $this->_l10n['saved_to_db'];
+            $this->_model->updateAlgorithmScript($this->_aid, json_encode($rawTree), base64_encode($source_edit));
+            $this->_response['success'] = $this->_l10n['saved_to_db'];
+        } catch (ParseError $e) {
+            $this->_response['error'] = "Parse error: " . $e->getMessage(); // FIXME proper error message!
+        }
     }
 
     private function _removeVar() {
         if (!isset($_POST['vid']))
-            die("Post parameters not set properly!");
+            die("Post parameter 'vid' not set properly!");
 
         $vid = trim($_POST['vid']);
 
