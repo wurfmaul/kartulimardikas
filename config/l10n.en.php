@@ -85,7 +85,6 @@ $l10n['variable_node_title'] = "Variable";
 $l10n['while_node_title'] = "While";
 $l10n[''] = "";
 $l10n[''] = "";
-$l10n[''] = "";
 
 // EDIT
 $l10n['edit'] = "Edit";
@@ -121,6 +120,7 @@ $l10n['empty_name'] = "The variable name cannot be empty.";
 $l10n['invalid_init'] = "The initialization method seems to be invalid.";
 $l10n['no_algo_defined'] = "No algorithm specified!";
 $l10n['no_area_defined'] = "You cannot edit everything at once. Define area!";
+$l10n['invalid'] = "invalid";
 
 // SETTINGS
 $l10n['settings'] = "Settings";

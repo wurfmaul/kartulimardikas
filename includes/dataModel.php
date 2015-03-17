@@ -167,16 +167,15 @@ class DataModel {
     }
 
     /**
-     * @param $aid int
-     * @param $tree mixed
-     * @param $html string
+     * @param $aid int The algorithm id.
+     * @param $tree mixed JSON representation of tree.
+     * @return int Number of changed rows.
      */
-    public function updateAlgorithmScript($aid, $tree, $html) {
+    public function updateAlgorithmScript($aid, $tree) {
         $null = NULL;
-        $stmt = $this->_sql->prepare("UPDATE algorithm SET tree=?, source_html=?, lastedit=NOW() WHERE aid=?");
-        $stmt->bind_param("bbi", $null, $null, $aid);
+        $stmt = $this->_sql->prepare("UPDATE algorithm SET tree=?, lastedit=NOW() WHERE aid=?");
+        $stmt->bind_param("bi", $null, $aid);
         $stmt->send_long_data(0, $tree);
-        $stmt->send_long_data(1, $html);
         $stmt->execute();
         $stmt->close();
     }

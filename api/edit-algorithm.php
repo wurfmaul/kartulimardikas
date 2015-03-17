@@ -186,20 +186,8 @@ class EditManager
         if (!isset($_POST['tree']))
             die("Post parameter 'tree' not set properly!");
 
-        require_once BASEDIR . "includes/nodes.php";
-        $rawTree = $_POST['tree'];
-        try {
-            ob_start();
-            $tree = new Tree($rawTree);
-            ob_clean(); // hide notices
-            $tree->printHtml();
-            $source_edit = ob_get_clean();
-
-            $this->_model->updateAlgorithmScript($this->_aid, json_encode($rawTree), base64_encode($source_edit));
-            $this->_response['success'] = $this->_l10n['saved_to_db'];
-        } catch (ParseError $e) {
-            $this->_response['error'] = "Parse error: " . $e->getMessage(); // FIXME proper error message!
-        }
+        $this->_model->updateAlgorithmScript($this->_aid, json_encode($_POST['tree']));
+        $this->_response['success'] = $this->_l10n['saved_to_db'];
     }
 
     private function _removeVar() {

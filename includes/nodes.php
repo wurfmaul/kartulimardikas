@@ -20,6 +20,7 @@ class AssignNode extends Node {
 					<td class="handle node-box top left">&nbsp;</td>
 					<td class="node-box top right bottom full-width">
 						<?= $this->l10n['assign_node_title'] ?>
+						<span class="label label-danger" <?php if ($this->isValid): ?>style="display: none;"<?php endif ?> 							><?= $this->l10n['invalid'] ?></span>
 						<button type="button" class="close node-remove" aria-label="Close">
 							<span aria-hidden="true">&times;</span>
 						</button>
@@ -73,6 +74,7 @@ class CompareNode extends Node {
 					<td class="handle node-box top left">&nbsp;</td>
 					<td class="node-box top right bottom full-width">
 						<?= $this->l10n['compare_node_title'] ?>
+						<span class="label label-danger" <?php if ($this->isValid): ?>style="display: none;"<?php endif ?> 							><?= $this->l10n['invalid'] ?></span>
 						<button type="button" class="close node-remove" aria-label="Close">
 							<span aria-hidden="true">&times;</span>
 						</button>
@@ -132,6 +134,7 @@ class ConstantNode extends Node {
 					<td class="node-box top right bottom full-width">
 						<?= $this->l10n['constant_node_title'] ?>
 						<input class="constant-value" value="<?= $this->isPrototype ? "" : $this->value ?>" />
+						<span class="label label-danger" <?php if ($this->isValid): ?>style="display: none;"<?php endif ?> 							><?= $this->l10n['invalid'] ?></span>
 						<button type="button" class="close node-remove" aria-label="Close">
 							<span aria-hidden="true">&times;</span>
 						</button>
@@ -166,6 +169,7 @@ class IfNode extends Node {
 					<td class="handle node-box top left">&nbsp;</td>
 					<td class="node-box top right bottom full-width">
 						<?= $this->l10n['if_node_title'] ?>
+						<span class="label label-danger" <?php if ($this->isValid): ?>style="display: none;"<?php endif ?> 							><?= $this->l10n['invalid'] ?></span>
 						<button type="button" class="close node-remove" aria-label="Close">
 							<span aria-hidden="true">&times;</span>
 						</button>
@@ -235,6 +239,7 @@ class VarNode extends Node {
 							<?php endforeach ?>
 							<?php endif ?>
 						</select>
+						<span class="label label-danger" <?php if ($this->isValid): ?>style="display: none;"<?php endif ?> 							><?= $this->l10n['invalid'] ?></span>
 						<button type="button" class="close node-remove" aria-label="Close">
 							<span aria-hidden="true">&times;</span>
 						</button>
@@ -267,6 +272,8 @@ class WhileNode extends Node {
 					<td class="handle node-box top left">&nbsp;</td>
 					<td class="node-box top right bottom full-width">
 						<?= $this->l10n['while_node_title'] ?>
+						<span class="label label-danger" <?php if ($this->isValid): ?>style="display: none;"<?php endif ?>
+							><?= $this->l10n['invalid'] ?></span>
 						<button type="button" class="close node-remove" aria-label="Close">
 							<span aria-hidden="true">&times;</span>
 						</button>
@@ -312,7 +319,7 @@ abstract class Node {
 	/** @var bool */
 	protected $isPrototype = false;
 	/** @var bool */
-	protected $isValid = true;
+	protected $isValid = false;
 
 	public function setValid($valid = true) {
 		$this->isValid = $valid;
@@ -375,26 +382,28 @@ class Tree {
 		}
 	}
 
+    /**
+     * @param $body array
+     * @return array
+     * @throws ParseError
+     */
 	private function parseBody($body) {
 		$nodes = array();
-		foreach ($body as $node) {
-			$nodes[] = $this->parse($node);
-		}
+        if (!is_null($body)) {
+            foreach ($body as $node) {
+                $nodes[] = $this->parse($node);
+            }
+        }
 		return $nodes;
 	}
 
 	/**
-	 * @param $node array
+	 * @param $node stdClass
 	 * @return Node
 	 * @throws ParseError if node is unknown
 	 */
 	private function parse($node) {
-		// unpack container of one node
-		if (!isset($node['node']) && sizeof($node) == 1) {
-			$node = $node[0];
-		}
-		// parse node
-		switch ($node['node']) {
+		switch ($node->node) {
 			case Node::$ASSIGN: return $this->parseAssign($node);
 			case Node::$COMPARE: return $this->parseCompare($node);
 			case Node::$CONSTANT: return $this->parseConstant($node);
@@ -406,57 +415,57 @@ class Tree {
 	}
 
 	private function parseAssign($node) {
-		$from = isset($node['from']) ? $this->parse($node['from']) : null;
-		$to = isset($node['to']) ? $this->parse($node['to']) : null;
+		$from = isset($node->from) ? $this->parse($node->from) : null;
+		$to = isset($node->to) ? $this->parse($node->to) : null;
 
 		$_node = new AssignNode($to, $from);
-		$_node->setValid(isset($node['from'], $node['to']));
+		$_node->setValid(isset($node->from, $node->to));
 		return $_node;
 	}
 
 	private function parseCompare($node) {
-		$left = isset($node['left']) ? $this->parse($node['left']) : null;
-		$right = isset($node['right']) ? $this->parse($node['right']) : null;
-		$op = isset($node['operator']) ? $node['operator'] : null;
+		$left = isset($node->left) ? $this->parse($node->left) : null;
+		$right = isset($node->right) ? $this->parse($node->right) : null;
+		$op = isset($node->operator) ? $node->operator : null;
 
 		$_node = new CompareNode($left, $right, $op);
-		$_node->setValid(isset($node['left'], $node['right'], $node['operator']));
+		$_node->setValid(isset($node->left, $node->right, $node->operator));
 		return $_node;
 	}
 
 	private function parseConstant($node) {
-		$value = isset($node['value']) ? $node['value'] : null;
+		$value = isset($node->value) ? $node->value : null;
 
 		$_node = new ConstantNode($value);
-		$_node->setValid(isset($node['value']));
+		$_node->setValid(isset($node->value) && is_numeric($value));
 		return $_node;
 	}
 
 	private function parseIf($node) {
-		$cond = isset($node['condition']) ? $this->parse($node['condition']) : null;
-		$body = isset($node['ifBody']) ? $this->parseBody($node['ifBody']) : null;
-		$else = isset($node['elseBody']) ? $this->parseBody($node['elseBody']) : null;
+		$cond = isset($node->condition) ? $this->parse($node->condition) : null;
+		$body = isset($node->ifBody) ? $this->parseBody($node->ifBody) : null;
+		$else = isset($node->elseBody) ? $this->parseBody($node->elseBody) : null;
 
 		$_node = new IfNode($cond, $body, $else);
-		$_node->setValid(isset($node['condition'], $node['ifBody'], $node['elseBody']));
+		$_node->setValid(isset($node->condition, $node->ifBody, $node->elseBody));
 		return $_node;
 	}
 
 	private function parseVar($node) {
-		$id = isset($node['id']) ? $node['id'] : null;
-		$name = isset($node['name']) ? $node['name'] : null;
+		$id = isset($node->id) ? $node->id : null;
+		$name = isset($node->name) ? $node->name : null;
 
 		$_node = new VarNode($id, $name);
-		$_node->setValid(isset($node['id'], $node['name']));
+		$_node->setValid(isset($node->id, $node->name));
 		return $_node;
 	}
 
 	private function parseWhile($node) {
-		$condition = isset($node['condition']) ? $this->parse($node['condition']) : null;
-		$body = isset($node['body']) ? $this->parseBody($node['body']) : null;
+		$condition = isset($node->condition) ? $this->parse($node->condition) : null;
+		$body = isset($node->body) ? $this->parseBody($node->body) : null;
 
 		$_node = new WhileNode($condition, $body);
-		$_node->setValid(isset($node['condition'], $node['body']));
+		$_node->setValid(isset($node->condition, $node->body));
 		return $_node;
 	}
 }
