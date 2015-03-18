@@ -51,13 +51,16 @@ class Api
           varRow.find('.view').show()
           # update existing var-steps
           opts = $('.var-value > .var-' + vid)
-          if (opts.length) then opts.html(name) # update the name
-          else $('.var-value').append(
-            $('<option></option>') # append another option
-            .addClass('var-' + vid) # give it a class
-            .val('var-' + vid) # give it a value
-            .html(name) # give it a name
-          )
+          if (opts.length)
+            opts.html(name) # update the name
+            $('.var-value-input.var-' + vid).val(name)
+          else
+            $('.var-value').append(
+              $('<option>') # append another option
+                .addClass('var-' + vid) # give it a class
+                .val(vid) # give it a value
+                .html(name) # give it a name
+            )
       error: (jqXHR, textStatus, errorThrown) => # if request failed
         @_printError("Request Error: " + errorThrown)
 
@@ -81,10 +84,9 @@ class Api
 
   editScript: (tree) ->
     aid = $('#aid').data('val')
-    html = SCRIPTSITE.html()
     $.ajax "api/edit-algorithm.php?area=script",
       type: 'POST'
-      data: {aid: aid, tree: tree, html: html}
+      data: {aid: aid, tree: tree}
       dataType: 'json'
       success: (data) => # if response arrived...
         if data['error']? then @_printError(data['error'])
@@ -174,12 +176,11 @@ class Tree
     }
 
   parseVar: (node) =>
-    variable = node.find('.var-value:first').val()
+    variable = node.find('.var-value > :selected')
 
     {
       node: 'var'
-      id: variable
-      name: $('#' + variable).val()
+      vid: variable.val()
     }
 
   parseWhile: (node) ->

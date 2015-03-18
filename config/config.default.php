@@ -17,12 +17,17 @@ define('DB_PASSWORD', '');
 # Algorithm settings
 define('ARRAY_MIN_SIZE', 2);
 define('ARRAY_MAX_SIZE', 13);
+define('DEFAULT_INDENT', '  ');
 
 # Index settings
 define('DEFAULT_PAGE', 'home');
 define('NUMBER_OF_LATEST_ALGORITHMS', 5);
 define('MAX_MINUTES_FOR_LABEL', 120);
 define('MAX_DESCRIPTION_LENGTH', 240);
+
+# Section settings
+define('SECTIONS_VIEW', 2);
+define('SECTIONS_EDIT', 4);
 
 error_reporting(DEBUG_MODE ? E_ALL : E_ERROR);
 

@@ -5,14 +5,19 @@ class AssignNode extends Node {
 	/** @var Node */
 	protected $from;
 
-	function __construct($to, $from) {
+	public function __construct($to, $from) {
 		global $l10n;
 		$this->l10n = $l10n;
 		$this->to = $to;
 		$this->from = $from;
 	}
 
-	public function printHtml($id = null, $params = null) { ?>
+    public function getSource($params) {
+        $indent = TreeHelper::getIndent($params['indent']);
+        return sprintf("%s%s = %s", $indent, $this->to->getSource($params), $this->from->getSource($params));
+    }
+
+	public function printHtml($id, $params) { ?>
 		<!-- ASSIGN NODE -->
 		<li<?php if (!is_null($id)): ?> id="<?= $id ?>"<?php endif ?> class="node assign-node" data-node-type="assign">
 			<table>
@@ -30,7 +35,7 @@ class AssignNode extends Node {
 					<td class="handle node-box left right">&nbsp;</td>
 					<td>
 						<ul class="assign-from sortable">
-							<?php self::printNode($this->from) ?>
+							<?php self::printNode($this->from, $params) ?>
 						</ul>
 					</td>
 				</tr>
@@ -42,7 +47,7 @@ class AssignNode extends Node {
 					<td class="handle node-box left right bottom">&nbsp;</td>
 					<td>
 						<ul class="assign-to sortable">
-							<?php self::printNode($this->to) ?>
+							<?php self::printNode($this->to, $params) ?>
 						</ul>
 					</td>
 				</tr>
@@ -56,9 +61,18 @@ class CompareNode extends Node {
 	protected $left;
 	/** @var Node */
 	protected $right;
+    /** @var string */
 	protected $op;
 
-	function __construct($left, $right, $op) {
+    protected $ops = [
+        'lt' => '&lt;',
+        'le' => '&le;',
+        'eq' => '&equals',
+        'ge' => '&ge;',
+        'gt' => '&gt;'
+    ];
+
+	public function __construct($left, $right, $op) {
 		global $l10n;
 		$this->l10n = $l10n;
 		$this->left = $left;
@@ -66,7 +80,13 @@ class CompareNode extends Node {
 		$this->op = $op;
 	}
 
-	public function printHtml($id = null, $params = null) { ?>
+    public function getSource($params) {
+        return sprintf("%s %s %s", $this->left->getSource($params), $this->ops[$this->op], $this->right->getSource($params));
+    }
+
+	public function printHtml($id, $params) {
+        $selected_op = $this->isPrototype ? "" : $this->op;
+    ?>
 		<!-- COMPARE NODE -->
 		<li<?php if (!is_null($id)): ?> id="<?= $id ?>"<?php endif ?> class="node compare-node" data-node-type="compare">
 			<table>
@@ -84,7 +104,7 @@ class CompareNode extends Node {
 					<td class="handle node-box right left">&nbsp;</td>
 					<td>
 						<ul class="compare-left sortable">
-							<?php self::printNode($this->left) ?>
+							<?php self::printNode($this->left, $params) ?>
 						</ul>
 					</td>
 				</tr>
@@ -93,20 +113,18 @@ class CompareNode extends Node {
 					<td class="node-box top right bottom half-width">
 						<?= $this->l10n['compare_node_operation'] ?>:
 						<select class="compare-operation">
-							<?php $op = $this->isPrototype ? "" : $this->op ?>
-							<option value="lt"<?php if ($op == "lt"): ?> selected="selected"<?php endif ?>>&lt;</option>
-							<option value="le"<?php if ($op == "le"): ?> selected="selected"<?php endif ?>>&le;</option>
-							<option value="eq"<?php if ($op == "eq"): ?> selected="selected"<?php endif ?>>&equals;</option>
-							<option value="ge"<?php if ($op == "ge"): ?> selected="selected"<?php endif ?>>&ge;</option>
-							<option value="gt"<?php if ($op == "gt"): ?> selected="selected"<?php endif ?>>&gt;</option>
+                            <?php foreach ($this->ops as $op => $char): ?>
+							<option value="<?= $op ?>"<?php if ($selected_op === $op): ?> selected="selected"<?php endif ?>><?= $char ?></option>
+                            <?php endforeach ?>
 						</select>
+                        <input class="compare-operation-input" disabled="disabled" value="<?= $this->ops[$selected_op] ?>" />
 					</td>
 				</tr>
 				<tr>
 					<td class="handle node-box right bottom left">&nbsp;</td>
 					<td>
 						<ul class="compare-right sortable">
-							<?php self::printNode($this->right) ?>
+							<?php self::printNode($this->right, $params) ?>
 						</ul>
 					</td>
 				</tr>
@@ -124,7 +142,11 @@ class ConstantNode extends Node {
 		$this->value = $value;
 	}
 
-	public function printHtml($id = null, $params = null)
+    public function getSource($params) {
+        return (string) $this->value;
+    }
+
+	public function printHtml($id, $params)
 	{ ?>
 		<!-- CONSTANT NODE -->
 		<li<?php if (!is_null($id)): ?> id="<?= $id ?>"<?php endif ?> class="node constant-node" data-node-type="constant">
@@ -148,9 +170,9 @@ class ConstantNode extends Node {
 class IfNode extends Node {
 	/** @var Node */
 	protected $cond;
-	/** @var Node */
+	/** @var array */
 	protected $then;
-	/** @var Node */
+	/** @var array */
 	protected $else;
 
 	function __construct($cond, $then, $else) {
@@ -161,7 +183,26 @@ class IfNode extends Node {
 		$this->else = $else;
 	}
 
-	public function printHtml($id = null, $params = null) { ?>
+    public function getSource($params) {
+        $indent = TreeHelper::getIndent($params['indent']);
+        $string = $indent . "if (" . $this->cond->getSource($params) . ")" . PHP_EOL;
+        foreach ($this->then as $node) {
+            $params['indent']++;
+            /** @var $node Node */
+            $string .= $node->getSource($params) . PHP_EOL;
+        }
+        if ($this->else) {
+            $string .= $indent . "else";
+            foreach ($this->else as $node){
+                $params['indent']++;
+                /** @var $node Node */
+                $string .= $node->getSource($params) . PHP_EOL;
+            }
+        }
+        return $string;
+    }
+
+	public function printHtml($id, $params) { ?>
 		<!-- IF NODE -->
 		<li<?php if (!is_null($id)): ?> id="<?= $id ?>"<?php endif ?> class="node if-node" data-node-type="if">
 			<table>
@@ -179,7 +220,7 @@ class IfNode extends Node {
 					<td class="handle node-box right left">&nbsp;</td>
 					<td>
 						<ul class="if-condition sortable">
-							<?php self::printNode($this->cond) ?>
+							<?php self::printNode($this->cond, $params) ?>
 						</ul>
 					</td>
 				</tr>
@@ -191,7 +232,7 @@ class IfNode extends Node {
 					<td class="handle node-box right left">&nbsp;</td>
 					<td>
 						<ul class="if-body sortable">
-							<?php self::printNode($this->then) ?>
+							<?php self::printNode($this->then, $params) ?>
 						</ul>
 					</td>
 				</tr>
@@ -203,7 +244,7 @@ class IfNode extends Node {
 					<td class="handle node-box right bottom left">&nbsp;</td>
 					<td>
 						<ul class="if-else sortable">
-							<?php self::printNode($this->else) ?>
+							<?php self::printNode($this->else, $params) ?>
 						</ul>
 					</td>
 				</tr>
@@ -213,18 +254,27 @@ class IfNode extends Node {
 }
 
 class VarNode extends Node {
-	protected $id;
-	protected $name;
+    protected $vid;
 
-	function __construct($varId, $varName) {
+    /**
+     * @param $vid int
+     */
+	function __construct($vid) {
 		global $l10n;
 		$this->l10n = $l10n;
-		$this->id = $varId;
-		$this->name = $varName;
+        $this->vid = intval($vid);
 	}
 
-	public function printHtml($id = null, $params = null)
-	{ ?>
+    public function getSource($params) {
+        return $params['vars'][$this->vid]->name;
+    }
+
+	public function printHtml($id, $params)
+	{
+        $vars = !is_null($params) && isset($params['vars']) ? $params['vars'] : array();
+        unset ($vars['prototype']);
+        $selected = isset($vars[$this->vid]) ? $vars[$this->vid]->name : '';
+    ?>
 		<!-- VAR NODE -->
 		<li<?php if (!is_null($id)): ?> id="<?= $id ?>"<?php endif ?> class="node var-node" data-node-type="var">
 			<table>
@@ -233,12 +283,12 @@ class VarNode extends Node {
 					<td class="node-box top right bottom full-width">
 						<?= $this->l10n['variable_node_title'] ?>
 						<select class="var-value">
-							<?php if (!is_null($params) && isset($params['vars'])): ?>
-							<?php foreach ($params['vars'] as $vid => $var): if ($vid === "prototype") continue ?>
-							<option id="var-<?= $vid ?>" value="var-<?= $vid ?>" selected="selected"><?= $var->name ?></option>
+							<?php foreach ($vars as $vid => $var): ?>
+							<option value="<?= $vid ?>" class="var-<?= $vid ?>"
+                                <?php if ($this->vid === $vid): ?>selected="selected"<?php endif ?>><?= $var->name ?></option>
 							<?php endforeach ?>
-							<?php endif ?>
 						</select>
+                        <input class="var-value-input var-<?= $this->vid ?>" value="<?= $selected ?>" disabled="disabled" />
 						<span class="label label-danger" <?php if ($this->isValid): ?>style="display: none;"<?php endif ?> 							><?= $this->l10n['invalid'] ?></span>
 						<button type="button" class="close node-remove" aria-label="Close">
 							<span aria-hidden="true">&times;</span>
@@ -256,14 +306,25 @@ class WhileNode extends Node {
 	/** @var Node */
 	protected $body;
 
-	function __construct($cond, $body) {
+	public function __construct($cond, $body) {
 		global $l10n;
 		$this->l10n = $l10n;
 		$this->cond = $cond;
 		$this->body = $body;
 	}
 
-	public function printHtml($id = null, $params = null)
+    public function getSource($params) {
+        $indent = TreeHelper::getIndent($params['indent']);
+        $string = $indent . "while (" . $this->cond->getSource($params) . ")";
+        foreach ($this->body as $node) {
+            $params['indent']++;
+            /** @var $node Node */
+            $string .= $node->getSource($params);
+        }
+        return $string;
+    }
+
+	public function printHtml($id, $params)
 	{ ?>
 		<!-- WHILE NODE -->
 		<li<?php if (!is_null($id)): ?> id="<?= $id ?>"<?php endif ?> class="node while-node" data-node-type="while">
@@ -283,7 +344,7 @@ class WhileNode extends Node {
 					<td class="handle node-box right left">&nbsp;</td>
 					<td>
 						<ul class="while-condition sortable">
-							<?php self::printNode($this->cond) ?>
+							<?php self::printNode($this->cond, $params) ?>
 						</ul>
 					</td>
 				</tr>
@@ -295,7 +356,7 @@ class WhileNode extends Node {
 					<td class="handle node-box right bottom left">&nbsp;</td>
 					<td>
 						<ul class="while-body sortable">
-							<?php self::printNode($this->body) ?>
+							<?php self::printNode($this->body, $params) ?>
 						</ul>
 					</td>
 				</tr>
@@ -309,12 +370,12 @@ class WhileNode extends Node {
  * @author Wolfgang Küllinger
  */
 abstract class Node {
-	public static $ASSIGN = "assign";
-	public static $COMPARE = "compare";
-	public static $CONSTANT = "constant";
-	public static $IF = "if";
-	public static $VAR = "var";
-	public static $WHILE = "while";
+	const ASSIGN_NODE = "assign";
+	const COMPARE_NODE = "compare";
+	const CONSTANT_NODE = "constant";
+	const IF_NODE = "if";
+	const VAR_NODE = "var";
+	const WHILE_NODE = "while";
 
 	/** @var bool */
 	protected $isPrototype = false;
@@ -325,19 +386,27 @@ abstract class Node {
 		$this->isValid = $valid;
 	}
 
-	/**
-	 * Returns HTML code which represents the node.
-	 * @param null $id int
-	 * @param null $params array
-	 */
-	public abstract function printHtml($id = null, $params = null);
+    /**
+     * Returns the source code representation of the node.
+     * @param $params array
+     * @return string
+     */
+    public abstract function getSource($params);
 
 	/**
-	 * Calls the printHtml method of the Node $node, if it's not null and not a prototype.
-	 * @param $node Node
-	 * @return bool True if printHtml method was called.
+	 * Prints HTML code which represents the node.
+	 * @param $id int
+	 * @param $params array
 	 */
-	public static function printNode($node) {
+	public abstract function printHtml($id, $params);
+
+    /**
+     * Calls the printHtml method of the Node $node, if it's not null and not a prototype.
+     * @param $node Node
+     * @param $params array
+     * @return bool True if printHtml method was called.
+     */
+	public static function printNode($node, $params) {
 		// unpack container of one node
 		if (!($node instanceof Node) && sizeof($node) == 1) {
 			$node = $node[0];
@@ -346,20 +415,20 @@ abstract class Node {
 		if (is_null($node) || $node->isPrototype)
 			return false;
 		// call printHtml() for valid nodes
-		$node->printHtml();
+		$node->printHtml(null, $params);
 		return true;
 	}
 
-	public static function printPrototype($type, $params = null) {
+	public static function printPrototype($type, $params = []) {
 		/** @var $node Node */
 		$node = null;
 		switch ($type) {
-			case self::$ASSIGN: $node = new AssignNode(null, null); break;
-			case self::$COMPARE: $node = new CompareNode(null, null, null); break;
-			case self::$CONSTANT: $node = new ConstantNode(null); break;
-			case self::$IF: $node = new IfNode(null, null, null); break;
-			case self::$VAR: $node = new VarNode(null, null); break;
-			case self::$WHILE: $node = new WhileNode(null, null); break;
+			case self::ASSIGN_NODE: $node = new AssignNode(null, null); break;
+			case self::COMPARE_NODE: $node = new CompareNode(null, null, null); break;
+			case self::CONSTANT_NODE: $node = new ConstantNode(null); break;
+			case self::IF_NODE: $node = new IfNode(null, null, null); break;
+			case self::VAR_NODE: $node = new VarNode(null); break;
+			case self::WHILE_NODE: $node = new WhileNode(null, null); break;
 			default: throw new Exception("No prototype prepared for '$type'.");
 		}
 		$node->isPrototype = true;
@@ -371,14 +440,24 @@ class Tree {
 	/** @var array */
 	private $tree;
 
-	function __construct($tree) {
+	public function __construct($tree) {
 		$this->tree = $this->parseBody($tree);
 	}
 
-	public function printHtml() {
+    public function printSource($params = []) {
+        if (!isset($params['indent'])) {
+            $params['indent'] = 0;
+        }
+        foreach ($this->tree as $node) {
+            /** @var $node Node */
+            print($node->getSource($params) . PHP_EOL);
+        }
+    }
+
+	public function printHtml($params = []) {
 		foreach ($this->tree as $node) {
 			/** @var $node Node */
-			$node->printHtml();
+			$node->printHtml(null, $params);
 		}
 	}
 
@@ -403,13 +482,18 @@ class Tree {
 	 * @throws ParseError if node is unknown
 	 */
 	private function parse($node) {
+		// unpack container of one node
+		if (is_array($node) && sizeof($node) == 1) {
+			$node = $node[0];
+        }
+        // parse node
 		switch ($node->node) {
-			case Node::$ASSIGN: return $this->parseAssign($node);
-			case Node::$COMPARE: return $this->parseCompare($node);
-			case Node::$CONSTANT: return $this->parseConstant($node);
-			case Node::$IF: return $this->parseIf($node);
-			case Node::$VAR: return $this->parseVar($node);
-			case Node::$WHILE: return $this->parseWhile($node);
+			case Node::ASSIGN_NODE: return $this->parseAssign($node);
+			case Node::COMPARE_NODE: return $this->parseCompare($node);
+			case Node::CONSTANT_NODE: return $this->parseConstant($node);
+			case Node::IF_NODE: return $this->parseIf($node);
+			case Node::VAR_NODE: return $this->parseVar($node);
+			case Node::WHILE_NODE: return $this->parseWhile($node);
 			default: throw new ParseError("Unknown node: " . print_r($node, true));
 		}
 	}
@@ -447,16 +531,16 @@ class Tree {
 		$else = isset($node->elseBody) ? $this->parseBody($node->elseBody) : null;
 
 		$_node = new IfNode($cond, $body, $else);
-		$_node->setValid(isset($node->condition, $node->ifBody, $node->elseBody));
+		$_node->setValid(isset($node->condition) &&
+            (isset($node->ifBody) || isset($node->elseBody)));
 		return $_node;
 	}
 
 	private function parseVar($node) {
-		$id = isset($node->id) ? $node->id : null;
-		$name = isset($node->name) ? $node->name : null;
+        $vid = isset($node->vid) ? $node->vid : null;
 
-		$_node = new VarNode($id, $name);
-		$_node->setValid(isset($node->id, $node->name));
+		$_node = new VarNode($vid);
+		$_node->setValid(isset($node->vid));
 		return $_node;
 	}
 
@@ -468,6 +552,16 @@ class Tree {
 		$_node->setValid(isset($node->condition, $node->body));
 		return $_node;
 	}
+}
+
+class TreeHelper {
+    public static function getIndent($indent) {
+        $str = "";
+        for ($i = 0; $i < $indent; $i++){
+            $str .= DEFAULT_INDENT;
+        }
+        return $str;
+    }
 }
 
 class ParseError extends Exception {}

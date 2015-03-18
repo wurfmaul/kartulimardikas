@@ -1,8 +1,8 @@
 <?php
 # Library paths
 $_jqueryVersion = '2.1.3';
-$_jqueryUiVersion = '1.11.2';
-$_bootstrapVersion = '3.3.1';
+$_jqueryUiVersion = '1.11.4';
+$_bootstrapVersion = '3.3.4';
 
 if (LIBRARY_MODE == 'LOCAL') {
     define('JQUERY_PATH', "lib/jquery/$_jqueryVersion/jquery.min.js");

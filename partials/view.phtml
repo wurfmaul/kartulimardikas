@@ -18,7 +18,10 @@ $name = stripslashes($_algo->name);
 $description = stripslashes($_algo->description);
 $long_description = stripslashes($_algo->long_description);
 $vars = json_decode($_algo->variables);
-$tree = json_decode($_algo->tree);
+
+// prepare tree
+require_once BASEDIR . "includes/nodes.php";
+$tree = new Tree(json_decode($_algo->tree));
 
 // open section if it is specified
 $section = array ('controls' => false, 'pseudo' => false, 'source' => false,
@@ -105,9 +108,9 @@ if ($sectionNum >= 1) { $section['controls'] = true; }
                     <?= $name ?>
                 </h4>
             </div>
-            <div id="pseudocode" class=" panel-collapse collapse <?= $section['pseudo'] ? 'in' : 'closed' ?>">
-                <div class="panel-body">
-
+            <div id="pseudocode" class="panel-collapse collapse <?= $section['pseudo'] ? 'in' : 'closed' ?>">
+                <div class="panel-body algorithm">
+                    <ul><?php $tree->printHtml(['vars' => $vars]) ?></ul>
                 </div>
             </div>
         </div>
@@ -122,9 +125,7 @@ if ($sectionNum >= 1) { $section['controls'] = true; }
             </div>
             <div id="sourcecode" class=" panel-collapse collapse <?= $section['source'] ? 'in' : 'closed' ?>">
                 <div class="panel-body">
-                    <pre>
-                        <?php print_r($tree) ?>
-                    </pre>
+                    <pre><?php $tree->printSource(['vars' => $vars]) ?></pre>
                 </div>
             </div>
         </div>
