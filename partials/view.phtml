@@ -13,26 +13,22 @@ $_model = new DataModel();
 $_algo = $_model->fetchAlgorithmByAID($aid);
 $_model->close();
 
-// extract variables
+// prepare algorithm meta-data
 $name = stripslashes($_algo->name);
 $description = stripslashes($_algo->description);
 $long_description = stripslashes($_algo->long_description);
+
+// prepare variables
 $vars = json_decode($_algo->variables);
 
 // prepare tree
 require_once BASEDIR . "includes/nodes.php";
 $tree = new Tree(json_decode($_algo->tree));
 
-// open section if it is specified
-$section = array ('controls' => false, 'pseudo' => false, 'source' => false,
-    'desc' => false, 'memory' => false, 'stats' => false);
+// prepare sections
+require_once BASEDIR . "includes/viewHelper.php";
 $sectionNum = isset($_GET['section']) ? $_GET['section'] : SECTIONS_VIEW;
-if ($sectionNum >= 32) { $section['stats'] = true; $sectionNum -= 32; }
-if ($sectionNum >= 16) { $section['memory'] = true; $sectionNum -= 16; }
-if ($sectionNum >= 8) { $section['desc'] = true; $sectionNum -= 8; }
-if ($sectionNum >= 4) { $section['source'] = true; $sectionNum -= 4; }
-if ($sectionNum >= 2) { $section['pseudo'] = true; $sectionNum -= 2; }
-if ($sectionNum >= 1) { $section['controls'] = true; }
+$section = sections($sectionNum, 6);
 ?>
 <!-- HEADER -->
 <div class="page-header">
@@ -54,44 +50,35 @@ if ($sectionNum >= 1) { $section['controls'] = true; }
         <div class="panel panel-default">
             <div class="panel-heading" data-toggle="collapse" data-target="#controls">
                 <h4 class="panel-title">
-                    <span class="glyphicon glyphicon-chevron-<?php if ($section['controls']): ?>down<?php else: ?>right<?php endif ?>"></span>
+                    <span class="glyphicon glyphicon-chevron-<?php if ($section[0]): ?>down<?php else: ?>right<?php endif ?>"></span>
                     <?= $l10n['controls'] ?>
                 </h4>
             </div>
-            <div id="controls" class=" panel-collapse collapse <?= $section['controls'] ? 'in' : 'closed' ?>">
+            <div id="controls" class=" panel-collapse collapse <?= $section[0] ? 'in' : 'closed' ?>">
                 <div class="panel-body">
-
-                    <!-- STEP CONTROLS -->
                     <div class="btn-group btn-group-justified">
                         <div class="btn-group">
-                            <button type="button" class="btn btn-default"
-                                    title="Back to beginning" id="btn-reset"
-                                    disabled="disabled">
+                            <button type="button" class="btn btn-default" title="<?= $l10n['back_to_start'] ?>" id="btn-reset" disabled="disabled">
                                 <span class="glyphicon glyphicon-fast-backward"></span>
                             </button>
                         </div>
                         <div class="btn-group">
-                            <button type="button" class="btn btn-default"
-                                    title="Step back" id="btn-stepback"
-                                    disabled="disabled">
+                            <button type="button" class="btn btn-default" title="<?= $l10n['step_back'] ?>" id="btn-stepback" disabled="disabled">
                                 <span class="glyphicon glyphicon-step-backward"></span>
                             </button>
                         </div>
                         <div class="btn-group">
-                            <button type="button" class="btn btn-default" title="Play"
-                                    id="btn-play" data-toggle="button">
+                            <button type="button" class="btn btn-default" title="<?= $l10n['play'] ?>" id="btn-play" data-toggle="button">
                                 <span class="glyphicon glyphicon-play" id="img-play"></span>
                             </button>
                         </div>
                         <div class="btn-group">
-                            <button type="button" class="btn btn-default"
-                                    title="Step forward" id="btn-step">
+                            <button type="button" class="btn btn-default" title="<?= $l10n['step_forward'] ?>" id="btn-step">
                                 <span class="glyphicon glyphicon-step-forward"></span>
                             </button>
                         </div>
                         <div class="btn-group">
-                            <button type="button" class="btn btn-default"
-                                    title="Forward to end" id="btn-finish">
+                            <button type="button" class="btn btn-default" title="<?= $l10n['forward_to_end'] ?>" id="btn-finish">
                                 <span class="glyphicon glyphicon-fast-forward"></span>
                             </button>
                         </div>
@@ -104,11 +91,11 @@ if ($sectionNum >= 1) { $section['controls'] = true; }
         <div class="panel panel-default">
             <div class="panel-heading" data-toggle="collapse" data-target="#pseudocode">
                 <h4 class="panel-title">
-                    <span class="glyphicon glyphicon-chevron-<?php if ($section['pseudo']): ?>down<?php else: ?>right<?php endif ?>"></span>
+                    <span class="glyphicon glyphicon-chevron-<?php if ($section[1]): ?>down<?php else: ?>right<?php endif ?>"></span>
                     <?= $name ?>
                 </h4>
             </div>
-            <div id="pseudocode" class="panel-collapse collapse <?= $section['pseudo'] ? 'in' : 'closed' ?>">
+            <div id="pseudocode" class="panel-collapse collapse <?= $section[1] ? 'in' : 'closed' ?>">
                 <div class="panel-body algorithm">
                     <ul><?php $tree->printHtml(['vars' => $vars]) ?></ul>
                 </div>
@@ -119,11 +106,11 @@ if ($sectionNum >= 1) { $section['controls'] = true; }
         <div class="panel panel-default">
             <div class="panel-heading" data-toggle="collapse" data-target="#sourcecode">
                 <h4 class="panel-title">
-                    <span class="glyphicon glyphicon-chevron-<?php if ($section['source']): ?>down<?php else: ?>right<?php endif ?>"></span>
+                    <span class="glyphicon glyphicon-chevron-<?php if ($section[2]): ?>down<?php else: ?>right<?php endif ?>"></span>
                     <?= $l10n['source_code'] ?>
                 </h4>
             </div>
-            <div id="sourcecode" class=" panel-collapse collapse <?= $section['source'] ? 'in' : 'closed' ?>">
+            <div id="sourcecode" class=" panel-collapse collapse <?= $section[2] ? 'in' : 'closed' ?>">
                 <div class="panel-body">
                     <pre><?php $tree->printSource(['vars' => $vars]) ?></pre>
                 </div>
@@ -134,11 +121,11 @@ if ($sectionNum >= 1) { $section['controls'] = true; }
         <div class="panel panel-default">
             <div class="panel-heading" data-toggle="collapse" data-target="#description">
                 <h4 class="panel-title">
-                    <span class="glyphicon glyphicon-chevron-<?php if ($section['desc']): ?>down<?php else: ?>right<?php endif ?>"></span>
+                    <span class="glyphicon glyphicon-chevron-<?php if ($section[3]): ?>down<?php else: ?>right<?php endif ?>"></span>
                     <?= $l10n['description'] ?>
                 </h4>
             </div>
-            <div id="description" class=" panel-collapse collapse <?= $section['desc'] ? 'in' : 'closed' ?>">
+            <div id="description" class=" panel-collapse collapse <?= $section[3] ? 'in' : 'closed' ?>">
                 <div class="panel-body">
                     <?= $long_description ?>
                 </div>
@@ -156,11 +143,11 @@ if ($sectionNum >= 1) { $section['controls'] = true; }
         <div class="panel panel-default">
             <div class="panel-heading" data-toggle="collapse" data-target="#memory">
                 <h4 class="panel-title">
-                    <span class="glyphicon glyphicon-chevron-<?php if ($section['memory']): ?>down<?php else: ?>right<?php endif ?>"></span>
+                    <span class="glyphicon glyphicon-chevron-<?php if ($section[4]): ?>down<?php else: ?>right<?php endif ?>"></span>
                     <?= $l10n['memory'] ?>
                 </h4>
             </div>
-            <div id="memory" class=" panel-collapse collapse <?= $section['memory'] ? 'in' : 'closed' ?>">
+            <div id="memory" class=" panel-collapse collapse <?= $section[4] ? 'in' : 'closed' ?>">
                 <div class="panel-body">
                     <table class="table table-hover table-bordered">
                         <tr>
@@ -194,11 +181,11 @@ if ($sectionNum >= 1) { $section['controls'] = true; }
         <div class="panel panel-default">
             <div class="panel-heading" data-toggle="collapse" data-target="#statistics">
                 <h4 class="panel-title">
-                    <span class="glyphicon glyphicon-chevron-<?php if ($section['stats']): ?>down<?php else: ?>right<?php endif ?>"></span>
+                    <span class="glyphicon glyphicon-chevron-<?php if ($section[5]): ?>down<?php else: ?>right<?php endif ?>"></span>
                     <?= $l10n['statistics'] ?>
                 </h4>
             </div>
-            <div id="statistics" class="panel-collapse collapse <?= $section['stats'] ? 'in' : 'closed' ?>">
+            <div id="statistics" class="panel-collapse collapse <?= $section[5] ? 'in' : 'closed' ?>">
                 <div class="panel-body">
                     <table class="table table-hover table-bordered">
                         <tr>
