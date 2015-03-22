@@ -4,51 +4,35 @@
   .close {
     display: none;
   }
-  .var-node {
-    .var-value {
-      display: none;
+  .node {
+    &.highlight > table > tbody > tr > td {
+      &.node-box {
+        font-weight: bold;
+        background-color: #286090 !important;
+        color: white;
+      }
+    }
+    &.var-node {
+      .var-value {
+        display: none;
+      }
+    }
+    &.compare-node {
+      .compare-operation {
+        display: none;
+      }
     }
   }
-  .compare-node {
-    .compare-operation {
-      display: none;
-    }
-  }
-}
 
-.cursor {
-    display: inline-block;
-    min-width: 10px;
-    padding: 3px 7px;
-    font-size: 12px;
-    line-height: 1;
-    color: #fff;
-    white-space: nowrap;
-    vertical-align: baseline;
-    background-color: #999;
-    margin-top: 1px;
-}
-
-.cursor-done {
-    background-color: lightgray;
-}
-
-.cursor-current {
-    font-weight: bold;
-    background-color: #428bca;
-    border-left: black solid 2px;
-    border-top: black solid 2px;
-    border-top-left-radius: 5px;
-}
-
-.highlight-write {
+  .highlight-write {
     color: #fff;
     background-color: #5cb85c;
     border-color: #4cae4c;
-}
+  }
 
-.highlight-compare {
+  .highlight-compare {
     color: #fff;
     background-color: #f0ad4e;
     border-color: #eea236;
+  }
 }

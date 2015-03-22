@@ -140,14 +140,17 @@ define('ACTION', $_action);
         <!-- PAGE CONTENT END -->
 	</div>
 
-	<script src="<?= JQUERY_PATH ?>"></script>
-	<script src="<?= BOOTSTRAP_JS_PATH ?>"></script>
-	<script src="js/common.js"></script>
-    <?php if (file_exists('js/'.ACTION.'.js')): ?>
-    <script src="js/<?= ACTION ?>.js"></script>
+	<script type="text/javascript" src="<?= JQUERY_PATH ?>"></script>
+	<script type="text/javascript" src="<?= BOOTSTRAP_JS_PATH ?>"></script>
+	<script type="text/javascript" src="js/common.js"></script>
+    <?php if (ACTION === 'edit' || ACTION === 'view'): ?>
+    <script type="text/javascript" src="js/algorithm.js"></script>
     <?php endif ?>
-    <?php if (ACTION == 'edit'): ?>
-    <script src="<?= JQUERYUI_JS_PATH ?>"></script>
+    <?php if (file_exists('js/'.ACTION.'.js')): ?>
+    <script type="text/javascript" src="js/<?= ACTION ?>.js"></script>
+    <?php endif ?>
+    <?php if (ACTION === 'edit'): ?>
+    <script type="text/javascript" src="<?= JQUERYUI_JS_PATH ?>"></script>
     <?php endif ?>
 </body>
 </html>

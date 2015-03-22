@@ -1,8 +1,7 @@
-VARSITE = $("#insertVarsHere") # Specifies the site, where variables are to place.
-SCRIPTSITE = $("#insertStepsHere") # Specifies the site, where variables are to place.
+window.VARSITE = $("#insertVarsHere") # Specifies the site, where variables are to place.
 
 class Api
-  editInfo: ->
+  @editInfo: ->
     aid = $('#aid').data('val')
     name = $('#in-name').val()
     desc = $('#in-desc').val()
@@ -17,7 +16,7 @@ class Api
       error: (jqXHR, textStatus, errorThrown) => # if request failed
         @_printError("Request Error: " + errorThrown)
 
-  editVariable: (vid) ->
+  @editVariable: (vid) ->
     varRow = $('#var-' + vid)
     aid = $('#aid').data('val')
     name = varRow.find('.name').val()
@@ -64,7 +63,7 @@ class Api
       error: (jqXHR, textStatus, errorThrown) => # if request failed
         @_printError("Request Error: " + errorThrown)
 
-  removeVariable: (vid) ->
+  @removeVariable: (vid) ->
     aid = $('#aid').data('val')
     $.ajax "api/edit-algorithm.php?area=var&action=remove",
       type: 'POST'
@@ -82,7 +81,7 @@ class Api
       error: (jqXHR, textStatus, errorThrown) => # if request failed
         @_printError("Request Error: " + errorThrown)
 
-  editScript: (tree) ->
+  @editScript: (tree) ->
     aid = $('#aid').data('val')
     $.ajax "api/edit-algorithm.php?area=script",
       type: 'POST'
@@ -94,116 +93,21 @@ class Api
       error: (jqXHR, textStatus, errorThrown) => # if request failed
         @_printError("Storage Error: " + errorThrown)
 
-  _printError: (msg) ->
+  @_printError: (msg) ->
     $('#editAlertText').html(msg)
     $('#editAlert').show('slow')
 
-  _printSuccess: (msg) ->
+  @_printSuccess: (msg) ->
     $('#editAlert').hide('slow')
     $('#saveSuccess:hidden').text(msg).show('slow', -> $(this).fadeOut(3000))
 
-class Tree
-  parse: (node) =>
-    # extract the type
-    type = node.data('node-type')
-
-    # call proper parsing method
-    switch type
-      when 'assign' then response = @parseAssign(node)
-      when 'compare' then response = @parseCompare(node)
-      when 'constant' then response = @parseConstant(node)
-      when 'if' then response = @parseIf(node)
-      when 'var' then response = @parseVar(node)
-      when 'while' then response = @parseWhile(node)
-#      else
-#        console.error "Parse error: Unknown type: '#{type}'"
-    response
-
-  parseRoot: ->
-    # if the main body is empty, return empty string, parse tree otherwise
-    if ($(SCRIPTSITE).filter(':empty').length) then ""
-    else @parseBody(SCRIPTSITE)
-
-  parseBody: (node) =>
-    # prepare return value
-    script = {}
-    # loop level-1 elements:
-    node.children('li').each((index, element) =>
-      script[index] = @parse($(element))
-    )
-    script
-
-  parseAssign: (node) =>
-    from = @parseBody(@findSubNode(node, '.assign-from'))
-    to = @parseBody(@findSubNode(node, '.assign-to'))
-
-    {
-      node: 'assign'
-      from: from
-      to: to
-    }
-
-  parseCompare: (node) =>
-    left = @parseBody(@findSubNode(node, '.compare-left'))
-    right = @parseBody(@findSubNode(node, '.compare-right'))
-    operator = node.find('.compare-operation:first').val()
-
-    {
-      node: 'compare'
-      left: left
-      right: right
-      operator: operator
-    }
-
-  parseConstant: (node) =>
-    value = node.find('.constant-value:first').val()
-
-    {
-      node: 'constant'
-      value: value
-    }
-
-  parseIf: (node) =>
-    condition = @parseBody(@findSubNode(node, '.if-condition'))
-    ifBody = @parseBody(@findSubNode(node, '.if-body'))
-    elseBody = @parseBody(@findSubNode(node, '.if-else'))
-
-    {
-      node: 'if'
-      condition: condition
-      ifBody: ifBody
-      elseBody: elseBody
-    }
-
-  parseVar: (node) =>
-    variable = node.find('.var-value > :selected')
-
-    {
-      node: 'var'
-      vid: variable.val()
-    }
-
-  parseWhile: (node) ->
-    condition = @parseBody(@findSubNode(node, '.while-condition'))
-    body = @parseBody(@findSubNode(node, '.while-body'))
-
-    {
-    node: 'while'
-    condition: condition
-    body: body
-    }
-
-  findSubNode: (node, _class) ->
-    node.find(_class + ':first')
-
 class VariableForm
-  constructor: (api) ->
+  constructor: ->
     lastVid = $('.varRow')# find all variable rows
     .not('#var-prototype')# exclude the prototype
     .last()# pick the last one
     .data('vid') # extract the variable id
     @maxVarId = if lastVid? then lastVid + 1 else 0
-    @api = api
 
   addRow: ->
     newRow = $('#var-prototype').clone(true)# get prototype
@@ -229,7 +133,7 @@ class VariableForm
       varRow.hide('slow', -> $(this).remove())
 
   performCheck: (vid) ->
-    @api.editVariable(vid)
+    Api.editVariable(vid)
 
   performEdit: (vid) ->
     varRow = $('#var-' + vid)
@@ -237,13 +141,9 @@ class VariableForm
     varRow.find('.view').hide()
 
   performRemove: (vid) ->
-    @api.removeVariable(vid)
+    Api.removeVariable(vid)
 
 class StepForm
-  constructor: (api, tree) ->
-    @api = api
-    @tree = tree
-
   addNode: (nodeId) ->
     # create new node from prototype
     node = $('#' + nodeId)
@@ -265,20 +165,20 @@ class StepForm
     # TODO: undo function
     node.hide('slow', =>
       node.remove()
-      @api.editScript(@tree.parseRoot())
+      Api.editScript(Tree.parseRoot())
     )
 
   updateActionHandlers: (parent) ->
     # update action handlers
     parent.find('input, select').off('blur').blur =>
-      @api.editScript(@tree.parseRoot())
+      Api.editScript(Tree.parseRoot())
     parent.find('.node-remove').off('click').click (event) =>
       @removeNode($(event.currentTarget).parents('.node:first'))
 
   updateSortable: ->
     # FIXME: find combined solution
     update = () =>
-      @api.editScript(@tree.parseRoot())
+      Api.editScript(Tree.parseRoot())
     sortParams =
       connectWith: ".sortable"
       placeholder: "sortable-highlight"
@@ -288,17 +188,16 @@ class StepForm
 
 $ ->
   # GENERAL
-  api = new Api()
   $('#editAlertClose').click -> $('#editAlert').hide('slow')
 
   # INFORMATION SECTION
   $('#in-long')
   .focus -> $(this).val("") if ($(this).data('placeholder') == $(this).val())
   .blur -> $(this).val($(this).data('placeholder')) if ($(this).val() == "")
-  $('#in-name, #in-desc, #in-long').blur -> api.editInfo()
+  $('#in-name, #in-desc, #in-long').blur -> Api.editInfo()
 
   # VARIABLE SECTION
-  varForm = new VariableForm(api)
+  varForm = new VariableForm()
   $("#btnAddVar").click -> varForm.addRow()
   $('.btn-var-cancel').click -> varForm.performCancel($(this).parents('.varRow').data('vid'))
   $('.btn-var-check').click -> varForm.performCheck($(this).parents('.varRow').data('vid'))
@@ -315,10 +214,9 @@ $ ->
     varRow.find('.value-group').hide('slow') if !showValue
 
   # STEPS SECTION
-  tree = new Tree()
-  stepForm = new StepForm(api, tree)
+  stepForm = new StepForm()
   stepForm.updateActionHandlers(SCRIPTSITE)
   stepForm.updateSortable()
   $('#node-btn-group').children('button').click ->
     stepForm.addNode($(this).data('node'))
-    api.editScript(tree.parseRoot())
+    Api.editScript(Tree.parseRoot())

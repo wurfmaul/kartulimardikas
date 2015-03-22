@@ -17,9 +17,9 @@ class AssignNode extends Node {
         return sprintf("%s%s = %s", $indent, $this->to->getSource($params), $this->from->getSource($params));
     }
 
-	public function printHtml($id, $params) { ?>
+	public function printHtml(&$params) { ?>
 		<!-- ASSIGN NODE -->
-		<li<?php if (!is_null($id)): ?> id="<?= $id ?>"<?php endif ?> class="node assign-node" data-node-type="assign">
+		<li id="step_<?= $params['step']++ ?>" class="node assign-node" data-node-type="assign">
 			<table>
 				<tr>
 					<td class="handle node-box top left">&nbsp;</td>
@@ -54,6 +54,15 @@ class AssignNode extends Node {
 			</table>
 		</li>
 	<?php }
+
+    public static function parse($node) {
+        $from = isset($node->from) ? parent::parse($node->from) : null;
+        $to = isset($node->to) ? parent::parse($node->to) : null;
+
+        $_node = new self($to, $from);
+        $_node->setValid(isset($node->from, $node->to));
+        return $_node;
+    }
 }
 
 class CompareNode extends Node {
@@ -84,11 +93,11 @@ class CompareNode extends Node {
         return sprintf("%s %s %s", $this->left->getSource($params), $this->ops[$this->op], $this->right->getSource($params));
     }
 
-	public function printHtml($id, $params) {
+	public function printHtml(&$params) {
         $selected_op = $this->isPrototype ? "" : $this->op;
     ?>
 		<!-- COMPARE NODE -->
-		<li<?php if (!is_null($id)): ?> id="<?= $id ?>"<?php endif ?> class="node compare-node" data-node-type="compare">
+		<li id="step_<?= $params['step']++ ?>" class="node compare-node" data-node-type="compare">
 			<table>
 				<tr>
 					<td class="handle node-box top left">&nbsp;</td>
@@ -131,6 +140,17 @@ class CompareNode extends Node {
 			</table>
 		</li>
 	<?php }
+
+    public static function parse($node)
+    {
+        $left = isset($node->left) ? parent::parse($node->left) : null;
+        $right = isset($node->right) ? parent::parse($node->right) : null;
+        $op = isset($node->operator) ? $node->operator : null;
+
+        $_node = new self($left, $right, $op);
+        $_node->setValid(isset($node->left, $node->right, $node->operator));
+        return $_node;
+    }
 }
 
 class ConstantNode extends Node {
@@ -146,10 +166,10 @@ class ConstantNode extends Node {
         return (string) $this->value;
     }
 
-	public function printHtml($id, $params)
+	public function printHtml(&$params)
 	{ ?>
 		<!-- CONSTANT NODE -->
-		<li<?php if (!is_null($id)): ?> id="<?= $id ?>"<?php endif ?> class="node constant-node" data-node-type="constant">
+		<li id="step_<?= $params['step']++ ?>" class="node constant-node" data-node-type="constant">
 			<table>
 				<tr>
 					<td class="handle node-box top left bottom">&nbsp;</td>
@@ -165,6 +185,15 @@ class ConstantNode extends Node {
 			</table>
 		</li>
 	<?php }
+
+    public static function parse($node)
+    {
+        $value = isset($node->value) ? $node->value : null;
+
+        $_node = new self($value);
+        $_node->setValid(isset($node->value) && is_numeric($value));
+        return $_node;
+    }
 }
 
 class IfNode extends Node {
@@ -202,9 +231,9 @@ class IfNode extends Node {
         return $string;
     }
 
-	public function printHtml($id, $params) { ?>
+	public function printHtml(&$params) { ?>
 		<!-- IF NODE -->
-		<li<?php if (!is_null($id)): ?> id="<?= $id ?>"<?php endif ?> class="node if-node" data-node-type="if">
+		<li id="step_<?= $params['step']++ ?>" class="node if-node" data-node-type="if">
 			<table>
 				<tr>
 					<td class="handle node-box top left">&nbsp;</td>
@@ -251,6 +280,18 @@ class IfNode extends Node {
 			</table>
 		</li>
 	<?php }
+
+    public static function parse($node)
+    {
+        $cond = isset($node->condition) ? parent::parse($node->condition) : null;
+        $body = isset($node->ifBody) ? Tree::parseBody($node->ifBody) : null;
+        $else = isset($node->elseBody) ? Tree::parseBody($node->elseBody) : null;
+
+        $_node = new self($cond, $body, $else);
+        $_node->setValid(isset($node->condition) &&
+            (isset($node->ifBody) || isset($node->elseBody)));
+        return $_node;
+    }
 }
 
 class VarNode extends Node {
@@ -269,14 +310,14 @@ class VarNode extends Node {
         return $params['vars'][$this->vid]->name;
     }
 
-	public function printHtml($id, $params)
+	public function printHtml(&$params)
 	{
         $vars = !is_null($params) && isset($params['vars']) ? $params['vars'] : array();
         unset ($vars['prototype']);
         $selected = isset($vars[$this->vid]) ? $vars[$this->vid]->name : '';
     ?>
 		<!-- VAR NODE -->
-		<li<?php if (!is_null($id)): ?> id="<?= $id ?>"<?php endif ?> class="node var-node" data-node-type="var">
+		<li id="step_<?= $params['step']++ ?>" class="node var-node" data-node-type="var">
 			<table>
 				<tr>
 					<td class="handle node-box top left bottom">&nbsp;</td>
@@ -298,6 +339,15 @@ class VarNode extends Node {
 			</table>
 		</li>
 	<?php }
+
+    public static function parse($node)
+    {
+        $vid = isset($node->vid) ? $node->vid : null;
+
+        $_node = new self($vid);
+        $_node->setValid(isset($node->vid));
+        return $_node;
+    }
 }
 
 class WhileNode extends Node {
@@ -324,10 +374,10 @@ class WhileNode extends Node {
         return $string;
     }
 
-	public function printHtml($id, $params)
+	public function printHtml(&$params)
 	{ ?>
 		<!-- WHILE NODE -->
-		<li<?php if (!is_null($id)): ?> id="<?= $id ?>"<?php endif ?> class="node while-node" data-node-type="while">
+		<li id="step_<?= $params['step']++ ?>" class="node while-node" data-node-type="while">
 			<table>
 				<tr>
 					<td class="handle node-box top left">&nbsp;</td>
@@ -363,6 +413,16 @@ class WhileNode extends Node {
 			</table>
 		</li>
 	<?php }
+
+    public static function parse($node)
+    {
+        $condition = isset($node->condition) ? parent::parse($node->condition) : null;
+        $body = isset($node->body) ? Tree::parseBody($node->body) : null;
+
+        $_node = new self($condition, $body);
+        $_node->setValid(isset($node->condition, $node->body));
+        return $_node;
+    }
 }
 
 /**
@@ -382,6 +442,10 @@ abstract class Node {
 	/** @var bool */
 	protected $isValid = false;
 
+    /**
+     * Set or unset the valid flag.
+     * @param bool $valid
+     */
 	public function setValid($valid = true) {
 		$this->isValid = $valid;
 	}
@@ -395,18 +459,17 @@ abstract class Node {
 
 	/**
 	 * Prints HTML code which represents the node.
-	 * @param $id int
 	 * @param $params array
 	 */
-	public abstract function printHtml($id, $params);
+	public abstract function printHtml(&$params);
 
     /**
      * Calls the printHtml method of the Node $node, if it's not null and not a prototype.
-     * @param $node Node
+     * @param $node Node|array
      * @param $params array
      * @return bool True if printHtml method was called.
      */
-	public static function printNode($node, $params) {
+	public static function printNode($node, &$params) {
 		// unpack container of one node
 		if (!($node instanceof Node) && sizeof($node) == 1) {
 			$node = $node[0];
@@ -415,10 +478,16 @@ abstract class Node {
 		if (is_null($node) || $node->isPrototype)
 			return false;
 		// call printHtml() for valid nodes
-		$node->printHtml(null, $params);
+		$node->printHtml($params);
 		return true;
 	}
 
+    /**
+     * Print the HTML code for the nodes' prototypes.
+     * @param string $type The node type the prototype should be generated for.
+     * @param array $params Optional parameters that are needed for the prototype.
+     * @throws Exception If no node can be found for the specified type.
+     */
 	public static function printPrototype($type, $params = []) {
 		/** @var $node Node */
 		$node = null;
@@ -432,8 +501,34 @@ abstract class Node {
 			default: throw new Exception("No prototype prepared for '$type'.");
 		}
 		$node->isPrototype = true;
-		$node->printHtml("$type-node", $params);
+		$node->printHtml($params);
 	}
+
+    /**
+     * Basically transforms stdClasses (e.g. from a JSON object) to valid Nodes.
+     * Calls the parse function of a subclass according to the node's type. Subclasses
+     * override this function in order to provide the concrete parsing functionality.
+     *
+     * @param stdClass $node
+     * @return Node
+     * @throws ParseError if node is unknown
+     */
+    public static function parse($node) {
+        // unpack container of one node
+        if (is_array($node) && sizeof($node) == 1) {
+            $node = $node[0];
+        }
+        // parse node
+        switch ($node->node) {
+            case self::ASSIGN_NODE: return AssignNode::parse($node);
+            case self::COMPARE_NODE: return CompareNode::parse($node);
+            case self::CONSTANT_NODE: return ConstantNode::parse($node);
+            case self::IF_NODE: return IfNode::parse($node);
+            case self::VAR_NODE: return VarNode::parse($node);
+            case self::WHILE_NODE: return WhileNode::parse($node);
+            default: throw new ParseError("Unknown node: " . print_r($node, true));
+        }
+    }
 }
 
 class Tree {
@@ -441,7 +536,7 @@ class Tree {
 	private $tree;
 
 	public function __construct($tree) {
-		$this->tree = $this->parseBody($tree);
+		$this->tree = self::parseBody($tree);
 	}
 
     public function printSource($params = []) {
@@ -455,9 +550,10 @@ class Tree {
     }
 
 	public function printHtml($params = []) {
-		foreach ($this->tree as $node) {
+        $params['step'] = 0;
+        foreach ($this->tree as $node) {
 			/** @var $node Node */
-			$node->printHtml(null, $params);
+			$node->printHtml($params);
 		}
 	}
 
@@ -466,91 +562,14 @@ class Tree {
      * @return array
      * @throws ParseError
      */
-	private function parseBody($body) {
+	public static function parseBody($body) {
 		$nodes = array();
         if (!is_null($body)) {
             foreach ($body as $node) {
-                $nodes[] = $this->parse($node);
+                $nodes[] = Node::parse($node);
             }
         }
 		return $nodes;
-	}
-
-	/**
-	 * @param $node stdClass
-	 * @return Node
-	 * @throws ParseError if node is unknown
-	 */
-	private function parse($node) {
-		// unpack container of one node
-		if (is_array($node) && sizeof($node) == 1) {
-			$node = $node[0];
-        }
-        // parse node
-		switch ($node->node) {
-			case Node::ASSIGN_NODE: return $this->parseAssign($node);
-			case Node::COMPARE_NODE: return $this->parseCompare($node);
-			case Node::CONSTANT_NODE: return $this->parseConstant($node);
-			case Node::IF_NODE: return $this->parseIf($node);
-			case Node::VAR_NODE: return $this->parseVar($node);
-			case Node::WHILE_NODE: return $this->parseWhile($node);
-			default: throw new ParseError("Unknown node: " . print_r($node, true));
-		}
-	}
-
-	private function parseAssign($node) {
-		$from = isset($node->from) ? $this->parse($node->from) : null;
-		$to = isset($node->to) ? $this->parse($node->to) : null;
-
-		$_node = new AssignNode($to, $from);
-		$_node->setValid(isset($node->from, $node->to));
-		return $_node;
-	}
-
-	private function parseCompare($node) {
-		$left = isset($node->left) ? $this->parse($node->left) : null;
-		$right = isset($node->right) ? $this->parse($node->right) : null;
-		$op = isset($node->operator) ? $node->operator : null;
-
-		$_node = new CompareNode($left, $right, $op);
-		$_node->setValid(isset($node->left, $node->right, $node->operator));
-		return $_node;
-	}
-
-	private function parseConstant($node) {
-		$value = isset($node->value) ? $node->value : null;
-
-		$_node = new ConstantNode($value);
-		$_node->setValid(isset($node->value) && is_numeric($value));
-		return $_node;
-	}
-
-	private function parseIf($node) {
-		$cond = isset($node->condition) ? $this->parse($node->condition) : null;
-		$body = isset($node->ifBody) ? $this->parseBody($node->ifBody) : null;
-		$else = isset($node->elseBody) ? $this->parseBody($node->elseBody) : null;
-
-		$_node = new IfNode($cond, $body, $else);
-		$_node->setValid(isset($node->condition) &&
-            (isset($node->ifBody) || isset($node->elseBody)));
-		return $_node;
-	}
-
-	private function parseVar($node) {
-        $vid = isset($node->vid) ? $node->vid : null;
-
-		$_node = new VarNode($vid);
-		$_node->setValid(isset($node->vid));
-		return $_node;
-	}
-
-	private function parseWhile($node) {
-		$condition = isset($node->condition) ? $this->parse($node->condition) : null;
-		$body = isset($node->body) ? $this->parseBody($node->body) : null;
-
-		$_node = new WhileNode($condition, $body);
-		$_node->setValid(isset($node->condition, $node->body));
-		return $_node;
 	}
 }
 

@@ -29,7 +29,7 @@ $vars = json_decode($_algo->variables);
 $vars['prototype'] = (object) ['name' => '', 'init' => 'elem-?', 'value' => '', 'size' => 2];
 
 // prepare tree
-require_once BASEDIR . "includes/nodes.php";
+require_once BASEDIR . "includes/algorithm.php";
 $tree = new Tree(json_decode($_algo->tree));
 
 // prepare sections
