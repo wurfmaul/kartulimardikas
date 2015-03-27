@@ -15,15 +15,18 @@ if (isSignedIn()) {
 ?>
 <!-- HEADER -->
 <div class="page-header">
-    <h1><?= $l10n['new_algo'] ?> <small><?= $l10n['define_algo'] ?></small></h1>
+    <h1><?= $l10n['new_algo'] ?>
+        <small><?= $l10n['define_algo'] ?></small>
+    </h1>
 </div>
 <!-- CONTENT -->
 <div class="alert alert-warning" role="alert">
-    <strong><?= $l10n['warning'] ?></strong><br />
+    <strong><?= $l10n['warning'] ?></strong><br/>
 
     <?= $l10n['message_not_signed_in'] ?>
     <ul>
         <li><?= $l10n['use_form_to_signin'] ?></li>
-        <li><?= $l10n['if_no_account'] ?> &rarr; <a href="<?= url(['action' => 'register']) ?>"><?= $l10n['register'] ?></a></li>
+        <li><?= $l10n['if_no_account'] ?> &rarr; <a
+                href="<?= url(['action' => 'register']) ?>"><?= $l10n['register'] ?></a></li>
     </ul>
 </div>

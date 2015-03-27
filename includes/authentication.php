@@ -1,10 +1,11 @@
 <?php
 
-function secure_session_start() {
+function secure_session_start()
+{
     require_once BASEDIR . 'config/config.php';
 
     // use cookies for php sessions
-    if (ini_set('session.use_only_cookies', 1) === FALSE) {
+    if (ini_set('session.use_only_cookies', 1) === false) {
         echo "Could not start secure session!";
         exit();
     }
@@ -17,7 +18,8 @@ function secure_session_start() {
     session_regenerate_id();
 }
 
-function signin($username, $password) {
+function signin($username, $password)
+{
     require_once BASEDIR . 'includes/dataModel.php';
     $model = new DataModel();
     $result = $model->fetchLoginByUsername($username);
@@ -47,14 +49,16 @@ function signin($username, $password) {
     return false;
 }
 
-function signout() {
+function signout()
+{
     $_SESSION = array();
     $oldCookie = session_get_cookie_params();
     setcookie(session_name(), '', time() - 42000, $oldCookie["path"], $oldCookie["domain"], $oldCookie["secure"], $oldCookie["httponly"]);
     session_destroy();
 }
 
-function isSignedIn() {
+function isSignedIn()
+{
     if (isset($_SESSION['uid'], $_SESSION['username'], $_SESSION['token'])) {
         require_once BASEDIR . 'includes/dataModel.php';
         $model = new DataModel();

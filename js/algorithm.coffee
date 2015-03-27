@@ -20,73 +20,117 @@ class Node
   @findSubNode: (node, _class) ->
     node.find(_class + ':first')
 
+  @toJSON: (nodes) ->
+    json = []
+    for node, i in nodes
+      json[i] = node.toJSON()
+    json
+
 class AssignNode extends Node
+  constructor: (@from, @to) ->
+
   @parse: (node) =>
     from = Tree.parseBody(@findSubNode(node, '.assign-from'))
     to = Tree.parseBody(@findSubNode(node, '.assign-to'))
+    new @(from, to)
 
+  toJSON: ->
     {
     node: 'assign'
-    from: from
-    to: to
+    from: Node.toJSON(@from)
+    to: Node.toJSON(@to)
     }
 
 class CompareNode extends Node
+  constructor: (@left, @right, @operator) ->
+
   @parse: (node) =>
     left = Tree.parseBody(@findSubNode(node, '.compare-left'))
     right = Tree.parseBody(@findSubNode(node, '.compare-right'))
-    operator = node.find('.compare-operation:first').val()
+    operator = @findSubNode(node, '.compare-operation').val()
+    new @(left, right, operator)
 
+  toJSON: ->
     {
     node: 'compare'
-    left: left
-    right: right
-    operator: operator
+    left: Node.toJSON(@left)
+    right: Node.toJSON(@right)
+    operator: @operator
     }
 
 class ConstantNode extends Node
-  @parse: (node) =>
-    value = node.find('.constant-value:first').val()
+  constructor: (@value) ->
 
+  @parse: (node) =>
+    value = @findSubNode(node, '.constant-value').val()
+    new @(value)
+
+  toJSON: ->
     {
     node: 'constant'
-    value: value
+    value: @value
     }
 
 class IfNode extends Node
+  constructor: (@condition, @ifBody, @elseBody) ->
+
   @parse: (node) =>
     condition = Tree.parseBody(@findSubNode(node, '.if-condition'))
     ifBody = Tree.parseBody(@findSubNode(node, '.if-body'))
     elseBody = Tree.parseBody(@findSubNode(node, '.if-else'))
+    new @(condition, ifBody, elseBody)
 
+  toJSON: ->
+    console.log(@ifBody)
     {
     node: 'if'
-    condition: condition
-    ifBody: ifBody
-    elseBody: elseBody
+    condition: Node.toJSON(@condition)
+    ifBody: Node.toJSON(@ifBody)
+    elseBody: Node.toJSON(@elseBody)
     }
 
 class VarNode extends Node
-  @parse: (node) =>
-    variable = node.find('.var-value > :selected')
+  constructor: (@variable) ->
 
+  @parse: (node) =>
+    variable = node.find('.var-value > :selected').val()
+    new @(variable)
+
+  toJSON: ->
     {
     node: 'var'
-    vid: variable.val()
+    vid: @variable
     }
 
 class WhileNode extends Node
+  constructor: (@condition, @body) ->
+
   @parse: (node) =>
     condition = Tree.parseBody(@findSubNode(node, '.while-condition'))
     body = Tree.parseBody(@findSubNode(node, '.while-body'))
+    new @(condition, body)
 
+  toJSON: ->
     {
     node: 'while'
-    condition: condition
-    body: body
+    condition: Node.toJSON(@condition)
+    body: Node.toJSON(@body)
     }
 
 class window.Tree
+  constructor: ->
+    @tree = Tree.parseRoot()
+
+  toJSON: ->
+    json = []
+    for node, i in @tree
+      json[i] = node.toJSON()
+    json
+
+  @toJSON: ->
+    tree = new @
+    tree.toJSON()
+
   @parseRoot: =>
     # if the main body is empty, return empty string, parse tree otherwise
     if ($(SCRIPTSITE).filter(':empty').length) then ""
@@ -94,9 +138,9 @@ class window.Tree
 
   @parseBody: (node) =>
     # prepare return value
-    script = {}
+    tree = []
     # loop level-1 elements:
     node.children('li').each((index, element) =>
-      script[index] = Node.parse($(element))
+      tree[index] = Node.parse($(element))
     )
-    script
+    tree

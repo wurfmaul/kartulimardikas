@@ -10,10 +10,13 @@ $_model->close();
 <!-- HEADER -->
 <div class="jumbotron">
     <h1>
-        <?= PROJECT_NAME ?> <small><?= $l10n['subtitle'] ?></small>
+        <?= PROJECT_NAME ?>
+        <small><?= $l10n['subtitle'] ?></small>
     </h1>
     <p><?= $l10n['welcome_msg'] ?></p>
-    <p><a class="btn btn-primary btn-lg" role="button" href="<?= url(['action' => 'new']) ?>"><?= $l10n['define_new_algo'] ?></a></p>
+
+    <p><a class="btn btn-primary btn-lg" role="button"
+          href="<?= url(['action' => 'new']) ?>"><?= $l10n['define_new_algo'] ?></a></p>
 </div>
 <div class="page-header">
     <h1><?= $l10n['latest_algos'] ?></h1>
@@ -21,28 +24,30 @@ $_model->close();
 
 <!-- CONTENT -->
 <table id="latest-algorithms" class="table table-striped table-hover">
-<?php foreach ($algos as $algo):
-    $age = $algo['age'];
-    $modified = "";
-    if ($age <= 1) $modified = $l10n['one_minute_ago'];
-    elseif ($age < 60) $modified = sprintf($l10n['minutes_ago'], $age);
-    elseif (intval($age/60) == 1) $modified = $l10n['one_hour_ago'];
-    elseif ($age < 60 * 24) $modified = sprintf($l10n['hours_ago'], $age/60);
-    elseif (intval($age/60/24) == 1) $modified = $l10n['one_day_ago'];
-    else $modified = sprintf($l10n['days_ago'], $age/60/24);
-?>
-    <tr>
-        <td>
-            <span class="name"><a href="<?= url(['action' => 'view', 'aid' => $algo['aid']]) ?>"><?= $algo['name'] ?></a></span>
-            <?php if ($age <= MAX_MINUTES_FOR_LABEL): ?>
-            <span class="label label-default"><?= $l10n['label_new'] ?></span>
-            <?php endif ?>
-            <span class="properties">(<?= sprintf($l10n['created_note'], $modified, $algo['username']) ?>)</span>
-            <hr class="separator" />
+    <?php foreach ($algos as $algo):
+        $age = $algo['age'];
+        $modified = "";
+        if ($age <= 1) $modified = $l10n['one_minute_ago'];
+        elseif ($age < 60) $modified = sprintf($l10n['minutes_ago'], $age);
+        elseif (intval($age / 60) == 1) $modified = $l10n['one_hour_ago'];
+        elseif ($age < 60 * 24) $modified = sprintf($l10n['hours_ago'], $age / 60);
+        elseif (intval($age / 60 / 24) == 1) $modified = $l10n['one_day_ago'];
+        else $modified = sprintf($l10n['days_ago'], $age / 60 / 24);
+        ?>
+        <tr>
+            <td>
+                <span class="name"><a
+                        href="<?= url(['action' => 'view', 'aid' => $algo['aid']]) ?>"><?= $algo['name'] ?></a></span>
+                <?php if ($age <= MAX_MINUTES_FOR_LABEL): ?>
+                    <span class="label label-default"><?= $l10n['label_new'] ?></span>
+                <?php endif ?>
+                <span class="properties">(<?= sprintf($l10n['created_note'], $modified, $algo['username']) ?>)</span>
+                <hr class="separator"/>
 
-            <span class="description"><?= substr($algo['long_description'], 0, MAX_DESCRIPTION_LENGTH) ?>...</span>
-            <span class="link">(<a href="<?= url(['action' => 'view', 'aid' => $algo['aid']]) ?>">&rarr; <?= $l10n['read_more'] ?></a>)</span>
-        </td>
-    </tr>
-<?php endforeach ?>
+                <span class="description"><?= substr($algo['long_description'], 0, MAX_DESCRIPTION_LENGTH) ?>...</span>
+                <span class="link">(<a
+                        href="<?= url(['action' => 'view', 'aid' => $algo['aid']]) ?>">&rarr; <?= $l10n['read_more'] ?></a>)</span>
+            </td>
+        </tr>
+    <?php endforeach ?>
 </table>

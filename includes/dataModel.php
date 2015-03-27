@@ -1,19 +1,24 @@
 <?php
-class DataModel {
+
+class DataModel
+{
 
     /** @var mysqli */
     private $_sql;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->open();
     }
 
-    public function open() {
+    public function open()
+    {
         require_once BASEDIR . 'config/config.php';
         $this->_sql = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
     }
 
-    public function close() {
+    public function close()
+    {
         $this->_sql->close();
     }
 
@@ -21,7 +26,8 @@ class DataModel {
      * @param $aid int
      * @return object|stdClass
      */
-    public function fetchAlgorithmByAID($aid) {
+    public function fetchAlgorithmByAID($aid)
+    {
         $stmt = $this->_sql->prepare("SELECT * FROM algorithm WHERE aid = ?");
         $stmt->bind_param("i", $aid);
         $stmt->execute();
@@ -30,7 +36,8 @@ class DataModel {
         return $result->fetch_object();
     }
 
-    public function fetchLatestAlgorithms($amount) {
+    public function fetchLatestAlgorithms($amount)
+    {
         $stmt = $this->_sql->prepare("
             SELECT aid, name, description, long_description, username, TIMESTAMPDIFF(MINUTE, creation, NOW()) AS age
             FROM algorithm a
@@ -50,7 +57,8 @@ class DataModel {
      * @param $username string
      * @return object|stdClass
      */
-    public function fetchUserByUsername($username) {
+    public function fetchUserByUsername($username)
+    {
         $username = $this->_sql->real_escape_string($username);
 
         $stmt = $this->_sql->prepare("SELECT * FROM user WHERE username = ?");
@@ -65,7 +73,8 @@ class DataModel {
      * @param $email string
      * @return object|stdClass
      */
-    public function fetchUserByMail($email) {
+    public function fetchUserByMail($email)
+    {
         $email = $this->_sql->real_escape_string($email);
 
         $stmt = $this->_sql->prepare("SELECT * FROM user WHERE email = ?");
@@ -80,7 +89,8 @@ class DataModel {
      * @param $username string
      * @return object|stdClass
      */
-    public function fetchLoginByUsername($username) {
+    public function fetchLoginByUsername($username)
+    {
         $username = $this->_sql->real_escape_string($username);
 
         $stmt = $this->_sql->prepare("SELECT uid, password FROM user WHERE username = ?");
@@ -95,7 +105,8 @@ class DataModel {
      * @param $uid int
      * @return object|stdClass
      */
-    public function fetchLoginByUID($uid) {
+    public function fetchLoginByUID($uid)
+    {
         $stmt = $this->_sql->prepare("SELECT password FROM user WHERE uid = ?");
         $stmt->bind_param('i', $uid);
         $stmt->execute();
@@ -110,7 +121,8 @@ class DataModel {
      * @param $password string
      * @return int
      */
-    public function insertUser($username, $email, $password) {
+    public function insertUser($username, $email, $password)
+    {
         $username = $this->_sql->real_escape_string($username);
         $email = $this->_sql->real_escape_string($email);
         $password = $this->_sql->real_escape_string($password);
@@ -127,7 +139,8 @@ class DataModel {
      * @param $uid int
      * @return int
      */
-    public function insertAlgorithm($uid) {
+    public function insertAlgorithm($uid)
+    {
         $stmt = $this->_sql->prepare("INSERT INTO algorithm (uid) VALUES (?)");
         $stmt->bind_param("i", $uid);
         $stmt->execute();
@@ -142,7 +155,8 @@ class DataModel {
      * @param $desc string
      * @param $long string
      */
-    public function updateAlgorithmInfo($aid, $name, $desc, $long) {
+    public function updateAlgorithmInfo($aid, $name, $desc, $long)
+    {
         $name = $this->_sql->real_escape_string($name);
         $desc = $this->_sql->real_escape_string($desc);
         $long = $this->_sql->real_escape_string($long);
@@ -157,8 +171,9 @@ class DataModel {
      * @param $aid int
      * @param $variables mixed
      */
-    public function updateAlgorithmVariables($aid, $variables) {
-        $null = NULL;
+    public function updateAlgorithmVariables($aid, $variables)
+    {
+        $null = null;
         $stmt = $this->_sql->prepare("UPDATE algorithm SET variables=?, lastedit=NOW() WHERE aid=?");
         $stmt->bind_param("bi", $null, $aid);
         $stmt->send_long_data(0, $variables);
@@ -171,8 +186,9 @@ class DataModel {
      * @param $tree mixed JSON representation of tree.
      * @return int Number of changed rows.
      */
-    public function updateAlgorithmScript($aid, $tree) {
-        $null = NULL;
+    public function updateAlgorithmScript($aid, $tree)
+    {
+        $null = null;
         $stmt = $this->_sql->prepare("UPDATE algorithm SET tree=?, lastedit=NOW() WHERE aid=?");
         $stmt->bind_param("bi", $null, $aid);
         $stmt->send_long_data(0, $tree);
@@ -183,7 +199,8 @@ class DataModel {
     /**
      * @param $uid int
      */
-    public function updateUserSignInDate($uid) {
+    public function updateUserSignInDate($uid)
+    {
         $stmt = $this->_sql->prepare("UPDATE user SET lastsignin=NOW() WHERE uid=?");
         $stmt->bind_param("i", $uid);
         $stmt->execute();

@@ -24,22 +24,22 @@ var ctrl = new Controls();
 var display = new Display();
 
 // Manage click events for control buttons
-$("#btn-reset").click(function() {
+$("#btn-reset").click(function () {
     reset();
 });
-$("#btn-stepback").click(function() {
+$("#btn-stepback").click(function () {
     stepback();
 });
-$("#btn-play").click(function() {
+$("#btn-play").click(function () {
     if ($("#btn-play").hasClass("active"))
-	pause();
+        pause();
     else
-	play();
+        play();
 });
-$("#btn-step").click(function() {
+$("#btn-step").click(function () {
     step();
 });
-$("#btn-finish").click(function() {
+$("#btn-finish").click(function () {
     finish();
 });
 
@@ -113,7 +113,7 @@ function step() {
  */
 function finish() {
     while (!done) {
-	performStep();
+        performStep();
     }
 }
 
@@ -143,13 +143,13 @@ function Controls() {
     this.MIDDLE = 4;
     this.END = 8;
 
-    this.set = function(pos) {
-	$("#btn-reset").prop("disabled", pos == this.BEGIN || pos == this.PLAY);
-	// $("#btn-stepback").prop("disabled",
-	// pos == this.BEGIN || pos == this.PLAY);
-	$("#btn-play").prop("disabled", pos == this.END);
-	$("#btn-step").prop("disabled", pos == this.END || pos == this.PLAY);
-	$("#btn-finish").prop("disabled", pos == this.END || pos == this.PLAY);
+    this.set = function (pos) {
+        $("#btn-reset").prop("disabled", pos == this.BEGIN || pos == this.PLAY);
+        // $("#btn-stepback").prop("disabled",
+        // pos == this.BEGIN || pos == this.PLAY);
+        $("#btn-play").prop("disabled", pos == this.END);
+        $("#btn-step").prop("disabled", pos == this.END || pos == this.PLAY);
+        $("#btn-finish").prop("disabled", pos == this.END || pos == this.PLAY);
     };
 }
 
@@ -161,69 +161,69 @@ function Display() {
     /** Number of other operations */
     this.noOfOps = 0;
 
-    this.setValue = function(varName, value) {
-	this.unHighlight();
-	// update button value and color
-	var btn = $("#btn-" + varName);
-	btn.toggleClass("btn-default highlight-write");
-	btn.prop("value", value);
-	// update stats
-	this.countWrite();
+    this.setValue = function (varName, value) {
+        this.unHighlight();
+        // update button value and color
+        var btn = $("#btn-" + varName);
+        btn.toggleClass("btn-default highlight-write");
+        btn.prop("value", value);
+        // update stats
+        this.countWrite();
     };
 
-    this.compare = function(varName1, varName2) {
-	this.unHighlight();
-	// update button value and color
-	$("#btn-" + varName1).toggleClass("btn-default highlight-compare");
-	$("#btn-" + varName2).toggleClass("btn-default highlight-compare");
-	// update stats
-	this.countCompare();
+    this.compare = function (varName1, varName2) {
+        this.unHighlight();
+        // update button value and color
+        $("#btn-" + varName1).toggleClass("btn-default highlight-compare");
+        $("#btn-" + varName2).toggleClass("btn-default highlight-compare");
+        // update stats
+        this.countCompare();
     };
 
-    this.reset = function() {
-	// delete highlights
-	this.unHighlight();
-	// reset counters
-	this.noOfWrites = 0;
-	this.noOfCompares = 0;
-	this.noOfOps = 0;
-	$("#btn-now").prop("value", "0");
-	$("#btn-noc").prop("value", "0");
-	$("#btn-noo").prop("value", "0");
+    this.reset = function () {
+        // delete highlights
+        this.unHighlight();
+        // reset counters
+        this.noOfWrites = 0;
+        this.noOfCompares = 0;
+        this.noOfOps = 0;
+        $("#btn-now").prop("value", "0");
+        $("#btn-noc").prop("value", "0");
+        $("#btn-noo").prop("value", "0");
     };
 
     // unhighlight currently active memory cell
-    this.unHighlight = function() {
-	$(".highlight-write").removeClass("highlight-write").addClass(
-		"btn-default");
-	$(".highlight-compare").removeClass("highlight-compare").addClass(
-		"btn-default");
+    this.unHighlight = function () {
+        $(".highlight-write").removeClass("highlight-write").addClass(
+            "btn-default");
+        $(".highlight-compare").removeClass("highlight-compare").addClass(
+            "btn-default");
     };
 
     /**
      * Increments the write operation counter and updates the counter
      */
-    this.countWrite = function() {
-	var btn = $("#btn-now");
-	btn.prop("value", ++this.noOfWrites);
-	btn.toggleClass("btn-default highlight-write");
+    this.countWrite = function () {
+        var btn = $("#btn-now");
+        btn.prop("value", ++this.noOfWrites);
+        btn.toggleClass("btn-default highlight-write");
     };
 
     /**
      * Increments the compare operation counter and updates the counter
      */
-    this.countCompare = function() {
-	var btn = $("#btn-noc");
-	btn.prop("value", ++this.noOfCompares);
-	btn.toggleClass("btn-default highlight-write");
+    this.countCompare = function () {
+        var btn = $("#btn-noc");
+        btn.prop("value", ++this.noOfCompares);
+        btn.toggleClass("btn-default highlight-write");
     };
 
     /**
      * Increments the operation counter and updates the counter
      */
-    this.countOps = function() {
-	var btn = $("#btn-noo");
-	btn.prop("value", ++this.noOfOps);
-	btn.toggleClass("btn-default highlight-write");
+    this.countOps = function () {
+        var btn = $("#btn-noo");
+        btn.prop("value", ++this.noOfOps);
+        btn.toggleClass("btn-default highlight-write");
     };
 }

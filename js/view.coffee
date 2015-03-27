@@ -4,17 +4,17 @@ class Player
 
   reset: ->
     console.log('reset')
-    @setControls([0,0,1,1,1])
+    @setControls([0, 0, 1, 1, 1])
 
   stepback: ->
     console.log('step back')
 
     # check for prev step
     if ($('#step_' + (@curstep - 1)).length)
-      @setControls([1,1,1,1,1])
+      @setControls([1, 1, 1, 1, 1])
       @curstep--
     else
-      @setControls([0,0,1,1,1])
+      @setControls([0, 0, 1, 1, 1])
 
   play: ->
 
@@ -24,17 +24,16 @@ class Player
     $('#step_' + @curstep).addClass('highlight')
 
 
-
     # check for next step
     if ($('#step_' + (@curstep + 1)).length)
-      @setControls([1,1,1,1,1])
+      @setControls([1, 1, 1, 1, 1])
       @curstep++
     else
-      @setControls([1,1,0,0,0])
+      @setControls([1, 1, 0, 0, 0])
 
   finish: ->
     console.log('finish')
-    @setControls([1,1,0,0,0])
+    @setControls([1, 1, 0, 0, 0])
 
   setControls: (settings) ->
     buttons = [$('#btn-reset'), $('#btn-stepback'), $('#btn-play'), $('#btn-step'), $('#btn-finish')]
@@ -44,7 +43,8 @@ class Player
 
 $ ->
   player = new Player()
-  player.setControls([0,0,1,1,1]) # reset controls
+  player.setControls([0, 0, 1, 1, 1]) # reset controls
+  tree = new Tree()
   $('.node:first').addClass('highlight') # set cursor to first node
 
   $('#btn-reset').click -> player.reset()

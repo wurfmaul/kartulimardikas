@@ -9,9 +9,10 @@
  * @param $sectionCount int Total number of sections.
  * @return array
  */
-function sections($sectionNum, $sectionCount) {
+function sections($sectionNum, $sectionCount)
+{
     $section = array_fill(0, $sectionCount, false);
-    for ($i = $sectionCount; $sectionNum > 0 && $i >= 0; $i --) {
+    for ($i = $sectionCount; $sectionNum > 0 && $i >= 0; $i--) {
         $code = 2 << ($i - 1);
         if ($sectionNum >= $code) {
             $section[$i] = true;

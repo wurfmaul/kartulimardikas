@@ -11,9 +11,9 @@ SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT = @@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS = @@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION = @@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8 */;
 
 --
@@ -27,19 +27,30 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE IF NOT EXISTS `algorithm` (
-  `aid` int(8) NOT NULL AUTO_INCREMENT COMMENT 'algorithm id',
-  `uid` int(6) NOT NULL COMMENT 'user id',
-  `name` varchar(64) COLLATE utf8_bin DEFAULT NULL,
-  `description` varchar(1024) COLLATE utf8_bin DEFAULT NULL,
-  `long_description` varchar(4096) COLLATE utf8_bin DEFAULT NULL,
-  `variables` blob COMMENT 'variable information in json format',
-  `tree` longblob COMMENT 'script information in json format',
-  `source_html` longblob COMMENT 'base64 hash of the scripts html',
-  `creation` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'timestamp of creation',
-  `lastedit` timestamp NULL DEFAULT NULL COMMENT 'timestamp of last modification',
+  `aid`              INT(8)    NOT NULL  AUTO_INCREMENT
+  COMMENT 'algorithm id',
+  `uid`              INT(6)    NOT NULL
+  COMMENT 'user id',
+  `name`             VARCHAR(64)
+                     COLLATE utf8_bin    DEFAULT NULL,
+  `description`      VARCHAR(1024)
+                     COLLATE utf8_bin    DEFAULT NULL,
+  `long_description` VARCHAR(4096)
+                     COLLATE utf8_bin    DEFAULT NULL,
+  `variables`        BLOB COMMENT 'variable information in json format',
+  `tree`             LONGBLOB COMMENT 'script information in json format',
+  `source_html`      LONGBLOB COMMENT 'base64 hash of the scripts html',
+  `creation`         TIMESTAMP NOT NULL  DEFAULT CURRENT_TIMESTAMP
+  COMMENT 'timestamp of creation',
+  `lastedit`         TIMESTAMP NULL      DEFAULT NULL
+  COMMENT 'timestamp of last modification',
   PRIMARY KEY (`aid`),
   KEY `uid` (`uid`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
+)
+  ENGINE = InnoDB
+  DEFAULT CHARSET = utf8
+  COLLATE = utf8_bin
+  AUTO_INCREMENT = 1;
 
 -- --------------------------------------------------------
 
@@ -48,17 +59,27 @@ CREATE TABLE IF NOT EXISTS `algorithm` (
 --
 
 CREATE TABLE IF NOT EXISTS `user` (
-  `uid` int(6) NOT NULL AUTO_INCREMENT COMMENT 'user id',
-  `username` varchar(64) COLLATE utf8_bin NOT NULL,
-  `email` varchar(128) COLLATE utf8_bin NOT NULL,
-  `password` varchar(255) COLLATE utf8_bin NOT NULL,
-  `registration` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'timestamp of registration',
-  `lastsignin` timestamp NULL DEFAULT NULL COMMENT 'timestamp of latest signin',
+  `uid`          INT(6)           NOT NULL AUTO_INCREMENT
+  COMMENT 'user id',
+  `username`     VARCHAR(64)
+                 COLLATE utf8_bin NOT NULL,
+  `email`        VARCHAR(128)
+                 COLLATE utf8_bin NOT NULL,
+  `password`     VARCHAR(255)
+                 COLLATE utf8_bin NOT NULL,
+  `registration` TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP
+  COMMENT 'timestamp of registration',
+  `lastsignin`   TIMESTAMP        NULL     DEFAULT NULL
+  COMMENT 'timestamp of latest signin',
   PRIMARY KEY (`uid`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
+)
+  ENGINE = InnoDB
+  DEFAULT CHARSET = utf8
+  COLLATE = utf8_bin
+  AUTO_INCREMENT = 1;
 
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40101 SET CHARACTER_SET_CLIENT = @OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS = @OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION = @OLD_COLLATION_CONNECTION */;

@@ -181,16 +181,18 @@ class EditManager
         }
     }
 
-    private function _processScript()
+    private function _checkArraySize(&$size)
     {
-        if (!isset($_POST['tree']))
-            die("Post parameter 'tree' not set properly!");
-
-        $this->_model->updateAlgorithmScript($this->_aid, json_encode($_POST['tree']));
-        $this->_response['success'] = $this->_l10n['saved_to_db'];
+        if (ARRAY_MIN_SIZE > $size || $size > ARRAY_MAX_SIZE) {
+            $this->_response['error-size'] = sprintf($this->_l10n['size_out_of_bounds'], ARRAY_MIN_SIZE, ARRAY_MAX_SIZE) . "<br />";
+            unset ($size); // FIXME does not work out of the function!
+        } else {
+            $this->_response['size'] = $size;
+        }
     }
 
-    private function _removeVar() {
+    private function _removeVar()
+    {
         if (!isset($_POST['vid']))
             die("Post parameter 'vid' not set properly!");
 
@@ -211,14 +213,13 @@ class EditManager
         $this->_response['success'] = $this->_l10n['saved_to_db'];
     }
 
-    private function _checkArraySize(&$size)
+    private function _processScript()
     {
-        if (ARRAY_MIN_SIZE > $size || $size > ARRAY_MAX_SIZE) {
-            $this->_response['error-size'] = sprintf($this->_l10n['size_out_of_bounds'], ARRAY_MIN_SIZE, ARRAY_MAX_SIZE) . "<br />";
-            unset ($size); // FIXME does not work out of the function!
-        } else {
-            $this->_response['size'] = $size;
-        }
+        if (!isset($_POST['tree']))
+            die("Post parameter 'tree' not set properly!");
+
+        $this->_model->updateAlgorithmScript($this->_aid, json_encode($_POST['tree']));
+        $this->_response['success'] = $this->_l10n['saved_to_db'];
     }
 }
 

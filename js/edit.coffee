@@ -55,10 +55,10 @@ class Api
             $('.var-value-input.var-' + vid).val(name)
           else
             $('.var-value').append(
-              $('<option>') # append another option
-                .addClass('var-' + vid) # give it a class
-                .val(vid) # give it a value
-                .html(name) # give it a name
+              $('<option>')# append another option
+              .addClass('var-' + vid)# give it a class
+              .val(vid)# give it a value
+              .html(name) # give it a name
             )
       error: (jqXHR, textStatus, errorThrown) => # if request failed
         @_printError("Request Error: " + errorThrown)
@@ -165,20 +165,20 @@ class StepForm
     # TODO: undo function
     node.hide('slow', =>
       node.remove()
-      Api.editScript(Tree.parseRoot())
+      Api.editScript(Tree.toJSON())
     )
 
   updateActionHandlers: (parent) ->
     # update action handlers
     parent.find('input, select').off('blur').blur =>
-      Api.editScript(Tree.parseRoot())
+      Api.editScript(Tree.toJSON())
     parent.find('.node-remove').off('click').click (event) =>
       @removeNode($(event.currentTarget).parents('.node:first'))
 
   updateSortable: ->
     # FIXME: find combined solution
     update = () =>
-      Api.editScript(Tree.parseRoot())
+      Api.editScript(Tree.toJSON())
     sortParams =
       connectWith: ".sortable"
       placeholder: "sortable-highlight"
@@ -198,7 +198,7 @@ $ ->
 
   # VARIABLE SECTION
   varForm = new VariableForm()
-  $("#btnAddVar").click -> varForm.addRow()
+  $('#btnAddVar').click -> varForm.addRow()
   $('.btn-var-cancel').click -> varForm.performCancel($(this).parents('.varRow').data('vid'))
   $('.btn-var-check').click -> varForm.performCheck($(this).parents('.varRow').data('vid'))
   $('.btn-var-edit').click -> varForm.performEdit($(this).parents('.varRow').data('vid'))
@@ -219,4 +219,4 @@ $ ->
   stepForm.updateSortable()
   $('#node-btn-group').children('button').click ->
     stepForm.addNode($(this).data('node'))
-    Api.editScript(Tree.parseRoot())
+    Api.editScript(Tree.toJSON())
