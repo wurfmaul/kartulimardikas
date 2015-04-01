@@ -162,29 +162,34 @@ $section = sections($sectionNum, 6);
                 <div id="memory" class=" panel-collapse collapse <?= $section[4] ? 'in' : 'closed' ?>">
                     <div class="panel-body">
                         <table class="table table-hover table-bordered">
-                            <tr>
-                                <th style="border-top: none;"><?= $l10n['variable'] ?></th>
-                                <th style="border-top: none;"><?= $l10n['contents'] ?></th>
-                            </tr>
-                            <?php foreach ($vars as $index => $var): ?>
+                            <thead>
                                 <tr>
-                                    <td><code><?= $var->name ?></code></td>
+                                    <th style="border-top: none;"><?= $l10n['variable'] ?></th>
+                                    <th style="border-top: none;"><?= $l10n['contents'] ?></th>
+                                </tr>
+                            </thead>
+                            <tbody id="variables">
+                            <?php foreach ($vars as $vid => $var): ?>
+                                <tr id="var-<?= $vid ?>" data-vid="<?= $vid ?>">
+                                    <td>
+                                        <code class="name"><?= $var->name ?></code>
+                                    </td>
                                     <td>
                                         <div class="btn-group">
                                             <?php if (substr($var->init, 0, 6) == "array-"): // deal with "array-{?,custom,random}" ?>
                                                 <?php foreach (explode(',', $var->value) as $offset => $value): ?>
-                                                    <input type="button" class="btn btn-default" disabled="disabled"
-                                                           value="<?= $value ?>"
-                                                           id="memory-<?= $var->name ?><?= $offset ?>"/>
+                                                    <input type="button" class="btn btn-default offset_<?= $offset ?>"
+                                                           disabled="disabled" value="<?= $value ?>"/>
                                                 <?php endforeach ?>
                                             <?php else: // deal with "elem-{?,value}" ?>
-                                                <input type="button" class="btn btn-default" disabled="disabled"
-                                                       value="<?= $var->value ?>" id="memory-<?= $var->name ?>"/>
+                                                <input type="button" class="btn btn-default value" disabled="disabled"
+                                                       value="<?= $var->value ?>"/>
                                             <?php endif ?>
                                         </div>
                                     </td>
                                 </tr>
                             <?php endforeach ?>
+                            </tbody>
                         </table>
                     </div>
                 </div>

@@ -5,7 +5,7 @@
     display: none;
   }
   .node {
-    &.highlight > table > tbody > tr > td {
+    &.cursor > table > tbody > tr > td {
       &.node-box {
         font-weight: bold;
         background-color: #286090 !important;
@@ -23,16 +23,17 @@
       }
     }
   }
+}
 
-  .highlight-write {
-    color: #fff;
-    background-color: #5cb85c;
-    border-color: #4cae4c;
-  }
+.highlight-write {
+  color: #fff;
+  font-weight: bold;
+  background-color: #5cb85c !important;
+  border-color: #4cae4c !important;
+}
 
-  .highlight-compare {
-    color: #fff;
-    background-color: #f0ad4e;
-    border-color: #eea236;
-  }
+.highlight-compare {
+  color: #fff;
+  background-color: #f0ad4e;
+  border-color: #eea236;
 }

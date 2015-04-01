@@ -33,10 +33,11 @@ class AssignNode extends Node
 
     public function printHtml(&$params)
     {
-        $id = isset($params['step']) ? 'step_' . $params['step']++ : 'assign-node';
+        $nid = isset($params['node']) ? $params['node']++ : -1;
+        $id = isset($params['node']) ? "node_$nid" : 'assign-node';
         ?>
         <!-- ASSIGN NODE -->
-        <li id="<?= $id ?>" class="node assign-node" data-node-type="assign">
+        <li id="<?= $id ?>" class="node assign-node" data-node-type="assign" data-node-id="<?= $nid ?>">
             <table>
                 <tr>
                     <td class="handle node-box top left">&nbsp;</td>
@@ -118,11 +119,12 @@ class CompareNode extends Node
 
     public function printHtml(&$params)
     {
-        $id = isset($params['step']) ? 'step_' . $params['step']++ : 'compare-node';
+        $nid = isset($params['node']) ? $params['node']++ : -1;
+        $id = isset($params['node']) ? "node_$nid" : 'compare-node';
         $selected_op = $this->isPrototype ? 'lt' : $this->op;
         ?>
         <!-- COMPARE NODE -->
-        <li id="<?= $id ?>" class="node compare-node" data-node-type="compare">
+        <li id="<?= $id ?>" class="node compare-node" data-node-type="compare" data-node-id="<?= $nid ?>">
             <table>
                 <tr>
                     <td class="handle node-box top left">&nbsp;</td>
@@ -197,10 +199,11 @@ class ConstantNode extends Node
 
     public function printHtml(&$params)
     {
-        $id = isset($params['step']) ? 'step_' . $params['step']++ : 'constant-node';
+        $nid = isset($params['node']) ? $params['node']++ : -1;
+        $id = isset($params['node']) ? "node_$nid" : 'constant-node';
         ?>
         <!-- CONSTANT NODE -->
-        <li id="<?= $id ?>" class="node constant-node" data-node-type="constant">
+        <li id="<?= $id ?>" class="node constant-node" data-node-type="constant" data-node-id="<?= $nid ?>">
             <table>
                 <tr>
                     <td class="handle node-box top left bottom">&nbsp;</td>
@@ -271,10 +274,11 @@ class IfNode extends Node
 
     public function printHtml(&$params)
     {
-        $id = isset($params['step']) ? 'step_' . $params['step']++ : 'if-node';
+        $nid = isset($params['node']) ? $params['node']++ : -1;
+        $id = isset($params['node']) ? "node_$nid" : 'if-node';
         ?>
         <!-- IF NODE -->
-        <li id="<?= $id ?>" class="node if-node" data-node-type="if">
+        <li id="<?= $id ?>" class="node if-node" data-node-type="if" data-node-id="<?= $nid ?>">
             <table>
                 <tr>
                     <td class="handle node-box top left">&nbsp;</td>
@@ -354,13 +358,14 @@ class VarNode extends Node
 
     public function printHtml(&$params)
     {
-        $id = isset($params['step']) ? 'step_' . $params['step']++ : 'var-node';
+        $nid = isset($params['node']) ? $params['node']++ : -1;
+        $id = isset($params['node']) ? "node_$nid" : 'var-node';
         $vars = !is_null($params) && isset($params['vars']) ? $params['vars'] : array();
         unset ($vars['prototype']);
         $selected = isset($vars[$this->vid]) ? $vars[$this->vid]->name : '';
         ?>
         <!-- VAR NODE -->
-        <li id="<?= $id ?>" class="node var-node" data-node-type="var">
+        <li id="<?= $id ?>" class="node var-node" data-node-type="var" data-node-id="<?= $nid ?>">
             <table>
                 <tr>
                     <td class="handle node-box top left bottom">&nbsp;</td>
@@ -425,10 +430,11 @@ class WhileNode extends Node
 
     public function printHtml(&$params)
     {
-        $id = isset($params['step']) ? 'step_' . $params['step']++ : 'while-node';
+        $nid = isset($params['node']) ? $params['node']++ : -1;
+        $id = isset($params['node']) ? "node_$nid" : 'while-node';
         ?>
         <!-- WHILE NODE -->
-        <li id="<?= $id ?>" class="node while-node" data-node-type="while">
+        <li id="<?= $id ?>" class="node while-node" data-node-type="while" data-node-id="<?= $nid ?>">
             <table>
                 <tr>
                     <td class="handle node-box top left">&nbsp;</td>
@@ -470,7 +476,7 @@ class WhileNode extends Node
 /**
  * Superclass of all Nodes.
  *
-*@author Wolfgang Küllinger
+ * @author Wolfgang Küllinger
  */
 abstract class Node
 {
@@ -510,14 +516,14 @@ abstract class Node
     /**
      * Prints HTML code which represents the node.
      *
-*@param $params array
+     * @param $params array
      */
     public abstract function printHtml(&$params);
 
     /**
      * Print the HTML code for the nodes' prototypes.
      *
-*@param string $type The node type the prototype should be generated for.
+     * @param string $type The node type the prototype should be generated for.
      * @param array $params Optional parameters that are needed for the prototype.
      * @throws Exception If no node can be found for the specified type.
      */
@@ -644,7 +650,7 @@ class Tree
 
     public function printHtml($params = [])
     {
-        $params['step'] = 0;
+        $params['node'] = 0;
         foreach ($this->tree as $node) {
             /** @var $node Node */
             $node->printHtml($params);

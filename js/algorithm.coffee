@@ -1,24 +1,44 @@
 window.SCRIPTSITE = $("#insertStepsHere") # Specifies the site, where variables are to place.
 
 class Node
+
+  ###
+  # Must be overridden by all subclasses.
+  ###
+  execute: (player) ->
+    throw new Exception('Node must override execute() method!')
+
+  ###
+  # Must be overridden by all subclasses.
+  ###
+  toJSON: ->
+    throw new Exception('Node must override toJSON() method!')
+
+  ###
+  # Returns node's first sub-node of class _class.
+  ###
+  @findSubNode: (node, _class) ->
+    node.find(_class + ':first')
+
+  ###
+  # Delegates the parse function to the right subclass.
+  #
+  # Must be overridden by all subclasses.
+  ###
   @parse: (node) ->
     # extract the type
     type = node.data('node-type')
 
     # call proper parsing method
     switch type
-      when 'assign' then response = AssignNode.parse(node)
-      when 'compare' then response = CompareNode.parse(node)
-      when 'constant' then response = ConstantNode.parse(node)
-      when 'if' then response = IfNode.parse(node)
-      when 'var' then response = VarNode.parse(node)
-      when 'while' then response = WhileNode.parse(node)
+      when 'assign' then AssignNode.parse(node)
+      when 'compare' then CompareNode.parse(node)
+      when 'constant' then ConstantNode.parse(node)
+      when 'if' then IfNode.parse(node)
+      when 'var' then VarNode.parse(node)
+      when 'while' then WhileNode.parse(node)
       else
-        console.error "Parse error: Unknown type: '#{type}'"
-    response
-
-  @findSubNode: (node, _class) ->
-    node.find(_class + ':first')
+        throw new Exception("Parse error: Unknown type: '#{type}'")
 
   @toJSON: (nodes) ->
     json = []
@@ -27,12 +47,28 @@ class Node
     json
 
 class AssignNode extends Node
-  constructor: (@from, @to) ->
+  constructor: (@id, @from, @to) ->
 
-  @parse: (node) =>
-    from = Tree.parseBody(@findSubNode(node, '.assign-from'))
-    to = Tree.parseBody(@findSubNode(node, '.assign-to'))
-    new @(from, to)
+  check: ->
+    @from.length == 1 &&
+      (@from[0] instanceof VarNode || @from[0] instanceof ConstantNode) &&
+      @to.length == 1 &&
+      @to[0] instanceof VarNode
+
+  execute: (player) ->
+    toNode = @to[0]
+    fromNode = @from[0]
+    # get new value
+    value = null
+    if (fromNode instanceof VarNode)
+      vid = fromNode.variable
+      value = player.memory.get(vid)
+    else
+      throw new Exception('constants not implemented yet')
+    #set new value
+    player.memory.set(toNode.variable, value)
+    # return next node-id
+    toNode.id + 1
 
   toJSON: ->
     {
@@ -41,14 +77,17 @@ class AssignNode extends Node
     to: Node.toJSON(@to)
     }
 
-class CompareNode extends Node
-  constructor: (@left, @right, @operator) ->
-
   @parse: (node) =>
-    left = Tree.parseBody(@findSubNode(node, '.compare-left'))
-    right = Tree.parseBody(@findSubNode(node, '.compare-right'))
-    operator = @findSubNode(node, '.compare-operation').val()
-    new @(left, right, operator)
+    id = node.data('node-id')
+    from = Tree.parseBody(@findSubNode(node, '.assign-from'))
+    to = Tree.parseBody(@findSubNode(node, '.assign-to'))
+    new @(id, from, to)
+
+class CompareNode extends Node
+  constructor: (@id, @left, @right, @operator) ->
+
+  execute: (player) ->
+    console.log('execute cond')
 
   toJSON: ->
     {
@@ -58,12 +97,15 @@ class CompareNode extends Node
     operator: @operator
     }
 
-class ConstantNode extends Node
-  constructor: (@value) ->
-
   @parse: (node) =>
-    value = @findSubNode(node, '.constant-value').val()
-    new @(value)
+    id = node.data('node-id')
+    left = Tree.parseBody(@findSubNode(node, '.compare-left'))
+    right = Tree.parseBody(@findSubNode(node, '.compare-right'))
+    operator = @findSubNode(node, '.compare-operation').val()
+    new @(id, left, right, operator)
+
+class ConstantNode extends Node
+  constructor: (@id, @value) ->
 
   toJSON: ->
     {
@@ -71,17 +113,18 @@ class ConstantNode extends Node
     value: @value
     }
 
-class IfNode extends Node
-  constructor: (@condition, @ifBody, @elseBody) ->
-
   @parse: (node) =>
-    condition = Tree.parseBody(@findSubNode(node, '.if-condition'))
-    ifBody = Tree.parseBody(@findSubNode(node, '.if-body'))
-    elseBody = Tree.parseBody(@findSubNode(node, '.if-else'))
-    new @(condition, ifBody, elseBody)
+    id = node.data('node-id')
+    value = @findSubNode(node, '.constant-value').val()
+    new @(id, value)
+
+class IfNode extends Node
+  constructor: (@id, @condition, @ifBody, @elseBody) ->
+
+  execute: (player) ->
+    console.log(@condition)
 
   toJSON: ->
-    console.log(@ifBody)
     {
     node: 'if'
     condition: Node.toJSON(@condition)
@@ -89,12 +132,15 @@ class IfNode extends Node
     elseBody: Node.toJSON(@elseBody)
     }
 
-class VarNode extends Node
-  constructor: (@variable) ->
-
   @parse: (node) =>
-    variable = node.find('.var-value > :selected').val()
-    new @(variable)
+    id = node.data('node-id')
+    condition = Tree.parseBody(@findSubNode(node, '.if-condition'))
+    ifBody = Tree.parseBody(@findSubNode(node, '.if-body'))
+    elseBody = Tree.parseBody(@findSubNode(node, '.if-else'))
+    new @(id, condition, ifBody, elseBody)
+
+class VarNode extends Node
+  constructor: (@id, @variable) ->
 
   toJSON: ->
     {
@@ -102,13 +148,13 @@ class VarNode extends Node
     vid: @variable
     }
 
-class WhileNode extends Node
-  constructor: (@condition, @body) ->
-
   @parse: (node) =>
-    condition = Tree.parseBody(@findSubNode(node, '.while-condition'))
-    body = Tree.parseBody(@findSubNode(node, '.while-body'))
-    new @(condition, body)
+    id = node.data('node-id')
+    variable = node.find('.var-value > :selected').val()
+    new @(id, variable)
+
+class WhileNode extends Node
+  constructor: (@id, @condition, @body) ->
 
   toJSON: ->
     {
@@ -117,24 +163,28 @@ class WhileNode extends Node
     body: Node.toJSON(@body)
     }
 
+  @parse: (node) =>
+    id = node.data('node-id')
+    condition = Tree.parseBody(@findSubNode(node, '.while-condition'))
+    body = Tree.parseBody(@findSubNode(node, '.while-body'))
+    new @(id, condition, body)
+
 class window.Tree
   constructor: ->
     @tree = Tree.parseRoot()
+
+  executeStep: (player) ->
+    console.log(@)
+    console.log(player)
+#    @prevStep = @nextStep
+#    @nextStep = @tree[0]
+#    @nextStep.execute(player)
 
   toJSON: ->
     json = []
     for node, i in @tree
       json[i] = node.toJSON()
     json
-
-  @toJSON: ->
-    tree = new @
-    tree.toJSON()
-
-  @parseRoot: =>
-    # if the main body is empty, return empty string, parse tree otherwise
-    if ($(SCRIPTSITE).filter(':empty').length) then ""
-    else @parseBody(SCRIPTSITE)
 
   @parseBody: (node) =>
     # prepare return value
@@ -144,3 +194,12 @@ class window.Tree
       tree[index] = Node.parse($(element))
     )
     tree
+
+  @parseRoot: =>
+    # if the main body is empty, return empty string, parse tree otherwise
+    if ($(SCRIPTSITE).filter(':empty').length) then ""
+    else @parseBody(SCRIPTSITE)
+
+  @toJSON: ->
+    tree = new @
+    tree.toJSON()

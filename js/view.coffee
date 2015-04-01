@@ -1,38 +1,38 @@
 class Player
-  constructor: ->
-    @curstep = 0
+  @curstep
+
+  constructor: (@tree, @memory) ->
+    @reset()
 
   reset: ->
-    console.log('reset')
+    @curstep = 0
+    @setCursor(0)
     @setControls([0, 0, 1, 1, 1])
 
   stepback: ->
-    console.log('step back')
-
     # check for prev step
-    if ($('#step_' + (@curstep - 1)).length)
+    if ($('#node_' + (@curstep - 1)).length)
       @setControls([1, 1, 1, 1, 1])
       @curstep--
+      @setCursor(@curstep)
     else
       @setControls([0, 0, 1, 1, 1])
 
   play: ->
+    console.log(@tree)
 
   step: ->
-    console.log('step ' + @curstep)
-    $('.highlight').removeClass('highlight')
-    $('#step_' + @curstep).addClass('highlight')
-
-
-    # check for next step
-    if ($('#step_' + (@curstep + 1)).length)
+    # execute current step
+    @nextstep = @tree.executeStep(@)
+    # prepare the next step
+    if ($('#node_' + @nextstep).length)
       @setControls([1, 1, 1, 1, 1])
-      @curstep++
+      @curstep = @nextstep
+      @setCursor(@curstep)
     else
       @setControls([1, 1, 0, 0, 0])
 
   finish: ->
-    console.log('finish')
     @setControls([1, 1, 0, 0, 0])
 
   setControls: (settings) ->
@@ -41,11 +41,32 @@ class Player
       if (settings[i] is 0) then buttons[i].attr('disabled', 'disabled')
       else buttons[i].removeAttr('disabled')
 
+  setCursor: (node) ->
+    $('.cursor').removeClass('cursor')
+    $('#node_' + node).addClass('cursor')
+
+class Memory
+  constructor: (@table) ->
+    @memory = []
+    @table.children().each((index, element) =>
+      vid = $(element).data('vid')
+      value = $(element).find('.value').val()
+      @memory[vid] = value
+    )
+
+  get: (vid) =>
+    @memory[vid]
+
+  set: (vid, value) =>
+    @memory[vid] = value
+    @table.children('#var-' + vid).find('.value')
+    .val(value)# set new value
+    .addClass('highlight-write') # mark as edited
+
 $ ->
-  player = new Player()
-  player.setControls([0, 0, 1, 1, 1]) # reset controls
   tree = new Tree()
-  $('.node:first').addClass('highlight') # set cursor to first node
+  memory = new Memory($('#variables'))
+  player = new Player(tree, memory)
 
   $('#btn-reset').click -> player.reset()
   $('#btn-stepback').click -> player.stepback()
