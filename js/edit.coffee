@@ -144,13 +144,11 @@ class VariableForm
     Api.removeVariable(vid)
 
 class StepForm
-  addNode: (nodeId) ->
+  addNode: (prototypeId) ->
     # create new node from prototype
-    node = $('#' + nodeId)
+    node = $('#' + prototypeId)
       .clone(true, true)
-      .removeAttr('id')
       .appendTo(SCRIPTSITE)
-
     # remove sortable completely
     $('.sortable').each(->
       if ($(this).sortable("instance")?)

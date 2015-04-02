@@ -232,26 +232,27 @@ $section = sections($sectionNum, 3);
                 </div>
                 <div id="stepPanel" class="panel-collapse collapse <?= $section[2] ? 'in' : 'closed' ?>">
                     <div class="panel-body algorithm" style="text-align: center">
-                        <ul id="insertStepsHere" class="sortable"><?php $tree->printHtml(['vars' => $vars]) ?></ul>
+                        <ul id="insertStepsHere" class="sortable"
+                            data-node-id="0"><?php $tree->printHtml(['vars' => $vars]) ?></ul>
 
                         <div id="node-btn-group" class="btn-group btn-group-lg" role="group" aria-label="Create a Node">
                             <button id="btn-add-assign" type="button" class="btn btn-default btn-lg"
-                                    data-node="assign-node">Assign
+                                    data-node="node_assign">Assign
                             </button>
                             <button id="btn-add-compare" type="button" class="btn btn-default btn-lg"
-                                    data-node="compare-node">Compare
+                                    data-node="node_compare">Compare
                             </button>
                             <button id="btn-add-constant" type="button" class="btn btn-default btn-lg"
-                                    data-node="constant-node">Constant
+                                    data-node="node_constant">Constant
                             </button>
-                            <button id="btn-add-if" type="button" class="btn btn-default btn-lg" data-node="if-node">
+                            <button id="btn-add-if" type="button" class="btn btn-default btn-lg" data-node="node_if">
                                 If
                             </button>
-                            <button id="btn-add-var" type="button" class="btn btn-default btn-lg" data-node="var-node">
+                            <button id="btn-add-var" type="button" class="btn btn-default btn-lg" data-node="node_var">
                                 Var
                             </button>
                             <button id="btn-add-while" type="button" class="btn btn-default btn-lg"
-                                    data-node="while-node">While
+                                    data-node="node_while">While
                             </button>
                         </div>
 
