@@ -612,9 +612,8 @@ abstract class Node
 
     /**
      * Prints HTML code which represents the node.
-
      *
-*@param $params array
+     * @param $params array
      */
     public abstract function printHtml(&$params);
 
@@ -656,6 +655,11 @@ abstract class Node
         $node->printHtml($params);
     }
 
+    public function getNodeId()
+    {
+        return $this->nodeId;
+    }
+
     /**
      * Returns the source code representation of the node.
      *
@@ -689,6 +693,11 @@ class Tree
         $this->root = $rootNode;
     }
 
+    public function getRoot()
+    {
+        return $this->root->getNodeId();
+    }
+
     public function printHtml($params)
     {
         $this->root->printHtml($params);
@@ -701,7 +710,7 @@ class Tree
             $params['indent'] = 0;
         }
         // start recursion
-        print($this->root->getSource($params));
+        print(trim($this->root->getSource($params)));
     }
 }
 

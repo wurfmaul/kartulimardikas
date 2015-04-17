@@ -1,4 +1,4 @@
-window.SCRIPTSITE = $("#insertStepsHere") # Specifies the site, where variables are to place.
+window.SCRIPTSITE = $(".insertStepsHere") # Specifies the site, where variables are to place.
 
 class Node
 
@@ -7,6 +7,9 @@ class Node
   ###
   execute: (player) ->
     throw new Exception('Node must override execute() method!')
+
+  mark: (player) ->
+    throw new Exception('Node must override mark() method!')
 
   ###
   # Must be overridden by all subclasses.
@@ -43,26 +46,24 @@ class Node
 class AssignNode extends Node
   constructor: (@nid, @from, @to) ->
 
-  check: ->
-    @from.length == 1 &&
-      (@from[0] instanceof VarNode || @from[0] instanceof ConstantNode) &&
-      @to.length == 1 &&
-      @to[0] instanceof VarNode
-
-  execute: (player) ->
-    toNode = @to[0]
-    fromNode = @from[0]
+  execute: (player, node) ->
+    toNode = player.tree.extract(@to)
+    fromNode = player.tree.extract(@from)
     # get new value
-    value = null
     if (fromNode instanceof VarNode)
       vid = fromNode.vid
       value = player.memory.get(vid)
     else
-      throw new Exception('constants not implemented yet')
-    #set new value
+      value = fromNode.value
+    # set new value
     player.memory.set(toNode.vid, value)
-    # return next node-id
-    toNode.nid + 1
+    player.stats.incWriteOps()
+    # return null to mark as done
+    null
+
+  mark: (player) ->
+    player.setCursor(@nid)
+    @nid
 
   toJSON: ->
     {
@@ -85,8 +86,25 @@ class AssignNode extends Node
 
 class BlockNode extends Node
   constructor: (@nid, @nodes) ->
+    @curNode = 0
 
-  execute: (player) ->
+  execute: (player, node) ->
+    nextNode = null
+    # find matching sub-node
+    for n,i in @nodes
+      if (node <= n)
+        nextNode = player.tree.extract(n).execute(player, node)
+        break
+    # compute next node
+    if nextNode? then nextNode
+    else @nodes[i + 1] # if curNode is done, take next from nodes
+
+  mark: (player) ->
+    first = player.tree.extract(@nodes[0])
+    first?.mark(player)
+
+  size: ->
+    @nodes.length
 
   toJSON: ->
     {
@@ -112,7 +130,35 @@ class BlockNode extends Node
 class CompareNode extends Node
   constructor: (@nid, @left, @right, @operator) ->
 
-  execute: (player) ->
+  check: (tree) ->
+    # check for right dimensions
+    return false if (tree[@left].size() != 1 or tree[@right].size() != 1)
+    # extract children
+    left = tree.extract(@left)
+    right = tree.extract(@right)
+    # check for right classes
+    (left instanceof VarNode or left instanceof ConstantNode) and
+      (right instanceof VarNode or right instanceof ConstantNode)
+
+  execute: (player, node) ->
+    left = player.tree.extract(@left)
+    right = player.tree.extract(@right)
+    leftVal = left.execute(player, node)
+    rightVal = right.execute(player, node)
+    player.stats.incCompareOps()
+    switch @operator
+      when 'le' then leftVal <= rightVal
+      when 'lt' then leftVal < rightVal
+      when 'eq' then leftVal == rightVal
+      when 'gt' then leftVal > rightVal
+      when 'ge' then leftVal >= rightVal
+      when 'ne' then leftVal != rightVal
+      else
+        throw new Exception("Unknown operator: '#{@operator}'")
+
+  mark: (player) ->
+    player.setCursor(@nid)
+    @nid
 
   toJSON: ->
     {
@@ -139,6 +185,9 @@ class CompareNode extends Node
 class ConstantNode extends Node
   constructor: (@nid, @value) ->
 
+  execute: (player, node) ->
+    parseInt(@value)
+
   toJSON: ->
     {
     nid: @nid
@@ -154,7 +203,19 @@ class ConstantNode extends Node
 class IfNode extends Node
   constructor: (@nid, @condition, @ifBody, @elseBody) ->
 
-  execute: (player) ->
+  execute: (player, node) ->
+    # find matching sub-node
+    if (node <= @condition)
+      if player.tree.extract(@condition).execute(player, node) then @ifBody
+      else @elseBody
+    else if (node <= @ifBody)
+      player.tree.extract(@ifBody).execute(player, node)
+    else
+      player.tree.extract(@elseBody).execute(player, node)
+
+  mark: (player) ->
+    condition = player.tree.extract(@condition)
+    condition.mark(player)
 
   toJSON: ->
     {
@@ -182,6 +243,9 @@ class IfNode extends Node
 class VarNode extends Node
   constructor: (@nid, @vid) ->
 
+  execute: (player, node) ->
+    parseInt(player.memory.get(@vid))
+
   toJSON: ->
     {
     nid: @nid
@@ -197,7 +261,7 @@ class VarNode extends Node
 class WhileNode extends Node
   constructor: (@nid, @condition, @body) ->
 
-  toJSON: (tree) ->
+  toJSON: ->
     {
     nid: @nid
     node: 'while'
@@ -218,28 +282,27 @@ class WhileNode extends Node
 
 class window.Tree
   constructor: ->
-    @tree = Tree.parseRoot()
+    @reset()
 
-  executeStep: (player) ->
-    console.log(@)
-    console.log(player)
-#    @prevStep = @nextStep
-#    @nextStep = @tree[0]
-#    @nextStep.execute(player)
+  executeStep: (player, node) ->
+    @tree[@root].execute(player, node)
+
+  extract: (nid) ->
+    node = @tree[nid]
+    if (node instanceof BlockNode and node.size() == 1) then @tree[node.nodes[0]]
+    else node
+
+  reset: () ->
+    @tree = []
+    rootNode = BlockNode.parse(SCRIPTSITE, @tree)
+    @root = @tree.length
+    @tree.push rootNode
 
   toJSON: ->
     json = []
     for node, i in @tree
       json[i] = node.toJSON()
     json
-
-  @parseRoot: =>
-    # prepare return value
-    tree = []
-    root = BlockNode.parse(SCRIPTSITE, tree)
-    rootNid = tree.length
-    tree[rootNid] = root
-    tree
 
   @toJSON: ->
     new @().toJSON()

@@ -232,7 +232,7 @@ $section = sections($sectionNum, 3);
                 </div>
                 <div id="stepPanel" class="panel-collapse collapse <?= $section[2] ? 'in' : 'closed' ?>">
                     <div class="panel-body algorithm" style="text-align: center">
-                        <ul id="insertStepsHere" class="sortable"
+                        <ul class="insertStepsHere" class="sortable"
                             data-node-id="0"><?php $tree->printHtml(['vars' => $vars]) ?></ul>
 
                         <div id="node-btn-group" class="btn-group btn-group-lg" role="group" aria-label="Create a Node">

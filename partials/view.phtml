@@ -68,7 +68,7 @@ $section = sections($sectionNum, 6);
                             </div>
                             <div class="btn-group">
                                 <button type="button" class="btn btn-default" title="<?= $l10n['step_back'] ?>"
-                                        id="btn-stepback">
+                                        id="btn-back">
                                     <span class="glyphicon glyphicon-step-backward"></span>
                                 </button>
                             </div>
@@ -106,7 +106,8 @@ $section = sections($sectionNum, 6);
                 </div>
                 <div id="pseudocode" class="panel-collapse collapse <?= $section[1] ? 'in' : 'closed' ?>">
                     <div class="panel-body algorithm">
-                        <ul id="insertStepsHere"><?php $tree->printHtml(['vars' => $vars]) ?></ul>
+                        <ul id="node_<?= $tree->getRoot() ?>" class="insertStepsHere"
+                            data-node-id="<?= $tree->getRoot() ?>"><?php $tree->printHtml(['vars' => $vars]) ?></ul>
                     </div>
                 </div>
             </div>
@@ -163,10 +164,10 @@ $section = sections($sectionNum, 6);
                     <div class="panel-body">
                         <table class="table table-hover table-bordered">
                             <thead>
-                                <tr>
-                                    <th style="border-top: none;"><?= $l10n['variable'] ?></th>
-                                    <th style="border-top: none;"><?= $l10n['contents'] ?></th>
-                                </tr>
+                            <tr>
+                                <th style="border-top: none;"><?= $l10n['variable'] ?></th>
+                                <th style="border-top: none;"><?= $l10n['contents'] ?></th>
+                            </tr>
                             </thead>
                             <tbody id="variables">
                             <?php foreach ($vars as $vid => $var): ?>
