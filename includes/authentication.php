@@ -18,7 +18,7 @@ function secure_session_start()
     session_regenerate_id();
 }
 
-function signin($username, $password)
+function signIn($username, $password)
 {
     require_once BASEDIR . 'includes/dataModel.php';
     $model = new DataModel();
@@ -49,7 +49,7 @@ function signin($username, $password)
     return false;
 }
 
-function signout()
+function signOut()
 {
     $_SESSION = array();
     $oldCookie = session_get_cookie_params();
@@ -70,7 +70,7 @@ function isSignedIn()
 
         if ($result) {
             if (password_verify($result->password . $_SERVER['HTTP_USER_AGENT'], $token)) {
-                return true;
+                return $uid;
             } elseif (DEBUG_MODE) {
                 echo "DEBUG_MODE: Token is not valid any more!";
             }

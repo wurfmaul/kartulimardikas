@@ -1,12 +1,4 @@
-<?php
-if (!defined('BASEDIR')) die('You cannot call this script directly !')
-
-/**
- * FIXME: registration workflow
- * - check for valid email address ("wurfmaul" was accepted)
- * - if registration successful, log in automatically and goto index?
- */
-?>
+<?php if (!defined('BASEDIR')) die('You cannot call this script directly !') ?>
 <!-- HEADER -->
 <div class="page-header">
     <h1><?= $l10n['register'] ?>
@@ -22,19 +14,11 @@ if (!defined('BASEDIR')) die('You cannot call this script directly !')
                 <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
             </button>
             <strong><?= $l10n['error'] ?></strong>
-
             <div id="registerAlertText"></div>
         </div>
-        <div id="registerSuccess" class="alert alert-success alert-dismissible" style="display:none">
-            <button id="registerSuccessClose" type="button" class="close">
-                <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
-            </button>
-            <strong><?= $l10n['success'] ?></strong>
 
-            <div id="registerSuccessText"></div>
-        </div>
-
-        <form class="form-horizontal" role="form" method="post" name="register">
+        <form id="registerForm" class="form-horizontal" role="form" method="post" name="register"
+              action="<?= url([]) ?>">
             <div id="username-group" class="form-group">
                 <label for="in-username" class="control-label col-sm-3"><?= $l10n['username'] ?></label>
 
@@ -57,7 +41,7 @@ if (!defined('BASEDIR')) die('You cannot call this script directly !')
                 <label for="in-password1" class="control-label col-sm-3"><?= $l10n['password'] ?></label>
 
                 <div class="col-sm-9">
-                    <input type="password" class="form-control" id="in-password1" name="password1"
+                    <input type="password" class="form-control" id="in-password1" name="password"
                            placeholder="<?= $l10n['password'] ?>">
                 </div>
             </div>
@@ -69,7 +53,11 @@ if (!defined('BASEDIR')) die('You cannot call this script directly !')
                            placeholder="<?= $l10n['password_again'] ?>">
                 </div>
             </div>
-            <a href="#" id="registerBtn" class="btn btn-primary btn-lg"><?= $l10n['register'] ?></a>
+            <a href="javascript:void(0)" id="registerBtn" class="btn btn-primary btn-lg"
+               data-url="<?= url(['action' => 'index']) ?>">
+                <?= $l10n['register'] ?>
+            </a>
+            <input name="registerBtn" style="display: none;"/>
         </form>
     </div>
 </div>

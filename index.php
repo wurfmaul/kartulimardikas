@@ -15,23 +15,43 @@ $_action = isset($_GET['action']) ? $_GET['action'] : DEFAULT_PAGE;
 if (!file_exists(BASEDIR . "partials/$_action.phtml"))
     $_action = DEFAULT_PAGE;
 
-secure_session_start();
-
 // deal with authentication
-if (isset($_POST['signInBtn']) && isset($_POST['username']) && isset($_POST['password'])) {
-    // SIGN IN
+secure_session_start();
+// SIGN IN
+if ((isset($_POST['signInBtn']) || isset($_POST['registerBtn'])) &&
+    isset($_POST['username']) && isset($_POST['password'])
+) {
     $username = $_POST['username'];
     $password = $_POST['password'];
-    if (signin($username, $password))
+    if (signIn($username, $password)) {
         $successMsg = sprintf($l10n['signed_in'], $username);
-    else
+        // if the user has just been created
+        if (isset($_POST['registerBtn'])) {
+            $successMsg = "<br />" . sprintf($l10n['user_created'], $username) .
+                "<br />" . $successMsg;
+        }
+    } else {
         $errorMsg = $l10n['credentials_invalid'];
+    }
+
+// SIGN OUT TODO: more beautiful system!
 } elseif (isset($_POST['signOutBtn'])) {
-    // SIGN OUT
-    signout();
-    $successMsg = $l10n['signed_out']; // TODO: more beautiful system!
+    signOut();
+    $successMsg = $l10n['signed_out'];
     if ($_action == 'edit' || $_action == 'settings')
         $_action = 'view';
+}
+
+// deal with current session
+$aid = isset($_GET['aid']) ? $_GET['aid'] : false;
+$uid = isSignedIn();
+
+if ($aid && $uid) {
+    require_once BASEDIR . 'includes/dataModel.php';
+    $model = new DataModel();
+    $result = $model->fetchAlgorithmByAID($aid);
+    $model->close();
+    $owner = $result->uid === $uid;
 }
 
 // make it certain, forever
@@ -73,7 +93,7 @@ define('ACTION', $_action);
                 </li>
             </ul>
             <form class="navbar-form navbar-right" role="form" method="post">
-                <?php if (isSignedIn()): ?>
+                <?php if ($uid): ?>
                     <?= sprintf($l10n['welcome'], $_SESSION['username']) ?>!
                     <button type="submit" name="signOutBtn" class="btn btn-default"><?= $l10n['sign_out'] ?></button>
                 <?php else: ?>
@@ -95,19 +115,28 @@ define('ACTION', $_action);
 </nav>
 
 <div class="container">
-    <?php if (isset($_GET['aid'])): $aid = $_GET['aid'] ?>
-        <?php if (isSignedIn()): // FIXME: only for owners! ?>
+    <?php if ($aid): ?>
+        <?php if ($uid): // FIXME: only for registered users! ?>
             <!-- NAVIGATION MENU FOR ALGORITHMS -->
             <ul class="nav nav-tabs">
                 <li role="presentation"<?php if (ACTION == 'view'): ?> class="active"<?php endif ?>>
                     <a href="<?= url(['action' => 'view', 'aid' => $aid]) ?>"><?= $l10n['view'] ?></a>
                 </li>
+                <?php if ($owner): ?>
                 <li role="presentation"<?php if (ACTION == 'edit'): ?> class="active"<?php endif ?>>
                     <a href="<?= url(['action' => 'edit', 'aid' => $aid]) ?>"><?= $l10n['edit'] ?></a>
                 </li>
                 <li role="presentation"<?php if (ACTION == 'settings'): ?> class="active"<?php endif ?>>
                     <a href="<?= url(['action' => 'settings', 'aid' => $aid]) ?>"><?= $l10n['settings'] ?></a>
                 </li>
+                <?php else: ?>
+                    <li role="presentation" class="disabled">
+                        <a href="javascript:void(0)"><?= $l10n['edit'] ?></a>
+                    </li>
+                    <li role="presentation" class="disabled">
+                        <a href="javascript:void(0)"><?= $l10n['settings'] ?></a>
+                    </li>
+                <?php endif ?>
             </ul>
         <?php endif ?>
         <!-- The current AID for jquery to use -->
