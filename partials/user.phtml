@@ -9,11 +9,8 @@ if (isset($_GET['uid'])) {
 } elseif (isset($_GET['name'])) {
     $user = $model->fetchUserByUsername($_GET['name']);
 }
-
 if (isset($user)) {
     $algorithms = $model->fetchAlgorithmsOfUser($user->uid, 0, MAX_NUMBER_OF_ALGORITHMS);
-} else {
-    $errorMsg = "eeeeee";
 }
 $model->close();
 ?>
@@ -21,7 +18,6 @@ $model->close();
 <?php if (isset($user)): ?>
     <div class="page-header">
         <h1><?= $user->username ?></h1>
-
         <p><?= sprintf($l10n['member_since'], date_create($user->registration)->format('F j, Y')) ?></p>
     </div>
 

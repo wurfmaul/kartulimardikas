@@ -26,6 +26,7 @@ $_model->close();
         </tr>
         </thead>
         <tbody>
+        <?php if ($latestAlgorithms): ?>
         <?php foreach ($latestAlgorithms as $algorithm):
             $linkAlgorithm = url(['action' => 'view', 'aid' => $algorithm['aid']]);
             $linkUser = url(['action' => 'user', 'uid' => $algorithm['uid']]);
@@ -46,6 +47,11 @@ $_model->close();
                 </td>
             </tr>
         <?php endforeach ?>
+        <?php else: ?>
+            <tr>
+                <td><?= $l10n['no_algorithms'] ?></td>
+            </tr>
+        <?php endif ?>
         </tbody>
     </table>
 </div>
@@ -58,6 +64,7 @@ $_model->close();
         </tr>
         </thead>
         <tbody>
+        <?php if ($lastChanges): ?>
         <?php foreach ($lastChanges as $algorithm):
             $linkAlgorithm = url(['action' => 'view', 'aid' => $algorithm['aid']]);
             $linkUser = url(['action' => 'user', 'uid' => $algorithm['uid']]);
@@ -75,6 +82,11 @@ $_model->close();
                 </td>
             </tr>
         <?php endforeach ?>
+        <?php else: ?>
+            <tr>
+                <td><?= $l10n['no_algorithms'] ?></td>
+            </tr>
+        <?php endif ?>
         </tbody>
     </table>
 </div>
@@ -87,6 +99,7 @@ $_model->close();
         </tr>
         </thead>
         <tbody>
+        <?php if ($diligentUsers): ?>
         <?php foreach ($diligentUsers as $user):
             $linkUser = url(['action' => 'user', 'uid' => $user['uid']]);
             ?>
@@ -99,6 +112,11 @@ $_model->close();
                 </td>
             </tr>
         <?php endforeach ?>
+        <?php else: ?>
+            <tr>
+                <td><?= $l10n['no_users'] ?></td>
+            </tr>
+        <?php endif ?>
         </tbody>
     </table>
 </div>

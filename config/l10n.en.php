@@ -45,6 +45,7 @@ $l10n['define_new_algo'] = "Define new algorithm";
 $l10n['index'] = "Index";
 $l10n['all_algos'] = "All the defined algorithms.";
 $l10n['no_algorithms'] = "No algorithms found!";
+$l10n['no_users'] = "No users found!";
 $l10n['latest_algos'] = "Latest algorithms";
 $l10n['last_changes'] = "Last changes";
 $l10n['diligent_users'] = "Most diligent users";
