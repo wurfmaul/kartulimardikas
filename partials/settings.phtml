@@ -10,7 +10,7 @@ $aid = $_GET['aid'];
 // get algorithm details from database
 require_once BASEDIR . "includes/dataModel.php";
 $_model = new DataModel();
-$_algo = $_model->fetchAlgorithmByAID($aid);
+$_algo = $_model->fetchAlgorithm($aid);
 $_model->close();
 
 // check authentication
@@ -18,6 +18,9 @@ if (!isSignedIn() || $_SESSION['uid'] != $_algo->uid) {
     header("Location:" . url(['action' => 'view', 'aid' => $aid]));
     die();
 }
+
+// use algorithm header
+require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
 ?>
 <!-- HEADER -->
 <div class="page-header">

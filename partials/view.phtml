@@ -10,7 +10,7 @@ $aid = $_GET['aid'];
 // get algorithm details from database
 require_once BASEDIR . "includes/dataModel.php";
 $_model = new DataModel();
-$_algo = $_model->fetchAlgorithmByAID($aid);
+$_algo = $_model->fetchAlgorithm($aid);
 $_model->close();
 
 // prepare algorithm meta-data
@@ -29,14 +29,15 @@ $tree = new Tree(json_decode($_algo->tree));
 require_once BASEDIR . "includes/viewHelper.php";
 $sectionNum = isset($_GET['section']) ? $_GET['section'] : SECTIONS_VIEW;
 $section = sections($sectionNum, 6);
+
+// use algorithm header
+require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
 ?>
 <!-- HEADER -->
 <div class="page-header">
-    <?php if (isset($aid)): ?>
-        <h1><?= $name ?>
-            <small><?= $description ?></small>
-        </h1>
-    <?php endif ?>
+    <h1><?= $name ?>
+        <small><?= $description ?></small>
+    </h1>
 </div>
 
 <!-- CONTENT -->

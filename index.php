@@ -34,7 +34,7 @@ if ((isset($_POST['signInBtn']) || isset($_POST['registerBtn'])) &&
         $errorMsg = $l10n['credentials_invalid'];
     }
 
-// SIGN OUT TODO: more beautiful system!
+// SIGN OUT
 } elseif (isset($_POST['signOutBtn'])) {
     signOut();
     $successMsg = $l10n['signed_out'];
@@ -43,18 +43,7 @@ if ((isset($_POST['signInBtn']) || isset($_POST['registerBtn'])) &&
 }
 
 // deal with current session
-$aid = isset($_GET['aid']) ? $_GET['aid'] : false;
 $uid = isSignedIn();
-
-if ($aid && $uid) {
-    require_once BASEDIR . 'includes/dataModel.php';
-    $model = new DataModel();
-    $result = $model->fetchAlgorithmByAID($aid);
-    $model->close();
-    $owner = $result->uid === $uid;
-}
-
-// make it certain, forever
 define('ACTION', $_action);
 ?><!DOCTYPE html>
 <html lang="en">
@@ -94,7 +83,8 @@ define('ACTION', $_action);
             </ul>
             <form class="navbar-form navbar-right" role="form" method="post">
                 <?php if ($uid): ?>
-                    <?= sprintf($l10n['welcome'], $_SESSION['username']) ?>!
+                    <?= sprintf($l10n['welcome'],
+                        '<a href="' . url(['action' => 'user', 'uid' => $uid]) . '">' . $_SESSION['username'] . '</a>') ?>!
                     <button type="submit" name="signOutBtn" class="btn btn-default"><?= $l10n['sign_out'] ?></button>
                 <?php else: ?>
                     <div class="form-group">
@@ -115,33 +105,6 @@ define('ACTION', $_action);
 </nav>
 
 <div class="container">
-    <?php if ($aid): ?>
-        <?php if ($uid): // FIXME: only for registered users! ?>
-            <!-- NAVIGATION MENU FOR ALGORITHMS -->
-            <ul class="nav nav-tabs">
-                <li role="presentation"<?php if (ACTION == 'view'): ?> class="active"<?php endif ?>>
-                    <a href="<?= url(['action' => 'view', 'aid' => $aid]) ?>"><?= $l10n['view'] ?></a>
-                </li>
-                <?php if ($owner): ?>
-                <li role="presentation"<?php if (ACTION == 'edit'): ?> class="active"<?php endif ?>>
-                    <a href="<?= url(['action' => 'edit', 'aid' => $aid]) ?>"><?= $l10n['edit'] ?></a>
-                </li>
-                <li role="presentation"<?php if (ACTION == 'settings'): ?> class="active"<?php endif ?>>
-                    <a href="<?= url(['action' => 'settings', 'aid' => $aid]) ?>"><?= $l10n['settings'] ?></a>
-                </li>
-                <?php else: ?>
-                    <li role="presentation" class="disabled">
-                        <a href="javascript:void(0)"><?= $l10n['edit'] ?></a>
-                    </li>
-                    <li role="presentation" class="disabled">
-                        <a href="javascript:void(0)"><?= $l10n['settings'] ?></a>
-                    </li>
-                <?php endif ?>
-            </ul>
-        <?php endif ?>
-        <!-- The current AID for jquery to use -->
-        <div id="aid" data-val="<?= $aid ?>" style="display: none"></div>
-    <?php endif ?>
     <!-- The current ACTION for jquery to use -->
     <div id="action" data-val="<?= ACTION ?>" style="display: none"></div>
 

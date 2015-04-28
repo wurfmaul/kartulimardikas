@@ -40,20 +40,25 @@ $l10n['become_user'] = "Become a new user!";
 $l10n['subtitle'] = "Online collection of algorithms";
 $l10n['welcome_msg'] = "Welcome to an interactive platform to discuss, demonstrate and compare common algorithms.";
 $l10n['define_new_algo'] = "Define new algorithm";
+
+// INDEX
+$l10n['index'] = "Index";
+$l10n['all_algos'] = "All the defined algorithms.";
+$l10n['no_algorithms'] = "No algorithms found!";
 $l10n['latest_algos'] = "Latest algorithms";
+$l10n['last_changes'] = "Last changes";
+$l10n['diligent_users'] = "Most diligent users";
+$l10n['user_created_note'] = "created %d algorithms";
+$l10n['created_note'] = "created %s by %s";
+$l10n['modified_note'] = "modified %s by %s";
 $l10n['label_new'] = "NEW";
 $l10n['read_more'] = "read more";
-$l10n['created_note'] = "created %s by %s";
 $l10n['minutes_ago'] = "%d minutes ago";
 $l10n['hours_ago'] = "%d hours ago";
 $l10n['days_ago'] = "%d days ago";
 $l10n['one_minute_ago'] = "a minute ago";
 $l10n['one_hour_ago'] = "1 hour ago";
 $l10n['one_day_ago'] = "1 day ago";
-
-// INDEX
-$l10n['index'] = "Index";
-$l10n['all_algos'] = "All the defined algorithms.";
 
 // NEW
 $l10n['new'] = "New";
@@ -90,7 +95,6 @@ $l10n['step_back'] = "Step back";
 $l10n['play'] = "Play";
 $l10n['step_forward'] = "Step forward";
 $l10n['forward_to_end'] = "Forward to end";
-$l10n[''] = "";
 $l10n[''] = "";
 $l10n[''] = "";
 $l10n[''] = "";
@@ -139,3 +143,10 @@ $l10n['invalid'] = "invalid";
 // SETTINGS
 $l10n['settings'] = "Settings";
 $l10n['configure_algo'] = "Configure your algorithm.";
+
+// USER
+$l10n['member_since'] = "Member since %s.";
+$l10n['error_no_such_user'] = "There is no such user!";
+$l10n['go_back'] = "go back";
+$l10n['created_at'] = "created %s";
+$l10n['algorithms'] = "Algorithms";

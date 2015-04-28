@@ -26,7 +26,7 @@ class DataModel
      * @param $aid int
      * @return object|stdClass
      */
-    public function fetchAlgorithmByAID($aid)
+    public function fetchAlgorithm($aid)
     {
         $stmt = $this->_sql->prepare("SELECT * FROM algorithm WHERE aid = ?");
         $stmt->bind_param("i", $aid);
@@ -36,13 +36,41 @@ class DataModel
         return $result->fetch_object();
     }
 
+    /**
+     * @param int $uid
+     * @param int $from
+     * @param int $amount
+     * @return mixed
+     */
+    public function fetchAlgorithmsOfUser($uid, $from, $amount)
+    {
+        $stmt = $this->_sql->prepare("
+            SELECT *, TIMESTAMPDIFF(MINUTE, creation, NOW()) AS age
+            FROM algorithm
+            WHERE uid = ?
+            ORDER BY creation DESC
+            LIMIT ?, ?
+        ");
+        $stmt->bind_param("iii", $uid, $from, $amount);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    /**
+     * @param $amount int
+     * @return array
+     */
     public function fetchLatestAlgorithms($amount)
     {
         $stmt = $this->_sql->prepare("
-            SELECT aid, name, description, long_description, username, TIMESTAMPDIFF(MINUTE, creation, NOW()) AS age
+            SELECT
+              aid, name, description, long_description,
+              TIMESTAMPDIFF(MINUTE, creation, NOW()) AS age,
+              uid, username
             FROM algorithm a
-            JOIN user u
-            ON a.uid=u.uid
+            JOIN user u USING(uid)
             ORDER BY creation DESC
             LIMIT ?
         ");
@@ -51,6 +79,43 @@ class DataModel
         $result = $stmt->get_result();
         $stmt->close();
         return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    /**
+     * @param int $amount
+     * @return array
+     */
+    public function fetchModifiedAlgorithms($amount)
+    {
+        $stmt = $this->_sql->prepare("
+            SELECT
+              aid, name, description, long_description,
+              TIMESTAMPDIFF(MINUTE, lastedit, NOW()) AS modified,
+              uid, username
+            FROM algorithm a
+            JOIN user u USING(uid)
+            ORDER BY lastedit DESC
+            LIMIT ?
+        ");
+        $stmt->bind_param("i", $amount);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    /**
+     * @param $uid int
+     * @return object|stdClass
+     */
+    public function fetchUser($uid)
+    {
+        $stmt = $this->_sql->prepare("SELECT * FROM user WHERE uid = ?");
+        $stmt->bind_param("i", $uid);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return $result->fetch_object();
     }
 
     /**
@@ -83,6 +148,23 @@ class DataModel
         $result = $stmt->get_result();
         $stmt->close();
         return $result->fetch_object();
+    }
+
+    public function fetchUsersWithMostAlgorithms($amount)
+    {
+        $stmt = $this->_sql->prepare("
+            SELECT uid, username, registration, COUNT(aid) AS algorithm_count
+            FROM user
+            LEFT JOIN algorithm USING(uid)
+            GROUP BY uid
+            ORDER BY algorithm_count DESC
+            LIMIT ?
+        ");
+        $stmt->bind_param("i", $amount);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return $result->fetch_all(MYSQLI_ASSOC);
     }
 
     /**

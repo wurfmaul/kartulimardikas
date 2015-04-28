@@ -1,0 +1,68 @@
+<?php
+if (!defined('BASEDIR')) die('You cannot call this script directly !');
+
+require_once BASEDIR . "includes/viewHelper.php";
+require_once BASEDIR . 'includes/dataModel.php';
+$model = new DataModel();
+if (isset($_GET['uid'])) {
+    $user = $model->fetchUser($_GET['uid']);
+} elseif (isset($_GET['name'])) {
+    $user = $model->fetchUserByUsername($_GET['name']);
+}
+
+if (isset($user)) {
+    $algorithms = $model->fetchAlgorithmsOfUser($user->uid, 0, MAX_NUMBER_OF_ALGORITHMS);
+} else {
+    $errorMsg = "eeeeee";
+}
+$model->close();
+?>
+
+<?php if (isset($user)): ?>
+    <div class="page-header">
+        <h1><?= $user->username ?></h1>
+
+        <p><?= sprintf($l10n['member_since'], date_create($user->registration)->format('F j, Y')) ?></p>
+    </div>
+
+    <?php if ($algorithms): ?>
+        <table class="table table-striped table-hover algorithms">
+            <thead>
+            <tr>
+                <th><?= $l10n['algorithms'] ?></th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($algorithms as $algorithm): $link = url(['action' => 'view', 'aid' => $algorithm['aid']]) ?>
+                <tr>
+                    <td>
+                        <?php if ($algorithm['age'] <= MAX_MINUTES_FOR_LABEL): ?>
+                            <span class="label label-default"><?= $l10n['label_new'] ?></span>
+                        <?php endif ?>
+                        <span class="name"><a href="<?= $link ?>"><?= $algorithm['name'] ?></a></span>
+                        <span class="properties">(<?= sprintf($l10n['created_at'], getTimeFrame($algorithm['age'])) ?>
+                            )</span>
+                        <?php if (!empty($algorithm['description'])): ?>
+                            <span class="description"><?= skipDescription($algorithm['description']) ?></span>
+                        <?php endif ?>
+                    </td>
+                </tr>
+            <?php endforeach ?>
+            </tbody>
+            <tfoot>
+            <!-- TODO: paginator -->
+            </tfoot>
+        </table>
+    <?php else: ?>
+        <div><?= $l10n['no_algorithms'] ?></div>
+    <?php endif ?>
+
+<?php else: ?>
+    <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="close">
+            <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
+        </button>
+        <strong><?= $l10n['error'] ?></strong> <?= $l10n['error_no_such_user'] ?><br/>
+        &rarr; <a href="javascript:history.back()"><?= $l10n['go_back'] ?></a>
+    </div>
+<?php endif ?>

@@ -29,7 +29,7 @@ class EditManager
     public function process()
     {
         // fetch algorithm details from database
-        $owner = $this->_model->fetchAlgorithmByAID($this->_aid)->uid;
+        $owner = $this->_model->fetchAlgorithm($this->_aid)->uid;
         if ($owner != $this->_uid) {
             $this->_response['error'] = $this->_l10n['need_to_be_owner'];
         }
@@ -85,7 +85,7 @@ class EditManager
         $size = intval($_POST['size']);
 
         // get variables from database
-        $vars = $this->_model->fetchAlgorithmByAID($this->_aid)->variables;
+        $vars = $this->_model->fetchAlgorithm($this->_aid)->variables;
         $vars = (is_null($vars)) ? array() : json_decode($vars);
 
         // check for correct name and duplicates
@@ -199,7 +199,7 @@ class EditManager
         $vid = trim($_POST['vid']);
 
         // get variables from database
-        $vars = $this->_model->fetchAlgorithmByAID($this->_aid)->variables;
+        $vars = $this->_model->fetchAlgorithm($this->_aid)->variables;
         $vars = (is_null($vars)) ? array() : json_decode($vars);
 
         if (!empty($vars)) {

@@ -18,7 +18,7 @@ window.shuffle = (array) ->
   array
 
 updateUrl = (parameters) ->
-  $.ajax "api/get-url.php",
+  $.ajax("api/get-url.php",
     type: 'GET'
     data: {parameters: parameters}
     dataType: 'text'
@@ -31,29 +31,28 @@ updateUrl = (parameters) ->
       )
     error: (jqXHR, textStatus, errorThrown) => # if request failed
       @_printError("Request Error: " + errorThrown)
+  )
+
+updateSection = (element) ->
+  # change arrow
+  element.find("span").toggleClass("glyphicon-chevron-right glyphicon-chevron-down")
+  # toggle signal class
+  $(element.data("target")).toggleClass("closed")
+
+  # prepare parameters for address bar manipulation
+  section = 0
+  counter = 1
+  $('.panel-collapse').each(->
+    section += counter if (not element.hasClass('closed'))
+    counter *= 2
+  )
+  updateUrl(
+    action: $('#action').data('val')
+    aid: $('#aid').data('val')
+    section: section
+  )
 
 $ ->
-  $('.panel-heading').click ->
-    # change arrow
-    $(this).find("span").toggleClass("glyphicon-chevron-right glyphicon-chevron-down")
-    # toggle signal class
-    $($(this).data("target")).toggleClass("closed")
-
-    # prepare parameters for address bar manipulation
-    section = 0
-    counter = 1
-    $('.panel-collapse').each(->
-      section += counter if (not $(this).hasClass('closed'))
-      counter *= 2
-    )
-    updateUrl(
-      action: $('#action').data('val')
-      aid: $('#aid').data('val')
-      section: section
-    )
-
-  $('#generalAlertClose').click ->
-    $('#generalAlert').hide('slow')
-
-  $('#generalSuccessClose').click ->
-    $('#generalSuccess').hide('slow')
+  $('.panel-heading').click -> updateSection($(this))
+  $('#generalAlertClose').click -> $('#generalAlert').hide('slow')
+  $('#generalSuccessClose').click -> $('#generalSuccess').hide('slow')

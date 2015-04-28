@@ -7,6 +7,7 @@ define('PROJECT_NAME', 'kartulimardikas');
 define('DEBUG_MODE', true);
 define('LIBRARY_MODE', 'LOCAL'); # one of LOCAL, DEBUG, CLOUDFLARE, CDN
 define('LANG', 'en');
+define('DEFAULT_PAGE', 'home');
 
 # Database settings
 define('DB_HOST', 'localhost');
@@ -19,11 +20,16 @@ define('ARRAY_MIN_SIZE', 2);
 define('ARRAY_MAX_SIZE', 13);
 define('DEFAULT_INDENT', '  ');
 
-# Index settings
-define('DEFAULT_PAGE', 'home');
+# Home settings
 define('NUMBER_OF_LATEST_ALGORITHMS', 5);
+
+# Index settings
+define('MAX_NUMBER_OF_ENTRIES', 10);
 define('MAX_MINUTES_FOR_LABEL', 120);
 define('MAX_DESCRIPTION_LENGTH', 240);
+
+# User settings
+define('MAX_NUMBER_OF_ALGORITHMS', 25);
 
 # Section settings
 define('SECTIONS_VIEW', 2);
