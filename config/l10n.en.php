@@ -140,10 +140,16 @@ $l10n['invalid_init'] = "The initialization method seems to be invalid.";
 $l10n['no_algo_defined'] = "No algorithm specified!";
 $l10n['no_area_defined'] = "You cannot edit everything at once. Define area!";
 $l10n['invalid'] = "invalid";
+$l10n['untitled_algorithm'] = "[Untitled algorithm]";
 
 // SETTINGS
 $l10n['settings'] = "Settings";
 $l10n['configure_algo'] = "Configure your algorithm.";
+$l10n['visibility'] = "Visibility";
+$l10n['private_message'] = "The algorithm is set to 'private' therefore nobody but you can see it. Click on the following button in order to publish the algorithm.";
+$l10n['public_message'] = "The algorithm is set to 'public' therefore everybody can see it. Click on the following button in order to hide the algorithm from the public.";
+$l10n['make_public'] = "Publish";
+$l10n['make_private'] = "Hide";
 
 // USER
 $l10n['member_since'] = "Member since %s.";

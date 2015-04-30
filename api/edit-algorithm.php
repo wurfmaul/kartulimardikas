@@ -53,6 +53,9 @@ class EditManager
                 case 'script':
                     $this->_processScript();
                     break;
+                case 'settings':
+                    $this->_processSettings();
+                    break;
             }
         }
 
@@ -68,6 +71,10 @@ class EditManager
         $name = trim($_POST['name']);
         $desc = trim($_POST['desc']);
         $long = trim($_POST['long']);
+
+        if (empty($name)) {
+            $name = $this->_l10n['untitled_algorithm'];
+        }
 
         $this->_model->updateAlgorithmInfo($this->_aid, $name, $desc, $long);
         $this->_response['success'] = $this->_l10n['saved_to_db'];
@@ -221,21 +228,31 @@ class EditManager
         $this->_model->updateAlgorithmScript($this->_aid, json_encode($_POST['tree']));
         $this->_response['success'] = $this->_l10n['saved_to_db'];
     }
+
+    private function _processSettings()
+    {
+        if (isset($_POST['status'])) {
+            $this->_model->updateAlgorithmVisibility($this->_aid, $_POST['status']);
+            $this->_response['success'] = $this->_l10n['saved_to_db'];
+        } else {
+            die("Post parameter 'tree' not set properly!");
+        }
+    }
 }
 
 if (!isset($_POST['aid'])) {
     $response['error'] = $l10n['no_algo_defined'];
 } elseif (!isset($_GET['area'])) {
     $response['error'] = $l10n['no_area_defined'];
-} elseif (isSignedIn()) {
+} elseif (!isSignedIn()) {
+    $response['error'] = $l10n['edit_not_signed_in'];
+} else {
     // prepare variables
     $uid = $_SESSION['uid'];
     $aid = $_POST['aid'];
     // start processing
     $manager = new EditManager($uid, $aid);
     $response = $manager->process();
-} else {
-    $response['error'] = $l10n['edit_not_signed_in'];
 }
 
 header('Content-type: application/json; charset=UTF-8');

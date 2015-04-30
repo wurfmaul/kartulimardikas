@@ -10,11 +10,14 @@ $aid = $_GET['aid'];
 // get algorithm details from database
 require_once BASEDIR . "includes/dataModel.php";
 $_model = new DataModel();
-$_algo = $_model->fetchAlgorithm($aid);
+$_algorithm = $_model->fetchAlgorithm($aid);
 $_model->close();
 
+// prepare settings
+$_settings['private'] = is_null($_algorithm->date_publish);
+
 // check authentication
-if (!isSignedIn() || $_SESSION['uid'] != $_algo->uid) {
+if (!isSignedIn() || $_SESSION['uid'] != $_algorithm->uid) {
     header("Location:" . url(['action' => 'view', 'aid' => $aid]));
     die();
 }
@@ -26,7 +29,33 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
 <div class="page-header">
     <h1><?= $l10n['settings'] ?>
         <small><?= $l10n['configure_algo'] ?></small>
+        <span id="saveSuccess" class="label label-success" style="display: none"></span>
     </h1>
 </div>
+<!-- HEADER END -->
+
+<!-- ERROR MESSAGE -->
+<div id="editAlert" class="alert alert-danger alert-dismissible" style="display:none">
+    <button id="editAlertClose" type="button" class="close">
+        <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
+    </button>
+    <strong><?= $l10n['error'] ?></strong>
+
+    <div id="editAlertText"></div>
+</div>
+<!-- ERROR MESSAGE END -->
+
 <!-- CONTENT -->
-<!-- TODO: settings page! -->
+<div class="well">
+    <h3><?= $l10n['visibility'] ?></h3>
+
+    <div class="visibility" <?php if ($_settings['private']): ?>style="display: none;"<?php endif ?>>
+        <p><?= $l10n['public_message'] ?></p>
+        <button id="btn-private" type="button" class="btn btn-warning"><?= $l10n['make_private'] ?></button>
+    </div>
+    <div class="visibility" <?php if (!$_settings['private']): ?>style="display: none;"<?php endif ?>>
+        <p><?= $l10n['private_message'] ?></p>
+        <button id="btn-public" type="button" class="btn btn-success"><?= $l10n['make_public'] ?></button>
+    </div>
+</div>
+<!-- CONTENT END -->

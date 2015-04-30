@@ -18,7 +18,8 @@ $model->close();
 <?php if (isset($user)): ?>
     <div class="page-header">
         <h1><?= $user->username ?></h1>
-        <p><?= sprintf($l10n['member_since'], date_create($user->registration)->format('F j, Y')) ?></p>
+
+        <p><?= sprintf($l10n['member_since'], date_create($user->date_registration)->format('F j, Y')) ?></p>
     </div>
 
     <?php if ($algorithms): ?>
@@ -34,6 +35,9 @@ $model->close();
                     <td>
                         <?php if ($algorithm['age'] <= MAX_MINUTES_FOR_LABEL): ?>
                             <span class="label label-default"><?= $l10n['label_new'] ?></span>
+                        <?php endif ?>
+                        <?php if (is_null($algorithm['date_publish'])): ?>
+                            <span class="label label-info">private</span>
                         <?php endif ?>
                         <span class="name"><a href="<?= $link ?>"><?= $algorithm['name'] ?></a></span>
                         <span class="properties">(<?= sprintf($l10n['created_at'], getTimeFrame($algorithm['age'])) ?>
