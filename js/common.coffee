@@ -43,7 +43,7 @@ updateSection = (element) ->
   section = 0
   counter = 1
   $('.panel-collapse').each(->
-    section += counter if (not element.hasClass('closed'))
+    section += counter if (not $(this).hasClass('closed'))
     counter *= 2
   )
   updateUrl(

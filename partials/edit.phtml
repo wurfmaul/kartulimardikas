@@ -115,95 +115,98 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                             <?php foreach ($vars as $vid => $var):
                                 $rowVisible = ($vid === 'prototype') ? 'style="display:none"' : '';
                                 $selInit = array();
-                                foreach (['elem-?', 'elem-value', 'array-?', 'array-random', 'array-custom'] as $mode)
+                                foreach (['elem-?', 'elem-value', 'array-?', 'array-random', 'array-custom'] as $mode) {
                                     $selInit[$mode] = $var->init === $mode ? 'selected="selected"' : '';
+                                }
                                 $valueVisible = ($var->init === 'elem-value' || $var->init === 'array-custom') ? '' : 'style="display:none"';
                                 $sizeVisible = ($var->init === 'array-?' || $var->init === 'array-random') ? '' : 'style="display:none"';
                                 ?>
                                 <tr id="var-<?= $vid ?>" class="varRow" data-vid="<?= $vid ?>" <?= $rowVisible ?>
                                     data-name="<?= $var->name ?>" data-init="<?= $var->init ?>"
                                     data-value="<?= $var->value ?>" data-size="<?= $var->size ?>">
+
                                     <!-- Variable in view mode -->
-                                    <td class="content view">
-                                        <div class="col-lg-12">
+                                    <td class="view">
+                                        <div class="content">
                                             <code class="cell"><?= $var->name ?> = <?= $var->value ?></code>
                                         </div>
-                                    </td>
-                                    <td class="buttons view">
-                                        <div class="btn-group btn-group-xs">
-                                            <button type="button" class="btn btn-default btn-var-edit"
-                                                    title="<?= $l10n['edit_var'] ?>">
-                                                <span class="glyphicon glyphicon-pencil"></span>
+                                        <div class="tools">
+                                            <button type="button" class="btn btn-default btn-sm btn-var-count"
+                                                    title="<?= $l10n['usage_count'] ?>" data-target="var-<?= $vid ?>">
+                                                <span class="glyphicon glyphicon-stats">
+                                                    <code class="counter">12</code>
+                                                </span>
                                             </button>
-                                            <button type="button" class="btn btn-default btn-var-remove"
-                                                    title="<?= $l10n['remove_var'] ?>">
-                                                <span class="glyphicon glyphicon-trash"></span>
-                                            </button>
+                                            <div class="btn-group btn-group-sm">
+                                                <button type="button" class="btn btn-default btn-var-edit"
+                                                        title="<?= $l10n['edit_var'] ?>">
+                                                    <span class="glyphicon glyphicon-pencil"></span>
+                                                </button>
+                                                <button type="button" class="btn btn-default btn-var-remove"
+                                                        title="<?= $l10n['remove_var'] ?>">
+                                                    <span class="glyphicon glyphicon-trash"></span>
+                                                </button>
+                                            </div>
                                         </div>
                                     </td>
 
                                     <!-- Variable in edit mode -->
-                                    <td class="content edit" style="display: none">
-                                        <div class="col-xs-4">
-                                            <div class="form-group name-group">
-                                                <label class="sr-only" for="name"><?= $l10n['var_name'] ?></label>
-                                                <input class="form-control name" value="<?= $var->name ?>"
-                                                       placeholder="<?= $l10n['name'] ?>" type="text">
-                                            </div>
+                                    <td class="edit" style="display: none">
+                                        <div class="form-group name-group">
+                                            <label class="sr-only" for="name"><?= $l10n['var_name'] ?></label>
+                                            <input class="form-control input-sm name" value="<?= $var->name ?>"
+                                                   placeholder="<?= $l10n['name'] ?>" type="text">
                                         </div>
-                                        <div class="col-xs-1">
-                                            <div class="cell"><code>=</code></div>
+                                        <div class="form-group equals-group ">
+                                            <label class="sr-only" for="equals"></label>
+                                            <button class="form-control input-sm disabled equals">=</button>
                                         </div>
-                                        <div class="col-xs-4">
-                                            <div class="form-group init-group">
-                                                <label class="sr-only" for="init"><?= $l10n['init'] ?></label>
-                                                <select class="form-control init">
-                                                    <optgroup label="Element">
+                                        <div class="form-group init-group">
+                                            <label class="sr-only" for="init"><?= $l10n['init'] ?></label>
+                                            <select class="form-control input-sm init">
+                                                <optgroup label="Element">
+                                                    <option
+                                                        value="elem-?" <?= $selInit['elem-?'] ?>><?= $l10n['uninitialized'] ?></option>
+                                                    <option value="elem-value" <?= $selInit['elem-value'] ?>
+                                                            data-target=".value"><?= $l10n['value'] ?></option>
+                                                </optgroup>
+                                                <optgroup label="Array">
+                                                    <option value="array-?"  <?= $selInit['array-?'] ?>
+                                                            data-target=".size"><?= $l10n['uninitialized'] ?></option>
+                                                    <option value="array-random"  <?= $selInit['array-random'] ?>
+                                                            data-target=".size"><?= $l10n['random'] ?></option>
+                                                    <option value="array-custom"  <?= $selInit['array-custom'] ?>
+                                                            data-target=".value"><?= $l10n['custom'] ?></option>
+                                                </optgroup>
+                                            </select>
+                                        </div>
+                                        <div class="form-group value-group" <?= $valueVisible ?>>
+                                            <label class="sr-only" for="value"><?= $l10n['init_value'] ?></label>
+                                            <input class="form-control input-sm value" value="<?= $var->value ?>"
+                                                   placeholder="<?= $l10n['value'] ?>" type="text">
+                                        </div>
+                                        <div class="form-group size-group" <?= $sizeVisible ?>>
+                                            <label class="sr-only" for="size"><?= $l10n['array_size'] ?></label>
+                                            <select class="form-control input-sm size">
+                                                <optgroup label="<?= $l10n['size'] ?>">
+                                                    <?php for ($i = ARRAY_MIN_SIZE; $i <= ARRAY_MAX_SIZE; $i++): ?>
                                                         <option
-                                                            value="elem-?" <?= $selInit['elem-?'] ?>><?= $l10n['uninitialized'] ?></option>
-                                                        <option value="elem-value" <?= $selInit['elem-value'] ?>
-                                                                data-target=".value"><?= $l10n['value'] ?></option>
-                                                    </optgroup>
-                                                    <optgroup label="Array">
-                                                        <option value="array-?"  <?= $selInit['array-?'] ?>
-                                                                data-target=".size"><?= $l10n['uninitialized'] ?></option>
-                                                        <option value="array-random"  <?= $selInit['array-random'] ?>
-                                                                data-target=".size"><?= $l10n['random'] ?></option>
-                                                        <option value="array-custom"  <?= $selInit['array-custom'] ?>
-                                                                data-target=".value"><?= $l10n['custom'] ?></option>
-                                                    </optgroup>
-                                                </select>
-                                            </div>
+                                                            <?php if ($var->size == $i): ?>selected="selected"<?php endif ?>><?= $i ?></option>
+                                                    <?php endfor ?>
+                                                </optgroup>
+                                            </select>
                                         </div>
-                                        <div class="col-xs-3">
-                                            <div class="form-group value-group" <?= $valueVisible ?>>
-                                                <label class="sr-only" for="value"><?= $l10n['init_value'] ?></label>
-                                                <input class="form-control value" value="<?= $var->value ?>"
-                                                       placeholder="<?= $l10n['value'] ?>" type="text">
+                                        <div class="tools">
+                                            <div class="btn-group btn-group-sm">
+                                                <button type="button" class="btn btn-default btn-var-check"
+                                                        title="<?= $l10n['check_var'] ?>">
+                                                    <span class="glyphicon glyphicon-ok"></span>
+                                                </button>
+                                                <button type="button" class="btn btn-default btn-var-cancel"
+                                                        title="<?= $l10n['discard_changes'] ?>">
+                                                    <span class="glyphicon glyphicon-remove"></span>
+                                                </button>
                                             </div>
-                                            <div class="form-group size-group" <?= $sizeVisible ?>>
-                                                <label class="sr-only" for="size"><?= $l10n['array_size'] ?></label>
-                                                <select class="form-control size">
-                                                    <optgroup label="<?= $l10n['size'] ?>">
-                                                        <?php for ($i = ARRAY_MIN_SIZE; $i <= ARRAY_MAX_SIZE; $i++): ?>
-                                                            <option
-                                                                <?php if ($var->size == $i): ?>selected="selected"<?php endif ?>><?= $i ?></option>
-                                                        <?php endfor ?>
-                                                    </optgroup>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="buttons edit" style="display: none">
-                                        <div class="btn-group btn-group-xs">
-                                            <button type="button" class="btn btn-default btn-var-check"
-                                                    title="<?= $l10n['check_var'] ?>">
-                                                <span class="glyphicon glyphicon-ok"></span>
-                                            </button>
-                                            <button type="button" class="btn btn-default btn-var-cancel"
-                                                    title="<?= $l10n['discard_changes'] ?>">
-                                                <span class="glyphicon glyphicon-remove"></span>
-                                            </button>
                                         </div>
                                     </td>
                                 </tr>

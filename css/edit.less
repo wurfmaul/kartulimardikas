@@ -1,34 +1,44 @@
 @import "algorithm";
 
 #varPanel {
-  table.variables {
-    margin-top: 0px;
+  .variables {
+    margin-top: 0;
     margin-bottom: 10px;
+    text-align: left;
 
-    .content {
-      text-align: left;
-      border-left: none;
-      border-right: none;
-      vertical-align: middle;
+    td > div {
+      display: inline-flex;
     }
 
-    .buttons {
-      @width: 58px;
-
-      width: @width;
-      min-width: @width;
-      max-width: @width;
-      text-align: center;
-      border-left: none;
-      vertical-align: middle;
+    .tools {
+      float: right;
+      .btn-var-count {
+        margin-right: 2px;
+      }
     }
 
     .form-group {
-      margin: 0px;
+      margin: 0;
+      width: 100px;
     }
 
-    .cell {
-      padding: 6px;
+    .name-group {
+    }
+    .equals-group {
+      width: 35px;
+      .equals {
+        border: none;
+        cursor: default;
+      }
+    }
+    .init-group {
+
+    }
+    .value-group {
+
+    }
+    .size-group {
+
     }
   }
 }
@@ -45,12 +55,15 @@
         display: none;
       }
     }
-
     .sortable-highlight {
       background-color: greenyellow;
       border: 2px dashed forestgreen;
       height: 20px;
       list-style-type: none;
+    }
+    .highlight {
+      background-color: greenyellow;
+      font-weight: bold;
     }
   }
 

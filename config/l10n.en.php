@@ -141,6 +141,8 @@ $l10n['no_algo_defined'] = "No algorithm specified!";
 $l10n['no_area_defined'] = "You cannot edit everything at once. Define area!";
 $l10n['invalid'] = "invalid";
 $l10n['untitled_algorithm'] = "[Untitled algorithm]";
+$l10n['usage_count'] = "Usage count";
+$l10n['contains'] = "contains";
 
 // SETTINGS
 $l10n['settings'] = "Settings";

@@ -108,6 +108,7 @@ class VariableForm
     .last()# pick the last one
     .data('vid') # extract the variable id
     @maxVarId = if lastVid? then lastVid + 1 else 0
+    @updateVarCount()
 
   addRow: ->
     newRow = $('#var-prototype').clone(true)# get prototype
@@ -118,6 +119,19 @@ class VariableForm
     newRow.find('.view').hide()
     newRow.show('slow')
     @maxVarId++
+
+  updateVarCount: ->
+    $('.varRow').not('#var-prototype').each(->
+      # update the variable counter
+      id = $(this).attr('id')
+      count = SCRIPTSITE.find(".#{id}:selected").length
+      $(this).find('.counter').text(count)
+      # (de)activate remove-button according to counter
+      if (count isnt 0)
+        $(this).find('.btn-var-remove').attr('disabled', 'disabled')
+      else
+        $(this).find('.btn-var-remove').removeAttr('disabled')
+    )
 
   performCancel: (vid) ->
     $('#editAlert').hide('slow')
@@ -144,6 +158,8 @@ class VariableForm
     Api.removeVariable(vid)
 
 class StepForm
+  constructor: (@varForm) ->
+
   addNode: (prototypeId) ->
     # create new node from prototype
     node = $('#' + prototypeId)
@@ -166,10 +182,14 @@ class StepForm
       Api.editScript(Tree.toJSON())
     )
 
+  performChange: ->
+    @varForm.updateVarCount()
+    Api.editScript(Tree.toJSON())
+
   updateActionHandlers: (parent) ->
     # update action handlers
-    parent.find('input, select').off('blur').blur =>
-      Api.editScript(Tree.toJSON())
+    parent.find('input').off('blur').blur => @performChange() # save when leaving inputs
+    parent.find('select').off('change').change => @performChange() # save when changing selects
     parent.find('.node-remove').off('click').click (event) =>
       @removeNode($(event.currentTarget).parents('.node:first'))
 
@@ -201,6 +221,12 @@ $ ->
   $('.btn-var-check').click -> varForm.performCheck($(this).parents('.varRow').data('vid'))
   $('.btn-var-edit').click -> varForm.performEdit($(this).parents('.varRow').data('vid'))
   $('.btn-var-remove').click -> varForm.performRemove($(this).parents('.varRow').data('vid'))
+  $('.btn-var-count').click -> # highlight all the variable usages
+    id = $(this).data('target')
+    SCRIPTSITE.find(".#{id}:selected").closest('tr').children().addClass('highlight')
+    setTimeout(-> # remove the highlight after some time
+      SCRIPTSITE.find('.highlight').removeClass('highlight')
+    , 1500)
   $('.init').change -> # show/hide input fields according to the init selection
     varRow = $(this).parents('.varRow')
     target = $(this).find(':selected').data('target')
@@ -212,7 +238,7 @@ $ ->
     varRow.find('.value-group').hide('slow') if !showValue
 
   # STEPS SECTION
-  stepForm = new StepForm()
+  stepForm = new StepForm(varForm)
   stepForm.updateActionHandlers(SCRIPTSITE)
   stepForm.updateSortable()
   $('#node-btn-group').children('button').click ->
