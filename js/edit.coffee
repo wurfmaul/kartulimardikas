@@ -165,6 +165,8 @@ class StepForm
     node = $('#' + prototypeId)
       .clone(true, true)
       .appendTo(SCRIPTSITE)
+    # update the variable counter
+    @varForm.updateVarCount()
     # remove sortable completely
     $('.sortable').each(->
       if ($(this).sortable("instance")?)
@@ -179,17 +181,18 @@ class StepForm
     # TODO: undo function
     node.hide('slow', =>
       node.remove()
+      @varForm.updateVarCount()
       Api.editScript(Tree.toJSON())
     )
 
-  performChange: ->
+  saveChanges: ->
     @varForm.updateVarCount()
     Api.editScript(Tree.toJSON())
 
   updateActionHandlers: (parent) ->
     # update action handlers
-    parent.find('input').off('blur').blur => @performChange() # save when leaving inputs
-    parent.find('select').off('change').change => @performChange() # save when changing selects
+    parent.find('input').off('blur').blur => @saveChanges() # save when leaving inputs
+    parent.find('select').off('change').change => @saveChanges() # save when changing selects
     parent.find('.node-remove').off('click').click (event) =>
       @removeNode($(event.currentTarget).parents('.node:first'))
 

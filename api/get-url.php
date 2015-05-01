@@ -1,6 +1,6 @@
 <?php
 
-function url($parameters)
+function url($parameters = [])
 {
     $_url = "index.php";
     $_index = 0;

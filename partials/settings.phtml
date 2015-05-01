@@ -58,4 +58,12 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
         <button id="btn-public" type="button" class="btn btn-success"><?= $l10n['make_public'] ?></button>
     </div>
 </div>
+<div class="alert alert-danger">
+    <h3><?= $l10n['delete'] ?></h3>
+
+    <p><?= $l10n['delete_message'] ?></p>
+    <button id="btn-delete" type="button" class="btn btn-danger" data-warning="<?= $l10n['delete_warning'] ?>">
+        <?= $l10n['delete_algorithm'] ?>
+    </button>
+</div>
 <!-- CONTENT END -->

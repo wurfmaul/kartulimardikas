@@ -96,9 +96,9 @@ $l10n['step_back'] = "Step back";
 $l10n['play'] = "Play";
 $l10n['step_forward'] = "Step forward";
 $l10n['forward_to_end'] = "Forward to end";
-$l10n[''] = "";
-$l10n[''] = "";
-$l10n[''] = "";
+$l10n['message_invalid_aid'] = "This algorithm does not exist (any more)!";
+$l10n['no_vars'] = "No variables defined yet.";
+$l10n['no_algorithm'] = "No algorithm defined yet.";
 $l10n[''] = "";
 $l10n[''] = "";
 $l10n[''] = "";
@@ -152,6 +152,11 @@ $l10n['private_message'] = "The algorithm is set to 'private' therefore nobody b
 $l10n['public_message'] = "The algorithm is set to 'public' therefore everybody can see it. Click on the following button in order to hide the algorithm from the public.";
 $l10n['make_public'] = "Publish";
 $l10n['make_private'] = "Hide";
+$l10n['delete'] = "Delete";
+$l10n['delete_message'] = "Once you click on the button below, this algorithm will be erased. This action cannot be undone!";
+$l10n['delete_algorithm'] = "Delete algorithm";
+$l10n['delete_warning'] = "Do you really want to remove this algorithm? This action cannot be undone!";
+$l10n['algorithm_deleted'] = "Algorithm deleted.";
 
 // USER
 $l10n['member_since'] = "Member since %s.";

@@ -4,9 +4,11 @@ define('BASEDIR', realpath('..') . '/');
 require_once BASEDIR . 'config/config.php';
 require_once BASEDIR . 'includes/authentication.php';
 require_once BASEDIR . 'includes/dataModel.php';
+require_once BASEDIR . 'api/get-url.php';
 
 // in order to retrieve the uid we need access to the session
 secure_session_start();
+$uid = isSignedIn();
 
 class EditManager
 {
@@ -55,6 +57,9 @@ class EditManager
                     break;
                 case 'settings':
                     $this->_processSettings();
+                    break;
+                case 'delete':
+                    $this->_processDeletion();
                     break;
             }
         }
@@ -238,17 +243,23 @@ class EditManager
             die("Post parameter 'tree' not set properly!");
         }
     }
+
+    private function _processDeletion()
+    {
+        $this->_model->deleteAlgorithm($this->_aid);
+        $this->_response['success'] = $this->_l10n['algorithm_deleted'];
+        $this->_response['redirect'] = url();
+    }
 }
 
 if (!isset($_POST['aid'])) {
     $response['error'] = $l10n['no_algo_defined'];
 } elseif (!isset($_GET['area'])) {
     $response['error'] = $l10n['no_area_defined'];
-} elseif (!isSignedIn()) {
+} elseif (!$uid) {
     $response['error'] = $l10n['edit_not_signed_in'];
 } else {
     // prepare variables
-    $uid = $_SESSION['uid'];
     $aid = $_POST['aid'];
     // start processing
     $manager = new EditManager($uid, $aid);

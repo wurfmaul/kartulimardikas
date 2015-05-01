@@ -23,6 +23,20 @@ class DataModel
     }
 
     /**
+     * @param int $aid The algorithm id.
+     * @return int The number of affected rows.
+     */
+    public function deleteAlgorithm($aid)
+    {
+        $stmt = $this->_sql->prepare("DELETE FROM algorithm WHERE aid = ?");
+        $stmt->bind_param("i", $aid);
+        $stmt->execute();
+        $rows = $stmt->affected_rows;
+        $stmt->close();
+        return $rows;
+    }
+
+    /**
      * @param $aid int
      * @return object|stdClass
      */

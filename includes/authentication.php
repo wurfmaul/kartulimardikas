@@ -57,6 +57,9 @@ function signOut()
     session_destroy();
 }
 
+/**
+ * @return bool|int If signed in, the uid is returned. False otherwise.
+ */
 function isSignedIn()
 {
     if (isset($_SESSION['uid'], $_SESSION['username'], $_SESSION['token'])) {

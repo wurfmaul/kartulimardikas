@@ -10,238 +10,263 @@ $aid = $_GET['aid'];
 // get algorithm details from database
 require_once BASEDIR . "includes/dataModel.php";
 $_model = new DataModel();
-$_algo = $_model->fetchAlgorithm($aid);
+$_algorithm = $_model->fetchAlgorithm($aid);
 $_model->close();
 
-// prepare algorithm meta-data
-$name = stripslashes($_algo->name);
-$description = stripslashes($_algo->description);
-$long_description = stripslashes($_algo->long_description);
+if (!is_null($_algorithm)) {
+    // prepare algorithm meta-data
+    $name = stripslashes($_algorithm->name);
+    $description = stripslashes($_algorithm->description);
+    $long_description = stripslashes($_algorithm->long_description);
 
-// prepare variables
-$vars = json_decode($_algo->variables);
+    // prepare variables
+    $vars = json_decode($_algorithm->variables);
 
-// prepare tree
-require_once BASEDIR . "includes/algorithm.php";
-$tree = new Tree(json_decode($_algo->tree));
+    // prepare tree
+    require_once BASEDIR . "includes/algorithm.php";
+    $tree = new Tree(json_decode($_algorithm->tree));
 
-// prepare sections
-require_once BASEDIR . "includes/viewHelper.php";
-$sectionNum = isset($_GET['section']) ? $_GET['section'] : SECTIONS_VIEW;
-$section = sections($sectionNum, 6);
-
-// use algorithm header
-require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
+    // prepare sections
+    require_once BASEDIR . "includes/viewHelper.php";
+    $sectionNum = isset($_GET['section']) ? $_GET['section'] : SECTIONS_VIEW;
+    $section = sections($sectionNum, 6);
+}
 ?>
-<!-- HEADER -->
-<div class="page-header">
-    <h1><?= $name ?>
-        <small><?= $description ?></small>
-    </h1>
-</div>
 
-<!-- CONTENT -->
-<div class="row">
+<?php if (is_null($_algorithm)): // invalid id ?>
+    <div class="alert alert-danger" role="alert">
+        <strong><?= $l10n['error'] ?></strong><br/>
 
-    <!-- LEFT COLUMN -->
-    <div class="col-md-6">
+        <?= $l10n['message_invalid_aid'] ?>
+    </div>
+<?php else: // valid aid ?>
+    <?php require_once BASEDIR . "partials/headers/algorithmHeader.phtml" ?>
+    <!-- HEADER -->
+    <div class="page-header">
+        <h1><?= $name ?>
+            <small><?= $description ?></small>
+        </h1>
+    </div>
 
-        <!-- ALGORITHM AREA -->
-        <div class="panel-group" id="accordion-left">
+    <!-- CONTENT -->
+    <div class="row">
 
-            <!-- TAB - CONTROLS -->
-            <div class="panel panel-default">
-                <div class="panel-heading" data-toggle="collapse" data-target="#controls">
-                    <h4 class="panel-title">
+        <!-- LEFT COLUMN -->
+        <div class="col-md-6">
+
+            <!-- ALGORITHM AREA -->
+            <div class="panel-group" id="accordion-left">
+
+                <!-- TAB - CONTROLS -->
+                <div class="panel panel-default">
+                    <div class="panel-heading" data-toggle="collapse" data-target="#controls">
+                        <h4 class="panel-title">
                         <span
                             class="glyphicon glyphicon-chevron-<?php if ($section[0]): ?>down<?php else: ?>right<?php endif ?>"></span>
-                        <?= $l10n['controls'] ?>
-                    </h4>
-                </div>
-                <div id="controls" class=" panel-collapse collapse <?= $section[0] ? 'in' : 'closed' ?>">
-                    <div class="panel-body controls">
-                        <div class="btn-group">
+                            <?= $l10n['controls'] ?>
+                        </h4>
+                    </div>
+                    <div id="controls" class="panel-collapse collapse <?= $section[0] ? 'in' : 'closed' ?>">
+                        <div class="panel-body controls">
                             <div class="btn-group">
-                                <button type="button" class="btn btn-default" title="<?= $l10n['back_to_start'] ?>"
-                                        id="btn-reset">
-                                    <span class="glyphicon glyphicon-fast-backward"></span>
-                                </button>
-                                <button type="button" class="btn btn-default" title="<?= $l10n['step_back'] ?>"
-                                        id="btn-back">
-                                    <span class="glyphicon glyphicon-step-backward"></span>
-                                </button>
-                                <button type="button" class="btn btn-default" title="<?= $l10n['play'] ?>"
-                                        id="btn-play">
-                                    <span class="glyphicon glyphicon-play" id="img-play"></span>
-                                </button>
-                                <button type="button" class="btn btn-default" title="<?= $l10n['step_forward'] ?>"
-                                        id="btn-step">
-                                    <span class="glyphicon glyphicon-step-forward"></span>
-                                </button>
-                                <button type="button" class="btn btn-default" title="<?= $l10n['forward_to_end'] ?>"
-                                        id="btn-finish">
-                                    <span class="glyphicon glyphicon-fast-forward"></span>
-                                </button>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-default" title="<?= $l10n['back_to_start'] ?>"
+                                            id="btn-reset">
+                                        <span class="glyphicon glyphicon-fast-backward"></span>
+                                    </button>
+                                    <button type="button" class="btn btn-default" title="<?= $l10n['step_back'] ?>"
+                                            id="btn-back">
+                                        <span class="glyphicon glyphicon-step-backward"></span>
+                                    </button>
+                                    <button type="button" class="btn btn-default" title="<?= $l10n['play'] ?>"
+                                            id="btn-play">
+                                        <span class="glyphicon glyphicon-play" id="img-play"></span>
+                                    </button>
+                                    <button type="button" class="btn btn-default" title="<?= $l10n['step_forward'] ?>"
+                                            id="btn-step">
+                                        <span class="glyphicon glyphicon-step-forward"></span>
+                                    </button>
+                                    <button type="button" class="btn btn-default" title="<?= $l10n['forward_to_end'] ?>"
+                                            id="btn-finish">
+                                        <span class="glyphicon glyphicon-fast-forward"></span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- TAB - PSEUDOCODE -->
-            <div class="panel panel-default">
-                <div class="panel-heading" data-toggle="collapse" data-target="#pseudocode">
-                    <h4 class="panel-title">
+                <!-- TAB - PSEUDOCODE -->
+                <div class="panel panel-default">
+                    <div class="panel-heading" data-toggle="collapse" data-target="#pseudocode">
+                        <h4 class="panel-title">
                         <span
                             class="glyphicon glyphicon-chevron-<?php if ($section[1]): ?>down<?php else: ?>right<?php endif ?>"></span>
-                        <?= $name ?>
-                    </h4>
-                </div>
-                <div id="pseudocode" class="panel-collapse collapse <?= $section[1] ? 'in' : 'closed' ?>">
-                    <div class="panel-body algorithm">
-                        <ul id="node_<?= $tree->getRoot() ?>" class="insertStepsHere"
-                            data-node-id="<?= $tree->getRoot() ?>"><?php $tree->printHtml(['vars' => $vars]) ?></ul>
+                            <?= $name ?>
+                        </h4>
+                    </div>
+                    <div id="pseudocode" class="panel-collapse collapse <?= $section[1] ? 'in' : 'closed' ?>">
+                        <div class="panel-body algorithm">
+                            <?php if (is_null($_algorithm->tree)): ?>
+                                <?= $l10n['no_algorithm'] ?>
+                            <?php else: ?>
+                                <ul id="node_<?= $tree->getRoot() ?>" class="insertStepsHere"
+                                    data-node-id="<?= $tree->getRoot() ?>"><?php $tree->printHtml(['vars' => $vars]) ?></ul>
+                            <?php endif ?>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- TAB - SOURCE CODE -->
-            <div class="panel panel-default">
-                <div class="panel-heading" data-toggle="collapse" data-target="#sourcecode">
-                    <h4 class="panel-title">
+                <!-- TAB - SOURCE CODE -->
+                <div class="panel panel-default">
+                    <div class="panel-heading" data-toggle="collapse" data-target="#sourcecode">
+                        <h4 class="panel-title">
                         <span
                             class="glyphicon glyphicon-chevron-<?php if ($section[2]): ?>down<?php else: ?>right<?php endif ?>"></span>
-                        <?= $l10n['source_code'] ?>
-                    </h4>
-                </div>
-                <div id="sourcecode" class=" panel-collapse collapse <?= $section[2] ? 'in' : 'closed' ?>">
-                    <div class="panel-body">
-                        <pre><?php $tree->printSource(['vars' => $vars]) ?></pre>
+                            <?= $l10n['source_code'] ?>
+                        </h4>
+                    </div>
+                    <div id="sourcecode" class=" panel-collapse collapse <?= $section[2] ? 'in' : 'closed' ?>">
+                        <div class="panel-body">
+                            <?php if (is_null($_algorithm->tree)): ?>
+                                <?= $l10n['no_algorithm'] ?>
+                            <?php else: ?>
+                                <pre><?php $tree->printSource(['vars' => $vars]) ?></pre>
+                            <?php endif ?>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- TAB - DESCRIPTION -->
-            <div class="panel panel-default">
-                <div class="panel-heading" data-toggle="collapse" data-target="#description">
-                    <h4 class="panel-title">
+                <?php if ($long_description): ?>
+                    <!-- TAB - DESCRIPTION -->
+                    <div class="panel panel-default">
+                        <div class="panel-heading" data-toggle="collapse" data-target="#description">
+                            <h4 class="panel-title">
                         <span
                             class="glyphicon glyphicon-chevron-<?php if ($section[3]): ?>down<?php else: ?>right<?php endif ?>"></span>
-                        <?= $l10n['description'] ?>
-                    </h4>
-                </div>
-                <div id="description" class=" panel-collapse collapse <?= $section[3] ? 'in' : 'closed' ?>">
-                    <div class="panel-body">
-                        <?= $long_description ?>
+                                <?= $l10n['description'] ?>
+                            </h4>
                     </div>
+                        <div id="description" class=" panel-collapse collapse <?= $section[3] ? 'in' : 'closed' ?>">
+                            <div class="panel-body">
+                                <?= $long_description ?>
+                            </div>
+                        </div>
                 </div>
+                <?php endif ?>
             </div>
         </div>
-    </div>
-    <!-- LEFT COLUMN END -->
+        <!-- LEFT COLUMN END -->
 
-    <!-- RIGHT COLUMN -->
-    <div class="col-md-6">
-        <div class="panel-group" id="accordion-right">
+        <!-- RIGHT COLUMN -->
+        <div class="col-md-6">
+            <div class="panel-group" id="accordion-right">
 
-            <!-- TAB - MEMORY -->
-            <div class="panel panel-default">
-                <div class="panel-heading" data-toggle="collapse" data-target="#memory">
-                    <h4 class="panel-title">
+                <!-- TAB - MEMORY -->
+                <div class="panel panel-default">
+                    <div class="panel-heading" data-toggle="collapse" data-target="#memory">
+                        <h4 class="panel-title">
                         <span
                             class="glyphicon glyphicon-chevron-<?php if ($section[4]): ?>down<?php else: ?>right<?php endif ?>"></span>
-                        <?= $l10n['memory'] ?>
-                    </h4>
+                            <?= $l10n['memory'] ?>
+                        </h4>
+                    </div>
+                    <div id="memory" class=" panel-collapse collapse <?= $section[4] ? 'in' : 'closed' ?>">
+                        <div class="panel-body">
+                            <?php if (sizeof($vars)): ?>
+                                <table class="table table-hover table-bordered">
+                                    <thead>
+                                    <tr>
+                                        <th style="border-top: none;"><?= $l10n['variable'] ?></th>
+                                        <th style="border-top: none;"><?= $l10n['contents'] ?></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="variables">
+                                    <?php foreach ($vars as $vid => $var): ?>
+                                        <tr id="var-<?= $vid ?>" data-vid="<?= $vid ?>">
+                                            <td>
+                                                <code class="name"><?= $var->name ?></code>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <?php if (substr($var->init, 0, 6) == "array-"): // deal with "array-{?,custom,random}" ?>
+                                                        <?php foreach (explode(',', $var->value) as $offset => $value): ?>
+                                                            <input type="button"
+                                                                   class="btn btn-default offset_<?= $offset ?>"
+                                                                   disabled="disabled" value="<?= $value ?>"/>
+                                                        <?php endforeach ?>
+                                                    <?php else: // deal with "elem-{?,value}" ?>
+                                                        <input type="button" class="btn btn-default value"
+                                                               disabled="disabled"
+                                                               value="<?= $var->value ?>"/>
+                                                    <?php endif ?>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach ?>
+                                    </tbody>
+                                </table>
+                            <?php else: ?>
+                                <?= $l10n['no_vars'] ?>
+                            <?php endif ?>
+                        </div>
+                    </div>
                 </div>
-                <div id="memory" class=" panel-collapse collapse <?= $section[4] ? 'in' : 'closed' ?>">
-                    <div class="panel-body">
-                        <table class="table table-hover table-bordered">
-                            <thead>
-                            <tr>
-                                <th style="border-top: none;"><?= $l10n['variable'] ?></th>
-                                <th style="border-top: none;"><?= $l10n['contents'] ?></th>
-                            </tr>
-                            </thead>
-                            <tbody id="variables">
-                            <?php foreach ($vars as $vid => $var): ?>
-                                <tr id="var-<?= $vid ?>" data-vid="<?= $vid ?>">
-                                    <td>
-                                        <code class="name"><?= $var->name ?></code>
-                                    </td>
+
+                <!-- TAB - STATISTICS -->
+                <div class="panel panel-default">
+                    <div class="panel-heading" data-toggle="collapse" data-target="#statistics">
+                        <h4 class="panel-title">
+                        <span
+                            class="glyphicon glyphicon-chevron-<?php if ($section[5]): ?>down<?php else: ?>right<?php endif ?>"></span>
+                            <?= $l10n['statistics'] ?>
+                        </h4>
+                    </div>
+                    <div id="statistics" class="panel-collapse collapse <?= $section[5] ? 'in' : 'closed' ?>">
+                        <div class="panel-body">
+                            <table class="table table-hover table-bordered">
+                                <tr>
+                                    <th><?= $l10n['metric'] ?></th>
+                                    <th><?= $l10n['count'] ?></th>
+                                </tr>
+                                <tr>
+                                    <td><?= $l10n['nowo'] ?></td>
                                     <td>
                                         <div class="btn-group">
-                                            <?php if (substr($var->init, 0, 6) == "array-"): // deal with "array-{?,custom,random}" ?>
-                                                <?php foreach (explode(',', $var->value) as $offset => $value): ?>
-                                                    <input type="button" class="btn btn-default offset_<?= $offset ?>"
-                                                           disabled="disabled" value="<?= $value ?>"/>
-                                                <?php endforeach ?>
-                                            <?php else: // deal with "elem-{?,value}" ?>
-                                                <input type="button" class="btn btn-default value" disabled="disabled"
-                                                       value="<?= $var->value ?>"/>
-                                            <?php endif ?>
+                                            <input type="button" class="btn btn-default" disabled="disabled" value="0"
+                                                   id="stats-now"/>
                                         </div>
                                     </td>
                                 </tr>
-                            <?php endforeach ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB - STATISTICS -->
-            <div class="panel panel-default">
-                <div class="panel-heading" data-toggle="collapse" data-target="#statistics">
-                    <h4 class="panel-title">
-                        <span
-                            class="glyphicon glyphicon-chevron-<?php if ($section[5]): ?>down<?php else: ?>right<?php endif ?>"></span>
-                        <?= $l10n['statistics'] ?>
-                    </h4>
-                </div>
-                <div id="statistics" class="panel-collapse collapse <?= $section[5] ? 'in' : 'closed' ?>">
-                    <div class="panel-body">
-                        <table class="table table-hover table-bordered">
-                            <tr>
-                                <th><?= $l10n['metric'] ?></th>
-                                <th><?= $l10n['count'] ?></th>
-                            </tr>
-                            <tr>
-                                <td><?= $l10n['nowo'] ?></td>
-                                <td>
-                                    <div class="btn-group">
-                                        <input type="button" class="btn btn-default" disabled="disabled" value="0"
-                                               id="stats-now"/>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><?= $l10n['noco'] ?></td>
-                                <td>
-                                    <div class="btn-group">
-                                        <input type="button" class="btn btn-default" disabled="disabled" value="0"
-                                               id="stats-noc"/>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><?= $l10n['nooo'] ?></td>
-                                <td>
-                                    <div class="btn-group">
-                                        <input type="button" class="btn btn-default" disabled="disabled" value="0"
-                                               id="stats-noo"/>
-                                    </div>
-                                </td>
-                            </tr>
-                        </table>
+                                <tr>
+                                    <td><?= $l10n['noco'] ?></td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <input type="button" class="btn btn-default" disabled="disabled" value="0"
+                                                   id="stats-noc"/>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><?= $l10n['nooo'] ?></td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <input type="button" class="btn btn-default" disabled="disabled" value="0"
+                                                   id="stats-noo"/>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <!-- RIGHT COLUMN END -->
+        <!-- RIGHT COLUMN END -->
 
-</div>
-<!-- CONTENT END -->
+    </div>
+    <!-- CONTENT END -->
+<?php endif // valid aid ?>
 
 <!-- TODO: remove link after presentation -->
 <ul class="pager">

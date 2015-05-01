@@ -13,6 +13,18 @@ class Api
       error: (jqXHR, textStatus, errorThrown) => # if request failed
         @_printError("Storage Error: " + errorThrown)
 
+  @delete = ->
+    aid = $('#aid').data('val')
+    $.ajax "api/edit-algorithm.php?area=delete",
+      type: 'POST'
+      data: {aid: aid}
+      dataType: 'json'
+      success: (data) =>
+        if data['error']? then @_printError(data['error'])
+        else window.location.href = data['redirect']
+      error: (jqXHR, textStatus, errorThrown) => # if request failed
+        @_printError("Storage Error: " + errorThrown)
+
   @_printError: (msg) ->
     $('#editAlertText').html(msg)
     $('#editAlert').show('slow')
@@ -24,3 +36,4 @@ class Api
 $ ->
   $('#btn-public').click -> Api.setVisibility('public')
   $('#btn-private').click -> Api.setVisibility('private')
+  $('#btn-delete').click -> Api.delete() if (confirm($(this).data('warning')))
