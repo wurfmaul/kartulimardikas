@@ -1,46 +1,34 @@
 <?php
 if (!defined('BASEDIR')) die('You cannot call this script directly !');
-if (!isset($_GET['aid'])) {
+
+// redirect if no aid is specified
+if (!$__aid) {
     header("Location:" . url(['action' => 'index']));
     die();
 }
-// get algorithm id
-$aid = $_GET['aid'];
 
-// get algorithm details from database
-require_once BASEDIR . "includes/dataModel.php";
-$_model = new DataModel();
-$_algorithm = $_model->fetchAlgorithm($aid);
-$_model->close();
-
-if (!is_null($_algorithm)) {
+// if algorithm is defined
+if ($__algorithm && ($__public || $__owner)):
     // prepare algorithm meta-data
-    $name = stripslashes($_algorithm->name);
-    $description = stripslashes($_algorithm->description);
-    $long_description = stripslashes($_algorithm->long_description);
+    $name = stripslashes($__algorithm->name);
+    $description = stripslashes($__algorithm->description);
+    $long_description = stripslashes($__algorithm->long_description);
 
     // prepare variables
-    $vars = json_decode($_algorithm->variables);
+    $vars = json_decode($__algorithm->variables);
 
     // prepare tree
     require_once BASEDIR . "includes/algorithm.php";
-    $tree = new Tree(json_decode($_algorithm->tree));
+    $tree = new Tree(json_decode($__algorithm->tree));
 
     // prepare sections
     require_once BASEDIR . "includes/viewHelper.php";
     $sectionNum = isset($_GET['section']) ? $_GET['section'] : SECTIONS_VIEW;
     $section = sections($sectionNum, 6);
-}
-?>
 
-<?php if (is_null($_algorithm)): // invalid id ?>
-    <div class="alert alert-danger" role="alert">
-        <strong><?= $l10n['error'] ?></strong><br/>
-
-        <?= $l10n['message_invalid_aid'] ?>
-    </div>
-<?php else: // valid aid ?>
-    <?php require_once BASEDIR . "partials/headers/algorithmHeader.phtml" ?>
+    // use algorithm header
+    require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
+    ?>
     <!-- HEADER -->
     <div class="page-header">
         <h1><?= $name ?>
@@ -107,7 +95,7 @@ if (!is_null($_algorithm)) {
                     </div>
                     <div id="pseudocode" class="panel-collapse collapse <?= $section[1] ? 'in' : 'closed' ?>">
                         <div class="panel-body algorithm">
-                            <?php if (is_null($_algorithm->tree)): ?>
+                            <?php if (is_null($__algorithm->tree)): ?>
                                 <?= $l10n['no_algorithm'] ?>
                             <?php else: ?>
                                 <ul id="node_<?= $tree->getRoot() ?>" class="insertStepsHere"
@@ -128,7 +116,7 @@ if (!is_null($_algorithm)) {
                     </div>
                     <div id="sourcecode" class=" panel-collapse collapse <?= $section[2] ? 'in' : 'closed' ?>">
                         <div class="panel-body">
-                            <?php if (is_null($_algorithm->tree)): ?>
+                            <?php if (is_null($__algorithm->tree)): ?>
                                 <?= $l10n['no_algorithm'] ?>
                             <?php else: ?>
                                 <pre><?php $tree->printSource(['vars' => $vars]) ?></pre>
@@ -266,9 +254,14 @@ if (!is_null($_algorithm)) {
 
     </div>
     <!-- CONTENT END -->
-<?php endif // valid aid ?>
+<?php else: // no valid aid ?>
+    <div class="alert alert-danger" role="alert">
+        <strong><?= $l10n['error'] ?></strong><br/>
 
-<!-- TODO: remove link after presentation -->
-<ul class="pager">
-    <li class="previous"><a href="../pres/#/overview">&larr; Back to presentation</a></li>
-</ul>
+        <?= $l10n['message_invalid_aid'] ?>
+        <ul>
+            <li><?= $l10n['message_deleted_algorithm'] ?></li>
+            <li><?= $l10n['message_hidden_algorithm'] ?></li>
+        </ul>
+    </div>
+<?php endif ?>

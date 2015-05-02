@@ -2,11 +2,7 @@
 if (!defined('BASEDIR')) die('You cannot call this script directly !');
 
 // ask database for latest algorithms
-require_once BASEDIR . "includes/dataModel.php";
-$_model = new DataModel();
-$algorithms = $_model->fetchLatestAlgorithms(NUMBER_OF_LATEST_ALGORITHMS);
-$_model->close();
-
+$algorithms = $__model->fetchLatestAlgorithms(NUMBER_OF_LATEST_ALGORITHMS);
 require_once BASEDIR . "includes/viewHelper.php";
 ?>
     <!-- HEADER -->
@@ -23,7 +19,7 @@ require_once BASEDIR . "includes/viewHelper.php";
         </p>
     </div>
 
-<?php if (sizeof($algorithms)): ?>
+<?php if ($algorithms): ?>
     <!-- CONTENT -->
     <table class="table table-striped table-hover algorithms">
         <thead>

@@ -9,7 +9,7 @@ class Api
         if data['error']? then @_printError(data['error'])
         else
           @_printSuccess(data['success'])
-          $('.visibility').toggle()
+          $('.settings-visibility').toggle()
       error: (jqXHR, textStatus, errorThrown) => # if request failed
         @_printError("Storage Error: " + errorThrown)
 
@@ -21,7 +21,9 @@ class Api
       dataType: 'json'
       success: (data) =>
         if data['error']? then @_printError(data['error'])
-        else window.location.href = data['redirect']
+        else
+          $('#delete-msg').val(data['success'])
+          $('#delete-form').submit()
       error: (jqXHR, textStatus, errorThrown) => # if request failed
         @_printError("Storage Error: " + errorThrown)
 

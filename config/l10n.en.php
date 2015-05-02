@@ -11,7 +11,7 @@ $l10n['warning'] = "Warning!";
 $l10n['toggle_nav'] = "Toggle navigation";
 
 // USER MANAGEMENT
-$l10n['welcome'] = "Hello, %s";
+$l10n['welcome'] = "Hello, %s!";
 $l10n['enter_username'] = "Please enter a username!";
 $l10n['enter_email'] = "Please enter a valid email address!";
 $l10n['enter_password'] = "Please enter a password!";
@@ -96,10 +96,11 @@ $l10n['step_back'] = "Step back";
 $l10n['play'] = "Play";
 $l10n['step_forward'] = "Step forward";
 $l10n['forward_to_end'] = "Forward to end";
-$l10n['message_invalid_aid'] = "This algorithm does not exist (any more)!";
+$l10n['message_invalid_aid'] = "The chosen algorithm cannot be displayed. This can have the following reasons:";
+$l10n['message_deleted_algorithm'] = "This algorithm was deleted.";
+$l10n['message_hidden_algorithm'] = "This algorithm is private and you are not allowed to see.";
 $l10n['no_vars'] = "No variables defined yet.";
 $l10n['no_algorithm'] = "No algorithm defined yet.";
-$l10n[''] = "";
 $l10n[''] = "";
 $l10n[''] = "";
 $l10n[''] = "";
@@ -143,6 +144,7 @@ $l10n['invalid'] = "invalid";
 $l10n['untitled_algorithm'] = "[Untitled algorithm]";
 $l10n['usage_count'] = "Usage count";
 $l10n['contains'] = "contains";
+$l10n['public_without_name'] = "A public algorithm cannot be without a name!";
 
 // SETTINGS
 $l10n['settings'] = "Settings";
@@ -156,6 +158,7 @@ $l10n['delete'] = "Delete";
 $l10n['delete_message'] = "Once you click on the button below, this algorithm will be erased. This action cannot be undone!";
 $l10n['delete_algorithm'] = "Delete algorithm";
 $l10n['delete_warning'] = "Do you really want to remove this algorithm? This action cannot be undone!";
+$l10n['delete_not_possible'] = "If no name is specified, this algorithm cannot be published!";
 $l10n['algorithm_deleted'] = "Algorithm deleted.";
 
 // USER

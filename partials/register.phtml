@@ -1,4 +1,12 @@
-<?php if (!defined('BASEDIR')) die('You cannot call this script directly !') ?>
+<?php
+if (!defined('BASEDIR')) die('You cannot call this script directly !');
+
+// redirect if the user is already signed in
+if (isset($__uid)) {
+    header("Location:" . url(['action' => 'user', 'uid' => $__uid]));
+    die();
+}
+?>
 <!-- HEADER -->
 <div class="page-header">
     <h1><?= $l10n['register'] ?>
@@ -14,11 +22,11 @@
                 <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
             </button>
             <strong><?= $l10n['error'] ?></strong>
+
             <div id="registerAlertText"></div>
         </div>
 
-        <form id="registerForm" class="form-horizontal" role="form" method="post" name="register"
-              action="<?= url([]) ?>">
+        <form id="registerForm" class="form-horizontal" role="form" method="post" name="register" action="<?= url() ?>">
             <div id="username-group" class="form-group">
                 <label for="in-username" class="control-label col-sm-3"><?= $l10n['username'] ?></label>
 

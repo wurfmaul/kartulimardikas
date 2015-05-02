@@ -4,7 +4,6 @@ define('BASEDIR', realpath('..') . '/');
 require_once BASEDIR . 'config/config.php';
 require_once BASEDIR . 'includes/authentication.php';
 require_once BASEDIR . 'includes/dataModel.php';
-require_once BASEDIR . 'api/get-url.php';
 
 // in order to retrieve the uid we need access to the session
 secure_session_start();
@@ -14,6 +13,7 @@ class EditManager
 {
     private $_uid;
     private $_aid;
+    private $_algorithm;
     private $_model;
     private $_response;
     private $_l10n;
@@ -26,18 +26,16 @@ class EditManager
         $this->_model = new DataModel();
         $this->_response = array();
         $this->_l10n = $l10n;
+        // fetch algorithm details from database
+        $this->_algorithm = $this->_model->fetchAlgorithm($this->_aid);
     }
 
     public function process()
     {
-        // fetch algorithm details from database
-        $owner = $this->_model->fetchAlgorithm($this->_aid)->uid;
-        if ($owner != $this->_uid) {
+        // check ownership
+        if ($this->_algorithm->uid !== $this->_uid) {
             $this->_response['error'] = $this->_l10n['need_to_be_owner'];
-        }
-
-        // partially process data
-        if (!isset($this->_response['error'])) {
+        } else {
             switch (trim($_GET['area'])) {
                 case 'info':
                     $this->_processInfo();
@@ -77,12 +75,13 @@ class EditManager
         $desc = trim($_POST['desc']);
         $long = trim($_POST['long']);
 
-        if (empty($name)) {
-            $name = $this->_l10n['untitled_algorithm'];
+        if (empty($name) && $this->_algorithm->date_publish) {
+            $this->_response['error'] = $this->_l10n['public_without_name'];
+            $this->_response['name'] = $this->_algorithm->name;
+        } else {
+            $this->_model->updateAlgorithmInfo($this->_aid, $name, $desc, $long);
+            $this->_response['success'] = $this->_l10n['saved_to_db'];
         }
-
-        $this->_model->updateAlgorithmInfo($this->_aid, $name, $desc, $long);
-        $this->_response['success'] = $this->_l10n['saved_to_db'];
     }
 
     private function _editVar()
@@ -248,7 +247,6 @@ class EditManager
     {
         $this->_model->deleteAlgorithm($this->_aid);
         $this->_response['success'] = $this->_l10n['algorithm_deleted'];
-        $this->_response['redirect'] = url();
     }
 }
 

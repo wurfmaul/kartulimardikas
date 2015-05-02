@@ -2,20 +2,23 @@
 if (!defined('BASEDIR')) die('You cannot call this script directly !');
 
 require_once BASEDIR . "includes/viewHelper.php";
-require_once BASEDIR . 'includes/dataModel.php';
-$model = new DataModel();
+// if a user id is specified, load user by uid
 if (isset($_GET['uid'])) {
-    $user = $model->fetchUser($_GET['uid']);
+    $user = $__model->fetchUser($_GET['uid']);
+
+// if a user name is specified, load user by user name
 } elseif (isset($_GET['name'])) {
-    $user = $model->fetchUserByUsername($_GET['name']);
+    $user = $__model->fetchUserByUsername($_GET['name']);
+
+// if nothing is specified, but user is signed in, load current user
+} elseif ($__uid) {
+    $user = $__model->fetchUser($__uid);
 }
-if (isset($user)) {
-    $algorithms = $model->fetchAlgorithmsOfUser($user->uid, 0, MAX_NUMBER_OF_ALGORITHMS);
-}
-$model->close();
 ?>
 
-<?php if (isset($user)): ?>
+<?php if (isset($user)):
+    $algorithms = $__model->fetchAlgorithmsOfUser($user->uid, 0, MAX_NUMBER_OF_ALGORITHMS);
+    ?>
     <div class="page-header">
         <h1><?= $user->username ?></h1>
 
@@ -23,41 +26,45 @@ $model->close();
     </div>
 
     <?php if ($algorithms): ?>
-        <table class="table table-striped table-hover algorithms">
-            <thead>
+    <table class="table table-striped table-hover algorithms">
+        <thead>
+        <tr>
+            <th><?= $l10n['algorithms'] ?></th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($algorithms as $algorithm): $link = url(['action' => 'view', 'aid' => $algorithm['aid']]) ?>
             <tr>
-                <th><?= $l10n['algorithms'] ?></th>
-            </tr>
-            </thead>
-            <tbody>
-            <?php foreach ($algorithms as $algorithm): $link = url(['action' => 'view', 'aid' => $algorithm['aid']]) ?>
-                <tr>
-                    <td>
-                        <?php if ($algorithm['age'] <= MAX_MINUTES_FOR_LABEL): ?>
-                            <span class="label label-default"><?= $l10n['label_new'] ?></span>
-                        <?php endif ?>
-                        <?php if (is_null($algorithm['date_publish'])): ?>
-                            <span class="label label-info">private</span>
-                        <?php endif ?>
-                        <span class="name"><a href="<?= $link ?>"><?= $algorithm['name'] ?></a></span>
+                <td>
+                    <?php if ($algorithm['age'] <= MAX_MINUTES_FOR_LABEL): ?>
+                        <span class="label label-default"><?= $l10n['label_new'] ?></span>
+                    <?php endif ?>
+                    <?php if (is_null($algorithm['date_publish'])): ?>
+                        <span class="label label-info">private</span>
+                    <?php endif ?>
+                    <span class="name">
+                            <a href="<?= $link ?>">
+                                <?= $algorithm['name'] ? $algorithm['name'] : $l10n['untitled_algorithm'] ?>
+                            </a>
+                        </span>
                         <span class="properties">(<?= sprintf($l10n['created_at'], getTimeFrame($algorithm['age'])) ?>
                             )</span>
-                        <?php if (!empty($algorithm['description'])): ?>
-                            <span class="description"><?= skipDescription($algorithm['description']) ?></span>
-                        <?php endif ?>
-                    </td>
-                </tr>
-            <?php endforeach ?>
-            </tbody>
-            <tfoot>
-            <!-- TODO: paginator -->
-            </tfoot>
-        </table>
-    <?php else: ?>
-        <div><?= $l10n['no_algorithms'] ?></div>
-    <?php endif ?>
-
+                    <?php if (!empty($algorithm['description'])): ?>
+                        <span class="description"><?= skipDescription($algorithm['description']) ?></span>
+                    <?php endif ?>
+                </td>
+            </tr>
+        <?php endforeach ?>
+        </tbody>
+        <tfoot>
+        <!-- TODO: paginator -->
+        </tfoot>
+    </table>
 <?php else: ?>
+    <div><?= $l10n['no_algorithms'] ?></div>
+<?php endif ?>
+
+<?php else: // no user specified ?>
     <div class="alert alert-danger alert-dismissible">
         <button type="button" class="close">
             <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>

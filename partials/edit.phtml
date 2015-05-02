@@ -1,36 +1,30 @@
 <?php
 if (!defined('BASEDIR')) die('You cannot call this script directly !');
-if (!isset($_GET['aid'])) {
+
+// redirect if no aid is specified
+if (!$__aid) {
     header("Location:" . url(['action' => 'new']));
     die();
 }
-// get algorithm id
-$aid = $_GET['aid'];
-
-// get algorithm details from database
-require_once BASEDIR . "includes/dataModel.php";
-$_model = new DataModel();
-$_algo = $_model->fetchAlgorithm($aid);
-$_model->close();
 
 // check authentication
-if (!isSignedIn() || $_SESSION['uid'] != $_algo->uid) {
-    header("Location:" . url(['action' => 'view', 'aid' => $aid]));
+if (!$__uid || !$__owner) {
+    header("Location:" . url(['action' => 'view', 'aid' => $__aid]));
     die();
 }
 
 // prepare algorithm meta data
-$name = stripslashes($_algo->name);
-$description = stripslashes($_algo->description);
-$long_description = stripslashes($_algo->long_description);
+$name = stripslashes($__algorithm->name);
+$description = stripslashes($__algorithm->description);
+$long_description = stripslashes($__algorithm->long_description);
 
 // prepare variables and add prototype row to variables
-$vars = json_decode($_algo->variables);
+$vars = json_decode($__algorithm->variables);
 $vars['prototype'] = (object)['name' => '', 'init' => 'elem-?', 'value' => '', 'size' => 2];
 
 // prepare tree
 require_once BASEDIR . "includes/algorithm.php";
-$tree = new Tree(json_decode($_algo->tree));
+$tree = new Tree(json_decode($__algorithm->tree));
 
 // prepare sections
 require_once BASEDIR . "includes/viewHelper.php";
@@ -39,7 +33,6 @@ $section = sections($sectionNum, 3);
 
 // use algorithm header
 require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
-
 ?>
 <!-- HEADER -->
 <div class="page-header">

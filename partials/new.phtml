@@ -2,14 +2,11 @@
 if (!defined('BASEDIR')) die('You cannot call this script directly !');
 
 // create a new algorithm and redirect to edit-page if a user is signed in
-if (isSignedIn()) {
+if ($__uid) {
     // create a new algorithm
-    require_once BASEDIR . "includes/dataModel.php";
-    $_model = new DataModel();
-    $aid = $_model->insertAlgorithm($_SESSION['uid']);
-    $_model->close();
+    $aid = $__model->insertAlgorithm($__uid);
     // redirect to the edit-page
-    header("Location:" . url(['action' => 'edit', 'aid' => $aid]));
+    header("Location:" . url(['action' => 'edit', 'aid' => $__aid]));
     die();
 }
 ?>

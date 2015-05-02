@@ -3,12 +3,9 @@ if (!defined('BASEDIR')) die('You cannot call this script directly !');
 require_once BASEDIR . "includes/viewHelper.php";
 
 // ask database for latest algorithms
-require_once BASEDIR . "includes/dataModel.php";
-$_model = new DataModel();
-$latestAlgorithms = $_model->fetchLatestAlgorithms(MAX_NUMBER_OF_ENTRIES);
-$lastChanges = $_model->fetchModifiedAlgorithms(MAX_NUMBER_OF_ENTRIES);
-$diligentUsers = $_model->fetchUsersWithMostAlgorithms(MAX_NUMBER_OF_ENTRIES);
-$_model->close();
+$latestAlgorithms = $__model->fetchLatestAlgorithms(MAX_NUMBER_OF_ENTRIES);
+$lastChanges = $__model->fetchModifiedAlgorithms(MAX_NUMBER_OF_ENTRIES);
+$diligentUsers = $__model->fetchUsersWithMostAlgorithms(MAX_NUMBER_OF_ENTRIES);
 ?>
 <!-- HEADER -->
 <div class="page-header">

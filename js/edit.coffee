@@ -6,15 +6,23 @@ class Api
     name = $('#in-name').val()
     desc = $('#in-desc').val()
     long = $('#in-long').val()
-    $.ajax "api/edit-algorithm.php?area=info",
+    $.ajax("api/edit-algorithm.php?area=info",
       type: 'POST'
       data: {aid: aid, name: name, desc: desc, long: long}
       dataType: 'json'
       success: (data) => # if response arrived...
-        if data['error']? then @_printError(data['error'])
-        else @_printSuccess(data['success'])
+        if data['error']?
+          @_printError(data['error'])
+          if data['name']?
+            $('#in-name')
+            .val(data['name'])# restore name
+            .closest('.form-group').addClass('has-error') # mark as invalid
+        else
+          @_printSuccess(data['success'])
+          $('.has-error').removeClass('has-error')
       error: (jqXHR, textStatus, errorThrown) => # if request failed
         @_printError("Request Error: " + errorThrown)
+    )
 
   @editVariable: (vid) ->
     varRow = $('#var-' + vid)
@@ -23,7 +31,7 @@ class Api
     init = varRow.find('.init').val()
     value = varRow.find('.value').val()
     size = varRow.find('.size').val()
-    $.ajax "api/edit-algorithm.php?area=var&action=edit",
+    $.ajax("api/edit-algorithm.php?area=var&action=edit",
       type: 'POST'
       data: {aid: aid, vid: vid, name: name, init: init, value: value, size: size}
       dataType: 'json'
@@ -62,10 +70,11 @@ class Api
             )
       error: (jqXHR, textStatus, errorThrown) => # if request failed
         @_printError("Request Error: " + errorThrown)
+    )
 
   @removeVariable: (vid) ->
     aid = $('#aid').data('val')
-    $.ajax "api/edit-algorithm.php?area=var&action=remove",
+    $.ajax("api/edit-algorithm.php?area=var&action=remove",
       type: 'POST'
       data: {aid: aid, vid: vid}
       dataType: 'json'
@@ -80,10 +89,11 @@ class Api
           $('.var-value > .var-' + vid).remove()
       error: (jqXHR, textStatus, errorThrown) => # if request failed
         @_printError("Request Error: " + errorThrown)
+    )
 
   @editScript: (tree) ->
     aid = $('#aid').data('val')
-    $.ajax "api/edit-algorithm.php?area=script",
+    $.ajax("api/edit-algorithm.php?area=script",
       type: 'POST'
       data: {aid: aid, tree: tree}
       dataType: 'json'
@@ -92,6 +102,7 @@ class Api
         else @_printSuccess(data['success'])
       error: (jqXHR, textStatus, errorThrown) => # if request failed
         @_printError("Storage Error: " + errorThrown)
+    )
 
   @_printError: (msg) ->
     $('#editAlertText').html(msg)
@@ -115,6 +126,7 @@ class VariableForm
       .attr('id', 'var-' + @maxVarId)# change id
       .data('vid', @maxVarId)# change vid
       .appendTo(VARSITE) # add to the other rows
+    newRow.find('.btn-var-count').data('target', 'var-' + @maxVarId) # change highlight target
     newRow.find('.edit').show()
     newRow.find('.view').hide()
     newRow.show('slow')
@@ -164,6 +176,7 @@ class StepForm
     # create new node from prototype
     node = $('#' + prototypeId)
       .clone(true, true)
+    .removeAttr('id')
       .appendTo(SCRIPTSITE)
     # update the variable counter
     @varForm.updateVarCount()
@@ -207,15 +220,33 @@ class StepForm
     SCRIPTSITE.sortable(sortParams)
     SCRIPTSITE.find('.sortable').sortable(sortParams)
 
+# highlight all the variable usages
+highlightVar = (id) ->
+  SCRIPTSITE.find(".#{id}:selected").closest('tr').children().addClass('highlight')
+  setTimeout(-> # remove the highlight after some time
+    SCRIPTSITE.find('.highlight').removeClass('highlight')
+  , 1500)
+
+updateVisibility = (variable) ->
+  # show/hide input fields according to the init selection
+  varRow = variable.parents('.varRow')
+  target = variable.find(':selected').data('target')
+  showValue = (target == '.value')
+  showSize = (target == '.size')
+  varRow.find('.value-group').show('slow') if showValue
+  varRow.find('.size-group').show('slow') if showSize
+  varRow.find('.size-group').hide('slow') if !showSize
+  varRow.find('.value-group').hide('slow') if !showValue
+
 $ ->
   # GENERAL
   $('#editAlertClose').click -> $('#editAlert').hide('slow')
 
   # INFORMATION SECTION
+  $('#in-name, #in-desc, #in-long').blur -> Api.editInfo()
   $('#in-long')
   .focus -> $(this).val("") if ($(this).data('placeholder') == $(this).val())
   .blur -> $(this).val($(this).data('placeholder')) if ($(this).val() == "")
-  $('#in-name, #in-desc, #in-long').blur -> Api.editInfo()
 
   # VARIABLE SECTION
   varForm = new VariableForm()
@@ -224,21 +255,8 @@ $ ->
   $('.btn-var-check').click -> varForm.performCheck($(this).parents('.varRow').data('vid'))
   $('.btn-var-edit').click -> varForm.performEdit($(this).parents('.varRow').data('vid'))
   $('.btn-var-remove').click -> varForm.performRemove($(this).parents('.varRow').data('vid'))
-  $('.btn-var-count').click -> # highlight all the variable usages
-    id = $(this).data('target')
-    SCRIPTSITE.find(".#{id}:selected").closest('tr').children().addClass('highlight')
-    setTimeout(-> # remove the highlight after some time
-      SCRIPTSITE.find('.highlight').removeClass('highlight')
-    , 1500)
-  $('.init').change -> # show/hide input fields according to the init selection
-    varRow = $(this).parents('.varRow')
-    target = $(this).find(':selected').data('target')
-    showValue = (target == '.value')
-    showSize = (target == '.size')
-    varRow.find('.value-group').show('slow') if showValue
-    varRow.find('.size-group').show('slow') if showSize
-    varRow.find('.size-group').hide('slow') if !showSize
-    varRow.find('.value-group').hide('slow') if !showValue
+  $('.btn-var-count').click -> highlightVar($(this).data('target'))
+  $('.init').change -> updateVisibility($(this))
 
   # STEPS SECTION
   stepForm = new StepForm(varForm)

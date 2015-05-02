@@ -1,28 +1,17 @@
-<?php
-if (!defined('BASEDIR')) die('You cannot call this script directly !');
-
-$aid = isset($_GET['aid']) ? $_GET['aid'] : false;
-if ($aid && $uid) {
-    require_once BASEDIR . 'includes/dataModel.php';
-    $model = new DataModel();
-    $result = $model->fetchAlgorithm($aid);
-    $model->close();
-    $owner = $result->uid === $uid;
-}
-?>
-<?php if ($aid): ?>
-    <?php if ($uid): ?>
+<?php if (!defined('BASEDIR')) die('You cannot call this script directly !') ?>
+<?php if ($__aid): ?>
+    <?php if ($__uid): ?>
         <!-- NAVIGATION MENU FOR ALGORITHMS -->
         <ul class="nav nav-tabs">
             <li role="presentation"<?php if (ACTION == 'view'): ?> class="active"<?php endif ?>>
-                <a href="<?= url(['action' => 'view', 'aid' => $aid]) ?>"><?= $l10n['view'] ?></a>
+                <a href="<?= url(['action' => 'view', 'aid' => $__aid]) ?>"><?= $l10n['view'] ?></a>
             </li>
-            <?php if ($owner): ?>
+            <?php if ($__owner): ?>
                 <li role="presentation"<?php if (ACTION == 'edit'): ?> class="active"<?php endif ?>>
-                    <a href="<?= url(['action' => 'edit', 'aid' => $aid]) ?>"><?= $l10n['edit'] ?></a>
+                    <a href="<?= url(['action' => 'edit', 'aid' => $__aid]) ?>"><?= $l10n['edit'] ?></a>
                 </li>
                 <li role="presentation"<?php if (ACTION == 'settings'): ?> class="active"<?php endif ?>>
-                    <a href="<?= url(['action' => 'settings', 'aid' => $aid]) ?>"><?= $l10n['settings'] ?></a>
+                    <a href="<?= url(['action' => 'settings', 'aid' => $__aid]) ?>"><?= $l10n['settings'] ?></a>
                 </li>
             <?php else: ?>
                 <li role="presentation" class="disabled">
@@ -35,5 +24,5 @@ if ($aid && $uid) {
         </ul>
     <?php endif ?>
     <!-- The current AID for jquery to use -->
-    <div id="aid" data-val="<?= $aid ?>" style="display: none"></div>
+    <div id="aid" data-val="<?= $__aid ?>" style="display: none"></div>
 <?php endif ?>

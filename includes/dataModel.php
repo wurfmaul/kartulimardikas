@@ -264,7 +264,11 @@ class DataModel
         $desc = $this->_sql->real_escape_string($desc);
         $long = $this->_sql->real_escape_string($long);
 
-        $stmt = $this->_sql->prepare("UPDATE algorithm SET name=?, description=?, long_description=?, date_lastedit=NOW() WHERE aid=?");
+        $stmt = $this->_sql->prepare("
+            UPDATE algorithm
+            SET name=?, description=?, long_description=?, date_lastedit=NOW()
+            WHERE aid=?
+        ");
         $stmt->bind_param("sssi", $name, $desc, $long, $aid);
         $stmt->execute();
         $rows = $stmt->affected_rows;

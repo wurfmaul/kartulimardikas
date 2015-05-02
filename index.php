@@ -9,11 +9,13 @@ define('BASEDIR', __DIR__ . '/');
 require_once BASEDIR . 'config/config.php';
 require_once BASEDIR . 'api/get-url.php';
 require_once BASEDIR . 'includes/authentication.php';
+require_once BASEDIR . "includes/dataModel.php";
+$__model = new DataModel();
 
 // setup and verify action
-$_action = isset($_GET['action']) ? $_GET['action'] : DEFAULT_PAGE;
-if (!file_exists(BASEDIR . "partials/$_action.phtml"))
-    $_action = DEFAULT_PAGE;
+$__action = isset($_GET['action']) ? $_GET['action'] : DEFAULT_PAGE;
+if (!file_exists(BASEDIR . "partials/$__action.phtml"))
+    $__action = DEFAULT_PAGE;
 
 // deal with authentication
 secure_session_start();
@@ -22,13 +24,11 @@ if ((isset($_POST['signInBtn']) || isset($_POST['registerBtn'])) &&
     isset($_POST['username']) && isset($_POST['password'])
 ) {
     $username = $_POST['username'];
-    $password = $_POST['password'];
-    if (signIn($username, $password)) {
+    if (signIn($username, $_POST['password'])) {
         $successMsg = sprintf($l10n['signed_in'], $username);
         // if the user has just been created
         if (isset($_POST['registerBtn'])) {
-            $successMsg = "<br />" . sprintf($l10n['user_created'], $username) .
-                "<br />" . $successMsg;
+            $registerMsg = sprintf($l10n['user_created'], $username);
         }
     } else {
         $errorMsg = $l10n['credentials_invalid'];
@@ -38,13 +38,45 @@ if ((isset($_POST['signInBtn']) || isset($_POST['registerBtn'])) &&
 } elseif (isset($_POST['signOutBtn'])) {
     signOut();
     $successMsg = $l10n['signed_out'];
-    if ($_action == 'edit' || $_action == 'settings')
-        $_action = 'view';
 }
 
-// deal with current session
-$uid = isSignedIn();
-define('ACTION', $_action);
+if (isset($_POST['successMsg'])) {
+    $successMsg = $_POST['successMsg'];
+}
+if (isset($_POST['errorMsg'])) {
+    $errorMsg = $_POST['errorMsg'];
+}
+
+/** @var int $__uid Currently signed in user or false if not signed in. */
+$__uid = isSignedIn();
+
+/** @var int $__aid Current algorithm id or false if no algorithm selected. */
+$__aid = false;
+if (isset($_GET['aid'])) {
+    $__aid = $_GET['aid'];
+    $__algorithm = $__model->fetchAlgorithm($__aid);
+    if ($__algorithm) {
+        /** @var bool $__owner True if the signed in user is the owner of the current algorithm. */
+        $__owner = $__algorithm->uid === $__uid;
+        /** @var bool $__public True if the algorithm is defined public. */
+        $__public = !is_null($__algorithm->date_publish);
+    }
+}
+
+// make action permanent for this session
+define('ACTION', $__action);
+
+// define where the user should be taken after signing out
+$signOutAction = "";
+if ($__aid && $__algorithm) {
+    // if the algorithm is private -> redirect to home action
+    if (!$__public) {
+        $signOutAction = url();
+        // if the algorithm is public -> redirect to view action
+    } elseif ($__action === 'edit' || $__action === 'settings') {
+        $signOutAction = url(['action' => 'view', 'aid' => $__aid]);
+    }
+}
 ?><!DOCTYPE html>
 <html lang="en">
 <head>
@@ -74,19 +106,23 @@ define('ACTION', $_action);
         </div>
         <div class="collapse navbar-collapse" id="navbar">
             <ul class="nav navbar-nav">
-                <li<?php if (ACTION == 'index'): ?> class="active"<?php endif ?>>
+                <li<?php if (ACTION === 'index'): ?> class="active"<?php endif ?>>
                     <a href="<?= url(['action' => 'index']) ?>"><?= $l10n['index'] ?></a>
                 </li>
-                <li<?php if (ACTION == 'new'): ?> class="active"<?php endif ?>>
+                <li<?php if (ACTION === 'new'): ?> class="active"<?php endif ?>>
                     <a href="<?= url(['action' => 'new']) ?>"><?= $l10n['new'] ?></a>
                 </li>
             </ul>
-            <form class="navbar-form navbar-right" role="form" method="post">
-                <?php if ($uid): ?>
-                    <?= sprintf($l10n['welcome'],
-                        '<a href="' . url(['action' => 'user', 'uid' => $uid]) . '">' . $_SESSION['username'] . '</a>') ?>!
+            <?php if ($__uid): ?>
+                <form class="navbar-form navbar-right" role="form" method="post" action="<?= $signOutAction ?>">
+                    <span>
+                        <?= sprintf($l10n['welcome'],
+                            '<a href="' . url(['action' => 'user']) . '">' . $_SESSION['username'] . '</a>') ?>
+                    </span>
                     <button type="submit" name="signOutBtn" class="btn btn-default"><?= $l10n['sign_out'] ?></button>
-                <?php else: ?>
+                </form>
+            <?php else: ?>
+                <form class="navbar-form navbar-right" role="form" method="post">
                     <div class="form-group">
                         <label class="sr-only" for="username"><?= $l10n['username'] ?></label>
                         <input class="form-control" name="username" placeholder="<?= $l10n['username'] ?>">
@@ -98,8 +134,8 @@ define('ACTION', $_action);
                     </div>
                     <button type="submit" name="signInBtn" class="btn btn-default"><?= $l10n['sign_in'] ?></button>
                     <a class="btn btn-link" href="<?= url(['action' => 'register']) ?>"><?= $l10n['register'] ?></a>
-                <?php endif ?>
-            </form>
+                </form>
+            <?php endif ?>
         </div>
     </div>
 </nav>
@@ -124,7 +160,15 @@ define('ACTION', $_action);
             <button id="generalSuccessClose" type="button" class="close">
                 <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
             </button>
-            <strong><?= $l10n['success'] ?></strong> <?= $successMsg ?>
+            <strong><?= $l10n['success'] ?></strong>
+            <?php if (isset($registerMsg)): ?>
+                <ul>
+                    <li><?= $registerMsg ?></li>
+                    <li><?= $successMsg ?></li>
+                </ul>
+            <?php else: ?>
+                <?= $successMsg ?>
+            <?php endif ?>
         </div>
     <?php endif ?>
 
@@ -147,3 +191,4 @@ define('ACTION', $_action);
 <?php endif ?>
 </body>
 </html>
+<?php $__model->close() ?>
