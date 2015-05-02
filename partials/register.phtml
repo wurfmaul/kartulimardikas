@@ -2,7 +2,7 @@
 if (!defined('BASEDIR')) die('You cannot call this script directly !');
 
 // redirect if the user is already signed in
-if (isset($__uid)) {
+if ($__uid) {
     header("Location:" . url(['action' => 'user', 'uid' => $__uid]));
     die();
 }

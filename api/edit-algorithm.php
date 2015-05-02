@@ -9,7 +9,7 @@ require_once BASEDIR . 'includes/dataModel.php';
 secure_session_start();
 $uid = isSignedIn();
 
-class EditManager
+class EditAlgorithmManager
 {
     private $_uid;
     private $_aid;
@@ -260,7 +260,7 @@ if (!isset($_POST['aid'])) {
     // prepare variables
     $aid = $_POST['aid'];
     // start processing
-    $manager = new EditManager($uid, $aid);
+    $manager = new EditAlgorithmManager($uid, $aid);
     $response = $manager->process();
 }
 

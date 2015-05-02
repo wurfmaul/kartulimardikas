@@ -1,14 +1,17 @@
 <?php
 if (!defined('BASEDIR')) die('You cannot call this script directly !');
 
+// if a user name is specified, redirect to uid
+if (isset($_GET['name'])) {
+    $user = $__model->fetchUserByUsername($_GET['name']);
+    header("Location:" . url(['action' => 'user', 'uid' => $user->uid]));
+    die();
+}
+
 require_once BASEDIR . "includes/viewHelper.php";
 // if a user id is specified, load user by uid
 if (isset($_GET['uid'])) {
     $user = $__model->fetchUser($_GET['uid']);
-
-// if a user name is specified, load user by user name
-} elseif (isset($_GET['name'])) {
-    $user = $__model->fetchUserByUsername($_GET['name']);
 
 // if nothing is specified, but user is signed in, load current user
 } elseif ($__uid) {
@@ -17,53 +20,151 @@ if (isset($_GET['uid'])) {
 ?>
 
 <?php if (isset($user)):
-    $algorithms = $__model->fetchAlgorithmsOfUser($user->uid, 0, MAX_NUMBER_OF_ALGORITHMS);
+    $ownAccount = $__uid === $user->uid;
+    $algorithms = $__model->fetchAlgorithmsOfUser($user->uid, $ownAccount, 0, MAX_NUMBER_OF_ALGORITHMS);
     ?>
+    <!-- HEADER -->
     <div class="page-header">
         <h1><?= $user->username ?></h1>
 
         <p><?= sprintf($l10n['member_since'], date_create($user->date_registration)->format('F j, Y')) ?></p>
     </div>
+    <!-- HEADER END -->
 
-    <?php if ($algorithms): ?>
-    <table class="table table-striped table-hover algorithms">
-        <thead>
-        <tr>
-            <th><?= $l10n['algorithms'] ?></th>
-        </tr>
-        </thead>
-        <tbody>
-        <?php foreach ($algorithms as $algorithm): $link = url(['action' => 'view', 'aid' => $algorithm['aid']]) ?>
-            <tr>
-                <td>
-                    <?php if ($algorithm['age'] <= MAX_MINUTES_FOR_LABEL): ?>
-                        <span class="label label-default"><?= $l10n['label_new'] ?></span>
-                    <?php endif ?>
-                    <?php if (is_null($algorithm['date_publish'])): ?>
-                        <span class="label label-info">private</span>
-                    <?php endif ?>
-                    <span class="name">
+    <!-- CONTENT -->
+    <div id="userSuccess" class="alert alert-success alert-dismissible" style="display:none">
+        <button id="userSuccessClose" type="button" class="close">
+            <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
+        </button>
+        <strong><?= $l10n['success'] ?></strong>
+
+        <div id="userSuccessText"></div>
+    </div>
+    <div id="userAlert" class="alert alert-danger alert-dismissible" style="display:none">
+        <button id="userAlertClose" type="button" class="close">
+            <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
+        </button>
+        <strong><?= $l10n['error'] ?></strong>
+
+        <div id="userAlertText"></div>
+    </div>
+    <div class="row">
+        <!-- LEFT COLUMN -->
+        <div class="col-md-6">
+            <?php if ($ownAccount): ?>
+                <div class="well">
+                    <h3><?= $l10n['account_settings'] ?></h3>
+
+                    <form id="usernameForm" class="form-horizontal" role="form" method="post"
+                          action="<?= url(['action' => 'user', 'uid' => $__uid]) ?>">
+                        <div id="username-group" class="form-group">
+                            <input id="usernameMsg" name="successMsg" style="display: none;"/>
+                            <label for="in-username" class="control-label col-sm-4"><?= $l10n['username'] ?></label>
+
+                            <div class="col-sm-5">
+                                <input type="text" class="form-control" id="in-username" name="username"
+                                       value="<?= $user->username ?>"/>
+                            </div>
+                            <div class="col-sm-3">
+                                <a href="javascript:void(0)" id="usernameBtn" class="btn btn-primary">
+                                    <?= $l10n['change'] ?>
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                    <form class="form-horizontal" role="form">
+                        <div id="email-group" class="form-group">
+                            <label for="in-email" class="control-label col-sm-4"><?= $l10n['email_address'] ?></label>
+
+                            <div class="col-sm-5">
+                                <input type="email" class="form-control" id="in-email" name="email"
+                                       value="<?= $user->email ?>"/>
+                            </div>
+                            <div class="col-sm-3">
+                                <a href="javascript:void(0)" id="emailBtn" class="btn btn-primary">
+                                    <?= $l10n['change'] ?>
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                    <form id="passwordForm" class="form-horizontal" role="form" method="post"
+                          action="<?= url(['action' => 'user', 'uid' => $__uid]) ?>">
+                        <div id="password1-group" class="form-group">
+                            <input id="passwordMsg" name="successMsg" style="display: none;"/>
+                            <label for="in-password1"
+                                   class="control-label col-sm-4"><?= $l10n['password'] ?></label>
+
+                            <div class="col-sm-5">
+                                <input type="password" class="form-control" id="in-password1" name="password1"
+                                       placeholder="<?= $l10n['password'] ?>">
+                            </div>
+                            <div class="col-sm-3">
+                                <a href="javascript:void(0)" id="passwordBtn" class="btn btn-primary">
+                                    <?= $l10n['change'] ?>
+                                </a>
+                            </div>
+                        </div>
+                        <div id="password2-group" class="form-group">
+                            <label for="in-password2" class="control-label col-sm-4"></label>
+
+                            <div class="col-sm-5">
+                                <input type="password" class="form-control" id="in-password2" name="password2"
+                                       placeholder="<?= $l10n['password_again'] ?>">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            <?php else: // not signed in ?>
+                <div class="well">
+                    <h3>Drop a message</h3>
+                </div>
+            <?php endif ?>
+        </div>
+        <!-- LEFT COLUMN END -->
+
+        <!-- RIGHT COLUMN -->
+        <div class="col-md-6">
+            <div class="well">
+                <h3><?= $l10n['algorithms'] ?></h3>
+                <?php if ($algorithms): ?>
+                    <table class="table table-striped table-hover algorithms">
+                        <tbody>
+                        <?php foreach ($algorithms as $algorithm): $link = url(['action' => 'view', 'aid' => $algorithm['aid']]) ?>
+                            <tr>
+                                <td>
+                                    <?php if ($algorithm['age'] <= MAX_MINUTES_FOR_LABEL): ?>
+                                        <span class="label label-default"><?= $l10n['label_new'] ?></span>
+                                    <?php endif ?>
+                                    <?php if (is_null($algorithm['date_publish'])): ?>
+                                        <span class="label label-info">private</span>
+                                    <?php endif ?>
+                                    <span class="name">
                             <a href="<?= $link ?>">
                                 <?= $algorithm['name'] ? $algorithm['name'] : $l10n['untitled_algorithm'] ?>
                             </a>
                         </span>
                         <span class="properties">(<?= sprintf($l10n['created_at'], getTimeFrame($algorithm['age'])) ?>
                             )</span>
-                    <?php if (!empty($algorithm['description'])): ?>
-                        <span class="description"><?= skipDescription($algorithm['description']) ?></span>
-                    <?php endif ?>
-                </td>
-            </tr>
-        <?php endforeach ?>
-        </tbody>
-        <tfoot>
-        <!-- TODO: paginator -->
-        </tfoot>
-    </table>
-<?php else: ?>
-    <div><?= $l10n['no_algorithms'] ?></div>
-<?php endif ?>
-
+                                    <?php if (!empty($algorithm['description'])): ?>
+                                        <span
+                                            class="description"><?= skipDescription($algorithm['description']) ?></span>
+                                    <?php endif ?>
+                                </td>
+                            </tr>
+                        <?php endforeach ?>
+                        </tbody>
+                        <tfoot>
+                        <!-- TODO: paginator -->
+                        </tfoot>
+                    </table>
+                <?php else: ?>
+                    <div><?= $l10n['no_algorithms'] ?></div>
+                <?php endif ?>
+            </div>
+        </div>
+        <!-- RIGHT COLUMN END -->
+    </div>
+    <!-- CONTENT END -->
 <?php else: // no user specified ?>
     <div class="alert alert-danger alert-dismissible">
         <button type="button" class="close">

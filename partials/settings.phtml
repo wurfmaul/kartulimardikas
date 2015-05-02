@@ -41,13 +41,13 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
     <h3><?= $l10n['visibility'] ?></h3>
     <?php if ($__algorithm->name): // allow publishing only if a name is defined! ?>
         <div class="settings-visibility" <?php if (!$__public): ?>style="display: none;"<?php endif ?>>
-        <p><?= $l10n['public_message'] ?></p>
-        <button id="btn-private" type="button" class="btn btn-warning"><?= $l10n['make_private'] ?></button>
-    </div>
+            <p><?= $l10n['public_message'] ?></p>
+            <button id="btn-private" type="button" class="btn btn-warning"><?= $l10n['make_private'] ?></button>
+        </div>
         <div class="settings-visibility" <?php if ($__public): ?>style="display: none;"<?php endif ?>>
-        <p><?= $l10n['private_message'] ?></p>
-        <button id="btn-public" type="button" class="btn btn-success"><?= $l10n['make_public'] ?></button>
-    </div>
+            <p><?= $l10n['private_message'] ?></p>
+            <button id="btn-public" type="button" class="btn btn-success"><?= $l10n['make_public'] ?></button>
+        </div>
     <?php else: ?>
         <div class="settings-visibility">
             <p><?= $l10n['private_message'] ?></p>

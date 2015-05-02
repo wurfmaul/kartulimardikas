@@ -35,6 +35,13 @@ $l10n['password_again'] = "Password, once again";
 $l10n['sign_in'] = "Sign in";
 $l10n['register'] = "Register";
 $l10n['become_user'] = "Become a new user!";
+$l10n['user_not_signed_in'] = "You have to be signed in to change your account!";
+$l10n['username_changed'] = "Your username has been changed to '%s'! Please sign in again, using your new username!";
+$l10n['username_not_changed'] = "Your username could not be changed!";
+$l10n['email_changed'] = "Your email address has been changed to '%s'!";
+$l10n['email_not_changed'] = "Your email address could not be changed!";
+$l10n['password_changed'] = "Your password has been changed! Please sign in again, using your new password!";
+$l10n['password_not_changed'] = "Your password could not be changed!";
 
 // HOME
 $l10n['subtitle'] = "Online collection of algorithms";
@@ -167,3 +174,5 @@ $l10n['error_no_such_user'] = "There is no such user!";
 $l10n['go_back'] = "go back";
 $l10n['created_at'] = "created %s";
 $l10n['algorithms'] = "Algorithms";
+$l10n['account_settings'] = "Account settings";
+$l10n['change'] = "Change";

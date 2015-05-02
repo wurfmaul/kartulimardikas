@@ -56,12 +56,15 @@ class DataModel
      * @param int $amount
      * @return mixed
      */
-    public function fetchAlgorithmsOfUser($uid, $from, $amount)
+    public function fetchAlgorithmsOfUser($uid, $fetchPrivate, $from, $amount)
     {
+        $privateFilter = $fetchPrivate ? "" : "AND date_publish IS NOT NULL";
+
         $stmt = $this->_sql->prepare("
             SELECT *, TIMESTAMPDIFF(MINUTE, date_creation, NOW()) AS age
             FROM algorithm
             WHERE uid = ?
+            $privateFilter
             ORDER BY date_creation DESC
             LIMIT ?, ?
         ");
@@ -334,6 +337,51 @@ class DataModel
     {
         $stmt = $this->_sql->prepare("UPDATE user SET date_lastsignin=NOW() WHERE uid=?");
         $stmt->bind_param("i", $uid);
+        $stmt->execute();
+        $rows = $stmt->affected_rows;
+        $stmt->close();
+        return $rows;
+    }
+
+    /**
+     * @param int $uid The user id.
+     * @param string $username The new user name.
+     * @return int The number of affected rows.
+     */
+    public function updateUserName($uid, $username)
+    {
+        $stmt = $this->_sql->prepare("UPDATE user SET username=? WHERE uid=?");
+        $stmt->bind_param("si", $username, $uid);
+        $stmt->execute();
+        $rows = $stmt->affected_rows;
+        $stmt->close();
+        return $rows;
+    }
+
+    /**
+     * @param int $uid The user id.
+     * @param string $email The new email address.
+     * @return int The number of affected rows.
+     */
+    public function updateUserEmail($uid, $email)
+    {
+        $stmt = $this->_sql->prepare("UPDATE user SET email=? WHERE uid=?");
+        $stmt->bind_param("si", $email, $uid);
+        $stmt->execute();
+        $rows = $stmt->affected_rows;
+        $stmt->close();
+        return $rows;
+    }
+
+    /**
+     * @param int $uid The user id.
+     * @param string $hash The hashed new password.
+     * @return int The number of affected rows.
+     */
+    public function updateUserPassword($uid, $hash)
+    {
+        $stmt = $this->_sql->prepare("UPDATE user SET password=? WHERE uid=?");
+        $stmt->bind_param("si", $hash, $uid);
         $stmt->execute();
         $rows = $stmt->affected_rows;
         $stmt->close();

@@ -21,7 +21,6 @@ register = ->
       if (msg isnt "")
         $('#registerAlertText').html msg
         $('#registerAlert').show('slow')
-        $('#registerSuccess').hide('slow')
       else
         $('#registerForm').submit()
     error: (jqXHR, textStatus, errorThrown) ->
@@ -33,6 +32,3 @@ $ ->
 
   $('#registerAlertClose').click ->
     $('#registerAlert').hide('slow')
-
-  $('#registerSuccessClose').click ->
-    $('#registerSuccess').hide('slow')
