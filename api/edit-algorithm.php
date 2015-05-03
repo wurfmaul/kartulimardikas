@@ -245,7 +245,7 @@ class EditAlgorithmManager
 
     private function _processDeletion()
     {
-        $this->_model->deleteAlgorithm($this->_aid);
+        $this->_model->updateDeleteAlgorithm($this->_aid);
         $this->_response['success'] = $this->_l10n['algorithm_deleted'];
     }
 }

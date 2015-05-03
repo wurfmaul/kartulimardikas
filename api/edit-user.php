@@ -39,6 +39,8 @@ class EditUserManager
             $this->_changeEmail();
         } elseif (isset($_POST['password1'], $_POST['password2'])) {
             $this->_changePassword();
+        } elseif (isset($_POST['password'])) {
+            $this->_deleteUser();
         }
 
         $this->_model->close();
@@ -81,6 +83,24 @@ class EditUserManager
                 signOut();
             } else {
                 $this->_response['error'] = $this->_l10n['password_not_changed'];
+            }
+        }
+    }
+
+    private function _deleteUser()
+    {
+        $password = $_POST['password'];
+        $login = $this->_model->fetchLoginByUID($this->_uid);
+        if (!trim($password)) {
+            $this->_response['error-password'] = $this->_l10n['enter_password'];
+        } elseif (!password_verify($password, $login->password)) {
+            $this->_response['error-password'] = $this->_l10n['password_invalid'];
+        } else {
+            if ($this->_model->updateDeleteUser($this->_uid)) {
+                $this->_response['success'] = sprintf($this->_l10n['user_deleted'], $this->_user->username);
+                signOut();
+            } else {
+                $this->_response['error'] = $this->_l10n['user_not_deleted'];
             }
         }
     }

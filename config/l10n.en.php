@@ -161,11 +161,10 @@ $l10n['private_message'] = "The algorithm is set to 'private' therefore nobody b
 $l10n['public_message'] = "The algorithm is set to 'public' therefore everybody can see it. Click on the following button in order to hide the algorithm from the public.";
 $l10n['make_public'] = "Publish";
 $l10n['make_private'] = "Hide";
-$l10n['delete'] = "Delete";
-$l10n['delete_message'] = "Once you click on the button below, this algorithm will be erased. This action cannot be undone!";
+$l10n['delete_algorithm_message'] = "Once you click on the button below, this algorithm will be erased. This action cannot be undone!";
 $l10n['delete_algorithm'] = "Delete algorithm";
-$l10n['delete_warning'] = "Do you really want to remove this algorithm? This action cannot be undone!";
-$l10n['delete_not_possible'] = "If no name is specified, this algorithm cannot be published!";
+$l10n['delete_algorithm_warning'] = "Do you really want to remove this algorithm? This action cannot be undone!";
+$l10n['delete_algorithm_not_possible'] = "If no name is specified, this algorithm cannot be published!";
 $l10n['algorithm_deleted'] = "Algorithm deleted.";
 
 // USER
@@ -176,3 +175,11 @@ $l10n['created_at'] = "created %s";
 $l10n['algorithms'] = "Algorithms";
 $l10n['account_settings'] = "Account settings";
 $l10n['change'] = "Change";
+$l10n['delete_user_message'] = "Please enter your password and click on the button below in order to delete your account. This action cannot be undone!";
+$l10n['delete_all_algorithms'] = "All the algorithms you shared will be erased too!";
+$l10n['not_able_to_contribute'] = "You will not be able to contribute any more!";
+$l10n['delete_user'] = "Delete this account";
+$l10n['delete_user_warning'] = "Do you really want to remove your account? This action cannot be undone!";
+$l10n['user_not_deleted'] = "User could not be deleted!";
+$l10n['user_deleted'] = "User '%s' has successfully been deleted!";
+$l10n['password_invalid'] = "Password does not seem to be valid!";

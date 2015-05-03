@@ -6,7 +6,7 @@ change = (params, callback) ->
     success: (data, textStatus, jqXHR) ->
       msg = data['error'] ? ""
       # check for errors
-      for token in ['username', 'email', 'password1', 'password2']
+      for token in ['username', 'email', 'password1', 'password2', 'password']
         if data['error-' + token]?
           msg += data['error-' + token]
           $('#' + token + '-group').addClass('has-error');
@@ -36,6 +36,10 @@ $ ->
     $('#passwordMsg').val(msg)
     $('#passwordForm').submit()
   )
+  $('#deleteBtn').click -> change({password: $('#delete-password').val()}, (msg) ->
+    $('#deleteMsg').val(msg)
+    $('#deleteForm').submit()
+  ) if (confirm($(this).data('warning')))
 
   $('#userAlertClose').click ->
     $('#userAlert').hide('slow')

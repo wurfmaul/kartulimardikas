@@ -114,6 +114,37 @@ if (isset($_GET['uid'])) {
                         </div>
                     </form>
                 </div>
+                <div class="alert alert-danger">
+                    <h3><?= $l10n['delete_user'] ?></h3>
+
+                    <div class="settings-delete">
+                        <p><?= $l10n['delete_user_message'] ?></p>
+                        <ul>
+                            <li><?= $l10n['not_able_to_contribute'] ?></li>
+                            <li><?= $l10n['delete_all_algorithms'] ?></li>
+                        </ul>
+
+                        <form id="deleteForm" class="form-horizontal" role="form" method="post" name="delete"
+                              action="<?= url(['action' => 'home']) ?>">
+                            <div class="row">
+                                <input id="deleteMsg" name="successMsg" style="display: none;"/>
+                                <label for="deletePassword"
+                                       class="control-label sr-only"><?= $l10n['password'] ?></label>
+
+                                <div id="password-group" class="col-sm-8">
+                                    <input type="password" class="form-control" id="delete-password" name="password"
+                                           placeholder="<?= $l10n['password'] ?>">
+                                </div>
+                                <div class="col-sm-4">
+                                    <button id="deleteBtn" type="button" class="btn btn-danger" name="delete"
+                                            data-warning="<?= $l10n['delete_user_warning'] ?>">
+                                        <?= $l10n['delete_user'] ?>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             <?php else: // not signed in ?>
                 <div class="well">
                     <h3>Drop a message</h3>

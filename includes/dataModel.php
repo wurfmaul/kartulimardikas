@@ -42,7 +42,11 @@ class DataModel
      */
     public function fetchAlgorithm($aid)
     {
-        $stmt = $this->_sql->prepare("SELECT * FROM algorithm WHERE aid = ?");
+        $stmt = $this->_sql->prepare("
+            SELECT * FROM algorithm
+            WHERE aid = ?
+            AND date_deletion IS NULL
+        ");
         $stmt->bind_param("i", $aid);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -65,6 +69,7 @@ class DataModel
             FROM algorithm
             WHERE uid = ?
             $privateFilter
+            AND date_deletion IS NULL
             ORDER BY date_creation DESC
             LIMIT ?, ?
         ");
@@ -89,6 +94,7 @@ class DataModel
             FROM algorithm a
             JOIN user u USING(uid)
             WHERE date_publish IS NOT NULL
+            AND a.date_deletion IS NULL
             ORDER BY date_creation DESC
             LIMIT ?
         ");
@@ -113,6 +119,7 @@ class DataModel
             FROM algorithm a
             JOIN user u USING(uid)
             WHERE date_publish IS NOT NULL
+            AND a.date_deletion IS NULL
             ORDER BY date_lastedit DESC
             LIMIT ?
         ");
@@ -129,7 +136,11 @@ class DataModel
      */
     public function fetchUser($uid)
     {
-        $stmt = $this->_sql->prepare("SELECT * FROM user WHERE uid = ?");
+        $stmt = $this->_sql->prepare("
+            SELECT * FROM user
+            WHERE uid = ?
+            AND date_deletion IS NULL
+        ");
         $stmt->bind_param("i", $uid);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -145,7 +156,11 @@ class DataModel
     {
         $username = $this->_sql->real_escape_string($username);
 
-        $stmt = $this->_sql->prepare("SELECT * FROM user WHERE username = ?");
+        $stmt = $this->_sql->prepare("
+            SELECT * FROM user
+            WHERE username = ?
+            AND date_deletion IS NULL
+        ");
         $stmt->bind_param("s", $username);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -161,7 +176,11 @@ class DataModel
     {
         $email = $this->_sql->real_escape_string($email);
 
-        $stmt = $this->_sql->prepare("SELECT * FROM user WHERE email = ?");
+        $stmt = $this->_sql->prepare("
+            SELECT * FROM user
+            WHERE email = ?
+            AND date_deletion IS NULL
+        ");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -198,7 +217,11 @@ class DataModel
     {
         $username = $this->_sql->real_escape_string($username);
 
-        $stmt = $this->_sql->prepare("SELECT uid, password FROM user WHERE username = ?");
+        $stmt = $this->_sql->prepare("
+            SELECT uid, password FROM user
+            WHERE username = ?
+            AND date_deletion IS NULL
+        ");
         $stmt->bind_param('s', $username);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -212,7 +235,11 @@ class DataModel
      */
     public function fetchLoginByUID($uid)
     {
-        $stmt = $this->_sql->prepare("SELECT password FROM user WHERE uid = ?");
+        $stmt = $this->_sql->prepare("
+            SELECT password FROM user
+            WHERE uid = ?
+            AND date_deletion IS NULL
+        ");
         $stmt->bind_param('i', $uid);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -232,7 +259,10 @@ class DataModel
         $email = $this->_sql->real_escape_string($email);
         $password = $this->_sql->real_escape_string($password);
 
-        $stmt = $this->_sql->prepare("INSERT INTO user (username, email, password) VALUES (?, ?, ?)");
+        $stmt = $this->_sql->prepare("
+            INSERT INTO user (username, email, password)
+            VALUES (?, ?, ?)
+        ");
         $stmt->bind_param('sss', $username, $email, $password);
         $stmt->execute();
         $uid = $stmt->insert_id;
@@ -246,12 +276,32 @@ class DataModel
      */
     public function insertAlgorithm($uid)
     {
-        $stmt = $this->_sql->prepare("INSERT INTO algorithm (uid) VALUES (?)");
+        $stmt = $this->_sql->prepare("
+            INSERT INTO algorithm (uid)
+            VALUES (?)
+        ");
         $stmt->bind_param("i", $uid);
         $stmt->execute();
         $aid = $stmt->insert_id;
         $stmt->close();
         return $aid;
+    }
+
+    /**
+     * @param int $aid The algorithm id.
+     * @return int The number of affected rows.
+     */
+    public function updateDeleteAlgorithm($aid)
+    {
+        $stmt = $this->_sql->prepare("
+            UPDATE algorithm
+            SET date_deletion=NOW()
+            WHERE aid=?");
+        $stmt->bind_param("i", $aid);
+        $stmt->execute();
+        $rows = $stmt->affected_rows;
+        $stmt->close();
+        return $rows;
     }
 
     /**
@@ -287,7 +337,11 @@ class DataModel
     public function updateAlgorithmVariables($aid, $variables)
     {
         $null = null;
-        $stmt = $this->_sql->prepare("UPDATE algorithm SET variables=?, date_lastedit=NOW() WHERE aid=?");
+        $stmt = $this->_sql->prepare("
+            UPDATE algorithm
+            SET variables=?, date_lastedit=NOW()
+            WHERE aid=?
+        ");
         $stmt->bind_param("bi", $null, $aid);
         $stmt->send_long_data(0, $variables);
         $stmt->execute();
@@ -304,7 +358,11 @@ class DataModel
     public function updateAlgorithmScript($aid, $tree)
     {
         $null = null;
-        $stmt = $this->_sql->prepare("UPDATE algorithm SET tree=?, date_lastedit=NOW() WHERE aid=?");
+        $stmt = $this->_sql->prepare("
+            UPDATE algorithm
+            SET tree=?, date_lastedit=NOW()
+            WHERE aid=?
+        ");
         $stmt->bind_param("bi", $null, $aid);
         $stmt->send_long_data(0, $tree);
         $stmt->execute();
@@ -321,7 +379,11 @@ class DataModel
     public function updateAlgorithmVisibility($aid, $status)
     {
         $value = ($status === "public") ? "NOW()" : "NULL";
-        $stmt = $this->_sql->prepare("UPDATE algorithm SET date_publish=$value WHERE aid=?");
+        $stmt = $this->_sql->prepare("
+            UPDATE algorithm
+            SET date_publish=$value
+            WHERE aid=?
+        ");
         $stmt->bind_param("i", $aid);
         $stmt->execute();
         $rows = $stmt->affected_rows;
@@ -333,25 +395,16 @@ class DataModel
      * @param int $uid The user id.
      * @return int The number of affected rows.
      */
-    public function updateUserSignInDate($uid)
+    public function updateDeleteUser($uid)
     {
-        $stmt = $this->_sql->prepare("UPDATE user SET date_lastsignin=NOW() WHERE uid=?");
+        $stmt = $this->_sql->prepare("
+            UPDATE user u, algorithm a
+            SET u.date_deletion=NOW(), a.date_deletion=NOW()
+            WHERE u.uid=a.uid
+            AND a.date_deletion IS NULL
+            AND u.uid=?
+        ");
         $stmt->bind_param("i", $uid);
-        $stmt->execute();
-        $rows = $stmt->affected_rows;
-        $stmt->close();
-        return $rows;
-    }
-
-    /**
-     * @param int $uid The user id.
-     * @param string $username The new user name.
-     * @return int The number of affected rows.
-     */
-    public function updateUserName($uid, $username)
-    {
-        $stmt = $this->_sql->prepare("UPDATE user SET username=? WHERE uid=?");
-        $stmt->bind_param("si", $username, $uid);
         $stmt->execute();
         $rows = $stmt->affected_rows;
         $stmt->close();
@@ -365,8 +418,31 @@ class DataModel
      */
     public function updateUserEmail($uid, $email)
     {
-        $stmt = $this->_sql->prepare("UPDATE user SET email=? WHERE uid=?");
+        $stmt = $this->_sql->prepare("
+            UPDATE user
+            SET email=?
+            WHERE uid=?
+        ");
         $stmt->bind_param("si", $email, $uid);
+        $stmt->execute();
+        $rows = $stmt->affected_rows;
+        $stmt->close();
+        return $rows;
+    }
+
+    /**
+     * @param int $uid The user id.
+     * @param string $username The new user name.
+     * @return int The number of affected rows.
+     */
+    public function updateUserName($uid, $username)
+    {
+        $stmt = $this->_sql->prepare("
+            UPDATE user
+            SET username=?
+            WHERE uid=?
+        ");
+        $stmt->bind_param("si", $username, $uid);
         $stmt->execute();
         $rows = $stmt->affected_rows;
         $stmt->close();
@@ -380,8 +456,30 @@ class DataModel
      */
     public function updateUserPassword($uid, $hash)
     {
-        $stmt = $this->_sql->prepare("UPDATE user SET password=? WHERE uid=?");
+        $stmt = $this->_sql->prepare("
+            UPDATE user
+            SET password=?
+            WHERE uid=?
+        ");
         $stmt->bind_param("si", $hash, $uid);
+        $stmt->execute();
+        $rows = $stmt->affected_rows;
+        $stmt->close();
+        return $rows;
+    }
+
+    /**
+     * @param int $uid The user id.
+     * @return int The number of affected rows.
+     */
+    public function updateUserSignIn($uid)
+    {
+        $stmt = $this->_sql->prepare("
+            UPDATE user
+            SET date_lastsignin=NOW()
+            WHERE uid=?
+        ");
+        $stmt->bind_param("i", $uid);
         $stmt->execute();
         $rows = $stmt->affected_rows;
         $stmt->close();

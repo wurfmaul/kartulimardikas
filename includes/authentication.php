@@ -36,7 +36,7 @@ function signIn($username, $password)
             $_SESSION['token'] = password_hash($hash . $_SERVER['HTTP_USER_AGENT'], PASSWORD_BCRYPT);
             // log signing process
             $model->open();
-            $model->updateUserSignInDate($uid);
+            $model->updateUserSignIn($uid);
             $model->close();
             // return the user id
             return $uid;

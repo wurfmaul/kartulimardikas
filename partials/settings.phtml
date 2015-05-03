@@ -58,14 +58,15 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
     <?php endif ?>
 </div>
 <div class="alert alert-danger">
-    <h3><?= $l10n['delete'] ?></h3>
+    <h3><?= $l10n['delete_algorithm'] ?></h3>
 
     <div class="settings-delete">
-        <p><?= $l10n['delete_message'] ?></p>
+        <p><?= $l10n['delete_algorithm_message'] ?></p>
 
         <form id="delete-form" role="form" method="post" name="delete" action="<?= url(['action' => 'user']) ?>">
             <input id="delete-msg" name="successMsg" style="display: none;"/>
-            <button id="btn-delete" type="button" class="btn btn-danger" data-warning="<?= $l10n['delete_warning'] ?>">
+            <button id="btn-delete" type="button" class="btn btn-danger"
+                    data-warning="<?= $l10n['delete_algorithm_warning'] ?>">
                 <?= $l10n['delete_algorithm'] ?>
             </button>
         </form>
