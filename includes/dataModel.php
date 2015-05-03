@@ -198,6 +198,7 @@ class DataModel
             LEFT JOIN algorithm a
             ON a.uid = u.uid
             AND date_publish IS NOT NULL
+            WHERE u.date_deletion IS NULL
             GROUP BY uid
             ORDER BY algorithm_count DESC
             LIMIT ?
