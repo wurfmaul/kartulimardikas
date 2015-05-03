@@ -22,17 +22,19 @@ function signIn($username, $password)
 {
     require_once BASEDIR . 'includes/dataModel.php';
     $model = new DataModel();
-    $result = $model->fetchLoginByUsername($username);
+    $login = $model->fetchLoginByUsername($username);
     $model->close();
 
-    if ($result) {
-        $uid = $result->uid;
-        $hash = $result->password;
+    if ($login) {
+        $uid = $login->uid;
+        $hash = $login->password;
+        $rights = $login->rights;
 
         if (password_verify($password, $hash)) {
             // Password is correct!
             $_SESSION['uid'] = $uid;
             $_SESSION['username'] = $username;
+            $_SESSION['rights'] = $rights;
             $_SESSION['token'] = password_hash($hash . $_SERVER['HTTP_USER_AGENT'], PASSWORD_BCRYPT);
             // log signing process
             $model->open();

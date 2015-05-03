@@ -219,7 +219,7 @@ class DataModel
         $username = $this->_sql->real_escape_string($username);
 
         $stmt = $this->_sql->prepare("
-            SELECT uid, password FROM user
+            SELECT uid, password, rights FROM user
             WHERE username = ?
             AND date_deletion IS NULL
         ");

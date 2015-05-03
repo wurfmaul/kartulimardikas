@@ -183,3 +183,6 @@ $l10n['delete_user_warning'] = "Do you really want to remove your account? This 
 $l10n['user_not_deleted'] = "User could not be deleted!";
 $l10n['user_deleted'] = "User '%s' has successfully been deleted!";
 $l10n['password_invalid'] = "Password does not seem to be valid!";
+
+// ADMIN
+$l10n['administration'] = "Administration";

@@ -109,6 +109,11 @@ if ($__aid && $__algorithm) {
                 <li<?php if (ACTION === 'index'): ?> class="active"<?php endif ?>>
                     <a href="<?= url(['action' => 'index']) ?>"><?= $l10n['index'] ?></a>
                 </li>
+                <?php if ($__uid && $_SESSION['rights'] > 0): ?>
+                    <li<?php if (ACTION === 'admin'): ?> class="active"<?php endif ?>>
+                        <a href="<?= url(['action' => 'admin']) ?>"><?= $l10n['administration'] ?></a>
+                    </li>
+                <?php endif ?>
                 <li<?php if (ACTION === 'new'): ?> class="active"<?php endif ?>>
                     <a href="<?= url(['action' => 'new']) ?>"><?= $l10n['new'] ?></a>
                 </li>
