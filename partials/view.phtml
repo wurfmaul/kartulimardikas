@@ -99,7 +99,10 @@ if ($__algorithm && ($__public || $__owner)):
                                 <?= $l10n['no_algorithm'] ?>
                             <?php else: ?>
                                 <ul id="node_<?= $tree->getRoot() ?>" class="insertStepsHere"
-                                    data-node-id="<?= $tree->getRoot() ?>"><?php $tree->printHtml(['vars' => $vars]) ?></ul>
+                                    data-node-id="<?= $tree->getRoot() ?>">
+                                    <li id="cursor"></li>
+                                    <?php $tree->printHtml(['vars' => $vars]) ?>
+                                </ul>
                             <?php endif ?>
                         </div>
                     </div>
@@ -134,13 +137,13 @@ if ($__algorithm && ($__public || $__owner)):
                             class="glyphicon glyphicon-chevron-<?php if ($section[3]): ?>down<?php else: ?>right<?php endif ?>"></span>
                                 <?= $l10n['description'] ?>
                             </h4>
-                    </div>
+                        </div>
                         <div id="description" class=" panel-collapse collapse <?= $section[3] ? 'in' : 'closed' ?>">
                             <div class="panel-body">
                                 <?= $long_description ?>
                             </div>
                         </div>
-                </div>
+                    </div>
                 <?php endif ?>
             </div>
         </div>

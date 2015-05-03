@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Apr 30, 2015 at 01:39 
+-- Generation Time: May 03, 2015 at 11:43 
 -- Server version: 5.6.21
 -- PHP Version: 5.6.3
 
@@ -42,14 +42,14 @@ CREATE TABLE IF NOT EXISTS `algorithm` (
   `date_lastedit`    TIMESTAMP NULL     DEFAULT NULL
   COMMENT 'timestamp of last modification',
   `date_publish`     TIMESTAMP NULL     DEFAULT NULL
-  COMMENT 'timestamp of publication'
+  COMMENT 'timestamp of publication',
+  `date_deletion`    TIMESTAMP NULL     DEFAULT NULL
+  COMMENT 'timestamp of deletion'
 )
   ENGINE = InnoDB
-  AUTO_INCREMENT = 4
+  AUTO_INCREMENT = 9
   DEFAULT CHARSET = utf8
   COLLATE = utf8_bin;
-
--- --------------------------------------------------------
 
 --
 -- Table structure for table `user`
@@ -67,7 +67,9 @@ CREATE TABLE IF NOT EXISTS `user` (
   `date_registration` TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP
   COMMENT 'timestamp of registration',
   `date_lastsignin`   TIMESTAMP        NULL     DEFAULT NULL
-  COMMENT 'timestamp of latest signin'
+  COMMENT 'timestamp of latest signin',
+  `date_deletion`     TIMESTAMP        NULL     DEFAULT NULL
+  COMMENT 'timestamp of deletion'
 )
   ENGINE = InnoDB
   AUTO_INCREMENT = 3

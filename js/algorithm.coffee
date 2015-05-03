@@ -117,7 +117,7 @@ class BlockNode extends Node
     # prepare return value
     nodes = []
     # loop level-1 elements:
-    node.children('li').each((index, element) =>
+    node.children('li.node').each((index, element) =>
       # parse child and add it to tree
       child = Node.parse($(element), tree)
       tree.push child

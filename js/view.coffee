@@ -13,6 +13,7 @@ class Player
     @curNode = null
     @nextNode = @tree.extract(@tree.root).mark(@)
     @clearHighlight()
+    @setCursor(@nextNode)
     @setControls([0, 0, 1, 1, 1])
 
   back: ->
@@ -74,11 +75,10 @@ class Player
       else buttons[i].removeAttr('disabled')
 
   setCursor: (node) ->
-    @unsetCursor()
-    $('#node_' + node).addClass('cursor')
+    $('#cursor').show().insertBefore('#node_' + node)
 
   unsetCursor: ->
-    $('.cursor').removeClass('cursor')
+    $('#cursor').hide()
 
 class Memory
   constructor: (@table) ->

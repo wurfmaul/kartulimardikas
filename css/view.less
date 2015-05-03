@@ -1,17 +1,20 @@
 @import "algorithm";
 
 .algorithm {
+  #cursor {
+    list-style-type: none;
+    min-width: 100%;
+    min-height: 5px;
+    background-color: #286090;
+    border-radius: 2px;
+  }
   .close {
     display: none;
   }
+  .handle {
+    cursor: default !important;
+  }
   .node {
-    &.cursor > table > tbody > tr > td {
-      &.node-box {
-        font-weight: bold;
-        background-color: #286090 !important;
-        color: white;
-      }
-    }
     &.var-node {
       .var-value {
         display: none;
