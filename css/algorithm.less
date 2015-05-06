@@ -1,7 +1,9 @@
+@arithmetic-node-color: #82ffd2;
 @assign-node-color: #ffb181;
 @compare-node-color: #fff465;
 @constant-node-color: #a6e0ff;
 @if-node-color: #b2e792;
+@inc-node-color: #b75946;
 @var-node-color: #d3d3d3;
 @while-node-color: #d5a2da;
 
@@ -80,6 +82,12 @@
         }
       }
 
+      &.arithmetic-node > table > tbody > tr > td {
+        &.node-box {
+          background-color: @arithmetic-node-color;
+        }
+      }
+
       &.assign-node > table > tbody > tr > td {
         &.node-box {
           background-color: @assign-node-color;
@@ -90,9 +98,9 @@
         &.node-box {
           background-color: @compare-node-color;
         }
-        select {
+        select, input {
           background-color: darken(@compare-node-color, @form-background-color-factor);
-          border: @form-border-style darken(@compare-node-color, @form-border-color-factor);
+          border: @form-border-style darken(@compare-node-color, 40%);
         }
       }
 
@@ -109,6 +117,16 @@
       &.if-node > table > tbody > tr > td {
         &.node-box {
           background-color: @if-node-color;
+        }
+      }
+
+      &.inc-node > table > tbody > tr > td {
+        &.node-box {
+          background-color: @inc-node-color;
+        }
+        input, select {
+          background-color: darken(@inc-node-color, @form-background-color-factor);
+          border: @form-border-style darken(@inc-node-color, @form-border-color-factor);
         }
       }
 

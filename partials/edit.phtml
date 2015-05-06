@@ -234,34 +234,43 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                         <ul class="insertStepsHere" class="sortable"
                             data-node-id="0"><?php $tree->printHtml(['vars' => $vars]) ?></ul>
 
-                        <div id="node-btn-group" class="btn-group btn-group-lg" role="group" aria-label="Create a Node">
-                            <button id="btn-add-assign" type="button" class="btn btn-default btn-lg"
-                                    data-node="node_assign">Assign
+                        <div id="node-btn-group" class="btn-group btn-group-sm" role="group"
+                             aria-label="<?= $l10n['create_a_node'] ?>">
+                            <button id="btn-add-arithmetic" type="button" class="btn btn-default"
+                                    data-node="node_arithmetic"><?= $l10n['arithmetic_node_title'] ?>
                             </button>
-                            <button id="btn-add-compare" type="button" class="btn btn-default btn-lg"
-                                    data-node="node_compare">Compare
+                            <button id="btn-add-assign" type="button" class="btn btn-default"
+                                    data-node="node_assign"><?= $l10n['assign_node_title'] ?>
                             </button>
-                            <button id="btn-add-constant" type="button" class="btn btn-default btn-lg"
-                                    data-node="node_constant">Constant
+                            <button id="btn-add-compare" type="button" class="btn btn-default"
+                                    data-node="node_compare"><?= $l10n['compare_node_title'] ?>
                             </button>
-                            <button id="btn-add-if" type="button" class="btn btn-default btn-lg" data-node="node_if">
-                                If
+                            <button id="btn-add-constant" type="button" class="btn btn-default"
+                                    data-node="node_constant"><?= $l10n['constant_node_title'] ?>
                             </button>
-                            <button id="btn-add-var" type="button" class="btn btn-default btn-lg" data-node="node_var">
-                                Var
+                            <button id="btn-add-if" type="button" class="btn btn-default" data-node="node_if">
+                                <?= $l10n['if_node_title'] ?>
                             </button>
-                            <button id="btn-add-while" type="button" class="btn btn-default btn-lg"
-                                    data-node="node_while">While
+                            <button id="btn-add-inc" type="button" class="btn btn-default" data-node="node_inc">
+                                <?= $l10n['inc_node_title'] ?>
+                            </button>
+                            <button id="btn-add-var" type="button" class="btn btn-default" data-node="node_var">
+                                <?= $l10n['variable_node_title'] ?>
+                            </button>
+                            <button id="btn-add-while" type="button" class="btn btn-default"
+                                    data-node="node_while"><?= $l10n['while_node_title'] ?>
                             </button>
                         </div>
 
                         <ul style="display: none">
                             <?php
                             // generate prototypes
-                            Node::printPrototype(Node::ASSIGN_NODE);
-                            Node::printPrototype(Node::COMPARE_NODE);
+                            Node::printPrototype(Node::ARITHMETIC_NODE, ['vars' => $vars]);
+                            Node::printPrototype(Node::ASSIGN_NODE, ['vars' => $vars]);
+                            Node::printPrototype(Node::COMPARE_NODE, ['vars' => $vars]);
                             Node::printPrototype(Node::CONSTANT_NODE);
                             Node::printPrototype(Node::IF_NODE);
+                            Node::printPrototype(Node::INC_NODE, ['vars' => $vars]);
                             Node::printPrototype(Node::VAR_NODE, ['vars' => $vars]);
                             Node::printPrototype(Node::WHILE_NODE);
                             ?>

@@ -34,14 +34,70 @@ class Node
 
     # call proper parsing method
     switch type
+      when 'arithmetic' then ArithmeticNode.parse(node, tree)
       when 'assign' then AssignNode.parse(node, tree)
       when 'compare' then CompareNode.parse(node, tree)
       when 'constant' then ConstantNode.parse(node, tree)
       when 'if' then IfNode.parse(node, tree)
+      when 'inc' then IncNode.parse(node, tree)
       when 'var' then VarNode.parse(node, tree)
       when 'while' then WhileNode.parse(node, tree)
       else
         throw new Exception("Parse error: Unknown type: '#{type}'")
+
+class ArithmeticNode extends Node
+  constructor: (@nid, @left, @right, @operator) ->
+
+  check: (tree) ->
+    # check for right dimensions
+    return false if (tree[@left].size() != 1 or tree[@right].size() != 1)
+    # extract children
+    left = tree.extract(@left)
+    right = tree.extract(@right)
+    # check for right classes
+    (left instanceof VarNode or left instanceof ConstantNode) and
+      (right instanceof VarNode or right instanceof ConstantNode)
+
+  execute: (player, node) ->
+    left = player.tree.extract(@left)
+    right = player.tree.extract(@right)
+    leftVal = left.execute(player, node)
+    rightVal = right.execute(player, node)
+    player.stats.incCompareOps()
+    switch @operator
+      when 'plus' then leftVal + rightVal
+      when 'minus' then leftVal - rightVal
+      when 'times' then leftVal * rightVal
+      when 'by' then leftVal / rightVal
+      when 'mod' then leftVal % rightVal
+      else
+        throw new Exception("Unknown operator: '#{@operator}'")
+
+  mark: (player) ->
+    player.setCursor(@nid)
+    @nid
+
+  toJSON: ->
+    {
+    nid: @nid
+    node: 'arithmetic'
+    left: @left
+    right: @right
+    operator: @operator
+    }
+
+  @parse: (node, tree) =>
+    # parse left node
+    left = BlockNode.parse(@findSubNode(node, '.arithmetic-left'), tree)
+    tree.push left
+    # parse right node
+    right = BlockNode.parse(@findSubNode(node, '.arithmetic-right'), tree)
+    tree.push right
+    # extract operator
+    operator = node.find('.arithmetic-operation:first').val()
+    # create node
+    nid = tree.length
+    new @(nid, left.nid, right.nid, operator)
 
 class AssignNode extends Node
   constructor: (@nid, @from, @to) ->
@@ -240,6 +296,29 @@ class IfNode extends Node
     nid = tree.length
     new @(nid, condition.nid, ifBody.nid, elseBody.nid)
 
+class IncNode extends Node
+  constructor: (@nid, @variable) ->
+
+  execute: (player, node) ->
+    @vid = 0
+    # increment value of variable
+    value = parseInt(player.memory.get(@vid))
+    player.memory.set(@vid, value + 1)
+    # return the value before incrementing (like i++)
+    value
+
+  toJSON: ->
+    {
+    nid: @nid
+    node: 'inc'
+    vid: @vid
+    }
+
+  @parse: (node, tree) =>
+    vid = node.find('.var-value > :selected').val()
+    nid = tree.length
+    new @(nid, vid)
+
 class VarNode extends Node
   constructor: (@nid, @vid) ->
 
@@ -260,6 +339,20 @@ class VarNode extends Node
 
 class WhileNode extends Node
   constructor: (@nid, @condition, @body) ->
+
+  execute: (player, node) ->
+    # find matching sub-node
+    if (node <= @condition)
+      if player.tree.extract(@condition).execute(player, node) then @ifBody
+      else @elseBody
+    else if (node <= @ifBody)
+      player.tree.extract(@ifBody).execute(player, node)
+    else
+      player.tree.extract(@elseBody).execute(player, node)
+
+  mark: (player) ->
+    condition = player.tree.extract(@condition)
+    condition.mark(player)
 
   toJSON: ->
     {

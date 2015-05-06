@@ -89,6 +89,7 @@ $l10n['count'] = "Count";
 $l10n['nowo'] = "Number of write operations";
 $l10n['noco'] = "Number of compare operations";
 $l10n['nooo'] = "Number of other operations";
+$l10n['arithmetic_node_title'] = "Arithmetic";
 $l10n['assign_node_title'] = "Assign";
 $l10n['compare_node_title'] = "Compare";
 $l10n['compare_node_operation'] = "operation";
@@ -96,6 +97,7 @@ $l10n['constant_node_title'] = "Constant";
 $l10n['if_node_title'] = "If";
 $l10n['if_node_then'] = "then";
 $l10n['if_node_else'] = "else";
+$l10n['inc_node_title'] = "Inc";
 $l10n['variable_node_title'] = "Variable";
 $l10n['while_node_title'] = "While";
 $l10n['back_to_start'] = "Back to start";
@@ -152,6 +154,7 @@ $l10n['untitled_algorithm'] = "[Untitled algorithm]";
 $l10n['usage_count'] = "Usage count";
 $l10n['contains'] = "contains";
 $l10n['public_without_name'] = "A public algorithm cannot be without a name!";
+$l10n['create_a_node'] = "Create a Node";
 
 // SETTINGS
 $l10n['settings'] = "Settings";
@@ -164,7 +167,7 @@ $l10n['make_private'] = "Hide";
 $l10n['delete_algorithm_message'] = "Once you click on the button below, this algorithm will be erased. This action cannot be undone!";
 $l10n['delete_algorithm'] = "Delete algorithm";
 $l10n['delete_algorithm_warning'] = "Do you really want to remove this algorithm? This action cannot be undone!";
-$l10n['delete_algorithm_not_possible'] = "If no name is specified, this algorithm cannot be published!";
+$l10n['publish_not_possible'] = "If no name is specified, this algorithm cannot be published!";
 $l10n['algorithm_deleted'] = "Algorithm deleted.";
 
 // USER

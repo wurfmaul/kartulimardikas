@@ -90,6 +90,11 @@ if ($__aid && $__algorithm) {
     <?php if (file_exists('css/' . ACTION . '.css')): ?>
         <link href="css/<?= ACTION ?>.css" rel="stylesheet"/>
     <?php endif ?>
+    <?php if (ACTION === "edit"): ?>
+        <link href="<?= JQUERYUI_CSS_PATH ?>" rel="stylesheet"/>
+        <!--        <link href="lib/jquery-ui/1.11.4/jquery-ui.structure.min.css" rel="stylesheet" />-->
+        <!--        <link href="lib/jquery-ui/1.11.4/jquery-ui.theme.min.css" rel="stylesheet" />-->
+    <?php endif ?>
 </head>
 <body>
 <!-- NAVIGATION BAR -->

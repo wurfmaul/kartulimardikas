@@ -6,7 +6,7 @@ if ($__uid) {
     // create a new algorithm
     $aid = $__model->insertAlgorithm($__uid);
     // redirect to the edit-page
-    header("Location:" . url(['action' => 'edit', 'aid' => $__aid]));
+    header("Location:" . url(['action' => 'edit', 'aid' => $aid]));
     die();
 }
 ?>

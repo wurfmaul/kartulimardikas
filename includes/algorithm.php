@@ -1,5 +1,104 @@
 <?php
 
+class ArithmeticNode extends Node
+{
+    /** @var BlockNode */
+    protected $left;
+    /** @var BlockNode */
+    protected $right;
+    /** @var string */
+    protected $op;
+
+    protected $ops = [
+        'plus' => '+',
+        'minus' => '&minus;',
+        'times' => '&times;',
+        'by' => '&frasl;',
+        'mod' => '%'
+    ];
+
+    public function __construct($nid, $left, $right, $op)
+    {
+        $this->nodeId = $nid;
+        $this->left = $left;
+        $this->right = $right;
+        $this->op = $op;
+    }
+
+    public static function parse($node, $tree)
+    {
+        $left = isset($node->left) ? parent::parse($tree[$node->left], $tree) : null;
+        $right = isset($node->right) ? parent::parse($tree[$node->right], $tree) : null;
+        $op = isset($node->operator) ? $node->operator : null;
+        return new self($node->nid, $left, $right, $op);
+    }
+
+    public function getSource($params)
+    {
+        return sprintf("%s %s %s", $this->left->getSource($params), $this->ops[$this->op], $this->right->getSource($params));
+    }
+
+    public function printHtml(&$params)
+    {
+        $leftNid = isset($this->left) ? $this->left->nodeId : null;
+        $rightNid = isset($this->right) ? $this->right->nodeId : null;
+        $selected_op = $this->isPrototype ? 'plus' : $this->op;
+        ?>
+        <!-- ARITHMETIC NODE -->
+        <li id="node_<?= $this->nodeId ?>" class="node arithmetic-node" data-node-type="arithmetic"
+            data-node-id="<?= $this->nodeId ?>">
+            <table>
+                <tr>
+                    <td class="handle node-box top left">&nbsp;</td>
+                    <td class="node-box top right bottom full-width">
+                        <?= TreeHelper::l10n('arithmetic_node_title') ?>
+                        <span class="label label-danger"
+                              <?php if ($this->isValid()): ?>style="display: none;"<?php endif ?>><?= TreeHelper::l10n('invalid') ?></span>
+                        <button type="button" class="close node-remove" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="handle node-box right left">&nbsp;</td>
+                    <td>
+                        <ul class="arithmetic-left sortable" data-node-id="<?= $leftNid ?>">
+                            <?php self::printNode($this->left, $params) ?>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="handle node-box left">&nbsp;</td>
+                    <td class="node-box top right bottom half-width">
+                        <?= TreeHelper::l10n('compare_node_operation') ?>:
+                        <select class="arithmetic-operation">
+                            <?php foreach ($this->ops as $op => $char): ?>
+                                <option
+                                    value="<?= $op ?>"<?php if ($selected_op === $op): ?> selected="selected"<?php endif ?>><?= $char ?></option>
+                            <?php endforeach ?>
+                        </select>
+                        <input class="arithmetic-operation-input" disabled="disabled"
+                               value="<?= $this->ops[$selected_op] ?>"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="handle node-box right bottom left">&nbsp;</td>
+                    <td>
+                        <ul class="arithmetic-right sortable" data-node-id="<?= $rightNid ?>">
+                            <?php self::printNode($this->right, $params) ?>
+                        </ul>
+                    </td>
+                </tr>
+            </table>
+        </li>
+    <?php }
+
+    public function isValid()
+    {
+        return true;
+    }
+}
+
 class AssignNode extends Node
 {
     /** @var BlockNode */
@@ -73,7 +172,8 @@ class AssignNode extends Node
 
     public function isValid()
     {
-        return !$this->isPrototype && $this->from->isValid() && $this->to->isValid();
+        return true;
+//        return !$this->isPrototype && $this->from->isValid() && $this->to->isValid();
     }
 }
 
@@ -115,13 +215,14 @@ class BlockNode extends Node
 
     public function isValid()
     {
-        foreach ($this->nodes as $node) {
-            /** @var Node $node */
-            if (!$node->isValid()) {
-                return false;
-            }
-        }
         return true;
+//        foreach ($this->nodes as $node) {
+//            /** @var Node $node */
+//            if (!$node->isValid()) {
+//                return false;
+//            }
+//        }
+//        return true;
     }
 
     public function printHtml(&$params)
@@ -149,7 +250,8 @@ class CompareNode extends Node
     protected $ops = [
         'lt' => '&lt;',
         'le' => '&le;',
-        'eq' => '&equals',
+        'eq' => '&equals;',
+        'ne' => '&ne;',
         'ge' => '&ge;',
         'gt' => '&gt;'
     ];
@@ -232,9 +334,10 @@ class CompareNode extends Node
 
     public function isValid()
     {
-        return !$this->isPrototype &&
-        $this->left->isValid() && $this->left->size() === 1 &&
-        $this->right->isValid() && $this->right->size() === 1;
+        return true;
+//        return !$this->isPrototype &&
+//        $this->left->isValid() && $this->left->size() === 1 &&
+//        $this->right->isValid() && $this->right->size() === 1;
     }
 }
 
@@ -284,7 +387,8 @@ class ConstantNode extends Node
 
     public function isValid()
     {
-        return !$this->isPrototype && isset($this->value) && is_numeric($this->value);
+        return true;
+//        return !$this->isPrototype && isset($this->value) && is_numeric($this->value);
     }
 }
 
@@ -383,9 +487,65 @@ class IfNode extends Node
 
     public function isValid()
     {
-        return !$this->isPrototype &&
-        $this->cond->isValid() && $this->cond->size() === 1 &&
-        ($this->then->isValid() || $this->else->isValid());
+        return true;
+//        return !$this->isPrototype &&
+//        $this->cond->isValid() && $this->cond->size() === 1 &&
+//        ($this->then->isValid() || $this->else->isValid());
+    }
+}
+
+class IncNode extends Node
+{
+    function __construct($nid, $vid = 0)
+    {
+        $this->nodeId = $nid;
+        $this->vid = intval($vid);
+    }
+
+    public static function parse($node, $tree)
+    {
+        // TODO: Implement parse() method.
+        return new self(null, null);
+    }
+
+    public function getSource($params)
+    {
+        // TODO: Implement getSource() method.
+    }
+
+    public function printHtml(&$params)
+    { ?>
+        <!-- IF NODE -->
+        <li id="node_<?= $this->nodeId ?>" class="node inc-node" data-node-type="inc"
+            data-node-id="<?= $this->nodeId ?>">
+            <table>
+                <tr>
+                    <td class="handle node-box top bottom left">&nbsp;</td>
+                    <td class="node-box top right bottom full-width">
+                        <?= TreeHelper::l10n('inc_node_title') ?>
+                        <select class="var-value">
+                            <?php foreach ($this->extractVars($params) as $vid => $var): ?>
+                                <option value="<?= $vid ?>" class="var-<?= $vid ?>"
+                                        <?php if ($this->vid === $vid): ?>selected="selected"<?php endif ?>>
+                                    <?= $var->name ?>
+                                </option>
+                            <?php endforeach ?>
+                        </select>
+                        <span class="label label-danger"
+                              <?php if ($this->isValid()): ?>style="display: none;"<?php endif ?>><?= TreeHelper::l10n('invalid') ?></span>
+                        <button type="button" class="close node-remove" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </td>
+                </tr>
+            </table>
+        </li>
+    <?php }
+
+    public function isValid()
+    {
+        // TODO: Implement isValid() method.
+        return true;
     }
 }
 
@@ -413,8 +573,7 @@ class VarNode extends Node
 
     public function printHtml(&$params)
     {
-        $vars = !is_null($params) && isset($params['vars']) ? $params['vars'] : array();
-        unset ($vars['prototype']);
+        $vars = $this->extractVars($params);
         $selected = isset($vars[$this->vid]) ? $vars[$this->vid]->name : '';
         ?>
         <!-- VAR NODE -->
@@ -446,7 +605,8 @@ class VarNode extends Node
 
     public function isValid()
     {
-        return !$this->isPrototype && isset($this->vid) && is_numeric($this->vid);
+        return true;
+//        return !$this->isPrototype && isset($this->vid) && is_numeric($this->vid);
     }
 }
 
@@ -474,7 +634,7 @@ class WhileNode extends Node
     public function getSource($params)
     {
         $indent = TreeHelper::getIndent($params['indent']++);
-        $string = $indent . "while (" . $this->cond->getSource($params) . ")";
+        $string = $indent . "while (" . $this->cond->getSource($params) . ")" . PHP_EOL;
         $string .= $this->body->getSource($params);
         return $string;
     }
@@ -526,9 +686,10 @@ class WhileNode extends Node
 
     public function isValid()
     {
-        return !$this->isPrototype &&
-        $this->cond->isValid() && $this->cond->size() === 1 &&
-        $this->body->isValid();
+        return true;
+//        return !$this->isPrototype &&
+//        $this->cond->isValid() && $this->cond->size() === 1 &&
+//        $this->body->isValid();
     }
 }
 
@@ -539,13 +700,18 @@ class WhileNode extends Node
  */
 abstract class Node
 {
+    const ARITHMETIC_NODE = "arithmetic";
     const ASSIGN_NODE = "assign";
     const BLOCK_NODE = "block";
     const COMPARE_NODE = "compare";
     const CONSTANT_NODE = "constant";
     const IF_NODE = "if";
+    const INC_NODE = "inc";
     const VAR_NODE = "var";
     const WHILE_NODE = "while";
+
+    const VAR_TYPE = "VAR";
+    const INT_TYPE = "INT";
 
     /** @var int */
     protected $nodeId;
@@ -570,6 +736,8 @@ abstract class Node
         }
         // parse node
         switch ($node->node) {
+            case self::ARITHMETIC_NODE:
+                return ArithmeticNode::parse($node, $tree);
             case self::ASSIGN_NODE:
                 return AssignNode::parse($node, $tree);
             case self::BLOCK_NODE:
@@ -580,6 +748,8 @@ abstract class Node
                 return ConstantNode::parse($node, $tree);
             case self::IF_NODE:
                 return IfNode::parse($node, $tree);
+            case self::INC_NODE:
+                return IncNode::parse($node, $tree);
             case self::VAR_NODE:
                 return VarNode::parse($node, $tree);
             case self::WHILE_NODE:
@@ -630,6 +800,9 @@ abstract class Node
         /** @var $node Node */
         $node = null;
         switch ($type) {
+            case self::ARITHMETIC_NODE:
+                $node = new ArithmeticNode($type, null, null, null);
+                break;
             case self::ASSIGN_NODE:
                 $node = new AssignNode($type, null, null);
                 break;
@@ -641,6 +814,9 @@ abstract class Node
                 break;
             case self::IF_NODE:
                 $node = new IfNode($type, null, null, null);
+                break;
+            case self::INC_NODE:
+                $node = new IncNode($type);
                 break;
             case self::VAR_NODE:
                 $node = new VarNode($type, null);
@@ -674,6 +850,15 @@ abstract class Node
      * @return bool
      */
     public abstract function isValid();
+
+    protected function extractVars($params)
+    {
+        $vars = !is_null($params) && isset($params['vars']) ? $params['vars'] : array();
+        if (isset($vars['prototype'])) {
+            unset ($vars['prototype']);
+        }
+        return $vars;
+    }
 }
 
 class Tree

@@ -5,24 +5,18 @@
     margin-top: 0;
     margin-bottom: 10px;
     text-align: left;
-
     td > div {
       display: inline-flex;
     }
-
     .tools {
       float: right;
       .btn-var-count {
         margin-right: 2px;
       }
     }
-
     .form-group {
       margin: 0;
       width: 100px;
-    }
-
-    .name-group {
     }
     .equals-group {
       width: 35px;
@@ -30,15 +24,6 @@
         border: none;
         cursor: default;
       }
-    }
-    .init-group {
-
-    }
-    .value-group {
-
-    }
-    .size-group {
-
     }
   }
 }
@@ -70,6 +55,10 @@
   #node-btn-group {
     padding-top: 10px;
 
+    #btn-add-arithmetic {
+      background-color: lighten(@arithmetic-node-color, 10%);
+    }
+
     #btn-add-assign {
       background-color: lighten(@assign-node-color, 10%);
     }
@@ -86,6 +75,10 @@
       background-color: lighten(@if-node-color, 10%);
     }
 
+    #btn-add-inc {
+      background-color: lighten(@inc-node-color, 10%);
+    }
+
     #btn-add-var {
       background-color: lighten(@var-node-color, 10%);
     }
@@ -93,5 +86,18 @@
     #btn-add-while {
       background-color: lighten(@while-node-color, 10%);
     }
+  }
+}
+
+.combobox-container {
+  display: inline;
+  .custom-combobox-toggle {
+    margin-left: -20px;
+    display: inline-flex;
+    cursor: pointer;
+  }
+  input {
+    max-width: 100px;
+    color: #000000;
   }
 }

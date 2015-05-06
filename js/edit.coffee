@@ -123,9 +123,9 @@ class VariableForm
 
   addRow: ->
     newRow = $('#var-prototype').clone(true)# get prototype
-      .attr('id', 'var-' + @maxVarId)# change id
-      .data('vid', @maxVarId)# change vid
-      .appendTo(VARSITE) # add to the other rows
+    .attr('id', 'var-' + @maxVarId)# change id
+    .data('vid', @maxVarId)# change vid
+    .appendTo(VARSITE) # add to the other rows
     newRow.find('.btn-var-count').data('target', 'var-' + @maxVarId) # change highlight target
     newRow.find('.edit').show()
     newRow.find('.view').hide()
@@ -175,9 +175,9 @@ class StepForm
   addNode: (prototypeId) ->
     # create new node from prototype
     node = $('#' + prototypeId)
-      .clone(true, true)
+    .clone(true, true)
     .removeAttr('id')
-      .appendTo(SCRIPTSITE)
+    .appendTo(SCRIPTSITE)
     # update the variable counter
     @varForm.updateVarCount()
     # remove sortable completely
@@ -204,13 +204,13 @@ class StepForm
 
   updateActionHandlers: (parent) ->
     # update action handlers
+    parent.find('.combobox').combobox()
     parent.find('input').off('blur').blur => @saveChanges() # save when leaving inputs
     parent.find('select').off('change').change => @saveChanges() # save when changing selects
     parent.find('.node-remove').off('click').click (event) =>
       @removeNode($(event.currentTarget).parents('.node:first'))
 
   updateSortable: ->
-    # FIXME: find combined solution
     update = () =>
       Api.editScript(Tree.toJSON())
     sortParams =
@@ -239,6 +239,85 @@ updateVisibility = (variable) ->
   varRow.find('.value-group').hide('slow') if !showValue
 
 $ ->
+  $.widget("custom.combobox",
+    _create: ->
+      @wrapper = $("<span>")
+      .addClass("custom-combobox")
+      .insertAfter(@element)
+      @element.hide()
+      @_createAutocomplete()
+      @_createShowAllButton()
+
+    _createAutocomplete: ->
+      selected = @element.children(":selected")
+      if selected.val() then value = selected.text()
+      else value = ""
+
+      @input = $("<input>")
+      .appendTo(@wrapper)
+      .val(value)
+      .attr("title", "")
+      .addClass("custom-combobox-input ui-widget ui-widget-content ui-state-default")
+      .autocomplete(
+        delay: 0,
+        minLength: 0,
+        source: $.proxy(@, "_source")
+      )
+      .tooltip(
+        tooltipClass: "ui-state-highlight"
+      )
+      .click(->
+        $(this).autocomplete("search", "") # open drop-down with all options
+      )
+
+      @_on(@input,
+        autocompleteselect: (event, ui) ->
+          ui.item.option.selected = true
+          @_trigger("select", event, {
+            item: ui.item.option
+          })
+        #autocompletechange: "_removeIfInvalid"
+      )
+
+    _createShowAllButton: ->
+      input = @input
+      wasOpen = false
+
+      link = $("<a>")
+      .attr("tabIndex", -1)
+      .attr("title", "Show All Items")
+      .tooltip()
+      .appendTo(@wrapper)
+      .removeClass("ui-corner-all")
+      .addClass("custom-combobox-toggle")
+      .mousedown(-> wasOpen = input.autocomplete("widget").is(":visible"))
+      .click(->
+        input.focus()
+        return if ( wasOpen )
+        #Pass empty string as value to search for, displaying all results
+        input.autocomplete("search", "")
+      )
+
+      $("<span>")
+      .addClass("ui-button-icon-primary ui-icon ui-icon-triangle-1-s")
+      .appendTo(link)
+
+    _source: (request, response) ->
+      response(@element.children("option").map(->
+        text = $(this).text()
+        if ( @value && !request.term  )
+          return {
+          label: text
+          value: text
+          option: $(this)
+          }
+      ))
+
+    _destroy: ->
+      @wrapper.remove()
+      @element.show()
+  )
+
   # GENERAL
   $('#editAlertClose').click -> $('#editAlert').hide('slow')
 
