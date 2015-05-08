@@ -1,33 +1,33 @@
 Kartulimardikas - TODO list
 ===========================
 
-View
+Open
 ----
-* [x] Cursor between the steps
-* [ ] Cursor also in source code
-* [x] Right edges are not in a line
-* [ ] Highlighting for R/W operations are not intuitive
-* [ ] Step back (history)
-* [ ] Animation speed configurable by viewer
-
-Edit
-----
-* [x] Warning, if a used variable is deleted
-    * [x] Usage counter for variables, allow deletion only if counter=0
-    * [x] Highlight variable usages by click on the counter
-* [ ] More data types
-    * [ ] characters
-    * [ ] boolean
-* [ ] More structures
-    * [ ] lists/arrays
-* [ ] More commands
+* [ ] Edit: Compact nodes (compare, arithmetic)
+* [ ] Edit: More commands
     * [ ] While
     * [ ] Inc/Dec
-* [ ] Variable definition: use combo box for value/undefined/random
-* [ ] Possibility for viewer-defined parameters
-* [x] Possibility to delete algorithms
+* [ ] Edit: More structures
+    * [ ] lists/arrays
+* [ ] Edit: Variable definition: use combo box for value/undefined/random
+* [ ] View: Step back (history)
+* [ ] View: Highlighting for R/W operations is not intuitive
+* [ ] Edit: More data types
+    * [ ] characters
+    * [ ] boolean
+* [ ] View: Cursor also in source code
+* [ ] View: Animation speed configurable by viewer
+* [ ] Edit: Possibility for viewer-defined parameters
+* [ ] User: Administration for deleted users/algorithms
+* [ ] User: Verify/Lost password
+* [ ] Save section state in cookies
 
-User
+Done
 ----
-* [x] Account management
-* [ ] Administration for deleted users/algorithms
+* [x] View: Cursor between the steps
+* [x] View: Right edges are not in a line
+* [x] Edit: Warning, if a used variable is deleted
+    * [x] Usage counter for variables, allow deletion only if counter=0
+    * [x] Highlight variable usages by click on the counter
+* [x] Edit: Possibility to delete algorithms
+* [x] User: Account management (change password etc., delete user)

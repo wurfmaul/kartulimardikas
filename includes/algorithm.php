@@ -35,7 +35,11 @@ class ArithmeticNode extends Node
 
     public function getSource($params)
     {
-        return sprintf("%s %s %s", $this->left->getSource($params), $this->ops[$this->op], $this->right->getSource($params));
+        return sprintf("%s %s %s",
+            $this->left->getSource($params),
+            $this->ops[$this->op],
+            $this->right->getSource($params)
+        );
     }
 
     public function printHtml(&$params)
@@ -70,15 +74,19 @@ class ArithmeticNode extends Node
                 <tr>
                     <td class="handle node-box left">&nbsp;</td>
                     <td class="node-box top right bottom half-width">
-                        <?= TreeHelper::l10n('compare_node_operation') ?>:
-                        <select class="arithmetic-operation">
-                            <?php foreach ($this->ops as $op => $char): ?>
-                                <option
-                                    value="<?= $op ?>"<?php if ($selected_op === $op): ?> selected="selected"<?php endif ?>><?= $char ?></option>
-                            <?php endforeach ?>
-                        </select>
-                        <input class="arithmetic-operation-input" disabled="disabled"
-                               value="<?= $this->ops[$selected_op] ?>"/>
+                        <label>
+                            <?= TreeHelper::l10n('compare_node_operation') ?>
+                            <select class="arithmetic-operation edit-only">
+                                <?php foreach ($this->ops as $op => $char): ?>
+                                    <option value="<?= $op ?>"
+                                            <?php if ($selected_op === $op): ?>selected="selected"<?php endif ?>>
+                                        <?= $char ?>
+                                    </option>
+                                <?php endforeach ?>
+                            </select>
+                            <input class="arithmetic-operation-input view-only" disabled="disabled"
+                                   value="<?= $this->ops[$selected_op] ?>"/>
+                        </label>
                     </td>
                 </tr>
                 <tr>
@@ -274,7 +282,11 @@ class CompareNode extends Node
 
     public function getSource($params)
     {
-        return sprintf("%s %s %s", $this->left->getSource($params), $this->ops[$this->op], $this->right->getSource($params));
+        return sprintf("%s %s %s",
+            $this->left->getSource($params),
+            $this->ops[$this->op],
+            $this->right->getSource($params)
+        );
     }
 
     public function printHtml(&$params)
@@ -309,15 +321,19 @@ class CompareNode extends Node
                 <tr>
                     <td class="handle node-box left">&nbsp;</td>
                     <td class="node-box top right bottom half-width">
-                        <?= TreeHelper::l10n('compare_node_operation') ?>:
-                        <select class="compare-operation">
-                            <?php foreach ($this->ops as $op => $char): ?>
-                                <option
-                                    value="<?= $op ?>"<?php if ($selected_op === $op): ?> selected="selected"<?php endif ?>><?= $char ?></option>
-                            <?php endforeach ?>
-                        </select>
-                        <input class="compare-operation-input" disabled="disabled"
-                               value="<?= $this->ops[$selected_op] ?>"/>
+                        <label>
+                            <?= TreeHelper::l10n('compare_node_operation') ?>
+                            <select class="compare-operation edit-only">
+                                <?php foreach ($this->ops as $op => $char): ?>
+                                    <option value="<?= $op ?>"
+                                            <?php if ($selected_op === $op): ?>selected="selected"<?php endif ?>>
+                                        <?= $char ?>
+                                    </option>
+                                <?php endforeach ?>
+                            </select>
+                            <input class="compare-operation-input view-only" disabled="disabled"
+                                   value="<?= $this->ops[$selected_op] ?>"/>
+                        </label>
                     </td>
                 </tr>
                 <tr>
@@ -372,8 +388,10 @@ class ConstantNode extends Node
                 <tr>
                     <td class="handle node-box top left bottom">&nbsp;</td>
                     <td class="node-box top right bottom full-width">
-                        <?= TreeHelper::l10n('constant_node_title') ?>
-                        <input class="constant-value" value="<?= $this->isPrototype ? "" : $this->value ?>"/>
+                        <label>
+                            <?= TreeHelper::l10n('constant_node_title') ?>
+                            <input class="constant-value" value="<?= $this->isPrototype ? "" : $this->value ?>"/>
+                        </label>
                         <span class="label label-danger"
                               <?php if ($this->isValid()): ?>style="display: none;"<?php endif ?>><?= TreeHelper::l10n('invalid') ?></span>
                         <button type="button" class="close node-remove" aria-label="Close">
@@ -419,11 +437,11 @@ class IfNode extends Node
 
     public function getSource($params)
     {
-        $indent = TreeHelper::getIndent($params['indent']++);
-        $string = $indent . "if (" . $this->cond->getSource($params) . ")" . PHP_EOL;
+        $_indent = TreeHelper::getIndent($params['indent']++);
+        $string = $_indent . "if (" . $this->cond->getSource($params) . ")" . PHP_EOL;
         $string .= $this->then->getSource($params) . PHP_EOL;
         if ($this->else->size()) {
-            $string .= $indent . "else";
+            $string .= $_indent . "else" . PHP_EOL;
             $string .= $this->else->getSource($params) . PHP_EOL;
         }
         return $string;
@@ -522,15 +540,17 @@ class IncNode extends Node
                 <tr>
                     <td class="handle node-box top bottom left">&nbsp;</td>
                     <td class="node-box top right bottom full-width">
-                        <?= TreeHelper::l10n('inc_node_title') ?>
-                        <select class="var-value">
-                            <?php foreach ($this->extractVars($params) as $vid => $var): ?>
-                                <option value="<?= $vid ?>" class="var-<?= $vid ?>"
-                                        <?php if ($this->vid === $vid): ?>selected="selected"<?php endif ?>>
-                                    <?= $var->name ?>
-                                </option>
-                            <?php endforeach ?>
-                        </select>
+                        <label>
+                            <?= TreeHelper::l10n('inc_node_title') ?>
+                            <select class="var-value">
+                                <?php foreach ($this->extractVars($params) as $vid => $var): ?>
+                                    <option value="<?= $vid ?>" class="var-<?= $vid ?>"
+                                            <?php if ($this->vid === $vid): ?>selected="selected"<?php endif ?>>
+                                        <?= $var->name ?>
+                                    </option>
+                                <?php endforeach ?>
+                            </select>
+                        </label>
                         <span class="label label-danger"
                               <?php if ($this->isValid()): ?>style="display: none;"<?php endif ?>><?= TreeHelper::l10n('invalid') ?></span>
                         <button type="button" class="close node-remove" aria-label="Close">
@@ -544,7 +564,6 @@ class IncNode extends Node
 
     public function isValid()
     {
-        // TODO: Implement isValid() method.
         return true;
     }
 }
@@ -583,15 +602,17 @@ class VarNode extends Node
                 <tr>
                     <td class="handle node-box top left bottom">&nbsp;</td>
                     <td class="node-box top right bottom full-width">
-                        <?= TreeHelper::l10n('variable_node_title') ?>
-                        <select class="var-value">
-                            <?php foreach ($vars as $vid => $var): ?>
-                                <option value="<?= $vid ?>" class="var-<?= $vid ?>"
-                                        <?php if ($this->vid === $vid): ?>selected="selected"<?php endif ?>><?= $var->name ?></option>
-                            <?php endforeach ?>
-                        </select>
-                        <input class="var-value-input var-<?= $this->vid ?>" value="<?= $selected ?>"
-                               disabled="disabled"/>
+                        <label>
+                            <?= TreeHelper::l10n('variable_node_title') ?>
+                            <select class="var-value edit-only">
+                                <?php foreach ($vars as $vid => $var): ?>
+                                    <option value="<?= $vid ?>" class="var-<?= $vid ?>"
+                                            <?php if ($this->vid === $vid): ?>selected="selected"<?php endif ?>><?= $var->name ?></option>
+                                <?php endforeach ?>
+                            </select>
+                            <input class="var-value-input var-<?= $this->vid ?> view-only" value="<?= $selected ?>"
+                                   disabled="disabled"/>
+                        </label>
                         <span class="label label-danger"
                               <?php if ($this->isValid()): ?>style="display: none;"<?php endif ?>><?= TreeHelper::l10n('invalid') ?></span>
                         <button type="button" class="close node-remove" aria-label="Close">
@@ -633,8 +654,8 @@ class WhileNode extends Node
 
     public function getSource($params)
     {
-        $indent = TreeHelper::getIndent($params['indent']++);
-        $string = $indent . "while (" . $this->cond->getSource($params) . ")" . PHP_EOL;
+        $_indent = TreeHelper::getIndent($params['indent']++);
+        $string = $_indent . "while (" . $this->cond->getSource($params) . ")" . PHP_EOL;
         $string .= $this->body->getSource($params);
         return $string;
     }

@@ -1,5 +1,6 @@
 <?php
 if (!defined('BASEDIR')) die('You cannot call this script directly !');
+global $l10n;
 
 // redirect if no aid is specified
 if (!$__aid) {
@@ -85,6 +86,7 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                                        placeholder="<?= $l10n['description'] ?>" value="<?= $description ?>">
                             </div>
                         </div>
+                        <label for="in-long" class="sr-only"><?= $l10n['long_description'] ?></label>
                         <textarea class="form-control" id="in-long" rows="3"
                                   data-placeholder="<?= $l10n['long_description'] ?>"><?= $long_description ?></textarea>
                     </div>
@@ -126,9 +128,7 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                                         <div class="tools">
                                             <button type="button" class="btn btn-default btn-sm btn-var-count"
                                                     title="<?= $l10n['usage_count'] ?>" data-target="var-<?= $vid ?>">
-                                                <span class="glyphicon glyphicon-stats">
-                                                    <code class="counter">0</code>
-                                                </span>
+                                                # <code class="counter">0</code>
                                             </button>
                                             <div class="btn-group btn-group-sm">
                                                 <button type="button" class="btn btn-default btn-var-edit"
@@ -179,15 +179,17 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                                                    placeholder="<?= $l10n['value'] ?>" type="text">
                                         </div>
                                         <div class="form-group size-group" <?= $sizeVisible ?>>
-                                            <label class="sr-only" for="size"><?= $l10n['array_size'] ?></label>
-                                            <select class="form-control input-sm size">
-                                                <optgroup label="<?= $l10n['size'] ?>">
-                                                    <?php for ($i = ARRAY_MIN_SIZE; $i <= ARRAY_MAX_SIZE; $i++): ?>
-                                                        <option
-                                                            <?php if ($var->size == $i): ?>selected="selected"<?php endif ?>><?= $i ?></option>
-                                                    <?php endfor ?>
-                                                </optgroup>
-                                            </select>
+                                            <label class="sr-only">
+                                                <?= $l10n['array_size'] ?>
+                                                <select class="form-control input-sm size">
+                                                    <optgroup label="<?= $l10n['size'] ?>">
+                                                        <?php for ($i = ARRAY_MIN_SIZE; $i <= ARRAY_MAX_SIZE; $i++): ?>
+                                                            <option
+                                                                <?php if ($var->size == $i): ?>selected="selected"<?php endif ?>><?= $i ?></option>
+                                                        <?php endfor ?>
+                                                    </optgroup>
+                                                </select>
+                                            </label>
                                         </div>
                                         <div class="tools">
                                             <div class="btn-group btn-group-sm">

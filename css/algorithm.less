@@ -86,6 +86,10 @@
         &.node-box {
           background-color: @arithmetic-node-color;
         }
+        select {
+          background-color: darken(@arithmetic-node-color, @form-background-color-factor);
+          border: @form-border-style darken(@arithmetic-node-color, @form-border-color-factor);
+        }
       }
 
       &.assign-node > table > tbody > tr > td {
@@ -98,7 +102,7 @@
         &.node-box {
           background-color: @compare-node-color;
         }
-        select, input {
+        select {
           background-color: darken(@compare-node-color, @form-background-color-factor);
           border: @form-border-style darken(@compare-node-color, 40%);
         }
