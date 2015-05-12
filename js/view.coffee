@@ -1,9 +1,10 @@
 TIMEOUT = 500 # milliseconds between the steps
-MAXSTEPS = 1000 # number of steps an algorithm may take
+MAX_STEPS = 1000 # number of steps an algorithm may take
 
 class Player
 
-  constructor: (@tree, @memory, @stats) ->
+  constructor: (@tree, @stats) ->
+    @memory = @tree.memory
     @reset()
 
   reset: ->
@@ -47,10 +48,10 @@ class Player
     @clearHighlight()
     # execute current step
     @curNode = @nextNode
-    nextNode = @tree.executeStep(@, @curNode)
+    curNode = @tree.executeStep(@, @curNode)
     # prepare the next step
-    if (nextNode?)
-      @nextNode = @tree.extract(nextNode).mark(@)
+    if (curNode.next?)
+      @nextNode = @tree.tree[curNode.next].mark(@)
       @setControls([1, 1, 1, 1, 1])
       true
     else
@@ -60,9 +61,9 @@ class Player
       false
 
   finish: ->
-    for i in [0..MAXSTEPS]
+    for i in [0..MAX_STEPS]
       return if !@step()
-    throw new Exception("Could not terminate!")
+    throw new Error("Could not terminate in #{MAX_STEPS} iterations!")
 
   clearHighlight: ->
     $('.highlight-write').removeClass('highlight-write')
@@ -81,6 +82,8 @@ class Player
     $('#cursor').hide()
 
 class Stats
+  constructor: (@memory) ->
+
   incWriteOps: ->
     $('#stats-now')
     .val(parseInt($('#stats-now').val()) + 1)
@@ -89,16 +92,29 @@ class Stats
   incCompareOps: ->
     $('#stats-noc')
     .val(parseInt($('#stats-noc').val()) + 1)
-    .addClass('highlight-compare')
+    .addClass('highlight-write')
+
+  readVar: (vid) ->
+    $('#var-' + vid).find('.value').addClass('highlight-compare')
+
+  writeVar: (vid, value) ->
+    $('#var-' + vid).find('.value').val(value)
+    .removeClass('highlight-compare').addClass('highlight-write')
+    @incWriteOps()
 
   reset: ->
+    # reset variables
+    console.log(@memory)
+    $.each(@memory.memory, (index, elem) ->
+      $('#var-' + index).find('.value').val(elem.value)
+    )
+    # reset statistics
     $('#stats-now').val(0)
     $('#stats-noc').val(0)
 $ ->
   tree = new Tree()
-  memory = new Memory($('#variables'))
-  stats = new Stats()
-  player = new Player(tree, memory, stats)
+  stats = new Stats(tree.memory)
+  player = new Player(tree, stats)
 
   $('#btn-reset').click -> player.reset()
   $('#btn-back').click -> player.back()

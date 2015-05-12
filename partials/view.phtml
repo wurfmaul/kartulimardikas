@@ -166,16 +166,19 @@ if ($__algorithm && ($__public || $__owner)):
                     <div id="memory" class=" panel-collapse collapse <?= $section[4] ? 'in' : 'closed' ?>">
                         <div class="panel-body">
                             <?php if (sizeof($vars)): ?>
-                                <table class="table table-hover table-bordered">
+                                <table class="table table-hover table-bordered variables">
                                     <thead>
                                     <tr>
                                         <th style="border-top: none;"><?= $l10n['variable'] ?></th>
                                         <th style="border-top: none;"><?= $l10n['contents'] ?></th>
                                     </tr>
                                     </thead>
-                                    <tbody id="variables">
+                                    <tbody>
                                     <?php foreach ($vars as $vid => $var): ?>
-                                        <tr id="var-<?= $vid ?>" data-vid="<?= $vid ?>">
+                                        <tr id="var-<?= $vid ?>"
+                                            data-vid="<?= $vid ?>"
+                                            data-name="<?= $var->name ?>"
+                                            data-value="<?= $var->value ?>">
                                             <td>
                                                 <code class="name"><?= $var->name ?></code>
                                             </td>

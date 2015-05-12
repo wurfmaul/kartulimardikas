@@ -1,25 +1,24 @@
 window.SCRIPTSITE = $(".insertStepsHere") # Specifies the site, where variables are to place.
 
 class Node
-
   ###
   # Must be overridden by all subclasses.
   ###
   execute: (player) ->
-    throw new Exception('Node must override execute() method!')
+    throw new Error('Node must override execute() method!')
 
   ###
   # Must be overridden by all subclasses. Sets the cursor to the position
   # of the node, or places it inside.
   ###
   mark: (player) ->
-    throw new Exception('Node must override mark() method!')
+    throw new Error('Node must override mark() method!')
 
   ###
   # Must be overridden by all subclasses.
   ###
   toJSON: ->
-    throw new Exception('Node must override toJSON() method!')
+    throw new Error('Node must override toJSON() method!')
 
   ###
   # For combo boxes: Inspects the given value and defines its kind
@@ -56,6 +55,22 @@ class Node
     # return null, if value is not valid
     null
 
+  executeValue: (value, player) ->
+    if (!value?.kind?)
+      throw new Error("Cannot execute value: '#{value}'!")
+    memory = player.memory
+
+    switch value.kind
+      when 'const' then value.value
+      when 'index' then throw new Error("Not yet implemented: kind 'index'!")
+      when 'prop' then throw new Error("Not yet implemented: kind 'prop'!")
+      when 'var'
+        vid = value.vid
+        player.stats.readVar(vid) # tell the stats, that a variable has been read
+        memory.get(vid).value # return the current value of the variable
+      else
+        throw new Error("Unknown kind: '#{value.kind}'")
+
   ###
   # Returns node's first sub-node of class _class.
   ###
@@ -82,7 +97,7 @@ class Node
       when 'var' then VarNode.parse(node, tree, memory)
       when 'while' then WhileNode.parse(node, tree, memory)
       else
-        throw new Exception("Parse error: Unknown type: '#{type}'")
+        throw new Error("Parse error: unknown type: '#{type}'")
 
 class ArithmeticNode extends Node
   constructor: (@nid, @left, @right, @operator) ->
@@ -104,13 +119,13 @@ class ArithmeticNode extends Node
     rightVal = right.execute(player, node)
     player.stats.incCompareOps()
     switch @operator
-      when 'plus' then leftVal + rightVal
-      when 'minus' then leftVal - rightVal
-      when 'times' then leftVal * rightVal
-      when 'by' then leftVal / rightVal
-      when 'mod' then leftVal % rightVal
+      when 'plus' then value: leftVal + rightVal
+      when 'minus' then value: leftVal - rightVal
+      when 'times' then value: leftVal * rightVal
+      when 'by' then value: leftVal / rightVal
+      when 'mod' then value: leftVal % rightVal
       else
-        throw new Exception("Unknown operator: '#{@operator}'")
+        throw new Error("ArithmeticNode: unknown operator: '#{@operator}'!")
 
   mark: (player) ->
     player.setCursor(@nid)
@@ -142,19 +157,17 @@ class AssignNode extends Node
   constructor: (@nid, @from, @to) ->
 
   execute: (player, node) ->
-    toNode = player.tree.extract(@to)
+    toVar = @to
     fromNode = player.tree.extract(@from)
     # get new value
-    if (fromNode instanceof VarNode)
-      vid = fromNode.vid
-      value = player.memory.get(vid)
-    else
-      value = fromNode.value
+    if (fromNode instanceof VarNode) then value = player.memory.get(fromNode.vid)
+    else value = fromNode.value
     # set new value
-    player.memory.set(toNode.vid, value)
+    player.memory.set(toVar.vid, value)
     player.stats.incWriteOps()
-    # return null to mark as done
-    null
+    player.stats.writeVar(toVar.vid)
+    # return value
+    value: value
 
   mark: (player) ->
     player.setCursor(@nid)
@@ -183,15 +196,16 @@ class BlockNode extends Node
     @curNode = 0
 
   execute: (player, node) ->
-    nextNode = null
+    curNode = null
     # find matching sub-node
     for n,i in @nodes
       if (node <= n)
-        nextNode = player.tree.extract(n).execute(player, node)
+        curNode = player.tree.extract(n).execute(player, node)
         break
     # compute next node
-    if nextNode? then nextNode
-    else @nodes[i + 1] # if curNode is done, take next from nodes
+    if curNode?.next? then next: curNode.next
+    else if (@nodes.length > i + 1) then next: @nodes[i + 1] # if curNode is done, take next from nodes
+    else {}
 
   mark: (player) ->
     first = player.tree.extract(@nodes[0])
@@ -227,18 +241,18 @@ class CompareNode extends Node
   check: (tree) -> true
 
   execute: (player, node) ->
-    leftVal = 0
-    rightVal = 0
+    leftVal = @executeValue(@left, player)
+    rightVal = @executeValue(@right, player)
     player.stats.incCompareOps()
     switch @operator
-      when 'le' then leftVal <= rightVal
-      when 'lt' then leftVal < rightVal
-      when 'eq' then leftVal == rightVal
-      when 'gt' then leftVal > rightVal
-      when 'ge' then leftVal >= rightVal
-      when 'ne' then leftVal != rightVal
+      when 'le' then value: leftVal <= rightVal
+      when 'lt' then value: leftVal < rightVal
+      when 'eq' then value: leftVal == rightVal
+      when 'gt' then value: leftVal > rightVal
+      when 'ge' then value: leftVal >= rightVal
+      when 'ne' then value: leftVal != rightVal
       else
-        throw new Exception("Unknown operator: '#{@operator}'")
+        throw new Error("CompareNode: unknown operator: '#{@operator}'!")
 
   mark: (player) ->
     player.setCursor(@nid)
@@ -264,7 +278,7 @@ class ConstantNode extends Node
   constructor: (@nid, @value) ->
 
   execute: (player, node) ->
-    parseInt(@value)
+    value: @executeValue(@value, player)
 
   toJSON: ->
     {
@@ -274,7 +288,7 @@ class ConstantNode extends Node
     }
 
   @parse: (node, tree, memory) =>
-    value = node.find('.constant-value:first').val()
+    value = @findSubNode(node, '.constant-value').val()
     nid = tree.length
     new @(nid, value)
 
@@ -284,12 +298,13 @@ class IfNode extends Node
   execute: (player, node) ->
     # find matching sub-node
     if (node <= @condition)
-      if player.tree.extract(@condition).execute(player, node) then @ifBody
-      else @elseBody
+      condRetVal = player.tree.extract(@condition).execute(player, node)
+      if condRetVal.value then next: @ifBody
+      else next: @elseBody
     else if (node <= @ifBody)
-      player.tree.extract(@ifBody).execute(player, node)
+      next: player.tree.tree[@ifBody].execute(player, node).next
     else
-      player.tree.extract(@elseBody).execute(player, node)
+      next: player.tree.tree[@elseBody].execute(player, node).next
 
   mark: (player) ->
     condition = player.tree.extract(@condition)
@@ -322,12 +337,17 @@ class IncNode extends Node
   constructor: (@nid, @variable) ->
 
   execute: (player, node) ->
-    @vid = 0
+    vid = @variable.vid
     # increment value of variable
-    value = parseInt(player.memory.get(@vid))
-    player.memory.set(@vid, value + 1)
+    value = @executeValue(@variable, player)
+    player.memory.set(vid, value + 1)
+    player.stats.writeVar(vid, value + 1)
     # return the value before incrementing (like i++)
-    value
+    {value: value}
+
+  mark: (player) ->
+    player.setCursor(@nid)
+    @nid
 
   toJSON: ->
     {
@@ -345,7 +365,10 @@ class VarNode extends Node
   constructor: (@nid, @vid) ->
 
   execute: (player, node) ->
-    parseInt(player.memory.get(@vid))
+    # tell display to highlight variable-read
+    player.stats.readVar(@vid)
+    # return the value
+    value: player.memory.get(@vid).value
 
   toJSON: ->
     {
@@ -365,12 +388,13 @@ class WhileNode extends Node
   execute: (player, node) ->
     # find matching sub-node
     if (node <= @condition)
-      if player.tree.extract(@condition).execute(player, node) then @ifBody
-      else @elseBody
-    else if (node <= @ifBody)
-      player.tree.extract(@ifBody).execute(player, node)
-    else
-      player.tree.extract(@elseBody).execute(player, node)
+      condValue = player.tree.extract(@condition).execute(player, node)
+      if condValue.value then next: @body # if condition is true, next node should be the body
+      else {} # otherwise don't return a next node in order to mark this node as done
+    else if (node <= @body)
+      bodyValue = player.tree.tree[@body].execute(player, node)
+      if bodyValue.next? then next: bodyValue.next # if body has still more nodes to execute, let it!
+      else next: @condition # otherwise jump back to condition
 
   mark: (player) ->
     condition = player.tree.extract(@condition)
@@ -404,6 +428,7 @@ class window.Tree
 
   extract: (nid) ->
     node = @tree[nid]
+    # if node is a BlockNode, extract the first child
     if (node instanceof BlockNode and node.size() == 1) then @tree[node.nodes[0]]
     else node
 
@@ -429,13 +454,12 @@ class window.Memory
     @original = []
     @table.children(':visible').each((index, element) =>
       vid = $(element).data('vid')
-      variable =
-        vid: vid
-        name: $(element).data('name')
-        value: $(element).data('value')
-        count: 0
-      @memory[vid] = variable
-      @original[vid] = variable
+      name = $(element).data('name')
+      value = $(element).data('value')
+      @memory[vid] =
+        vid: vid, name: name, value: value, count: 0
+      @original[vid] =
+        vid: vid, name: name, value: value, count: 0
     )
 
   count: (vid) =>
@@ -453,11 +477,10 @@ class window.Memory
     @memory[vid]
 
   set: (vid, value) =>
-    @memory[vid] = value
+    @memory[vid].value = value
 
   reset: =>
-    @table.children(':visible').each((index, element) =>
-      vid = $(element).data('vid')
-      $(element).find('.value').val(@original[vid].value)
-      @memory[vid] = @original[vid]
+    $.each(@original, (index, elem) =>
+      @memory[index].value = elem.value
+      @memory[index].count = 0
     )

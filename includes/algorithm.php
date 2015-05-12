@@ -81,10 +81,17 @@ class ArithmeticNode extends Node
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         <?php else: ?>
-                            <?= TreeHelper::l10n('arithmetic_node_title') ?>
-                            <?= $leftVal ?>
-                            <?= $this->ops[$selected_op] ?>
-                            <?= $rightVal ?>
+                            <label>
+                                <?= TreeHelper::l10n('arithmetic_node_title') ?>
+                                <?= $leftVal ?>
+                                <?= $this->ops[$selected_op] ?>
+                                <?= $rightVal ?>
+                                <div style="display: none;">
+                                    <input class="arithmetic-left" value="<?= $leftVal ?>"/>
+                                    <input class="arithmetic-operation" value="<?= $selected_op ?>"/>
+                                    <input class="arithmetic-right" value="<?= $rightVal ?>"/>
+                                </div>
+                            </label>
                         <?php endif ?>
                     </td>
                 </tr>
@@ -149,8 +156,13 @@ class AssignNode extends Node
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         <?php else: ?>
-                            <?= TreeHelper::l10n('assign_node_title') ?>
-                            <?= $toValue ?> :=
+                            <label>
+                                <?= TreeHelper::l10n('assign_node_title') ?>
+                                <?= $toValue ?> :=
+                                <div style="display: none;">
+                                    <input class="assign-to" value="<?= $toValue ?>"/>
+                                </div>
+                            </label>
                         <?php endif ?>
                     </td>
                 </tr>
@@ -218,9 +230,7 @@ class BlockNode extends Node
 
 class CompareNode extends Node
 {
-    /** @var BlockNode */
     protected $left;
-    /** @var BlockNode */
     protected $right;
     /** @var string */
     protected $op;
@@ -298,10 +308,17 @@ class CompareNode extends Node
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         <?php else: ?>
-                            <?= TreeHelper::l10n('compare_node_title') ?>
-                            <?= $leftVal ?>
-                            <?= $this->ops[$selected_op] ?>
-                            <?= $rightVal ?>
+                            <label>
+                                <?= TreeHelper::l10n('compare_node_title') ?>
+                                <?= $leftVal ?>
+                                <?= $this->ops[$selected_op] ?>
+                                <?= $rightVal ?>
+                                <div style="display: none;">
+                                    <input class="compare-left" value="<?= $leftVal ?>"/>
+                                    <input class="compare-operation" value="<?= $selected_op ?>"/>
+                                    <input class="compare-right" value="<?= $rightVal ?>"/>
+                                </div>
+                            </label>
                         <?php endif ?>
                     </td>
                 </tr>
@@ -351,8 +368,13 @@ class ConstantNode extends Node
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         <?php else: ?>
-                            <?= TreeHelper::l10n('constant_node_title') ?>
-                            <?= $this->value ?>
+                            <label>
+                                <?= TreeHelper::l10n('constant_node_title') ?>
+                                <?= $this->value ?>
+                                <div style="display: none;">
+                                    <input class="constant-value" value="<?= $this->value ?>"/>
+                                </div>
+                            </label>
                         <?php endif ?>
                     </td>
                 </tr>
@@ -431,7 +453,7 @@ class IfNode extends Node
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         <?php else: ?>
-                            <?= TreeHelper::l10n('if_node_title') // TODO: op!       ?>
+                            <?= TreeHelper::l10n('if_node_title') // TODO: op!  ?>
                         <?php endif ?>
                     </td>
                 </tr>
@@ -514,8 +536,13 @@ class IncNode extends Node
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         <?php else: ?>
-                            <?= TreeHelper::l10n('inc_node_title') ?>
-                            <?= $varValue ?>
+                            <label>
+                                <?= TreeHelper::l10n('inc_node_title') ?>
+                                <?= $varValue ?>
+                                <div style="display: none;">
+                                    <input class="inc-var" value="<?= $varValue ?>"/>
+                                </div>
+                            </label>
                         <?php endif ?>
                     </td>
                 </tr>
@@ -643,7 +670,7 @@ class WhileNode extends Node
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         <?php else: ?>
-                            <?= TreeHelper::l10n('while_node_title') // TODO: op!       ?>
+                            <?= TreeHelper::l10n('while_node_title') // TODO: op!              ?>
                         <?php endif ?>
                     </td>
                 </tr>
@@ -772,9 +799,8 @@ abstract class Node
 
     /**
      * Print the HTML code for the nodes' prototypes.
-
      *
-*@param string $type The node type the prototype should be generated for.
+     * @param string $type The node type the prototype should be generated for.
      * @param array $params Parameters that are needed for the prototype.
      * @throws Exception If no node can be found for the specified type.
      */
