@@ -8,6 +8,10 @@ class Node
   execute: (player) ->
     throw new Exception('Node must override execute() method!')
 
+  ###
+  # Must be overridden by all subclasses. Sets the cursor to the position
+  # of the node, or places it inside.
+  ###
   mark: (player) ->
     throw new Exception('Node must override mark() method!')
 
@@ -16,6 +20,41 @@ class Node
   ###
   toJSON: ->
     throw new Exception('Node must override toJSON() method!')
+
+  ###
+  # For combo boxes: Inspects the given value and defines its kind
+  # and properties.
+  ###
+  @checkAndExtract: (value, memory) ->
+    # check for const (int)
+    intVal = parseInt(value)
+    if (intVal + "" is value)
+      return {kind: 'const', type: 'int', value: intVal}
+    # check for array ([])
+    open = value.indexOf('[')
+    close = value.lastIndexOf(']')
+    if (open > -1 and close > open)
+      vid = memory.find(value.substr(0, open))
+      inner = @checkAndExtract(value.substr(open + 1, close - open - 1), memory)
+      if vid > -1 and inner?
+        memory.count(vid)
+        return {kind: 'index', vid: vid, index: inner}
+      else return null
+    # check for property (.length)
+    period = value.indexOf('.')
+    if (period > -1 and value.substr(period + 1) is "length")
+      vid = memory.find(value.substr(0, period))
+      if (vid > -1)
+        memory.count(vid)
+        return {kind: 'prop', type: 'int', vid: vid, prop: 'length'}
+      else return null
+    # check for variable name
+    vid = memory.find(value)
+    if (vid > -1)
+      memory.count(vid)
+      return {kind: 'var', vid: vid}
+    # return null, if value is not valid
+    null
 
   ###
   # Returns node's first sub-node of class _class.
@@ -28,20 +67,20 @@ class Node
   #
   # Must be overridden by all subclasses.
   ###
-  @parse: (node, tree) ->
+  @parse: (node, tree, memory) ->
     # extract the type
     type = node.data('node-type')
 
     # call proper parsing method
     switch type
-      when 'arithmetic' then ArithmeticNode.parse(node, tree)
-      when 'assign' then AssignNode.parse(node, tree)
-      when 'compare' then CompareNode.parse(node, tree)
-      when 'constant' then ConstantNode.parse(node, tree)
-      when 'if' then IfNode.parse(node, tree)
-      when 'inc' then IncNode.parse(node, tree)
-      when 'var' then VarNode.parse(node, tree)
-      when 'while' then WhileNode.parse(node, tree)
+      when 'arithmetic' then ArithmeticNode.parse(node, tree, memory)
+      when 'assign' then AssignNode.parse(node, tree, memory)
+      when 'compare' then CompareNode.parse(node, tree, memory)
+      when 'constant' then ConstantNode.parse(node, tree, memory)
+      when 'if' then IfNode.parse(node, tree, memory)
+      when 'inc' then IncNode.parse(node, tree, memory)
+      when 'var' then VarNode.parse(node, tree, memory)
+      when 'while' then WhileNode.parse(node, tree, memory)
       else
         throw new Exception("Parse error: Unknown type: '#{type}'")
 
@@ -86,7 +125,7 @@ class ArithmeticNode extends Node
     operator: @operator
     }
 
-  @parse: (node, tree) =>
+  @parse: (node, tree, memory) =>
     # parse left node
     left = BlockNode.parse(@findSubNode(node, '.arithmetic-left'), tree)
     tree.push left
@@ -129,7 +168,7 @@ class AssignNode extends Node
     to: @to
     }
 
-  @parse: (node, tree) =>
+  @parse: (node, tree, memory) =>
     # parse from-node
     from = BlockNode.parse(@findSubNode(node, '.assign-from'), tree)
     tree.push from
@@ -169,13 +208,13 @@ class BlockNode extends Node
     nodes: @nodes
     }
 
-  @parse: (node, tree) =>
+  @parse: (node, tree, memory) =>
     # prepare return value
     nodes = []
     # loop level-1 elements:
     node.children('li.node').each((index, element) =>
       # parse child and add it to tree
-      child = Node.parse($(element), tree)
+      child = Node.parse($(element), tree, memory)
       tree.push child
       # store each child-nid in block-node
       nodes[index] = child.nid
@@ -186,21 +225,11 @@ class BlockNode extends Node
 class CompareNode extends Node
   constructor: (@nid, @left, @right, @operator) ->
 
-  check: (tree) ->
-    # check for right dimensions
-    return false if (tree[@left].size() != 1 or tree[@right].size() != 1)
-    # extract children
-    left = tree.extract(@left)
-    right = tree.extract(@right)
-    # check for right classes
-    (left instanceof VarNode or left instanceof ConstantNode) and
-      (right instanceof VarNode or right instanceof ConstantNode)
+  check: (tree) -> true
 
   execute: (player, node) ->
-    left = player.tree.extract(@left)
-    right = player.tree.extract(@right)
-    leftVal = left.execute(player, node)
-    rightVal = right.execute(player, node)
+    leftVal = 0
+    rightVal = 0
     player.stats.incCompareOps()
     switch @operator
       when 'le' then leftVal <= rightVal
@@ -225,18 +254,12 @@ class CompareNode extends Node
     operator: @operator
     }
 
-  @parse: (node, tree) =>
-    # parse left node
-    left = BlockNode.parse(@findSubNode(node, '.compare-left'), tree)
-    tree.push left
-    # parse right node
-    right = BlockNode.parse(@findSubNode(node, '.compare-right'), tree)
-    tree.push right
-    # extract operator
-    operator = node.find('.compare-operation:first').val()
-    # create node
+  @parse: (node, tree, memory) =>
+    left = @checkAndExtract(@findSubNode(node, '.compare-left').val(), memory)
+    right = @checkAndExtract(@findSubNode(node, '.compare-right').val(), memory)
+    operator = @findSubNode(node, '.compare-operation').val()
     nid = tree.length
-    new @(nid, left.nid, right.nid, operator)
+    new @(nid, left, right, operator)
 
 class ConstantNode extends Node
   constructor: (@nid, @value) ->
@@ -251,7 +274,7 @@ class ConstantNode extends Node
     value: @value
     }
 
-  @parse: (node, tree) =>
+  @parse: (node, tree, memory) =>
     value = node.find('.constant-value:first').val()
     nid = tree.length
     new @(nid, value)
@@ -282,7 +305,7 @@ class IfNode extends Node
     elseBody: @elseBody
     }
 
-  @parse: (node, tree) =>
+  @parse: (node, tree, memory) =>
     # parse condition node
     condition = BlockNode.parse(@findSubNode(node, '.if-condition'), tree)
     tree.push condition
@@ -314,7 +337,7 @@ class IncNode extends Node
     vid: @vid
     }
 
-  @parse: (node, tree) =>
+  @parse: (node, tree, memory) =>
     vid = node.find('.var-value > :selected').val()
     nid = tree.length
     new @(nid, vid)
@@ -332,7 +355,7 @@ class VarNode extends Node
     vid: @vid
     }
 
-  @parse: (node, tree) =>
+  @parse: (node, tree, memory) =>
     vid = node.find('.var-value > :selected').val()
     nid = tree.length
     new @(nid, vid)
@@ -362,7 +385,7 @@ class WhileNode extends Node
     body: @body
     }
 
-  @parse: (node, tree) =>
+  @parse: (node, tree, memory) =>
     # parse condition node
     condition = BlockNode.parse(@findSubNode(node, '.while-condition'), tree)
     tree.push condition
@@ -386,8 +409,9 @@ class window.Tree
     else node
 
   reset: () ->
+    @memory = new Memory($('.variables>tbody'))
     @tree = []
-    rootNode = BlockNode.parse(SCRIPTSITE, @tree)
+    rootNode = BlockNode.parse(SCRIPTSITE, @tree, @memory)
     @root = @tree.length
     @tree.push rootNode
 
@@ -399,3 +423,42 @@ class window.Tree
 
   @toJSON: ->
     new @().toJSON()
+
+class window.Memory
+  constructor: (@table) ->
+    @memory = []
+    @original = []
+    @table.children(':visible').each((index, element) =>
+      vid = $(element).data('vid')
+      variable =
+        vid: vid
+        name: $(element).data('name')
+        value: $(element).data('value')
+        count: 0
+      @memory[vid] = variable
+      @original[vid] = variable
+    )
+
+  count: (vid) =>
+    variable = @memory[vid]
+    ++variable.count
+
+  find: (name) =>
+    vid = -1 # return a not-found-value
+    $.each(@memory, (index, elem) ->
+      vid = elem.vid if (elem.name is name)
+    )
+    vid
+
+  get: (vid) =>
+    @memory[vid]
+
+  set: (vid, value) =>
+    @memory[vid] = value
+
+  reset: =>
+    @table.children(':visible').each((index, element) =>
+      vid = $(element).data('vid')
+      $(element).find('.value').val(@original[vid].value)
+      @memory[vid] = @original[vid]
+    )

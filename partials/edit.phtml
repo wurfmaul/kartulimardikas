@@ -116,9 +116,12 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                                 $valueVisible = ($var->init === 'elem-value' || $var->init === 'array-custom') ? '' : 'style="display:none"';
                                 $sizeVisible = ($var->init === 'array-?' || $var->init === 'array-random') ? '' : 'style="display:none"';
                                 ?>
-                                <tr id="var-<?= $vid ?>" class="varRow" data-vid="<?= $vid ?>" <?= $rowVisible ?>
-                                    data-name="<?= $var->name ?>" data-init="<?= $var->init ?>"
-                                    data-value="<?= $var->value ?>" data-size="<?= $var->size ?>">
+                                <tr id="var-<?= $vid ?>" class="varRow" <?= $rowVisible ?>
+                                    data-vid="<?= $vid ?>"
+                                    data-name="<?= $var->name ?>"
+                                    data-init="<?= $var->init ?>"
+                                    data-value="<?= $var->value ?>"
+                                    data-size="<?= $var->size ?>">
 
                                     <!-- Variable in view mode -->
                                     <td class="view">

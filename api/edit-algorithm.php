@@ -1,5 +1,6 @@
 <?php
 define('BASEDIR', realpath('..') . '/');
+global $l10n;
 
 require_once BASEDIR . 'config/config.php';
 require_once BASEDIR . 'includes/authentication.php';

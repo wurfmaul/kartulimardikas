@@ -17,7 +17,7 @@
       @border: 1px solid gray;
       @radius: 5px;
       @form-background-color-factor: 5%;
-      @form-border-color-factor: 20%;
+      @form-border-color-factor: 40%;
       @form-border-style: 1px dashed;
 
       list-style-type: none;
@@ -28,9 +28,10 @@
         text-align: left;
       }
 
-      input {
+      input, select {
         background: none;
         border: none;
+        line-height: normal;
       }
 
       .handle {
@@ -86,7 +87,7 @@
         &.node-box {
           background-color: @arithmetic-node-color;
         }
-        select {
+        select, input {
           background-color: darken(@arithmetic-node-color, @form-background-color-factor);
           border: @form-border-style darken(@arithmetic-node-color, @form-border-color-factor);
         }
@@ -96,31 +97,39 @@
         &.node-box {
           background-color: @assign-node-color;
         }
+        select, input {
+          background-color: darken(@assign-node-color, @form-background-color-factor);
+          border: @form-border-style darken(@assign-node-color, @form-border-color-factor);
+        }
       }
 
       &.compare-node > table > tbody > tr > td {
         &.node-box {
           background-color: @compare-node-color;
         }
-        select {
+        select, input {
           background-color: darken(@compare-node-color, @form-background-color-factor);
-          border: @form-border-style darken(@compare-node-color, 40%);
+          border: @form-border-style darken(@compare-node-color, @form-border-color-factor);
         }
       }
 
       &.constant-node > table > tbody > tr > td {
         &.node-box {
           background-color: @constant-node-color;
-          input {
-            background-color: darken(@constant-node-color, @form-background-color-factor);
-            border: @form-border-style darken(@constant-node-color, @form-border-color-factor);
-          }
+        }
+        input {
+          background-color: darken(@constant-node-color, @form-background-color-factor);
+          border: @form-border-style darken(@constant-node-color, @form-border-color-factor);
         }
       }
 
       &.if-node > table > tbody > tr > td {
         &.node-box {
           background-color: @if-node-color;
+        }
+        select, input {
+          background-color: darken(@if-node-color, @form-background-color-factor);
+          border: @form-border-style darken(@if-node-color, @form-border-color-factor);
         }
       }
 
@@ -147,6 +156,10 @@
       &.while-node > table > tbody > tr > td {
         &.node-box {
           background-color: @while-node-color;
+        }
+        select, input {
+          background-color: darken(@while-node-color, @form-background-color-factor);
+          border: @form-border-style darken(@while-node-color, @form-border-color-factor);
         }
       }
     }

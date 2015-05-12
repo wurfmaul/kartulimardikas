@@ -80,38 +80,6 @@ class Player
   unsetCursor: ->
     $('#cursor').hide()
 
-class Memory
-  constructor: (@table) ->
-    @memory = []
-    @original = []
-    @table.children().each((index, element) =>
-      vid = $(element).data('vid')
-      value = $(element).find('.value').val()
-      @memory[vid] = value
-      @original[vid] = value
-    )
-
-  get: (vid) =>
-    # highlight source
-    @table.children('#var-' + vid).find('.value')
-    .addClass('highlight-compare')
-    # return value
-    @memory[vid]
-
-  set: (vid, value) =>
-    @memory[vid] = value
-    # change value in vars section
-    @table.children('#var-' + vid).find('.value')
-    .val(value)# set new value
-    .addClass('highlight-write') # mark as edited
-
-  reset: =>
-    @table.children().each((index, element) =>
-      vid = $(element).data('vid')
-      $(element).find('.value').val(@original[vid])
-      @memory[vid] = @original[vid]
-    )
-
 class Stats
   incWriteOps: ->
     $('#stats-now')

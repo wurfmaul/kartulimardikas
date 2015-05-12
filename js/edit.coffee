@@ -85,8 +85,6 @@ class Api
           @_printSuccess(data['success'])
           # hide and remove row
           $('#var-' + vid).hide('slow', -> $(this).remove())
-          # update existing var-steps
-          $('.var-value > .var-' + vid).remove()
       error: (jqXHR, textStatus, errorThrown) => # if request failed
         @_printError("Request Error: " + errorThrown)
     )
@@ -135,21 +133,18 @@ class VariableForm
   updateVarCount: ->
     $('.varRow').not('#var-prototype').each(->
       # update the variable counter
-      id = $(this).attr('id')
-      count = SCRIPTSITE.find(".#{id}:selected").length
+      vid = $(this).data('vid')
+      tree = new Tree()
+      count = tree.memory.get(vid).count
       $(this).find('.counter').text(count)
-      # (de)activate remove-button according to counter
-      if (count isnt 0)
-        $(this).find('.btn-var-remove').attr('disabled', 'disabled')
-      else
-        $(this).find('.btn-var-remove').removeAttr('disabled')
     )
 
   performCancel: (vid) ->
     $('#editAlert').hide('slow')
     varRow = $('#var-' + vid)
-    if varRow.data('name')?
-      varRow.find('.name').val(varRow.data('name'))
+    name = varRow.data('name')
+    if (name? and name isnt "")
+      varRow.find('.name').val(name)
       varRow.find('.init').val(varRow.data('init'))
       varRow.find('.value').val(varRow.data('value'))
       varRow.find('.size').val(varRow.data('size'))
@@ -163,7 +158,8 @@ class VariableForm
 
   performEdit: (vid) ->
     varRow = $('#var-' + vid)
-    varRow.find('.edit').show()
+    # TODO allow renaming of variables
+    varRow.find('.edit').show().find('.name').attr('disabled', 'disabled')
     varRow.find('.view').hide()
 
   performRemove: (vid) ->
@@ -204,7 +200,7 @@ class StepForm
 
   updateActionHandlers: (parent) ->
     # update action handlers
-    parent.find('.combobox').combobox()
+    initCombobox(parent.find('.combobox'))
     parent.find('input').off('blur').blur => @saveChanges() # save when leaving inputs
     parent.find('select').off('change').change => @saveChanges() # save when changing selects
     parent.find('.node-remove').off('click').click (event) =>
@@ -220,13 +216,6 @@ class StepForm
     SCRIPTSITE.sortable(sortParams)
     SCRIPTSITE.find('.sortable').sortable(sortParams)
 
-# highlight all the variable usages
-highlightVar = (id) ->
-  SCRIPTSITE.find(".#{id}:selected").closest('tr').children().addClass('highlight')
-  setTimeout(-> # remove the highlight after some time
-    SCRIPTSITE.find('.highlight').removeClass('highlight')
-  , 1500)
-
 updateVisibility = (variable) ->
   # show/hide input fields according to the init selection
   varRow = variable.parents('.varRow')
@@ -238,86 +227,52 @@ updateVisibility = (variable) ->
   varRow.find('.size-group').hide('slow') if !showSize
   varRow.find('.value-group').hide('slow') if !showValue
 
-$ ->
-  $.widget("custom.combobox",
-    _create: ->
-      @wrapper = $("<span>")
-      .addClass("custom-combobox")
-      .insertAfter(@element)
-      @element.hide()
-      @_createAutocomplete()
-      @_createShowAllButton()
-
-    _createAutocomplete: ->
-      selected = @element.children(":selected")
-      if selected.val() then value = selected.text()
-      else value = ""
-
-      @input = $("<input>")
-      .appendTo(@wrapper)
-      .val(value)
-      .attr("title", "")
-      .addClass("custom-combobox-input ui-widget ui-widget-content ui-state-default")
-      .autocomplete(
-        delay: 0,
-        minLength: 0,
-        source: $.proxy(@, "_source")
-      )
-      .tooltip(
-        tooltipClass: "ui-state-highlight"
-      )
-      .click(->
-        $(this).autocomplete("search", "") # open drop-down with all options
-      )
-
-      @_on(@input,
-        autocompleteselect: (event, ui) ->
-          ui.item.option.selected = true
-          @_trigger("select", event, {
-            item: ui.item.option
-          })
-        #autocompletechange: "_removeIfInvalid"
-      )
-
-    _createShowAllButton: ->
-      input = @input
-      wasOpen = false
-
-      link = $("<a>")
-      .attr("tabIndex", -1)
-      .attr("title", "Show All Items")
-      .tooltip()
-      .appendTo(@wrapper)
-      .removeClass("ui-corner-all")
-      .addClass("custom-combobox-toggle")
-      .mousedown(-> wasOpen = input.autocomplete("widget").is(":visible"))
-      .click(->
-        input.focus()
-        return if ( wasOpen )
-        #Pass empty string as value to search for, displaying all results
-        input.autocomplete("search", "")
-      )
-
-      $("<span>")
-      .addClass("ui-button-icon-primary ui-icon ui-icon-triangle-1-s")
-      .appendTo(link)
-
-    _source: (request, response) ->
-      response(@element.children("option").map(->
-        text = $(this).text()
-        if ( @value && !request.term  )
-          return {
-          label: text
-          value: text
-          option: $(this)
-          }
+initCombobox = (elem) ->
+  vars = []
+  $('.varRow:visible').each(->
+    vars.push($(this).data('name'))
+  )
+  properties = ["", "[*]", ".length"]
+  if (elem.autocomplete("instance")?)
+    elem.autocomplete("destroy")
+  elem.autocomplete(
+    delay: 0
+    minLength: 0
+    source: (request, response) ->
+      # the entered search term
+      val = request.term
+      if (val is "")
+        # use var names for empty term
+        @src = vars
+      else if ($.inArray(val, vars) > -1)
+        # use var operations if a variable name was typed/selected
+        newSrc = []
+        $.each(properties, (i, elem) ->
+          newSrc.push(
+            value: val + elem
+            label: val + elem
+            variable: val
+          )
+        )
+        @src = newSrc
+      # try to find a match in the array of possible matches
+      matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i")
+      response($.grep(@src, (value)->
+        value = value.label || value.value || value
+        matcher.test(value)
       ))
-
-    _destroy: ->
-      @wrapper.remove()
-      @element.show()
+    select: (event, ui) ->
+      val = ui.item.variable ? ui.item.label
+      $(this).autocomplete("search", val)
+  ).click(->
+    # open search with basic options
+    $(this).autocomplete("search", $(this).val())
+  ).focusout(->
+    # collapse search, when losing focus
+    $(this).autocomplete("close")
   )
 
+$ ->
   # GENERAL
   $('#editAlertClose').click -> $('#editAlert').hide('slow')
 
@@ -334,7 +289,6 @@ $ ->
   $('.btn-var-check').click -> varForm.performCheck($(this).parents('.varRow').data('vid'))
   $('.btn-var-edit').click -> varForm.performEdit($(this).parents('.varRow').data('vid'))
   $('.btn-var-remove').click -> varForm.performRemove($(this).parents('.varRow').data('vid'))
-  $('.btn-var-count').click -> highlightVar($(this).data('target'))
   $('.init').change -> updateVisibility($(this))
 
   # STEPS SECTION
