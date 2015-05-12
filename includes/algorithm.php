@@ -206,10 +206,11 @@ class BlockNode extends Node
         if (sizeof($this->nodes) === 1) {
             return end($this->nodes)->getSource($params);
         } else {
+            $_indent = TreeHelper::getIndent(++$params['indent']);
             $source = "";
             foreach ($this->nodes as $node) {
                 /** @var Node $node */
-                $source .= $node->getSource($params) . PHP_EOL;
+                $source .= $_indent . $node->getSource($params) . PHP_EOL;
             }
             return $source;
         }
@@ -285,22 +286,20 @@ class CompareNode extends Node
                         <?php if ($params['mode'] === 'edit'): ?>
                             <label>
                                 <?= TreeHelper::l10n('compare_node_title') ?>
-                                <div class="edit-only">
-                                    <div class="ui-widget combobox-container">
-                                        <input class="compare-left combobox" value="<?= $leftVal ?>"/>
-                                    </div>
-                                    <select class="compare-operation">
-                                        <?php foreach ($this->ops as $op => $char): ?>
-                                            <option value="<?= $op ?>"
-                                                    <?php if ($selected_op === $op): ?>selected="selected"<?php endif ?>>
-                                                <?= $char ?>
-                                            </option>
-                                        <?php endforeach ?>
-                                    </select>
+                                <div class="ui-widget combobox-container">
+                                    <input class="compare-left combobox" value="<?= $leftVal ?>"/>
+                                </div>
+                                <select class="compare-operation">
+                                    <?php foreach ($this->ops as $op => $char): ?>
+                                        <option value="<?= $op ?>"
+                                                <?php if ($selected_op === $op): ?>selected="selected"<?php endif ?>>
+                                            <?= $char ?>
+                                        </option>
+                                    <?php endforeach ?>
+                                </select>
 
-                                    <div class="ui-widget combobox-container">
-                                        <input class="compare-right combobox" value="<?= $rightVal ?>"/>
-                                    </div>
+                                <div class="ui-widget combobox-container">
+                                    <input class="compare-right combobox" value="<?= $rightVal ?>"/>
                                 </div>
                             </label>
                             <span class="invalid label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
@@ -638,7 +637,7 @@ class WhileNode extends Node
 
     public function getSource($params)
     {
-        $_indent = TreeHelper::getIndent($params['indent']++);
+        $_indent = TreeHelper::getIndent($params['indent']);
         $string = $_indent . "while (" . $this->cond->getSource($params) . ")" . PHP_EOL;
         $string .= $this->body->getSource($params);
         return $string;

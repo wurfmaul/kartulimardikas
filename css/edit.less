@@ -44,37 +44,32 @@
 
   #node-btn-group {
     padding-top: 10px;
-
+    .btnStyle(@color) {
+      background-color: lighten(@color, 10%);
+    }
     #btn-add-arithmetic {
-      background-color: lighten(@arithmetic-node-color, 10%);
+      .btnStyle(@arithmetic-node-color);
     }
-
     #btn-add-assign {
-      background-color: lighten(@assign-node-color, 10%);
+      .btnStyle(@assign-node-color);
     }
-
     #btn-add-compare {
-      background-color: lighten(@compare-node-color, 10%);
+      .btnStyle(@compare-node-color);
     }
-
     #btn-add-constant {
-      background-color: lighten(@constant-node-color, 10%);
+      .btnStyle(@constant-node-color);
     }
-
     #btn-add-if {
-      background-color: lighten(@if-node-color, 10%);
+      .btnStyle(@if-node-color);
     }
-
     #btn-add-inc {
-      background-color: lighten(@inc-node-color, 10%);
+      .btnStyle(@inc-node-color);
     }
-
     #btn-add-var {
-      background-color: lighten(@var-node-color, 10%);
+      .btnStyle(@var-node-color);
     }
-
     #btn-add-while {
-      background-color: lighten(@while-node-color, 10%);
+      .btnStyle(@while-node-color);
     }
   }
 }

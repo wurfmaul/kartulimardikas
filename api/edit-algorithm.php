@@ -12,6 +12,9 @@ $uid = isSignedIn();
 
 class EditAlgorithmManager
 {
+    const INT_TYPE = 'elem-int';
+    const INT_ARRAY_TYPE = 'array-int';
+
     private $_uid;
     private $_aid;
     private $_algorithm;
@@ -87,44 +90,74 @@ class EditAlgorithmManager
 
     private function _editVar()
     {
-        if (!isset($_POST['vid'], $_POST['name'], $_POST['init'], $_POST['value'], $_POST['size']))
+        if (!isset($_POST['vid'], $_POST['name'], $_POST['type'], $_POST['value'], $_POST['size']))
             die("Post parameters not set properly!");
 
         $vid = trim($_POST['vid']);
         $name = trim($_POST['name']);
-        $init = trim($_POST['init']);
+        $type = trim($_POST['type']);
         $value = trim($_POST['value']);
         $size = intval($_POST['size']);
 
         // get variables from database
         $vars = $this->_model->fetchAlgorithm($this->_aid)->variables;
-        $vars = (is_null($vars)) ? array() : json_decode($vars);
+        $vars = (is_null($vars)) ? array() : json_decode($vars, true);
 
         // check for correct name and duplicates
         $name = htmlspecialchars($name);
 
         // check if name is not specified
-        if (strlen($name) == 0) {
+        if (strlen($name) === 0) {
             $this->_response['error-name'] = $this->_l10n['empty_name'] . "<br />";
-            unset($name);
+            $name = false;
         } elseif (!empty($vars)) { // check for name duplicate
             foreach ($vars as $curVid => $curVar) {
-                if ($curVar->name == $name && $curVid != $vid) {
+                if ($curVar['name'] === $name && $curVid != $vid) {
                     $this->_response['error-name'] = $this->_l10n['same_name'] . "<br />";
-                    unset($name);
+                    $name = false;
                     break;
                 }
             }
         }
 
         // check for correct initialization
-        switch ($init) {
-            case "array-custom":
-                // check value field
-                if ($value == "") {
-                    $this->_response['error-value'] = $this->_l10n['empty_value'] . "<br />";
-                    unset($value);
+        $RANDOM_VALUE = $this->_l10n['random'];
+        $UNINIT_VALUE = $this->_l10n['uninitialized'];
+        switch ($type) {
+
+            // deal with int elements
+            case self::INT_TYPE:
+                if ($value === $RANDOM_VALUE) {
+                    $value = rand(0, 100);
+                } elseif ($value === $UNINIT_VALUE) {
+                    $value = '?';
+                } elseif (!empty($value)) {
+                    $value = intval($value);
                 } else {
+                    $this->_response['error-value'] = $this->_l10n['empty_value'] . "<br />";
+                    $value = false;
+                }
+                break;
+
+            // deal with int arrays
+            case self::INT_ARRAY_TYPE:
+                if ($value === $RANDOM_VALUE) {
+                    $this->_checkArraySize($size);
+                    if ($size) {
+                        $newValue = array();
+                        for ($i = 0; $i < $size; $i++)
+                            $newValue[] = rand(0, $size);
+                        $value = implode(',', $newValue);
+                    }
+                } elseif ($value === $UNINIT_VALUE) {
+                    $this->_checkArraySize($size);
+                    if ($size) {
+                        $newValue = array();
+                        for ($i = 0; $i < $size; $i++)
+                            $newValue[] = '?';
+                        $value = implode(',', $newValue);
+                    }
+                } elseif (!empty($value)) {
                     $newValue = array();
                     $size = 0;
                     foreach (explode(',', $value) as $val) {
@@ -132,54 +165,28 @@ class EditAlgorithmManager
                         $size++;
                     }
                     $value = implode(',', $newValue);
-                }
-                $this->_checkArraySize($size); // FIXME: highlight value field and not size field
-                break;
-            case "array-random":
-                $this->_checkArraySize($size);
-                if (isset($size)) {
-                    $newValue = array();
-                    for ($i = 0; $i < $size; $i++)
-                        $newValue[] = rand(0, $size);
-                    $value = implode(',', $newValue);
-                }
-                break;
-            case "array-?":
-                $this->_checkArraySize($size);
-                if (isset($size)) {
-                    $newValue = array();
-                    for ($i = 0; $i < $size; $i++)
-                        $newValue[] = '?';
-                    $value = implode(',', $newValue);
-                }
-                break;
-            case "elem-value":
-                if ($value == "") {
-                    $this->_response['error-value'] = $this->_l10n['empty_value'] . "<br />";
-                    unset($value);
+                    $this->_checkArraySize($size);
                 } else {
-                    $value = intval($value); // FIXME: only allow integer -> error message!
+                    $this->_response['error-value'] = $this->_l10n['empty_value'] . "<br />";
+                    $value = false;
                 }
-                break;
-            case "elem-?":
-                $value = '?';
                 break;
             default:
-                $this->_response['error-init'] = $this->_l10n['invalid_init'] . "<br />";
+                $this->_response['error-type'] = $this->_l10n['invalid_init'] . "<br />";
                 unset($init);
         }
 
         // return whatever information is still valid
-        if (isset($init)) $this->_response['init'] = $init;
-        if (isset($name)) $this->_response['name'] = $name;
-        if (isset($value)) $this->_response['value'] = $value;
-        if (isset($size)) $this->_response['size'] = $size;
+        if ($type) $this->_response['type'] = $type;
+        if ($name) $this->_response['name'] = $name;
+        if ($value) $this->_response['value'] = $value;
+        if ($size) $this->_response['size'] = $size;
 
         // if every field has been filled:
-        if (isset($init, $name, $value, $size)) {
+        if ($type && $name && $value && $size) {
             $vars[$vid] = array(
                 'name' => $name,
-                'init' => $init,
+                'type' => $type,
                 'value' => $value,
                 'size' => $size
             );
@@ -197,7 +204,7 @@ class EditAlgorithmManager
     {
         if (ARRAY_MIN_SIZE > $size || $size > ARRAY_MAX_SIZE) {
             $this->_response['error-size'] = sprintf($this->_l10n['size_out_of_bounds'], ARRAY_MIN_SIZE, ARRAY_MAX_SIZE) . "<br />";
-            unset ($size); // FIXME does not work out of the function!
+            $size = false;
         } else {
             $this->_response['size'] = $size;
         }
@@ -212,7 +219,7 @@ class EditAlgorithmManager
 
         // get variables from database
         $vars = $this->_model->fetchAlgorithm($this->_aid)->variables;
-        $vars = (is_null($vars)) ? array() : json_decode($vars);
+        $vars = (is_null($vars)) ? array() : json_decode($vars, true);
 
         if (!empty($vars)) {
             unset($vars[$vid]);

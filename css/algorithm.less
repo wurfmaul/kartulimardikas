@@ -87,84 +87,41 @@
         }
       }
 
-      &.arithmetic-node > table > tbody > tr > td {
-        &.node-box {
-          background-color: @arithmetic-node-color;
-        }
-        select, input {
-          background-color: darken(@arithmetic-node-color, @form-background-color-factor);
-          border: @form-border-style darken(@arithmetic-node-color, @form-border-color-factor);
-        }
-      }
-
-      &.assign-node > table > tbody > tr > td {
-        &.node-box {
-          background-color: @assign-node-color;
-        }
-        select, input {
-          background-color: darken(@assign-node-color, @form-background-color-factor);
-          border: @form-border-style darken(@assign-node-color, @form-border-color-factor);
+      .nodeStyle(@color) {
+        & > table > tbody > tr > td {
+          &.node-box {
+            background-color: @color;
+            select, input {
+              background-color: darken(@color, @form-background-color-factor);
+              border: @form-border-style darken(@color, @form-border-color-factor);
+            }
+          }
         }
       }
 
-      &.compare-node > table > tbody > tr > td {
-        &.node-box {
-          background-color: @compare-node-color;
-        }
-        select, input {
-          background-color: darken(@compare-node-color, @form-background-color-factor);
-          border: @form-border-style darken(@compare-node-color, @form-border-color-factor);
-        }
+      &.arithmetic-node {
+        .nodeStyle(@arithmetic-node-color);
       }
-
-      &.constant-node > table > tbody > tr > td {
-        &.node-box {
-          background-color: @constant-node-color;
-        }
-        input {
-          background-color: darken(@constant-node-color, @form-background-color-factor);
-          border: @form-border-style darken(@constant-node-color, @form-border-color-factor);
-        }
+      &.assign-node {
+        .nodeStyle(@assign-node-color);
       }
-
-      &.if-node > table > tbody > tr > td {
-        &.node-box {
-          background-color: @if-node-color;
-        }
-        select, input {
-          background-color: darken(@if-node-color, @form-background-color-factor);
-          border: @form-border-style darken(@if-node-color, @form-border-color-factor);
-        }
+      &.compare-node {
+        .nodeStyle(@compare-node-color)
       }
-
-      &.inc-node > table > tbody > tr > td {
-        &.node-box {
-          background-color: @inc-node-color;
-        }
-        input, select {
-          background-color: darken(@inc-node-color, @form-background-color-factor);
-          border: @form-border-style darken(@inc-node-color, @form-border-color-factor);
-        }
+      &.constant-node {
+        .nodeStyle(@constant-node-color)
       }
-
-      &.var-node > table > tbody > tr > td {
-        &.node-box {
-          background-color: @var-node-color;
-        }
-        select {
-          background-color: darken(@var-node-color, @form-background-color-factor);
-          border: @form-border-style darken(@var-node-color, @form-border-color-factor);
-        }
+      &.if-node {
+        .nodeStyle(@if-node-color)
       }
-
-      &.while-node > table > tbody > tr > td {
-        &.node-box {
-          background-color: @while-node-color;
-        }
-        select, input {
-          background-color: darken(@while-node-color, @form-background-color-factor);
-          border: @form-border-style darken(@while-node-color, @form-border-color-factor);
-        }
+      &.inc-node {
+        .nodeStyle(@inc-node-color)
+      }
+      &.var-node {
+        .nodeStyle(@var-node-color)
+      }
+      &.while-node {
+        .nodeStyle(@while-node-color)
       }
     }
   }

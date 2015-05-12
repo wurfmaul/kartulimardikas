@@ -28,25 +28,24 @@ class Api
     varRow = $('#var-' + vid)
     aid = $('#aid').data('val')
     name = varRow.find('.name').val()
-    init = varRow.find('.init').val()
+    type = varRow.find('.type').val()
     value = varRow.find('.value').val()
     size = varRow.find('.size').val()
     $.ajax("api/edit-algorithm.php?area=var&action=edit",
       type: 'POST'
-      data: {aid: aid, vid: vid, name: name, init: init, value: value, size: size}
+      data: {aid: aid, vid: vid, name: name, type: type, value: value, size: size}
       dataType: 'json'
       success: (data) => # if response arrived...
         msg = data['error'] ? ""
         varRow = $('#var-' + vid)
 
         # check for errors
-        for token in ['name', 'init', 'value', 'size']
+        for token in ['name', 'type', 'value', 'size']
           if data['error-' + token]?
             msg += data['error-' + token]
             varRow.find('.' + token + '-group').addClass('has-error')
           else
             varRow.find('.' + token + '-group').removeClass('has-error')
-            varRow.find('.' + token).val(data[token])
             varRow.data(token, data[token])
 
         if msg isnt "" then @_printError(msg)
@@ -56,18 +55,6 @@ class Api
           varRow.find('.edit').hide()
           varRow.find('.view .cell').text(data['viewMode'])
           varRow.find('.view').show()
-          # update existing var-steps
-          opts = $('.var-value > .var-' + vid)
-          if (opts.length)
-            opts.html(name) # update the name
-            $('.var-value-input.var-' + vid).val(name)
-          else
-            $('.var-value').append(
-              $('<option>')# append another option
-              .addClass('var-' + vid)# give it a class
-              .val(vid)# give it a value
-              .html(name) # give it a name
-            )
       error: (jqXHR, textStatus, errorThrown) => # if request failed
         @_printError("Request Error: " + errorThrown)
     )
@@ -128,6 +115,7 @@ class VariableForm
     newRow.find('.edit').show()
     newRow.find('.view').hide()
     newRow.show('slow')
+    initValueInput(newRow.find('.value-group'))
     @maxVarId++
 
   updateVarCount: ->
@@ -164,6 +152,7 @@ class VariableForm
   performEdit: (vid) ->
     varRow = $('#var-' + vid)
     # TODO allow renaming of variables
+    initValueInput(varRow.find('.value-group'))
     varRow.find('.edit').show().find('.name').attr('disabled', 'disabled')
     varRow.find('.view').hide()
 
@@ -205,14 +194,14 @@ class StepForm
 
   updateActionHandlers: (parent) ->
     # update action handlers
-    initCombobox(parent.find('.combobox'))
+    initVarInput(parent.find('.combobox'))
     parent.find('input').off('blur').blur => @saveChanges() # save when leaving inputs
     parent.find('select').off('change').change => @saveChanges() # save when changing selects
     parent.find('.node-remove').off('click').click (event) =>
       @removeNode($(event.currentTarget).parents('.node:first'))
 
   updateSortable: ->
-    update = () =>
+    update = =>
       Api.editScript(Tree.toJSON())
     sortParams =
       connectWith: ".sortable"
@@ -223,16 +212,9 @@ class StepForm
 
 updateVisibility = (variable) ->
   # show/hide input fields according to the init selection
-  varRow = variable.parents('.varRow')
-  target = variable.find(':selected').data('target')
-  showValue = (target == '.value')
-  showSize = (target == '.size')
-  varRow.find('.value-group').show('slow') if showValue
-  varRow.find('.size-group').show('slow') if showSize
-  varRow.find('.size-group').hide('slow') if !showSize
-  varRow.find('.value-group').hide('slow') if !showValue
+  # FIXME: show/hide size-group
 
-initCombobox = (elem) ->
+initVarInput = (elem) ->
   vars = []
   $('.varRow:visible').each(->
     vars.push($(this).data('name'))
@@ -277,6 +259,25 @@ initCombobox = (elem) ->
     $(this).autocomplete("close")
   )
 
+initValueInput = (elem) ->
+  input = elem.find('.value')
+  # destroy old instance
+  if (input.autocomplete("instance")?)
+    input.autocomplete("destroy")
+  # init auto-completion
+  input.autocomplete(
+    delay: 0
+    minLength: 0
+    source: [elem.data('random'), elem.data('uninit')]
+    select: -> updateVisibility(elem)
+  ).click(->
+    # open search with basic options
+    $(this).autocomplete("search", "")
+  ).focusout(->
+    # collapse search, when losing focus
+    $(this).autocomplete("close")
+  )
+
 $ ->
   # GENERAL
   $('#editAlertClose').click -> $('#editAlert').hide('slow')
@@ -294,7 +295,7 @@ $ ->
   $('.btn-var-check').click -> varForm.performCheck($(this).parents('.varRow').data('vid'))
   $('.btn-var-edit').click -> varForm.performEdit($(this).parents('.varRow').data('vid'))
   $('.btn-var-remove').click -> varForm.performRemove($(this).parents('.varRow').data('vid'))
-  $('.init').change -> updateVisibility($(this))
+  $('.type').change -> updateVisibility($(this))
 
   # STEPS SECTION
   stepForm = new StepForm(varForm)
