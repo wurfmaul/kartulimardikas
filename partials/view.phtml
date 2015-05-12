@@ -102,7 +102,7 @@ if ($__algorithm && ($__public || $__owner)):
                                 <ul id="node_<?= $tree->getRoot() ?>" class="insertStepsHere"
                                     data-node-id="<?= $tree->getRoot() ?>">
                                     <li id="cursor"></li>
-                                    <?php $tree->printHtml(['vars' => $vars]) ?>
+                                    <?php $tree->printHtml(['vars' => $vars, 'mode' => 'view']) ?>
                                 </ul>
                             <?php endif ?>
                         </div>

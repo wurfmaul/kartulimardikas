@@ -170,14 +170,13 @@ class AssignNode extends Node
 
   @parse: (node, tree, memory) =>
     # parse from-node
-    from = BlockNode.parse(@findSubNode(node, '.assign-from'), tree)
+    from = BlockNode.parse(@findSubNode(node, '.assign-from'), tree, memory)
     tree.push from
     # parse to-node
-    to = BlockNode.parse(@findSubNode(node, '.assign-to'), tree)
-    tree.push to
+    to = @checkAndExtract(@findSubNode(node, '.assign-to').val(), memory)
     # create the node
     nid = tree.length
-    new @(nid, from.nid, to.nid)
+    new @(nid, from.nid, to)
 
 class BlockNode extends Node
   constructor: (@nid, @nodes) ->
@@ -307,13 +306,13 @@ class IfNode extends Node
 
   @parse: (node, tree, memory) =>
     # parse condition node
-    condition = BlockNode.parse(@findSubNode(node, '.if-condition'), tree)
+    condition = BlockNode.parse(@findSubNode(node, '.if-condition'), tree, memory)
     tree.push condition
     # parse if node
-    ifBody = BlockNode.parse(@findSubNode(node, '.if-body'), tree)
+    ifBody = BlockNode.parse(@findSubNode(node, '.if-body'), tree, memory)
     tree.push ifBody
     # parse else node
-    elseBody = BlockNode.parse(@findSubNode(node, '.if-else'), tree)
+    elseBody = BlockNode.parse(@findSubNode(node, '.if-else'), tree, memory)
     tree.push elseBody
     # create node
     nid = tree.length
@@ -334,13 +333,13 @@ class IncNode extends Node
     {
     nid: @nid
     node: 'inc'
-    vid: @vid
+    var: @variable
     }
 
   @parse: (node, tree, memory) =>
-    vid = node.find('.var-value > :selected').val()
+    variable = @checkAndExtract(@findSubNode(node, '.inc-var').val(), memory)
     nid = tree.length
-    new @(nid, vid)
+    new @(nid, variable)
 
 class VarNode extends Node
   constructor: (@nid, @vid) ->
@@ -387,10 +386,10 @@ class WhileNode extends Node
 
   @parse: (node, tree, memory) =>
     # parse condition node
-    condition = BlockNode.parse(@findSubNode(node, '.while-condition'), tree)
+    condition = BlockNode.parse(@findSubNode(node, '.while-condition'), tree, memory)
     tree.push condition
     # parse body node
-    body = BlockNode.parse(@findSubNode(node, '.while-body'), tree)
+    body = BlockNode.parse(@findSubNode(node, '.while-body'), tree, memory)
     tree.push body
     # create node
     nid = tree.length

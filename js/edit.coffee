@@ -137,6 +137,11 @@ class VariableForm
       tree = new Tree()
       count = tree.memory.get(vid).count
       $(this).find('.counter').text(count)
+      # (de)activate remove-button according to counter
+      if (count isnt 0)
+        $(this).find('.btn-var-remove').attr('disabled', 'disabled')
+      else
+        $(this).find('.btn-var-remove').removeAttr('disabled')
     )
 
   performCancel: (vid) ->

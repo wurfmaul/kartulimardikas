@@ -130,7 +130,7 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                                         </div>
                                         <div class="tools">
                                             <button type="button" class="btn btn-default btn-sm btn-var-count"
-                                                    title="<?= $l10n['usage_count'] ?>" data-target="var-<?= $vid ?>">
+                                                    title="<?= $l10n['usage_count'] ?>">
                                                 # <code class="counter">0</code>
                                             </button>
                                             <div class="btn-group btn-group-sm">
@@ -237,7 +237,7 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                 <div id="stepPanel" class="panel-collapse collapse <?= $section[2] ? 'in' : 'closed' ?>">
                     <div class="panel-body algorithm" style="text-align: center">
                         <ul class="insertStepsHere" class="sortable"
-                            data-node-id="0"><?php $tree->printHtml(['vars' => $vars]) ?></ul>
+                            data-node-id="0"><?php $tree->printHtml(['vars' => $vars, 'mode' => 'edit']) ?></ul>
 
                         <div id="node-btn-group" class="btn-group btn-group-sm" role="group"
                              aria-label="<?= $l10n['create_a_node'] ?>">
@@ -269,15 +269,21 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
 
                         <ul style="display: none">
                             <?php
+                            // prepare parameters for prototypes
+                            $params = [
+                                'vars' => $vars,  // attach variables
+                                'mode' => 'edit', // start in edit-mode
+                                'indent' => 0     // start indentation at 0
+                            ];
                             // generate prototypes
-                            Node::printPrototype(Node::ARITHMETIC_NODE, ['vars' => $vars]);
-                            Node::printPrototype(Node::ASSIGN_NODE, ['vars' => $vars]);
-                            Node::printPrototype(Node::COMPARE_NODE, ['vars' => $vars]);
-                            Node::printPrototype(Node::CONSTANT_NODE);
-                            Node::printPrototype(Node::IF_NODE);
-                            Node::printPrototype(Node::INC_NODE, ['vars' => $vars]);
-                            Node::printPrototype(Node::VAR_NODE, ['vars' => $vars]);
-                            Node::printPrototype(Node::WHILE_NODE);
+                            Node::printPrototype(Node::ARITHMETIC_NODE, $params);
+                            Node::printPrototype(Node::ASSIGN_NODE, $params);
+                            Node::printPrototype(Node::COMPARE_NODE, $params);
+                            Node::printPrototype(Node::CONSTANT_NODE, $params);
+                            Node::printPrototype(Node::IF_NODE, $params);
+                            Node::printPrototype(Node::INC_NODE, $params);
+                            Node::printPrototype(Node::VAR_NODE, $params);
+                            Node::printPrototype(Node::WHILE_NODE, $params);
                             ?>
                         </ul>
                     </div>

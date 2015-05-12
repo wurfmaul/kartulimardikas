@@ -29,8 +29,8 @@ class ArithmeticNode extends Node
 
     public static function parse($node, $tree)
     {
-        $left = isset($node->left) ? parent::parse($tree[$node->left], $tree) : null;
-        $right = isset($node->right) ? parent::parse($tree[$node->right], $tree) : null;
+        $left = isset($node->left) ? $node->left : null;
+        $right = isset($node->right) ? $node->right : null;
         $op = isset($node->operator) ? $node->operator : null;
         return new self($node->nid, $left, $right, $op);
     }
@@ -38,16 +38,16 @@ class ArithmeticNode extends Node
     public function getSource($params)
     {
         return sprintf("%s %s %s",
-            $this->left->getSource($params),
+            $this->parseValue($this->left, $params),
             $this->ops[$this->op],
-            $this->right->getSource($params)
+            $this->parseValue($this->right, $params)
         );
     }
 
     public function printHtml(&$params)
     {
-        $leftNid = isset($this->left) ? $this->left->nodeId : null;
-        $rightNid = isset($this->right) ? $this->right->nodeId : null;
+        $leftVal = $this->parseValue($this->left, $params);
+        $rightVal = $this->parseValue($this->right, $params);
         $selected_op = $this->isPrototype ? 'plus' : $this->op;
         ?>
         <!-- ARITHMETIC NODE -->
@@ -57,42 +57,40 @@ class ArithmeticNode extends Node
                 <tr>
                     <td class="handle node-box top bottom left">&nbsp;</td>
                     <td class="node-box top right bottom full-width">
-                        <label>
-                            <?= TreeHelper::l10n('arithmetic_node_title') ?>
-                            <div class="ui-widget combobox-container">
-                                <input class="var-value edit-only combobox"/>
-                            </div>
-                            <select class="arithmetic-operation edit-only">
-                                <?php foreach ($this->ops as $op => $char): ?>
-                                    <option value="<?= $op ?>"
-                                            <?php if ($selected_op === $op): ?>selected="selected"<?php endif ?>>
-                                        <?= $char ?>
-                                    </option>
-                                <?php endforeach ?>
-                            </select>
-                            <input class="arithmetic-operation-input view-only" disabled="disabled"
-                                   value="<?= $this->ops[$selected_op] ?>"/>
+                        <?php if ($params['mode'] === 'edit'): ?>
+                            <label>
+                                <?= TreeHelper::l10n('arithmetic_node_title') ?>
+                                <div class="ui-widget combobox-container">
+                                    <input class="arithmetic-left combobox" value="<?= $leftVal ?>"/>
+                                </div>
+                                <select class="arithmetic-operation">
+                                    <?php foreach ($this->ops as $op => $char): ?>
+                                        <option value="<?= $op ?>"
+                                                <?php if ($selected_op === $op): ?>selected="selected"<?php endif ?>>
+                                            <?= $char ?>
+                                        </option>
+                                    <?php endforeach ?>
+                                </select>
 
-                            <div class="ui-widget combobox-container">
-                                <input class="var-value edit-only combobox"/>
-                            </div>
-                        </label>
-                        <span class="label label-danger" style="display: none;">
-                            <?= TreeHelper::l10n('invalid') ?>
-                        </span>
-                        <button type="button" class="close node-remove" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                                <div class="ui-widget combobox-container">
+                                    <input class="arithmetic-right combobox" value="<?= $rightVal ?>"/>
+                                </div>
+                            </label>
+                            <span class="invalid label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
+                            <button type="button" class="close node-remove" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        <?php else: ?>
+                            <?= TreeHelper::l10n('arithmetic_node_title') ?>
+                            <?= $leftVal ?>
+                            <?= $this->ops[$selected_op] ?>
+                            <?= $rightVal ?>
+                        <?php endif ?>
                     </td>
                 </tr>
             </table>
         </li>
     <?php }
-
-    public function isValid()
-    {
-        return true;
-    }
 }
 
 class AssignNode extends Node
@@ -111,21 +109,25 @@ class AssignNode extends Node
 
     public static function parse($node, $tree)
     {
-        $from = parent::parse($tree[$node->from], $tree);
-        $to = parent::parse($tree[$node->to], $tree);
+        $from = isset($node->from) ? parent::parse($tree[$node->from], $tree) : null;
+        $to = isset($node->to) ? $node->to : null;
         return new self($node->nid, $to, $from);
     }
 
     public function getSource($params)
     {
         $indent = TreeHelper::getIndent($params['indent']);
-        return sprintf("%s%s = %s", $indent, $this->to->getSource($params), $this->from->getSource($params));
+        return sprintf("%s%s = %s",
+            $indent,
+            $this->parseValue($this->to, $params),
+            $this->from->getSource($params)
+        );
     }
 
     public function printHtml(&$params)
     {
+        $toValue = $this->parseValue($this->to, $params);
         $fromNid = isset($this->from) ? $this->from->nodeId : null;
-        $toNid = isset($this->to) ? $this->to->nodeId : null;
         ?>
         <!-- ASSIGN NODE -->
         <li id="node_<?= $this->nodeId ?>" class="node assign-node" data-node-type="assign"
@@ -134,18 +136,22 @@ class AssignNode extends Node
                 <tr>
                     <td class="handle node-box top left">&nbsp;</td>
                     <td class="node-box top right bottom full-width">
-                        <label>
+                        <?php if ($params['mode'] === 'edit'): ?>
+                            <label>
+                                <?= TreeHelper::l10n('assign_node_title') ?>
+                                <div class="ui-widget combobox-container">
+                                    <input class="assign-to combobox" value="<?= $toValue ?>"/>
+                                </div>
+                                :=
+                            </label>
+                            <span class="invalid label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
+                            <button type="button" class="close node-remove" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        <?php else: ?>
                             <?= TreeHelper::l10n('assign_node_title') ?>
-                            <div class="ui-widget combobox-container">
-                                <input class="var-value edit-only combobox"/>
-                            </div>
-                            :=
-                        </label>
-                        <span class="label label-danger"
-                              <?php if ($this->isValid()): ?>style="display: none;"<?php endif ?>><?= TreeHelper::l10n('invalid') ?></span>
-                        <button type="button" class="close node-remove" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                            <?= $toValue ?> :=
+                        <?php endif ?>
                     </td>
                 </tr>
                 <tr>
@@ -159,12 +165,6 @@ class AssignNode extends Node
             </table>
         </li>
     <?php }
-
-    public function isValid()
-    {
-        return true;
-//        return !$this->isPrototype && $this->from->isValid() && $this->to->isValid();
-    }
 }
 
 class BlockNode extends Node
@@ -201,18 +201,6 @@ class BlockNode extends Node
             }
             return $source;
         }
-    }
-
-    public function isValid()
-    {
-        return true;
-//        foreach ($this->nodes as $node) {
-//            /** @var Node $node */
-//            if (!$node->isValid()) {
-//                return false;
-//            }
-//        }
-//        return true;
     }
 
     public function printHtml(&$params)
@@ -273,6 +261,8 @@ class CompareNode extends Node
 
     public function printHtml(&$params)
     {
+        $leftVal = $this->parseValue($this->left, $params);
+        $rightVal = $this->parseValue($this->right, $params);
         $selected_op = $this->isPrototype ? 'lt' : $this->op;
         ?>
         <!-- COMPARE NODE -->
@@ -282,47 +272,42 @@ class CompareNode extends Node
                 <tr>
                     <td class="handle node-box top bottom left">&nbsp;</td>
                     <td class="node-box top right bottom full-width">
-                        <label>
-                            <?= TreeHelper::l10n('compare_node_title') ?>
-                            <div class="ui-widget combobox-container edit-only">
-                                <input class="compare-left combobox"
-                                       value="<?= $this->parseValue($this->left, $params) ?>"/>
-                            </div>
-                            <select class="compare-operation edit-only">
-                                <?php foreach ($this->ops as $op => $char): ?>
-                                    <option value="<?= $op ?>"
-                                            <?php if ($selected_op === $op): ?>selected="selected"<?php endif ?>>
-                                        <?= $char ?>
-                                    </option>
-                                <?php endforeach ?>
-                            </select>
+                        <?php if ($params['mode'] === 'edit'): ?>
+                            <label>
+                                <?= TreeHelper::l10n('compare_node_title') ?>
+                                <div class="edit-only">
+                                    <div class="ui-widget combobox-container">
+                                        <input class="compare-left combobox" value="<?= $leftVal ?>"/>
+                                    </div>
+                                    <select class="compare-operation">
+                                        <?php foreach ($this->ops as $op => $char): ?>
+                                            <option value="<?= $op ?>"
+                                                    <?php if ($selected_op === $op): ?>selected="selected"<?php endif ?>>
+                                                <?= $char ?>
+                                            </option>
+                                        <?php endforeach ?>
+                                    </select>
 
-                            <div class="ui-widget combobox-container edit-only">
-                                <input class="compare-right combobox"
-                                       value="<?= $this->parseValue($this->right, $params) ?>"/>
-                            </div>
-                            <input class="compare-operation-input view-only" disabled="disabled"
-                                   value="<?= $this->ops[$selected_op] ?>"/>
-                        </label>
-                        <span class="label label-danger" style="display: none;">
-                            <?= TreeHelper::l10n('invalid') ?>
-                        </span>
-                        <button type="button" class="close node-remove" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                                    <div class="ui-widget combobox-container">
+                                        <input class="compare-right combobox" value="<?= $rightVal ?>"/>
+                                    </div>
+                                </div>
+                            </label>
+                            <span class="invalid label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
+                            <button type="button" class="close node-remove" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        <?php else: ?>
+                            <?= TreeHelper::l10n('compare_node_title') ?>
+                            <?= $leftVal ?>
+                            <?= $this->ops[$selected_op] ?>
+                            <?= $rightVal ?>
+                        <?php endif ?>
                     </td>
                 </tr>
             </table>
         </li>
     <?php }
-
-    public function isValid()
-    {
-        return true;
-//        return !$this->isPrototype &&
-//        $this->left->isValid() && $this->left->size() === 1 &&
-//        $this->right->isValid() && $this->right->size() === 1;
-    }
 }
 
 class ConstantNode extends Node
@@ -356,26 +341,24 @@ class ConstantNode extends Node
                 <tr>
                     <td class="handle node-box top left bottom">&nbsp;</td>
                     <td class="node-box top right bottom full-width">
-                        <label>
+                        <?php if ($params['mode'] === 'edit'): ?>
+                            <label>
+                                <?= TreeHelper::l10n('constant_node_title') ?>
+                                <input class="constant-value" value="<?= $this->isPrototype ? "" : $this->value ?>"/>
+                            </label>
+                            <span class="invalid label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
+                            <button type="button" class="close node-remove" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        <?php else: ?>
                             <?= TreeHelper::l10n('constant_node_title') ?>
-                            <input class="constant-value" value="<?= $this->isPrototype ? "" : $this->value ?>"/>
-                        </label>
-                        <span class="label label-danger"
-                              <?php if ($this->isValid()): ?>style="display: none;"<?php endif ?>><?= TreeHelper::l10n('invalid') ?></span>
-                        <button type="button" class="close node-remove" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                            <?= $this->value ?>
+                        <?php endif ?>
                     </td>
                 </tr>
             </table>
         </li>
     <?php }
-
-    public function isValid()
-    {
-        return true;
-//        return !$this->isPrototype && isset($this->value) && is_numeric($this->value);
-    }
 }
 
 class IfNode extends Node
@@ -432,21 +415,24 @@ class IfNode extends Node
                 <tr>
                     <td class="handle node-box top left">&nbsp;</td>
                     <td class="node-box top right bottom full-width">
-                        <label>
-                            <?= TreeHelper::l10n('if_node_title') ?>
-                            <select class="assign-operation edit-only">
-                                <?php foreach ($this->ops as $op => $char): ?>
-                                    <option value="<?= $op ?>">
-                                        <?= $char ?>
-                                    </option>
-                                <?php endforeach ?>
-                            </select>
-                        </label>
-                        <span class="label label-danger"
-                              <?php if ($this->isValid()): ?>style="display: none;"<?php endif ?>><?= TreeHelper::l10n('invalid') ?></span>
-                        <button type="button" class="close node-remove" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                        <?php if ($params['mode'] === 'edit'): ?>
+                            <label>
+                                <?= TreeHelper::l10n('if_node_title') ?>
+                                <select class="assign-operation" style="display: none;">
+                                    <?php foreach ($this->ops as $op => $char): ?>
+                                        <option value="<?= $op ?>">
+                                            <?= $char ?>
+                                        </option>
+                                    <?php endforeach ?>
+                                </select>
+                            </label>
+                            <span class="invalid label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
+                            <button type="button" class="close node-remove" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        <?php else: ?>
+                            <?= TreeHelper::l10n('if_node_title') // TODO: op!       ?>
+                        <?php endif ?>
                     </td>
                 </tr>
                 <tr>
@@ -484,65 +470,58 @@ class IfNode extends Node
             </table>
         </li>
     <?php }
-
-    public function isValid()
-    {
-        return true;
-//        return !$this->isPrototype &&
-//        $this->cond->isValid() && $this->cond->size() === 1 &&
-//        ($this->then->isValid() || $this->else->isValid());
-    }
 }
 
 class IncNode extends Node
 {
-    function __construct($nid, $vid = 0)
+    function __construct($nid, $var)
     {
         $this->nodeId = $nid;
-        $this->vid = intval($vid);
+        $this->var = $var;
     }
 
     public static function parse($node, $tree)
     {
-        // TODO: Implement parse() method.
-        return new self(null, null);
+        $var = isset($node->var) ? $node->var : null;
+        return new self($node->nid, $var);
     }
 
     public function getSource($params)
     {
-        // TODO: Implement getSource() method.
+        return $this->parseValue($this->var, $params) . "++";
     }
 
     public function printHtml(&$params)
-    { ?>
-        <!-- IF NODE -->
+    {
+        $varValue = $this->parseValue($this->var, $params);
+        ?>
+        <!-- INC NODE -->
         <li id="node_<?= $this->nodeId ?>" class="node inc-node" data-node-type="inc"
             data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr>
                     <td class="handle node-box top bottom left">&nbsp;</td>
                     <td class="node-box top right bottom full-width">
-                        <label>
+                        <?php if ($params['mode'] === 'edit'): ?>
+                            <label>
+                                <?= TreeHelper::l10n('inc_node_title') ?>
+                                <div class="ui-widget combobox-container">
+                                    <input class="inc-var combobox" value="<?= $varValue ?>"/>
+                                </div>
+                            </label>
+                            <span class="invalid label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
+                            <button type="button" class="close node-remove" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        <?php else: ?>
                             <?= TreeHelper::l10n('inc_node_title') ?>
-                            <div class="ui-widget combobox-container">
-                                <input class="var-value edit-only combobox"/>
-                            </div>
-                        </label>
-                        <span class="label label-danger"
-                              <?php if ($this->isValid()): ?>style="display: none;"<?php endif ?>><?= TreeHelper::l10n('invalid') ?></span>
-                        <button type="button" class="close node-remove" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                            <?= $varValue ?>
+                        <?php endif ?>
                     </td>
                 </tr>
             </table>
         </li>
     <?php }
-
-    public function isValid()
-    {
-        return true;
-    }
 }
 
 class VarNode extends Node
@@ -579,33 +558,29 @@ class VarNode extends Node
                 <tr>
                     <td class="handle node-box top left bottom">&nbsp;</td>
                     <td class="node-box top right bottom full-width">
-                        <label>
+                        <?php if ($params['mode'] === 'edit'): ?>
+                            <label>
+                                <?= TreeHelper::l10n('variable_node_title') ?>
+                                <select class="var-value">
+                                    <?php foreach ($vars as $vid => $var): ?>
+                                        <option value="<?= $vid ?>" class="var-<?= $vid ?>"
+                                                <?php if ($this->vid === $vid): ?>selected="selected"<?php endif ?>><?= $var->name ?></option>
+                                    <?php endforeach ?>
+                                </select>
+                            </label>
+                            <span class="invalid label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
+                            <button type="button" class="close node-remove" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        <?php else: ?>
                             <?= TreeHelper::l10n('variable_node_title') ?>
-                            <select class="var-value edit-only">
-                                <?php foreach ($vars as $vid => $var): ?>
-                                    <option value="<?= $vid ?>" class="var-<?= $vid ?>"
-                                            <?php if ($this->vid === $vid): ?>selected="selected"<?php endif ?>><?= $var->name ?></option>
-                                <?php endforeach ?>
-                            </select>
-                            <input class="var-value-input var-<?= $this->vid ?> view-only" value="<?= $selected ?>"
-                                   disabled="disabled"/>
-                        </label>
-                        <span class="label label-danger"
-                              <?php if ($this->isValid()): ?>style="display: none;"<?php endif ?>><?= TreeHelper::l10n('invalid') ?></span>
-                        <button type="button" class="close node-remove" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                            <?= $vars[$selected] ?>
+                        <?php endif ?>
                     </td>
                 </tr>
             </table>
         </li>
     <?php }
-
-    public function isValid()
-    {
-        return true;
-//        return !$this->isPrototype && isset($this->vid) && is_numeric($this->vid);
-    }
 }
 
 class WhileNode extends Node
@@ -654,22 +629,22 @@ class WhileNode extends Node
                 <tr>
                     <td class="handle node-box top left">&nbsp;</td>
                     <td class="node-box top right bottom full-width">
-                        <label>
-                            <?= TreeHelper::l10n('while_node_title') ?>
-                            <select class="assign-operation edit-only">
-                                <?php foreach ($this->ops as $op => $char): ?>
-                                    <option value="<?= $op ?>">
-                                        <?= $char ?>
-                                    </option>
-                                <?php endforeach ?>
-                            </select>
-                        </label>
-                        <span class="label label-danger"
-                              <?php if ($this->isValid()): ?>style="display: none;"<?php endif ?>
-                            ><?= TreeHelper::l10n('invalid') ?></span>
-                        <button type="button" class="close node-remove" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                        <?php if ($params['mode'] === 'edit'): ?>
+                            <label>
+                                <?= TreeHelper::l10n('while_node_title') ?>
+                                <select class="assign-operation" style="display: none;">
+                                    <?php foreach ($this->ops as $op => $char): ?>
+                                        <option value="<?= $op ?>"><?= $char ?></option>
+                                    <?php endforeach ?>
+                                </select>
+                            </label>
+                            <span class="invalid label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
+                            <button type="button" class="close node-remove" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        <?php else: ?>
+                            <?= TreeHelper::l10n('while_node_title') // TODO: op!       ?>
+                        <?php endif ?>
                     </td>
                 </tr>
                 <tr>
@@ -695,14 +670,6 @@ class WhileNode extends Node
             </table>
         </li>
     <?php }
-
-    public function isValid()
-    {
-        return true;
-//        return !$this->isPrototype &&
-//        $this->cond->isValid() && $this->cond->size() === 1 &&
-//        $this->body->isValid();
-    }
 }
 
 /**
@@ -771,8 +738,7 @@ abstract class Node
             case self::WHILE_NODE:
                 return WhileNode::parse($node, $tree);
             default:
-                return null;
-            //throw new ParseError("Unknown node: " . print_r($node, true));
+                throw new ParseError("Unknown node: " . print_r($node, true));
         }
     }
 
@@ -806,14 +772,14 @@ abstract class Node
 
     /**
      * Print the HTML code for the nodes' prototypes.
+
      *
-     * @param string $type The node type the prototype should be generated for.
-     * @param array $params Optional parameters that are needed for the prototype.
+*@param string $type The node type the prototype should be generated for.
+     * @param array $params Parameters that are needed for the prototype.
      * @throws Exception If no node can be found for the specified type.
      */
-    public static final function printPrototype($type, $params = [])
+    public static final function printPrototype($type, $params)
     {
-        $params['indent'] = 0;
         /** @var $node Node */
         $node = null;
         switch ($type) {
@@ -833,7 +799,7 @@ abstract class Node
                 $node = new IfNode($type, null, null, null);
                 break;
             case self::INC_NODE:
-                $node = new IncNode($type);
+                $node = new IncNode($type, null);
                 break;
             case self::VAR_NODE:
                 $node = new VarNode($type, null);
@@ -860,13 +826,6 @@ abstract class Node
      * @return string
      */
     public abstract function getSource($params);
-
-    /**
-     * Returns true if the node is considered valid.
-     *
-     * @return bool
-     */
-    public abstract function isValid();
 
     protected function parseValue($value, $params)
     {
