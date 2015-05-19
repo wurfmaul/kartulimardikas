@@ -240,17 +240,17 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                             <button id="btn-add-compare" type="button" class="btn btn-default"
                                     data-node="node_compare"><?= $l10n['compare_node_title'] ?>
                             </button>
-                            <button id="btn-add-constant" type="button" class="btn btn-default"
-                                    data-node="node_constant"><?= $l10n['constant_node_title'] ?>
-                            </button>
                             <button id="btn-add-if" type="button" class="btn btn-default" data-node="node_if">
                                 <?= $l10n['if_node_title'] ?>
                             </button>
                             <button id="btn-add-inc" type="button" class="btn btn-default" data-node="node_inc">
                                 <?= $l10n['inc_node_title'] ?>
                             </button>
-                            <button id="btn-add-var" type="button" class="btn btn-default" data-node="node_var">
-                                <?= $l10n['variable_node_title'] ?>
+                            <button id="btn-add-return" type="button" class="btn btn-default"
+                                    data-node="node_return"><?= $l10n['return_node_title'] ?>
+                            </button>
+                            <button id="btn-add-value" type="button" class="btn btn-default" data-node="node_value">
+                                <?= $l10n['value_node_title'] ?>
                             </button>
                             <button id="btn-add-while" type="button" class="btn btn-default"
                                     data-node="node_while"><?= $l10n['while_node_title'] ?>
@@ -269,10 +269,10 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                             Node::printPrototype(Node::ARITHMETIC_NODE, $params);
                             Node::printPrototype(Node::ASSIGN_NODE, $params);
                             Node::printPrototype(Node::COMPARE_NODE, $params);
-                            Node::printPrototype(Node::CONSTANT_NODE, $params);
+                            Node::printPrototype(Node::RETURN_NODE, $params);
                             Node::printPrototype(Node::IF_NODE, $params);
                             Node::printPrototype(Node::INC_NODE, $params);
-                            Node::printPrototype(Node::VAR_NODE, $params);
+                            Node::printPrototype(Node::VALUE_NODE, $params);
                             Node::printPrototype(Node::WHILE_NODE, $params);
                             ?>
                         </ul>

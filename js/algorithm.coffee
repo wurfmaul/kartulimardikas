@@ -8,11 +8,11 @@ class Node
     throw new Error('Node must override execute() method!')
 
   ###
-  # Must be overridden by all subclasses. Sets the cursor to the position
-  # of the node, or places it inside.
+  # Sets the cursor to the position of the node. Override to place it somewhere else!
   ###
   mark: (player) ->
-    throw new Error('Node must override mark() method!')
+    player.setCursor(@nid)
+    @nid
 
   ###
   # Must be overridden by all subclasses.
@@ -62,7 +62,12 @@ class Node
 
     switch value.kind
       when 'const' then value.value
-      when 'index' then throw new Error("Not yet implemented: kind 'index'!")
+      when 'index'
+        index = value.index
+        if (index.kind is 'const' and index.type is 'int')
+          memory.arrayGet(value.vid, index.value)
+        else
+          throw new Error("Not yet implemented: kind 'index' for variables!")
       when 'prop' then throw new Error("Not yet implemented: kind 'prop'!")
       when 'var'
         vid = value.vid
@@ -91,10 +96,10 @@ class Node
       when 'arithmetic' then ArithmeticNode.parse(node, tree, memory)
       when 'assign' then AssignNode.parse(node, tree, memory)
       when 'compare' then CompareNode.parse(node, tree, memory)
-      when 'constant' then ConstantNode.parse(node, tree, memory)
       when 'if' then IfNode.parse(node, tree, memory)
       when 'inc' then IncNode.parse(node, tree, memory)
-      when 'var' then VarNode.parse(node, tree, memory)
+      when 'return' then ReturnNode.parse(node, tree, memory)
+      when 'value' then ValueNode.parse(node, tree, memory)
       when 'while' then WhileNode.parse(node, tree, memory)
       else
         throw new Error("Parse error: unknown type: '#{type}'")
@@ -109,8 +114,7 @@ class ArithmeticNode extends Node
     left = tree.extract(@left)
     right = tree.extract(@right)
     # check for right classes
-    (left instanceof VarNode or left instanceof ConstantNode) and
-      (right instanceof VarNode or right instanceof ConstantNode)
+    (left instanceof ValueNode) and (right instanceof ValueNode)
 
   execute: (player, node) ->
     left = player.tree.extract(@left)
@@ -126,10 +130,6 @@ class ArithmeticNode extends Node
       when 'mod' then value: leftVal % rightVal
       else
         throw new Error("ArithmeticNode: unknown operator: '#{@operator}'!")
-
-  mark: (player) ->
-    player.setCursor(@nid)
-    @nid
 
   toJSON: ->
     {
@@ -160,7 +160,7 @@ class AssignNode extends Node
     toVar = @to
     fromNode = player.tree.extract(@from)
     # get new value
-    if (fromNode instanceof VarNode) then value = player.memory.get(fromNode.vid)
+    if (fromNode instanceof ValueNode) then value = player.memory.get(fromNode.vid)
     else value = fromNode.value
     # set new value
     player.memory.set(toVar.vid, value)
@@ -168,10 +168,6 @@ class AssignNode extends Node
     player.stats.writeVar(toVar.vid)
     # return value
     value: value
-
-  mark: (player) ->
-    player.setCursor(@nid)
-    @nid
 
   toJSON: ->
     {
@@ -185,7 +181,7 @@ class AssignNode extends Node
     # parse from-node
     from = BlockNode.parse(@findSubNode(node, '.assign-from'), tree, memory)
     tree.push from
-    # parse to-node
+    # parse to-value
     to = @checkAndExtract(@findSubNode(node, '.assign-to').val(), memory)
     # create the node
     nid = tree.length
@@ -204,6 +200,7 @@ class BlockNode extends Node
         break
     # compute next node
     if curNode?.next? then next: curNode.next
+    else if (curNode is -1) then next: -1 # return node was executed
     else if (@nodes.length > i + 1) then next: @nodes[i + 1] # if curNode is done, take next from nodes
     else {}
 
@@ -254,10 +251,6 @@ class CompareNode extends Node
       else
         throw new Error("CompareNode: unknown operator: '#{@operator}'!")
 
-  mark: (player) ->
-    player.setCursor(@nid)
-    @nid
-
   toJSON: ->
     {
     nid: @nid
@@ -273,24 +266,6 @@ class CompareNode extends Node
     operator = @findSubNode(node, '.compare-operation').val()
     nid = tree.length
     new @(nid, left, right, operator)
-
-class ConstantNode extends Node
-  constructor: (@nid, @value) ->
-
-  execute: (player, node) ->
-    value: @executeValue(@value, player)
-
-  toJSON: ->
-    {
-    nid: @nid
-    node: 'constant'
-    value: @value
-    }
-
-  @parse: (node, tree, memory) =>
-    value = @findSubNode(node, '.constant-value').val()
-    nid = tree.length
-    new @(nid, value)
 
 class IfNode extends Node
   constructor: (@nid, @condition, @ifBody, @elseBody) ->
@@ -340,14 +315,15 @@ class IncNode extends Node
     vid = @variable.vid
     # increment value of variable
     value = @executeValue(@variable, player)
-    player.memory.set(vid, value + 1)
-    player.stats.writeVar(vid, value + 1)
+    if (@variable.kind is 'index')
+      index = @variable.index.value
+      player.memory.arraySet(vid, index, value + 1)
+      player.stats.writeArrayVar(vid, index, value + 1)
+    else
+      player.memory.set(vid, value + 1)
+      player.stats.writeVar(vid, value + 1)
     # return the value before incrementing (like i++)
     {value: value}
-
-  mark: (player) ->
-    player.setCursor(@nid)
-    @nid
 
   toJSON: ->
     {
@@ -361,26 +337,43 @@ class IncNode extends Node
     nid = tree.length
     new @(nid, variable)
 
-class VarNode extends Node
-  constructor: (@nid, @vid) ->
+class ReturnNode extends Node
+  constructor: (@nid, @value) ->
 
   execute: (player, node) ->
-    # tell display to highlight variable-read
-    player.stats.readVar(@vid)
-    # return the value
-    value: player.memory.get(@vid).value
+    value = @executeValue(@value, player)
+    alert('Return value: ' + value)
+    -1 # no further steps
 
   toJSON: ->
     {
     nid: @nid
-    node: 'var'
-    vid: @vid
+    node: 'return'
+    value: @value
     }
 
   @parse: (node, tree, memory) =>
-    vid = node.find('.var-value > :selected').val()
+    value = @checkAndExtract(@findSubNode(node, '.return-value').val(), memory)
     nid = tree.length
-    new @(nid, vid)
+    new @(nid, value)
+
+class ValueNode extends Node
+  constructor: (@nid, @value) ->
+
+  execute: (player, node) ->
+    # FIXME: execute value
+
+  toJSON: ->
+    {
+    nid: @nid
+    node: 'value'
+    value: @value
+    }
+
+  @parse: (node, tree, memory) =>
+    value = @checkAndExtract(@findSubNode(node, '.value-var').val(), memory)
+    nid = tree.length
+    new @(nid, value)
 
 class WhileNode extends Node
   constructor: (@nid, @condition, @body) ->
@@ -478,6 +471,19 @@ class window.Memory
 
   set: (vid, value) =>
     @memory[vid].value = value
+
+  arrayGet: (vid, index) =>
+    variable = @get(vid)
+    array = variable.value.split(',')
+    value = array[index]
+    if (parseInt(value) + '' is value) then parseInt(value)
+    else value
+
+  arraySet: (vid, index, value) =>
+    variable = @get(vid)
+    array = variable.value.split(',')
+    array[index] = value
+    @set(vid, array.join(','))
 
   reset: =>
     $.each(@original, (index, elem) =>

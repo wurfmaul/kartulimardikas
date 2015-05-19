@@ -184,7 +184,7 @@ if ($__algorithm && ($__public || $__owner)):
                                             </td>
                                             <td>
                                                 <div class="btn-group">
-                                                    <?php if (substr($var->init, 0, 6) == "array-"): // deal with "array-{?,custom,random}" ?>
+                                                    <?php if (substr($var->type, 0, 6) === "array-"): // deal with "array-{int}" ?>
                                                         <?php foreach (explode(',', $var->value) as $offset => $value): ?>
                                                             <input type="button"
                                                                    class="btn btn-default offset_<?= $offset ?>"

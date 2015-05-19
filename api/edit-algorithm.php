@@ -128,7 +128,7 @@ class EditAlgorithmManager
             // deal with int elements
             case self::INT_TYPE:
                 if ($value === $RANDOM_VALUE) {
-                    $value = rand(0, 100);
+                    $value = rand(0, 100); // TODO: max-number or range definable
                 } elseif ($value === $UNINIT_VALUE) {
                     $value = '?';
                 } elseif (!empty($value)) {

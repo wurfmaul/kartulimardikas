@@ -326,62 +326,6 @@ class CompareNode extends Node
     <?php }
 }
 
-class ConstantNode extends Node
-{
-    /** @var int */
-    protected $value;
-
-    function __construct($nid, $value)
-    {
-        $this->nodeId = $nid;
-        $this->value = $value;
-    }
-
-    public static function parse($node, $tree)
-    {
-        $value = isset($node->value) ? $node->value : null;
-        return new self($node->nid, $value);
-    }
-
-    public function getSource($params)
-    {
-        return (string)$this->value;
-    }
-
-    public function printHtml(&$params)
-    { ?>
-        <!-- CONSTANT NODE -->
-        <li id="node_<?= $this->nodeId ?>" class="node constant-node" data-node-type="constant"
-            data-node-id="<?= $this->nodeId ?>">
-            <table>
-                <tr>
-                    <td class="handle node-box top left bottom">&nbsp;</td>
-                    <td class="node-box top right bottom full-width">
-                        <?php if ($params['mode'] === 'edit'): ?>
-                            <label>
-                                <?= TreeHelper::l10n('constant_node_title') ?>
-                                <input class="constant-value" value="<?= $this->isPrototype ? "" : $this->value ?>"/>
-                            </label>
-                            <span class="invalid label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
-                            <button type="button" class="close node-remove" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        <?php else: ?>
-                            <label>
-                                <?= TreeHelper::l10n('constant_node_title') ?>
-                                <?= $this->value ?>
-                                <div style="display: none;">
-                                    <input class="constant-value" value="<?= $this->value ?>"/>
-                                </div>
-                            </label>
-                        <?php endif ?>
-                    </td>
-                </tr>
-            </table>
-        </li>
-    <?php }
-}
-
 class IfNode extends Node
 {
     /** @var BlockNode */
@@ -452,7 +396,7 @@ class IfNode extends Node
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         <?php else: ?>
-                            <?= TreeHelper::l10n('if_node_title') // TODO: op!  ?>
+                            <?= TreeHelper::l10n('if_node_title') // TODO: op!     ?>
                         <?php endif ?>
                     </td>
                 </tr>
@@ -550,35 +494,34 @@ class IncNode extends Node
     <?php }
 }
 
-class VarNode extends Node
+class ReturnNode extends Node
 {
-    /** @param $vid int */
-    protected $vid;
+    /** @var int */
+    protected $value;
 
-    function __construct($nid, $vid)
+    function __construct($nid, $value)
     {
         $this->nodeId = $nid;
-        $this->vid = intval($vid);
+        $this->value = $value;
     }
 
     public static function parse($node, $tree)
     {
-        $vid = isset($node->vid) ? $node->vid : null;
-        return new self($node->nid, $vid);
+        $value = isset($node->value) ? $node->value : null;
+        return new self($node->nid, $value);
     }
 
     public function getSource($params)
     {
-        return $params['vars'][$this->vid]->name;
+        return "return " . $this->parseValue($this->value, $params);
     }
 
     public function printHtml(&$params)
     {
-        $vars = $this->extractVars($params);
-        $selected = isset($vars[$this->vid]) ? $vars[$this->vid]->name : '';
+        $varValue = $this->parseValue($this->value, $params);
         ?>
-        <!-- VAR NODE -->
-        <li id="node_<?= $this->nodeId ?>" class="node var-node" data-node-type="var"
+        <!-- RETURN NODE -->
+        <li id="node_<?= $this->nodeId ?>" class="node return-node" data-node-type="return"
             data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr>
@@ -586,21 +529,83 @@ class VarNode extends Node
                     <td class="node-box top right bottom full-width">
                         <?php if ($params['mode'] === 'edit'): ?>
                             <label>
-                                <?= TreeHelper::l10n('variable_node_title') ?>
-                                <select class="var-value">
-                                    <?php foreach ($vars as $vid => $var): ?>
-                                        <option value="<?= $vid ?>" class="var-<?= $vid ?>"
-                                                <?php if ($this->vid === $vid): ?>selected="selected"<?php endif ?>><?= $var->name ?></option>
-                                    <?php endforeach ?>
-                                </select>
+                                <?= TreeHelper::l10n('return_node_title') ?>
+                                <div class="ui-widget combobox-container">
+                                    <input class="return-value combobox" value="<?= $varValue ?>"/>
+                                </div>
                             </label>
                             <span class="invalid label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
                             <button type="button" class="close node-remove" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         <?php else: ?>
-                            <?= TreeHelper::l10n('variable_node_title') ?>
-                            <?= $vars[$selected] ?>
+                            <label>
+                                <?= TreeHelper::l10n('return_node_title') ?>
+                                <?= $varValue ?>
+                                <div style="display: none;">
+                                    <input class="return-value" value="<?= $varValue ?>"/>
+                                </div>
+                            </label>
+                        <?php endif ?>
+                    </td>
+                </tr>
+            </table>
+        </li>
+    <?php }
+}
+
+class ValueNode extends Node
+{
+    /** @param $vid int */
+    protected $vid;
+
+    function __construct($nid, $value)
+    {
+        $this->nodeId = $nid;
+        $this->value = $value;
+    }
+
+    public static function parse($node, $tree)
+    {
+        $value = isset($node->value) ? $node->value : null;
+        return new self($node->nid, $value);
+    }
+
+    public function getSource($params)
+    {
+        return $this->parseValue($this->value, $params);
+    }
+
+    public function printHtml(&$params)
+    {
+        $varValue = $this->parseValue($this->value, $params);
+        ?>
+        <!-- VALUE NODE -->
+        <li id="node_<?= $this->nodeId ?>" class="node value-node" data-node-type="value"
+            data-node-id="<?= $this->nodeId ?>">
+            <table>
+                <tr>
+                    <td class="handle node-box top left bottom">&nbsp;</td>
+                    <td class="node-box top right bottom full-width">
+                        <?php if ($params['mode'] === 'edit'): ?>
+                            <label>
+                                <?= TreeHelper::l10n('value_node_title') ?>
+                                <div class="ui-widget combobox-container">
+                                    <input class="value-var combobox" value="<?= $varValue ?>"/>
+                                </div>
+                            </label>
+                            <span class="invalid label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
+                            <button type="button" class="close node-remove" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        <?php else: ?>
+                            <label>
+                                <?= TreeHelper::l10n('value_node_title') ?>
+                                <?= $varValue ?>
+                                <div style="display: none;">
+                                    <input class="value-var" value="<?= $varValue ?>"/>
+                                </div>
+                            </label>
                         <?php endif ?>
                     </td>
                 </tr>
@@ -669,7 +674,7 @@ class WhileNode extends Node
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         <?php else: ?>
-                            <?= TreeHelper::l10n('while_node_title') // TODO: op!              ?>
+                            <?= TreeHelper::l10n('while_node_title') // TODO: op!                 ?>
                         <?php endif ?>
                     </td>
                 </tr>
@@ -709,10 +714,10 @@ abstract class Node
     const ASSIGN_NODE = "assign";
     const BLOCK_NODE = "block";
     const COMPARE_NODE = "compare";
-    const CONSTANT_NODE = "constant";
+    const RETURN_NODE = "return";
     const IF_NODE = "if";
     const INC_NODE = "inc";
-    const VAR_NODE = "var";
+    const VALUE_NODE = "value";
     const WHILE_NODE = "while";
 
     const VAR_KIND = "var";
@@ -753,14 +758,14 @@ abstract class Node
                 return BlockNode::parse($node, $tree);
             case self::COMPARE_NODE:
                 return CompareNode::parse($node, $tree);
-            case self::CONSTANT_NODE:
-                return ConstantNode::parse($node, $tree);
+            case self::RETURN_NODE:
+                return ReturnNode::parse($node, $tree);
             case self::IF_NODE:
                 return IfNode::parse($node, $tree);
             case self::INC_NODE:
                 return IncNode::parse($node, $tree);
-            case self::VAR_NODE:
-                return VarNode::parse($node, $tree);
+            case self::VALUE_NODE:
+                return ValueNode::parse($node, $tree);
             case self::WHILE_NODE:
                 return WhileNode::parse($node, $tree);
             default:
@@ -817,8 +822,8 @@ abstract class Node
             case self::COMPARE_NODE:
                 $node = new CompareNode($type, null, null, null);
                 break;
-            case self::CONSTANT_NODE:
-                $node = new ConstantNode($type, null);
+            case self::RETURN_NODE:
+                $node = new ReturnNode($type, null);
                 break;
             case self::IF_NODE:
                 $node = new IfNode($type, null, null, null);
@@ -826,8 +831,8 @@ abstract class Node
             case self::INC_NODE:
                 $node = new IncNode($type, null);
                 break;
-            case self::VAR_NODE:
-                $node = new VarNode($type, null);
+            case self::VALUE_NODE:
+                $node = new ValueNode($type, null);
                 break;
             case self::WHILE_NODE:
                 $node = new WhileNode($type, null, null);
@@ -856,7 +861,7 @@ abstract class Node
     {
         $vars = $this->extractVars($params);
         if (!isset($value) || !isset($value->kind))
-            return "";
+            return "[INVALID]";
 
         switch ($value->kind) {
             case self::CONST_KIND:

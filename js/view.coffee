@@ -50,7 +50,7 @@ class Player
     @curNode = @nextNode
     curNode = @tree.executeStep(@, @curNode)
     # prepare the next step
-    if (curNode.next?)
+    if (curNode.next? and curNode.next >= 0)
       @nextNode = @tree.tree[curNode.next].mark(@)
       @setControls([1, 1, 1, 1, 1])
       true
@@ -102,9 +102,13 @@ class Stats
     .removeClass('highlight-compare').addClass('highlight-write')
     @incWriteOps()
 
+  writeArrayVar: (vid, index, value) ->
+    $('#var-' + vid).find('.offset_' + index).val(value)
+    .removeClass('highlight-compare').addClass('highlight-write')
+    @incWriteOps()
+
   reset: ->
     # reset variables
-    console.log(@memory)
     $.each(@memory.memory, (index, elem) ->
       $('#var-' + index).find('.value').val(elem.value)
     )
