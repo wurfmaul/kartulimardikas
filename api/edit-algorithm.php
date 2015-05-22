@@ -1,5 +1,6 @@
 <?php
 define('BASEDIR', realpath('..') . '/');
+define('BR', "<br />");
 global $l10n;
 
 require_once BASEDIR . 'config/config.php';
@@ -108,12 +109,12 @@ class EditAlgorithmManager
 
         // check if name is not specified
         if (strlen($name) === 0) {
-            $this->_response['error-name'] = $this->_l10n['empty_name'] . "<br />";
+            $this->_response['error-name'] = $this->_l10n['empty_name'] . BR;
             $name = false;
         } elseif (!empty($vars)) { // check for name duplicate
             foreach ($vars as $curVid => $curVar) {
                 if ($curVar['name'] === $name && $curVid != $vid) {
-                    $this->_response['error-name'] = $this->_l10n['same_name'] . "<br />";
+                    $this->_response['error-name'] = $this->_l10n['same_name'] . BR;
                     $name = false;
                     break;
                 }
@@ -131,11 +132,11 @@ class EditAlgorithmManager
                     $value = rand(0, 100); // TODO: max-number or range definable
                 } elseif ($value === $UNINIT_VALUE) {
                     $value = '?';
-                } elseif (!empty($value)) {
+                } elseif ($value !== "") {
                     $value = intval($value);
                 } else {
-                    $this->_response['error-value'] = $this->_l10n['empty_value'] . "<br />";
-                    $value = false;
+                    $this->_response['error-value'] = $this->_l10n['empty_value'] . BR;
+                    unset($value);
                 }
                 break;
 
@@ -167,23 +168,23 @@ class EditAlgorithmManager
                     $value = implode(',', $newValue);
                     $this->_checkArraySize($size);
                 } else {
-                    $this->_response['error-value'] = $this->_l10n['empty_value'] . "<br />";
+                    $this->_response['error-value'] = $this->_l10n['empty_value'] . BR;
                     $value = false;
                 }
                 break;
             default:
-                $this->_response['error-type'] = $this->_l10n['invalid_init'] . "<br />";
-                unset($init);
+                $this->_response['error-type'] = $this->_l10n['invalid_init'] . BR;
+                $type = false;
         }
 
         // return whatever information is still valid
         if ($type) $this->_response['type'] = $type;
         if ($name) $this->_response['name'] = $name;
-        if ($value) $this->_response['value'] = $value;
+        if (isset($value)) $this->_response['value'] = $value;
         if ($size) $this->_response['size'] = $size;
 
         // if every field has been filled:
-        if ($type && $name && $value && $size) {
+        if ($type && $name && isset($value) && $size) {
             $vars[$vid] = array(
                 'name' => $name,
                 'type' => $type,
@@ -203,7 +204,7 @@ class EditAlgorithmManager
     private function _checkArraySize(&$size)
     {
         if (ARRAY_MIN_SIZE > $size || $size > ARRAY_MAX_SIZE) {
-            $this->_response['error-size'] = sprintf($this->_l10n['size_out_of_bounds'], ARRAY_MIN_SIZE, ARRAY_MAX_SIZE) . "<br />";
+            $this->_response['error-size'] = sprintf($this->_l10n['size_out_of_bounds'], ARRAY_MIN_SIZE, ARRAY_MAX_SIZE) . BR;
             $size = false;
         } else {
             $this->_response['size'] = $size;

@@ -24,7 +24,14 @@ class Node
   # For combo boxes: Inspects the given value and defines its kind
   # and properties.
   ###
-  @checkAndExtract: (value, memory) ->
+  @parseAndCheckValue: (_class, node, memory) ->
+    node = @findSubNode(node, _class)
+    value = @parseValue(node.val(), memory)
+    if !value? then node.addClass('error')
+    else node.removeClass('error')
+    value
+
+  @parseValue: (value, memory) ->
     # check for const (int)
     intVal = parseInt(value)
     if (intVal + "" is value)
@@ -34,7 +41,7 @@ class Node
     close = value.lastIndexOf(']')
     if (open > -1 and close > open)
       vid = memory.find(value.substr(0, open))
-      inner = @checkAndExtract(value.substr(open + 1, close - open - 1), memory)
+      inner = @parseValue(value.substr(open + 1, close - open - 1), memory)
       if vid > -1 and inner?
         memory.count(vid)
         return {kind: 'index', vid: vid, index: inner}
@@ -66,8 +73,11 @@ class Node
         index = value.index
         if (index.kind is 'const' and index.type is 'int')
           memory.arrayGet(value.vid, index.value)
+        else if (index.kind is 'var')
+          idx = memory.get(index.vid).value
+          memory.arrayGet(value.vid, idx)
         else
-          throw new Error("Not yet implemented: kind 'index' for variables!")
+          throw new Error("Not yet implemented: kind 'index' for complex variables!")
       when 'prop' then throw new Error("Not yet implemented: kind 'prop'!")
       when 'var'
         vid = value.vid
@@ -104,6 +114,11 @@ class Node
       else
         throw new Error("Parse error: unknown type: '#{type}'")
 
+  @validate: (node, check) ->
+    flag = node.find('.invalid:first')
+    if (check) then flag.hide()
+    else flag.show()
+
 class ArithmeticNode extends Node
   constructor: (@nid, @left, @right, @operator) ->
 
@@ -117,16 +132,14 @@ class ArithmeticNode extends Node
     (left instanceof ValueNode) and (right instanceof ValueNode)
 
   execute: (player, node) ->
-    left = player.tree.extract(@left)
-    right = player.tree.extract(@right)
-    leftVal = left.execute(player, node)
-    rightVal = right.execute(player, node)
+    leftVal = @executeValue(@left, player)
+    rightVal = @executeValue(@right, player)
     player.stats.incCompareOps()
     switch @operator
       when 'plus' then value: leftVal + rightVal
       when 'minus' then value: leftVal - rightVal
       when 'times' then value: leftVal * rightVal
-      when 'by' then value: leftVal / rightVal
+      when 'by' then value: parseInt(leftVal / rightVal)
       when 'mod' then value: leftVal % rightVal
       else
         throw new Error("ArithmeticNode: unknown operator: '#{@operator}'!")
@@ -141,17 +154,12 @@ class ArithmeticNode extends Node
     }
 
   @parse: (node, tree, memory) =>
-    # parse left node
-    left = BlockNode.parse(@findSubNode(node, '.arithmetic-left'), tree)
-    tree.push left
-    # parse right node
-    right = BlockNode.parse(@findSubNode(node, '.arithmetic-right'), tree)
-    tree.push right
-    # extract operator
-    operator = node.find('.arithmetic-operation:first').val()
-    # create node
+    left = @parseAndCheckValue('.arithmetic-left', node, memory)
+    right = @parseAndCheckValue('.arithmetic-right', node, memory)
+    @validate(node, left? and right?)
+    operator = @findSubNode(node, '.arithmetic-operation').val()
     nid = tree.length
-    new @(nid, left.nid, right.nid, operator)
+    new @(nid, left, right, operator)
 
 class AssignNode extends Node
   constructor: (@nid, @from, @to) ->
@@ -160,12 +168,10 @@ class AssignNode extends Node
     toVar = @to
     fromNode = player.tree.extract(@from)
     # get new value
-    if (fromNode instanceof ValueNode) then value = player.memory.get(fromNode.vid)
-    else value = fromNode.value
+    value = fromNode.execute(player, node).value
     # set new value
     player.memory.set(toVar.vid, value)
-    player.stats.incWriteOps()
-    player.stats.writeVar(toVar.vid)
+    player.stats.writeVar(toVar.vid, value)
     # return value
     value: value
 
@@ -182,7 +188,8 @@ class AssignNode extends Node
     from = BlockNode.parse(@findSubNode(node, '.assign-from'), tree, memory)
     tree.push from
     # parse to-value
-    to = @checkAndExtract(@findSubNode(node, '.assign-to').val(), memory)
+    to = @parseAndCheckValue('.assign-to', node, memory)
+    @validate(node, to?)
     # create the node
     nid = tree.length
     new @(nid, from.nid, to)
@@ -261,8 +268,9 @@ class CompareNode extends Node
     }
 
   @parse: (node, tree, memory) =>
-    left = @checkAndExtract(@findSubNode(node, '.compare-left').val(), memory)
-    right = @checkAndExtract(@findSubNode(node, '.compare-right').val(), memory)
+    left = @parseAndCheckValue('.compare-left', node, memory)
+    right = @parseAndCheckValue('.compare-right', node, memory)
+    @validate(node, left? and right?)
     operator = @findSubNode(node, '.compare-operation').val()
     nid = tree.length
     new @(nid, left, right, operator)
@@ -309,19 +317,21 @@ class IfNode extends Node
     new @(nid, condition.nid, ifBody.nid, elseBody.nid)
 
 class IncNode extends Node
-  constructor: (@nid, @variable) ->
+  constructor: (@nid, @variable, @operator) ->
 
   execute: (player, node) ->
     vid = @variable.vid
     # increment value of variable
     value = @executeValue(@variable, player)
+    newValue = @operator is 'inc' ? value + 1: value - 1
+
     if (@variable.kind is 'index')
       index = @variable.index.value
-      player.memory.arraySet(vid, index, value + 1)
-      player.stats.writeArrayVar(vid, index, value + 1)
+      player.memory.arraySet(vid, index, newValue)
+      player.stats.writeArrayVar(vid, index, newValue)
     else
-      player.memory.set(vid, value + 1)
-      player.stats.writeVar(vid, value + 1)
+      player.memory.set(vid, newValue)
+      player.stats.writeVar(vid, newValue)
     # return the value before incrementing (like i++)
     {value: value}
 
@@ -330,12 +340,15 @@ class IncNode extends Node
     nid: @nid
     node: 'inc'
     var: @variable
+    operator: @operator
     }
 
   @parse: (node, tree, memory) =>
-    variable = @checkAndExtract(@findSubNode(node, '.inc-var').val(), memory)
+    variable = @parseAndCheckValue('.inc-var', node, memory)
+    @validate(node, variable?)
+    operator = @findSubNode(node, '.inc-operation').val()
     nid = tree.length
-    new @(nid, variable)
+    new @(nid, variable, operator)
 
 class ReturnNode extends Node
   constructor: (@nid, @value) ->
@@ -353,7 +366,8 @@ class ReturnNode extends Node
     }
 
   @parse: (node, tree, memory) =>
-    value = @checkAndExtract(@findSubNode(node, '.return-value').val(), memory)
+    value = @parseAndCheckValue('.return-value', node, memory)
+    @validate(node, value?)
     nid = tree.length
     new @(nid, value)
 
@@ -371,7 +385,8 @@ class ValueNode extends Node
     }
 
   @parse: (node, tree, memory) =>
-    value = @checkAndExtract(@findSubNode(node, '.value-var').val(), memory)
+    value = @parseAndCheckValue('.value-var', node, memory)
+    @validate(node, value?)
     nid = tree.length
     new @(nid, value)
 

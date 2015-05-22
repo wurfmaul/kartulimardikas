@@ -100,6 +100,7 @@ $l10n['if_node_else'] = "else";
 $l10n['inc_node_title'] = "Inc";
 $l10n['value_node_title'] = "Value";
 $l10n['while_node_title'] = "While";
+$l10n['while_node_do'] = "do";
 $l10n['back_to_start'] = "Back to start";
 $l10n['step_back'] = "Step back";
 $l10n['play'] = "Play";

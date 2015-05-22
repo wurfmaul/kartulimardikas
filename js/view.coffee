@@ -36,8 +36,10 @@ class Player
       .addClass('glyphicon-play')
     else # play
       # set an interval and perform step after step
+      @playStep = 0
       @timer = setInterval(=>
-        @step()
+        if (@playStep <= MAX_STEPS) then @step()
+        else throw new Error("Could not terminate in #{MAX_STEPS} iterations!")
       , TIMEOUT)
       # set button icon to pause
       $('#img-play')

@@ -189,8 +189,14 @@ class StepForm
     )
 
   saveChanges: ->
-    @varForm.updateVarCount()
-    Api.editScript(Tree.toJSON())
+    # parse the tree
+    tree = Tree.toJSON()
+    # search for invalid-flags
+    if (SCRIPTSITE.find('.invalid:visible').length)
+      console.error('ParseErrors!')
+    else
+      @varForm.updateVarCount()
+      Api.editScript(tree)
 
   updateActionHandlers: (parent) ->
     # update action handlers
@@ -261,7 +267,7 @@ initVarInput = (elem) ->
 
 initValueInput = (elem) ->
   input = elem.find('.value')
-  # destroy old instance
+  # destroy old instance of auto-completion
   if (input.autocomplete("instance")?)
     input.autocomplete("destroy")
   # init auto-completion

@@ -52,6 +52,48 @@ if (isset($_GET['uid'])) {
     <div class="row">
         <!-- LEFT COLUMN -->
         <div class="col-md-6">
+            <div class="well">
+                <h3><?= $l10n['algorithms'] ?></h3>
+                <?php if ($algorithms): ?>
+                    <table class="table table-striped table-hover algorithms">
+                        <tbody>
+                        <?php foreach ($algorithms as $algorithm): $link = url(['action' => 'view', 'aid' => $algorithm['aid']]) ?>
+                            <tr>
+                                <td>
+                                    <?php if ($algorithm['age'] <= MAX_MINUTES_FOR_LABEL): ?>
+                                        <span class="label label-default"><?= $l10n['label_new'] ?></span>
+                                    <?php endif ?>
+                                    <?php if (is_null($algorithm['date_publish'])): ?>
+                                        <span class="label label-info">private</span>
+                                    <?php endif ?>
+                                    <span class="name">
+                            <a href="<?= $link ?>">
+                                <?= $algorithm['name'] ? $algorithm['name'] : $l10n['untitled_algorithm'] ?>
+                            </a>
+                        </span>
+                        <span class="properties">(<?= sprintf($l10n['created_at'], getTimeFrame($algorithm['age'])) ?>
+                            )</span>
+                                    <?php if (!empty($algorithm['description'])): ?>
+                                        <span
+                                            class="description"><?= skipDescription($algorithm['description']) ?></span>
+                                    <?php endif ?>
+                                </td>
+                            </tr>
+                        <?php endforeach ?>
+                        </tbody>
+                        <tfoot>
+                        <!-- TODO: paginator -->
+                        </tfoot>
+                    </table>
+                <?php else: ?>
+                    <div><?= $l10n['no_algorithms'] ?></div>
+                <?php endif ?>
+            </div>
+        </div>
+        <!-- LEFT COLUMN END -->
+
+        <!-- RIGHT COLUMN -->
+        <div class="col-md-6">
             <?php if ($ownAccount): ?>
                 <div class="well">
                     <h3><?= $l10n['account_settings'] ?></h3>
@@ -151,48 +193,6 @@ if (isset($_GET['uid'])) {
                     <h3>Drop a message</h3>
                 </div>
             <?php endif ?>
-        </div>
-        <!-- LEFT COLUMN END -->
-
-        <!-- RIGHT COLUMN -->
-        <div class="col-md-6">
-            <div class="well">
-                <h3><?= $l10n['algorithms'] ?></h3>
-                <?php if ($algorithms): ?>
-                    <table class="table table-striped table-hover algorithms">
-                        <tbody>
-                        <?php foreach ($algorithms as $algorithm): $link = url(['action' => 'view', 'aid' => $algorithm['aid']]) ?>
-                            <tr>
-                                <td>
-                                    <?php if ($algorithm['age'] <= MAX_MINUTES_FOR_LABEL): ?>
-                                        <span class="label label-default"><?= $l10n['label_new'] ?></span>
-                                    <?php endif ?>
-                                    <?php if (is_null($algorithm['date_publish'])): ?>
-                                        <span class="label label-info">private</span>
-                                    <?php endif ?>
-                                    <span class="name">
-                            <a href="<?= $link ?>">
-                                <?= $algorithm['name'] ? $algorithm['name'] : $l10n['untitled_algorithm'] ?>
-                            </a>
-                        </span>
-                        <span class="properties">(<?= sprintf($l10n['created_at'], getTimeFrame($algorithm['age'])) ?>
-                            )</span>
-                                    <?php if (!empty($algorithm['description'])): ?>
-                                        <span
-                                            class="description"><?= skipDescription($algorithm['description']) ?></span>
-                                    <?php endif ?>
-                                </td>
-                            </tr>
-                        <?php endforeach ?>
-                        </tbody>
-                        <tfoot>
-                        <!-- TODO: paginator -->
-                        </tfoot>
-                    </table>
-                <?php else: ?>
-                    <div><?= $l10n['no_algorithms'] ?></div>
-                <?php endif ?>
-            </div>
         </div>
         <!-- RIGHT COLUMN END -->
     </div>

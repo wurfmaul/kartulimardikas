@@ -2,9 +2,9 @@
 
 class ArithmeticNode extends Node
 {
-    /** @var BlockNode */
+    /** @var Value */
     protected $left;
-    /** @var BlockNode */
+    /** @var Value */
     protected $right;
     /** @var string */
     protected $op;
@@ -15,15 +15,15 @@ class ArithmeticNode extends Node
         'times' => '&times;',
         'by' => '&frasl;',
         'mod' => '%',
-        'and' => '&&',
-        'or' => '||'
+//        'and' => '&&',
+//        'or' => '||'
     ];
 
     public function __construct($nid, $left, $right, $op)
     {
         $this->nodeId = $nid;
-        $this->left = $left;
-        $this->right = $right;
+        $this->left = new Value($left);
+        $this->right = new Value($right);
         $this->op = $op;
     }
 
@@ -38,16 +38,16 @@ class ArithmeticNode extends Node
     public function getSource($params)
     {
         return sprintf("%s %s %s",
-            $this->parseValue($this->left, $params),
+            $this->left->parse($params),
             $this->ops[$this->op],
-            $this->parseValue($this->right, $params)
+            $this->right->parse($params)
         );
     }
 
     public function printHtml(&$params)
     {
-        $leftVal = $this->parseValue($this->left, $params);
-        $rightVal = $this->parseValue($this->right, $params);
+        $leftVal = $this->left->parse($params);
+        $rightVal = $this->right->parse($params);
         $selected_op = $this->isPrototype ? 'plus' : $this->op;
         ?>
         <!-- ARITHMETIC NODE -->
@@ -71,7 +71,6 @@ class ArithmeticNode extends Node
                                         </option>
                                     <?php endforeach ?>
                                 </select>
-
                                 <div class="ui-widget combobox-container">
                                     <input class="arithmetic-right combobox" value="<?= $rightVal ?>"/>
                                 </div>
@@ -82,7 +81,6 @@ class ArithmeticNode extends Node
                             </button>
                         <?php else: ?>
                             <label>
-                                <?= TreeHelper::l10n('arithmetic_node_title') ?>
                                 <?= $leftVal ?>
                                 <?= $this->ops[$selected_op] ?>
                                 <?= $rightVal ?>
@@ -102,7 +100,7 @@ class ArithmeticNode extends Node
 
 class AssignNode extends Node
 {
-    /** @var BlockNode */
+    /** @var Value */
     protected $to;
     /** @var BlockNode */
     protected $from;
@@ -110,7 +108,7 @@ class AssignNode extends Node
     public function __construct($nid, $to, $from)
     {
         $this->nodeId = $nid;
-        $this->to = $to;
+        $this->to = new Value($to);
         $this->from = $from;
     }
 
@@ -123,17 +121,15 @@ class AssignNode extends Node
 
     public function getSource($params)
     {
-        $indent = TreeHelper::getIndent($params['indent']);
-        return sprintf("%s%s = %s",
-            $indent,
-            $this->parseValue($this->to, $params),
-            $this->from->getSource($params)
+        return sprintf("%s = %s",
+            $this->to->parse($params),
+            trim($this->from->getSource($params))
         );
     }
 
     public function printHtml(&$params)
     {
-        $toValue = $this->parseValue($this->to, $params);
+        $toValue = $this->to->parse($params);
         $fromNid = isset($this->from) ? $this->from->nodeId : null;
         ?>
         <!-- ASSIGN NODE -->
@@ -157,7 +153,6 @@ class AssignNode extends Node
                             </button>
                         <?php else: ?>
                             <label>
-                                <?= TreeHelper::l10n('assign_node_title') ?>
                                 <?= $toValue ?> :=
                                 <div style="display: none;">
                                     <input class="assign-to" value="<?= $toValue ?>"/>
@@ -203,17 +198,15 @@ class BlockNode extends Node
 
     public function getSource($params)
     {
-        if (sizeof($this->nodes) === 1) {
-            return end($this->nodes)->getSource($params);
-        } else {
-            $_indent = TreeHelper::getIndent(++$params['indent']);
-            $source = "";
-            foreach ($this->nodes as $node) {
-                /** @var Node $node */
-                $source .= $_indent . $node->getSource($params) . PHP_EOL;
-            }
-            return $source;
+        $_indent = TreeHelper::getIndent($params['indent']);
+        $source = "";
+        foreach ($this->nodes as $index => $node) {
+            /** @var Node $node */
+            $source .= $_indent . $node->getSource($params);
+            if ($index < sizeof($this->nodes) - 1)
+                $source .= PHP_EOL;
         }
+        return $source;
     }
 
     public function printHtml(&$params)
@@ -231,7 +224,9 @@ class BlockNode extends Node
 
 class CompareNode extends Node
 {
+    /** @var Value */
     protected $left;
+    /** @var Value */
     protected $right;
     /** @var string */
     protected $op;
@@ -248,8 +243,8 @@ class CompareNode extends Node
     public function __construct($nid, $left, $right, $op)
     {
         $this->nodeId = $nid;
-        $this->left = $left;
-        $this->right = $right;
+        $this->left = new Value($left);
+        $this->right = new Value($right);
         $this->op = $op;
     }
 
@@ -264,16 +259,16 @@ class CompareNode extends Node
     public function getSource($params)
     {
         return sprintf("%s %s %s",
-            $this->parseValue($this->left, $params),
+            $this->left->parse($params),
             $this->ops[$this->op],
-            $this->parseValue($this->right, $params)
+            $this->right->parse($params)
         );
     }
 
     public function printHtml(&$params)
     {
-        $leftVal = $this->parseValue($this->left, $params);
-        $rightVal = $this->parseValue($this->right, $params);
+        $leftVal = $this->left->parse($params);
+        $rightVal = $this->right->parse($params);
         $selected_op = $this->isPrototype ? 'lt' : $this->op;
         ?>
         <!-- COMPARE NODE -->
@@ -308,7 +303,6 @@ class CompareNode extends Node
                             </button>
                         <?php else: ?>
                             <label>
-                                <?= TreeHelper::l10n('compare_node_title') ?>
                                 <?= $leftVal ?>
                                 <?= $this->ops[$selected_op] ?>
                                 <?= $rightVal ?>
@@ -359,7 +353,7 @@ class IfNode extends Node
     public function getSource($params)
     {
         $_indent = TreeHelper::getIndent($params['indent']++);
-        $string = $_indent . "if (" . $this->cond->getSource($params) . ")" . PHP_EOL;
+        $string = "if (" . trim($this->cond->getSource($params)) . ")" . PHP_EOL;
         $string .= $this->then->getSource($params) . PHP_EOL;
         if ($this->else->size()) {
             $string .= $_indent . "else" . PHP_EOL;
@@ -439,26 +433,38 @@ class IfNode extends Node
 
 class IncNode extends Node
 {
-    function __construct($nid, $var)
+    /** @var Value */
+    protected $var;
+    /** @var string */
+    protected $op;
+    protected $ops = [
+        'inc' => '++',
+        'dec' => '--'
+    ];
+
+    function __construct($nid, $var, $op)
     {
         $this->nodeId = $nid;
-        $this->var = $var;
+        $this->var = new Value($var);
+        $this->op = $op;
     }
 
     public static function parse($node, $tree)
     {
         $var = isset($node->var) ? $node->var : null;
-        return new self($node->nid, $var);
+        $op = isset($node->operator) ? $node->operator : null;
+        return new self($node->nid, $var, $op);
     }
 
     public function getSource($params)
     {
-        return $this->parseValue($this->var, $params) . "++";
+        return $this->var->parse($params) . "++";
     }
 
     public function printHtml(&$params)
     {
-        $varValue = $this->parseValue($this->var, $params);
+        $varValue = $this->var->parse($params);
+        $selected_op = $this->isPrototype ? 'inc' : $this->op;
         ?>
         <!-- INC NODE -->
         <li id="node_<?= $this->nodeId ?>" class="node inc-node" data-node-type="inc"
@@ -473,6 +479,14 @@ class IncNode extends Node
                                 <div class="ui-widget combobox-container">
                                     <input class="inc-var combobox" value="<?= $varValue ?>"/>
                                 </div>
+                                <select class="inc-operation">
+                                    <?php foreach ($this->ops as $op => $char): ?>
+                                        <option value="<?= $op ?>"
+                                                <?php if ($selected_op === $op): ?>selected="selected"<?php endif ?>>
+                                            <?= $char ?>
+                                        </option>
+                                    <?php endforeach ?>
+                                </select>
                             </label>
                             <span class="invalid label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
                             <button type="button" class="close node-remove" aria-label="Close">
@@ -480,10 +494,10 @@ class IncNode extends Node
                             </button>
                         <?php else: ?>
                             <label>
-                                <?= TreeHelper::l10n('inc_node_title') ?>
-                                <?= $varValue ?>
+                                <?= $varValue . $this->ops[$selected_op] ?>
                                 <div style="display: none;">
                                     <input class="inc-var" value="<?= $varValue ?>"/>
+                                    <input class="inc-operation" value="<?= $selected_op ?>"/>
                                 </div>
                             </label>
                         <?php endif ?>
@@ -496,13 +510,13 @@ class IncNode extends Node
 
 class ReturnNode extends Node
 {
-    /** @var int */
+    /** @var Value */
     protected $value;
 
     function __construct($nid, $value)
     {
         $this->nodeId = $nid;
-        $this->value = $value;
+        $this->value = new Value($value);
     }
 
     public static function parse($node, $tree)
@@ -513,12 +527,12 @@ class ReturnNode extends Node
 
     public function getSource($params)
     {
-        return "return " . $this->parseValue($this->value, $params);
+        return "return " . $this->value->parse($params);
     }
 
     public function printHtml(&$params)
     {
-        $varValue = $this->parseValue($this->value, $params);
+        $varValue = $this->value->parse($params);
         ?>
         <!-- RETURN NODE -->
         <li id="node_<?= $this->nodeId ?>" class="node return-node" data-node-type="return"
@@ -556,13 +570,13 @@ class ReturnNode extends Node
 
 class ValueNode extends Node
 {
-    /** @param $vid int */
-    protected $vid;
+    /** @var Value */
+    protected $value;
 
     function __construct($nid, $value)
     {
         $this->nodeId = $nid;
-        $this->value = $value;
+        $this->value = new Value($value);
     }
 
     public static function parse($node, $tree)
@@ -573,12 +587,12 @@ class ValueNode extends Node
 
     public function getSource($params)
     {
-        return $this->parseValue($this->value, $params);
+        return $this->value->parse($params);
     }
 
     public function printHtml(&$params)
     {
-        $varValue = $this->parseValue($this->value, $params);
+        $varValue = $this->value->parse($params);
         ?>
         <!-- VALUE NODE -->
         <li id="node_<?= $this->nodeId ?>" class="node value-node" data-node-type="value"
@@ -600,7 +614,6 @@ class ValueNode extends Node
                             </button>
                         <?php else: ?>
                             <label>
-                                <?= TreeHelper::l10n('value_node_title') ?>
                                 <?= $varValue ?>
                                 <div style="display: none;">
                                     <input class="value-var" value="<?= $varValue ?>"/>
@@ -642,8 +655,10 @@ class WhileNode extends Node
 
     public function getSource($params)
     {
-        $_indent = TreeHelper::getIndent($params['indent']);
-        $string = $_indent . "while (" . $this->cond->getSource($params) . ")" . PHP_EOL;
+        // increase the indent for the body
+        $params['indent']++;
+        // build string
+        $string = "while (" . trim($this->cond->getSource($params)) . ")" . PHP_EOL;
         $string .= $this->body->getSource($params);
         return $string;
     }
@@ -688,7 +703,7 @@ class WhileNode extends Node
                 </tr>
                 <tr>
                     <td class="handle node-box left">&nbsp;</td>
-                    <td class="node-box top right bottom half-width">then</td>
+                    <td class="node-box top right bottom half-width"><?= TreeHelper::l10n('while_node_do') ?></td>
                 </tr>
                 <tr>
                     <td class="handle node-box right bottom left">&nbsp;</td>
@@ -719,13 +734,6 @@ abstract class Node
     const INC_NODE = "inc";
     const VALUE_NODE = "value";
     const WHILE_NODE = "while";
-
-    const VAR_KIND = "var";
-    const CONST_KIND = "const";
-    const INDEX_KIND = "index";
-    const PROP_KIND = "prop";
-
-    const INT_TYPE = "int";
 
     /** @var int */
     protected $nodeId;
@@ -829,7 +837,7 @@ abstract class Node
                 $node = new IfNode($type, null, null, null);
                 break;
             case self::INC_NODE:
-                $node = new IncNode($type, null);
+                $node = new IncNode($type, null, null);
                 break;
             case self::VALUE_NODE:
                 $node = new ValueNode($type, null);
@@ -856,41 +864,6 @@ abstract class Node
      * @return string
      */
     public abstract function getSource($params);
-
-    protected function parseValue($value, $params)
-    {
-        $vars = $this->extractVars($params);
-        if (!isset($value) || !isset($value->kind))
-            return "[INVALID]";
-
-        switch ($value->kind) {
-            case self::CONST_KIND:
-                return $value->value;
-            case self::INDEX_KIND:
-                return sprintf("%s[%s]",
-                    $vars[$value->vid]->name,
-                    $this->parseValue($value->index, $params)
-                );
-            case self::PROP_KIND:
-                return sprintf("%s.%s",
-                    $vars[$value->vid]->name,
-                    $value->prop
-                );
-            case self::VAR_KIND:
-                return $vars[$value->vid]->name;
-            default:
-                throw new ParseError("Kind not found in '$value'!");
-        }
-    }
-
-    protected function extractVars($params)
-    {
-        $vars = !is_null($params) && isset($params['vars']) ? $params['vars'] : array();
-        if (isset($vars['prototype'])) {
-            unset ($vars['prototype']);
-        }
-        return $vars;
-    }
 }
 
 class Tree
@@ -931,8 +904,78 @@ class Tree
     }
 }
 
+class Value
+{
+    const VAR_KIND = "var";
+    const CONST_KIND = "const";
+    const INDEX_KIND = "index";
+    const PROP_KIND = "prop";
+
+    const INT_TYPE = "int";
+
+    const LEN_PROP = "length";
+
+    /** @var string One of *_KIND. Used by constants. */
+    protected $kind;
+    /** @var string One of *_TYPE. Used by constants. */
+    protected $type;
+    /** @var mixed Used by constants. */
+    protected $value;
+    /** @var int Variable ID, used by variables, array accesses and array properties. */
+    protected $vid;
+    /** @var Value Used by array accesses, contains index value. */
+    protected $index;
+    /** @var string One of *_PROP. Used by array properties. */
+    protected $prop;
+
+    public function __construct($value)
+    {
+        if (isset($value->kind)) $this->kind = $value->kind;
+        if (isset($value->type)) $this->type = $value->type;
+        if (isset($value->value)) $this->value = $value->value;
+        if (isset($value->vid)) $this->vid = $value->vid;
+        if (isset($value->index)) $this->index = new Value($value->index);
+        if (isset($value->prop)) $this->prop = $value->prop;
+    }
+
+    public function parse($params)
+    {
+        $vars = TreeHelper::extractVars($params);
+        if (!isset($this->kind))
+            return "";
+
+        switch ($this->kind) {
+            case self::CONST_KIND:
+                return $this->value;
+            case self::INDEX_KIND:
+                return sprintf("%s[%s]",
+                    $vars[$this->vid]->name,
+                    $this->index->parse($params)
+                );
+            case self::PROP_KIND:
+                return sprintf("%s.%s",
+                    $vars[$this->vid]->name,
+                    $this->prop
+                );
+            case self::VAR_KIND:
+                return $vars[$this->vid]->name;
+            default:
+                throw new ParseError("Kind not found: '$this->kind'!");
+        }
+    }
+}
+
 class TreeHelper
 {
+    public static function extractVars($params)
+    {
+        $vars = !is_null($params) && isset($params['vars']) ? $params['vars'] : array();
+        if (isset($vars['prototype'])) {
+            unset ($vars['prototype']);
+        }
+        return $vars;
+    }
+
     public static function getIndent($indent)
     {
         $str = "";
