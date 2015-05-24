@@ -64,18 +64,20 @@ if (isset($_GET['uid'])) {
                                         <span class="label label-default"><?= $l10n['label_new'] ?></span>
                                     <?php endif ?>
                                     <?php if (is_null($algorithm['date_publish'])): ?>
-                                        <span class="label label-info">private</span>
+                                        <span class="label label-info"><?= $l10n['private'] ?></span>
                                     <?php endif ?>
                                     <span class="name">
-                            <a href="<?= $link ?>">
-                                <?= $algorithm['name'] ? $algorithm['name'] : $l10n['untitled_algorithm'] ?>
-                            </a>
-                        </span>
-                        <span class="properties">(<?= sprintf($l10n['created_at'], getTimeFrame($algorithm['age'])) ?>
-                            )</span>
+                                        <a href="<?= $link ?>">
+                                            <?= $algorithm['name'] ? $algorithm['name'] : $l10n['untitled_algorithm'] ?>
+                                        </a>
+                                    </span>
+                                    <span class="properties">
+                                        (<?= sprintf($l10n['created_at'], getTimeFrame($algorithm['age'])) ?>)
+                                    </span>
                                     <?php if (!empty($algorithm['description'])): ?>
-                                        <span
-                                            class="description"><?= skipDescription($algorithm['description']) ?></span>
+                                        <span class="description">
+                                            <?= skipDescription($algorithm['description']) ?>
+                                        </span>
                                     <?php endif ?>
                                 </td>
                             </tr>

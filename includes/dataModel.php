@@ -56,6 +56,7 @@ class DataModel
 
     /**
      * @param int $uid
+     * @param bool $fetchPrivate
      * @param int $from
      * @param int $amount
      * @return mixed
@@ -124,6 +125,35 @@ class DataModel
             LIMIT ?
         ");
         $stmt->bind_param("i", $amount);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    /**
+     * @param int $uid
+     * @param bool $fetchPrivate
+     * @param int $amount
+     * @return array
+     */
+    public function fetchModifiedAlgorithmsOfUser($uid, $fetchPrivate, $amount)
+    {
+        $privateFilter = $fetchPrivate ? "" : "AND date_publish IS NOT NULL";
+        $stmt = $this->_sql->prepare("
+            SELECT
+              aid, name, description, long_description, date_publish,
+              TIMESTAMPDIFF(MINUTE, date_lastedit, NOW()) AS modified,
+              uid, username
+            FROM algorithm a
+            JOIN user u USING(uid)
+            WHERE a.date_deletion IS NULL
+            AND uid = ?
+            $privateFilter
+            ORDER BY date_lastedit DESC
+            LIMIT ?
+        ");
+        $stmt->bind_param("ii", $uid, $amount);
         $stmt->execute();
         $result = $stmt->get_result();
         $stmt->close();

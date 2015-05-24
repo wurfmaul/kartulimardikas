@@ -54,7 +54,9 @@ $l10n['all_algos'] = "All the defined algorithms.";
 $l10n['no_algorithms'] = "No algorithms found!";
 $l10n['no_users'] = "No users found!";
 $l10n['latest_algos'] = "Latest algorithms";
+$l10n['my_algos'] = "My algorithms";
 $l10n['last_changes'] = "Last changes";
+$l10n['my_last_changes'] = "My last changes";
 $l10n['diligent_users'] = "Most diligent users";
 $l10n['user_created_note'] = "created %d algorithms";
 $l10n['created_note'] = "created %s by %s";
@@ -67,6 +69,8 @@ $l10n['days_ago'] = "%d days ago";
 $l10n['one_minute_ago'] = "a minute ago";
 $l10n['one_hour_ago'] = "1 hour ago";
 $l10n['one_day_ago'] = "1 day ago";
+$l10n['see_more'] = "See more";
+$l10n['private'] = "private";
 
 // NEW
 $l10n['new'] = "New";
