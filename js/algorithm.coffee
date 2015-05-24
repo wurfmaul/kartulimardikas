@@ -134,7 +134,7 @@ class ArithmeticNode extends Node
   execute: (player, node) ->
     leftVal = @executeValue(@left, player)
     rightVal = @executeValue(@right, player)
-    player.stats.incCompareOps()
+    player.stats.incArithmeticOps()
     switch @operator
       when 'plus' then value: leftVal + rightVal
       when 'minus' then value: leftVal - rightVal

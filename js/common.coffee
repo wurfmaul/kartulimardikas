@@ -33,17 +33,17 @@ updateUrl = (parameters) ->
       @_printError("Request Error: " + errorThrown)
   )
 
-updateSection = (element) ->
+toggleSection = (element, speed) ->
   # change arrow
   element.find("span").toggleClass("glyphicon-chevron-right glyphicon-chevron-down")
-  # toggle signal class
-  $(element.data("target")).toggleClass("closed")
+  $(element.data("target")).toggle(speed)
 
+updateSectionUrl = ->
   # prepare parameters for address bar manipulation
   section = 0
   counter = 1
-  $('.panel-collapse').each(->
-    section += counter if (not $(this).hasClass('closed'))
+  $('.panel-heading').each(->
+    section += counter if (not $(this).hasClass('collapsed'))
     counter *= 2
   )
   updateUrl(
@@ -53,6 +53,13 @@ updateSection = (element) ->
   )
 
 $ ->
-  $('.panel-heading').click -> updateSection($(this))
+  $('.panel-heading').click ->
+    $(this).toggleClass('collapsed')
+    toggleSection($(this), 'slow')
+    updateSectionUrl()
+  $('.collapsed').each(->
+    # the panels have to be displayed briefly in order to initialize the memory!
+    toggleSection($(this), $(this).data('speed') ? 0)
+  )
   $('#generalAlertClose').click -> $('#generalAlert').hide('slow')
   $('#generalSuccessClose').click -> $('#generalSuccess').hide('slow')

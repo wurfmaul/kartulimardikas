@@ -48,14 +48,14 @@ if ($__algorithm && ($__public || $__owner)):
 
                 <!-- TAB - CONTROLS -->
                 <div class="panel panel-default">
-                    <div class="panel-heading" data-toggle="collapse" data-target="#controls">
+                    <div class="panel-heading<?php if (!$section[0]): ?> collapsed<?php endif ?>"
+                         data-target="#controls">
                         <h4 class="panel-title">
-                        <span
-                            class="glyphicon glyphicon-chevron-<?php if ($section[0]): ?>down<?php else: ?>right<?php endif ?>"></span>
+                            <span class="glyphicon glyphicon-chevron-down"></span>
                             <?= $l10n['controls'] ?>
                         </h4>
                     </div>
-                    <div id="controls" class="panel-collapse collapse <?= $section[0] ? 'in' : 'closed' ?>">
+                    <div id="controls" class="panel-collapse">
                         <div class="panel-body controls">
                             <div class="btn-group">
                                 <div class="btn-group">
@@ -89,21 +89,20 @@ if ($__algorithm && ($__public || $__owner)):
 
                 <!-- TAB - PSEUDOCODE -->
                 <div class="panel panel-default">
-                    <div class="panel-heading" data-toggle="collapse" data-target="#pseudocode">
+                    <div class="panel-heading<?php if (!$section[1]): ?> collapsed<?php endif ?>"
+                         data-target="#pseudocode">
                         <h4 class="panel-title">
-                        <span
-                            class="glyphicon glyphicon-chevron-<?php if ($section[1]): ?>down<?php else: ?>right<?php endif ?>"></span>
+                            <span class="glyphicon glyphicon-chevron-down"></span>
                             <?= $name ?>
                         </h4>
                     </div>
-                    <div id="pseudocode" class="panel-collapse collapse <?= $section[1] ? 'in' : 'closed' ?>">
+                    <div id="pseudocode" class="panel-collapse">
                         <div class="panel-body algorithm">
                             <?php if (is_null($__algorithm->tree)): ?>
                                 <?= $l10n['no_algorithm'] ?>
                             <?php else: ?>
                                 <ul id="node_<?= $tree->getRoot() ?>" class="insertStepsHere"
                                     data-node-id="<?= $tree->getRoot() ?>">
-                                    <li id="cursor"></li>
                                     <?php $tree->printHtml(['vars' => $vars, 'mode' => 'view']) ?>
                                 </ul>
                             <?php endif ?>
@@ -113,14 +112,15 @@ if ($__algorithm && ($__public || $__owner)):
 
                 <!-- TAB - SOURCE CODE -->
                 <div class="panel panel-default">
-                    <div class="panel-heading" data-toggle="collapse" data-target="#sourcecode">
+                    <div class="panel-heading<?php if (!$section[2]): ?> collapsed<?php endif ?>"
+                         data-target="#sourcecode">
                         <h4 class="panel-title">
                         <span
-                            class="glyphicon glyphicon-chevron-<?php if ($section[2]): ?>down<?php else: ?>right<?php endif ?>"></span>
+                            class="glyphicon glyphicon-chevron-down"></span>
                             <?= $l10n['source_code'] ?>
                         </h4>
                     </div>
-                    <div id="sourcecode" class=" panel-collapse collapse <?= $section[2] ? 'in' : 'closed' ?>">
+                    <div id="sourcecode" class="panel-collapse">
                         <div class="panel-body">
                             <?php if (is_null($__algorithm->tree)): ?>
                                 <?= $l10n['no_algorithm'] ?>
@@ -131,23 +131,21 @@ if ($__algorithm && ($__public || $__owner)):
                     </div>
                 </div>
 
-                <?php if ($long_description): ?>
-                    <!-- TAB - DESCRIPTION -->
-                    <div class="panel panel-default">
-                        <div class="panel-heading" data-toggle="collapse" data-target="#description">
-                            <h4 class="panel-title">
-                        <span
-                            class="glyphicon glyphicon-chevron-<?php if ($section[3]): ?>down<?php else: ?>right<?php endif ?>"></span>
-                                <?= $l10n['description'] ?>
-                            </h4>
-                        </div>
-                        <div id="description" class=" panel-collapse collapse <?= $section[3] ? 'in' : 'closed' ?>">
-                            <div class="panel-body">
-                                <?= $long_description ?>
-                            </div>
+                <!-- TAB - DESCRIPTION -->
+                <div class="panel panel-default" <?php if (!$long_description): ?>style="display: none;"<?php endif ?>>
+                    <div class="panel-heading<?php if (!$section[3]): ?> collapsed<?php endif ?>"
+                         data-target="#description">
+                        <h4 class="panel-title">
+                            <span class="glyphicon glyphicon-chevron-down"></span>
+                            <?= $l10n['description'] ?>
+                        </h4>
+                    </div>
+                    <div id="description" class="panel-collapse">
+                        <div class="panel-body">
+                            <?= $long_description ?>
                         </div>
                     </div>
-                <?php endif ?>
+                </div>
             </div>
         </div>
         <!-- LEFT COLUMN END -->
@@ -158,14 +156,14 @@ if ($__algorithm && ($__public || $__owner)):
 
                 <!-- TAB - MEMORY -->
                 <div class="panel panel-default">
-                    <div class="panel-heading" data-toggle="collapse" data-target="#memory">
+                    <div class="panel-heading<?php if (!$section[4]): ?> collapsed<?php endif ?>" data-target="#memory"
+                         data-speed="100">
                         <h4 class="panel-title">
-                        <span
-                            class="glyphicon glyphicon-chevron-<?php if ($section[4]): ?>down<?php else: ?>right<?php endif ?>"></span>
+                            <span class="glyphicon glyphicon-chevron-down"></span>
                             <?= $l10n['memory'] ?>
                         </h4>
                     </div>
-                    <div id="memory" class=" panel-collapse collapse <?= $section[4] ? 'in' : 'closed' ?>">
+                    <div id="memory" class="panel-collapse">
                         <div class="panel-body">
                             <?php if (sizeof($vars)): ?>
                                 <table class="table table-hover table-bordered variables">
@@ -212,44 +210,54 @@ if ($__algorithm && ($__public || $__owner)):
 
                 <!-- TAB - STATISTICS -->
                 <div class="panel panel-default">
-                    <div class="panel-heading" data-toggle="collapse" data-target="#statistics">
+                    <div class="panel-heading<?php if (!$section[5]): ?> collapsed<?php endif ?>"
+                         data-target="#statistics">
                         <h4 class="panel-title">
                         <span
-                            class="glyphicon glyphicon-chevron-<?php if ($section[5]): ?>down<?php else: ?>right<?php endif ?>"></span>
+                            class="glyphicon glyphicon-chevron-down"></span>
                             <?= $l10n['statistics'] ?>
                         </h4>
                     </div>
-                    <div id="statistics" class="panel-collapse collapse <?= $section[5] ? 'in' : 'closed' ?>">
+                    <div id="statistics" class="panel-collapse">
                         <div class="panel-body">
                             <table class="table table-hover table-bordered">
                                 <tr>
-                                    <th><?= $l10n['metric'] ?></th>
+                                    <th><?= $l10n['operations'] ?></th>
                                     <th><?= $l10n['count'] ?></th>
                                 </tr>
                                 <tr>
-                                    <td><?= $l10n['nowo'] ?></td>
+                                    <td><?= $l10n['accesses'] ?></td>
                                     <td>
                                         <div class="btn-group">
                                             <input type="button" class="btn btn-default" disabled="disabled" value="0"
-                                                   id="stats-now"/>
+                                                   id="stats-accesses"/>
                                         </div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><?= $l10n['noco'] ?></td>
+                                    <td><?= $l10n['assignments'] ?></td>
                                     <td>
                                         <div class="btn-group">
                                             <input type="button" class="btn btn-default" disabled="disabled" value="0"
-                                                   id="stats-noc"/>
+                                                   id="stats-assignments"/>
                                         </div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><?= $l10n['nooo'] ?></td>
+                                    <td><?= $l10n['comparisons'] ?></td>
                                     <td>
                                         <div class="btn-group">
                                             <input type="button" class="btn btn-default" disabled="disabled" value="0"
-                                                   id="stats-noo"/>
+                                                   id="stats-comparisons"/>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><?= $l10n['arithmetic'] ?></td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <input type="button" class="btn btn-default" disabled="disabled" value="0"
+                                                   id="stats-arithmetic"/>
                                         </div>
                                     </td>
                                 </tr>

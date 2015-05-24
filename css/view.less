@@ -1,21 +1,19 @@
 @import "algorithm";
 
 .algorithm {
-  #cursor {
-    list-style-type: none;
-    min-width: 100%;
-    min-height: 5px;
-    background-color: #286090;
-    border-radius: 2px;
-  }
-  .close {
-    display: none;
-  }
-  .handle {
-    cursor: default !important;
-  }
-  .edit-only {
-    display: none;
+  .cursor > table > tbody > tr {
+    > .node-box {
+      background-color: #3a8dd4 !important;
+    }
+    > .handle .glyphicon {
+      left: 5px;
+      visibility: visible;
+      @angle: 225deg;
+      -moz-transform: rotate(@angle);
+      -webkit-transform: rotate(@angle);
+      -o-transform: rotate(@angle);
+      -ms-transform: rotate(@angle);
+    }
   }
   input, select {
     background-color: transparent !important;

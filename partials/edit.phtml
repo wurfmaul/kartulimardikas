@@ -61,14 +61,13 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
         <div class="panel-group" id="accordion-left">
             <!-- TAB - GENERAL INFORMATION -->
             <div class="panel panel-default">
-                <div class="panel-heading" data-toggle="collapse" data-target="#infoPanel">
+                <div class="panel-heading<?php if (!$section[0]): ?> collapsed<?php endif ?>" data-target="#infoPanel">
                     <h4 class="panel-title">
-                        <span
-                            class="glyphicon glyphicon-chevron-<?php if ($section[0]): ?>down<?php else: ?>right<?php endif ?>"></span>
+                        <span class="glyphicon glyphicon-chevron-down"></span>
                         <?= $l10n['general_info'] ?>
                     </h4>
                 </div>
-                <div id="infoPanel" class="panel-collapse collapse <?= $section[0] ? 'in' : 'closed' ?>">
+                <div id="infoPanel" class="panel-collapse">
                     <div class="panel-body form-horizontal">
                         <div class="form-group">
                             <label for="in-name" class="control-label col-sm-3"><?= $l10n['algo_name'] ?></label>
@@ -96,14 +95,13 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
 
             <!-- TAB - VARIABLES -->
             <div class="panel panel-default">
-                <div class="panel-heading" data-toggle="collapse" data-target="#varPanel">
+                <div class="panel-heading<?php if (!$section[1]): ?> collapsed<?php endif ?>" data-target="#varPanel">
                     <h4 class="panel-title">
-                        <span
-                            class="glyphicon glyphicon-chevron-<?php if ($section[1]): ?>down<?php else: ?>right<?php endif ?>"></span>
+                        <span class="glyphicon glyphicon-chevron-down"></span>
                         <?= $l10n['variables'] ?>
                     </h4>
                 </div>
-                <div id="varPanel" class="panel-collapse collapse <?= $section[1] ? 'in' : 'closed' ?>">
+                <div id="varPanel" class="panel-collapse">
                     <div class="panel-body" style="text-align: center;">
                         <table class="table table-condensed table-bordered table-hover variables">
                             <tbody id="insertVarsHere">
@@ -217,14 +215,13 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
         <div class="panel-group" id="accordion-right">
             <!-- TAB - STEPS -->
             <div class="panel panel-default">
-                <div class="panel-heading" data-toggle="collapse" data-target="#stepPanel">
+                <div class="panel-heading<?php if (!$section[2]): ?> collapsed<?php endif ?>" data-target="#stepPanel">
                     <h4 class="panel-title">
-                        <span
-                            class="glyphicon glyphicon-chevron-<?php if ($section[2]): ?>down<?php else: ?>right<?php endif ?>"></span>
+                        <span class="glyphicon glyphicon-chevron-down"></span>
                         <?= $l10n['algorithm'] ?>
                     </h4>
                 </div>
-                <div id="stepPanel" class="panel-collapse collapse <?= $section[2] ? 'in' : 'closed' ?>">
+                <div id="stepPanel" class="panel-collapse">
                     <div class="panel-body algorithm" style="text-align: center">
                         <ul class="insertStepsHere" class="sortable"
                             data-node-id="0"><?php $tree->printHtml(['vars' => $vars, 'mode' => 'edit']) ?></ul>

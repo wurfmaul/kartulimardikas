@@ -55,7 +55,9 @@ class ArithmeticNode extends Node
             data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr>
-                    <td class="handle node-box top bottom left">&nbsp;</td>
+                    <td class="handle node-box top bottom left">
+                        <span class="glyphicon glyphicon-map-marker"></span>
+                    </td>
                     <td class="node-box top right bottom full-width">
                         <?php if ($params['mode'] === 'edit'): ?>
                             <label>
@@ -71,6 +73,7 @@ class ArithmeticNode extends Node
                                         </option>
                                     <?php endforeach ?>
                                 </select>
+
                                 <div class="ui-widget combobox-container">
                                     <input class="arithmetic-right combobox" value="<?= $rightVal ?>"/>
                                 </div>
@@ -137,7 +140,9 @@ class AssignNode extends Node
             data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr>
-                    <td class="handle node-box top left">&nbsp;</td>
+                    <td class="handle node-box top left">
+                        <span class="glyphicon glyphicon-map-marker"></span>
+                    </td>
                     <td class="node-box top right bottom full-width">
                         <?php if ($params['mode'] === 'edit'): ?>
                             <label>
@@ -276,7 +281,9 @@ class CompareNode extends Node
             data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr>
-                    <td class="handle node-box top bottom left">&nbsp;</td>
+                    <td class="handle node-box top bottom left">
+                        <span class="glyphicon glyphicon-map-marker"></span>
+                    </td>
                     <td class="node-box top right bottom full-width">
                         <?php if ($params['mode'] === 'edit'): ?>
                             <label>
@@ -372,7 +379,9 @@ class IfNode extends Node
         <li id="node_<?= $this->nodeId ?>" class="node if-node" data-node-type="if" data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr>
-                    <td class="handle node-box top left">&nbsp;</td>
+                    <td class="handle node-box top left">
+                        <span class="glyphicon glyphicon-map-marker"></span>
+                    </td>
                     <td class="node-box top right bottom full-width">
                         <?php if ($params['mode'] === 'edit'): ?>
                             <label>
@@ -390,7 +399,7 @@ class IfNode extends Node
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         <?php else: ?>
-                            <?= TreeHelper::l10n('if_node_title') // TODO: op!     ?>
+                            <?= TreeHelper::l10n('if_node_title') // TODO: op!       ?>
                         <?php endif ?>
                     </td>
                 </tr>
@@ -471,7 +480,9 @@ class IncNode extends Node
             data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr>
-                    <td class="handle node-box top bottom left">&nbsp;</td>
+                    <td class="handle node-box top bottom left">
+                        <span class="glyphicon glyphicon-map-marker"></span>
+                    </td>
                     <td class="node-box top right bottom full-width">
                         <?php if ($params['mode'] === 'edit'): ?>
                             <label>
@@ -539,7 +550,9 @@ class ReturnNode extends Node
             data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr>
-                    <td class="handle node-box top left bottom">&nbsp;</td>
+                    <td class="handle node-box top left bottom">
+                        <span class="glyphicon glyphicon-map-marker"></span>
+                    </td>
                     <td class="node-box top right bottom full-width">
                         <?php if ($params['mode'] === 'edit'): ?>
                             <label>
@@ -599,7 +612,9 @@ class ValueNode extends Node
             data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr>
-                    <td class="handle node-box top left bottom">&nbsp;</td>
+                    <td class="handle node-box top left bottom">
+                        <span class="glyphicon glyphicon-map-marker"></span>
+                    </td>
                     <td class="node-box top right bottom full-width">
                         <?php if ($params['mode'] === 'edit'): ?>
                             <label>
@@ -673,7 +688,9 @@ class WhileNode extends Node
             data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr>
-                    <td class="handle node-box top left">&nbsp;</td>
+                    <td class="handle node-box top left">
+                        <span class="glyphicon glyphicon-map-marker"></span>
+                    </td>
                     <td class="node-box top right bottom full-width">
                         <?php if ($params['mode'] === 'edit'): ?>
                             <label>
@@ -689,7 +706,7 @@ class WhileNode extends Node
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         <?php else: ?>
-                            <?= TreeHelper::l10n('while_node_title') // TODO: op!                 ?>
+                            <?= TreeHelper::l10n('while_node_title') // TODO: op!                   ?>
                         <?php endif ?>
                     </td>
                 </tr>

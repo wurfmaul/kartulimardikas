@@ -78,36 +78,42 @@ class Player
       else buttons[i].removeAttr('disabled')
 
   setCursor: (node) ->
-    $('#cursor').show().insertBefore('#node_' + node)
+    @unsetCursor()
+    $('#node_' + node).addClass('cursor')
 
   unsetCursor: ->
-    $('#cursor').hide()
+    $('.cursor').removeClass('cursor')
 
 class Stats
   constructor: (@memory) ->
+    @stats = ['accesses', 'assignments', 'comparisons', 'arithmetic']
 
-  incWriteOps: ->
-    $('#stats-now')
-    .val(parseInt($('#stats-now').val()) + 1)
-    .addClass('highlight-write')
+  inc: (element) ->
+    elem = $('#stats-' + element)
+    value = parseInt(elem.val()) + 1
+    elem.val(value).addClass('highlight-write')
 
-  incCompareOps: ->
-    $('#stats-noc')
-    .val(parseInt($('#stats-noc').val()) + 1)
-    .addClass('highlight-write')
+  incAccessOps: -> @inc(@stats[0])
+
+  incAssignOps: -> @inc(@stats[1])
+
+  incCompareOps: -> @inc(@stats[2])
+
+  incArithmeticOps: -> @inc(@stats[3])
 
   readVar: (vid) ->
     $('#var-' + vid).find('.value').addClass('highlight-compare')
+    @incAccessOps()
 
   writeVar: (vid, value) ->
     $('#var-' + vid).find('.value').val(value)
     .removeClass('highlight-compare').addClass('highlight-write')
-    @incWriteOps()
+    @incAssignOps()
 
   writeArrayVar: (vid, index, value) ->
     $('#var-' + vid).find('.offset_' + index).val(value)
     .removeClass('highlight-compare').addClass('highlight-write')
-    @incWriteOps()
+    @incAssignOps()
 
   reset: ->
     # reset variables
@@ -115,8 +121,9 @@ class Stats
       $('#var-' + index).find('.value').val(elem.value)
     )
     # reset statistics
-    $('#stats-now').val(0)
-    $('#stats-noc').val(0)
+    $.each(@stats, (elem) ->
+      $('#stats-' + elem).val(0)
+    )
 $ ->
   tree = new Tree()
   stats = new Stats(tree.memory)
