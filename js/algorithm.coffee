@@ -72,9 +72,14 @@ class Node
       when 'index'
         index = value.index
         if (index.kind is 'const' and index.type is 'int')
+          player.stats.readArrayVar(value.vid, index.value)
           memory.arrayGet(value.vid, index.value)
         else if (index.kind is 'var')
+          # get index variable
+          player.stats.readVar(index.vid)
           idx = memory.get(index.vid).value
+          # use it for array
+          player.stats.readArrayVar(value.vid, idx)
           memory.arrayGet(value.vid, idx)
         else
           throw new Error("Not yet implemented: kind 'index' for complex variables!")

@@ -90,10 +90,8 @@ if ($__aid && $__algorithm) {
     <?php if (file_exists('css/' . ACTION . '.css')): ?>
         <link href="css/<?= ACTION ?>.css" rel="stylesheet"/>
     <?php endif ?>
-    <?php if (ACTION === "edit"): ?>
+    <?php if (ACTION === 'edit' || ACTION === 'view'): ?>
         <link href="<?= JQUERYUI_CSS_PATH ?>" rel="stylesheet"/>
-        <!--        <link href="lib/jquery-ui/1.11.4/jquery-ui.structure.min.css" rel="stylesheet" />-->
-        <!--        <link href="lib/jquery-ui/1.11.4/jquery-ui.theme.min.css" rel="stylesheet" />-->
     <?php endif ?>
 </head>
 <body>
@@ -192,12 +190,10 @@ if ($__aid && $__algorithm) {
 <script type="text/javascript" src="js/common.js"></script>
 <?php if (ACTION === 'edit' || ACTION === 'view'): ?>
     <script type="text/javascript" src="js/algorithm.js"></script>
+    <script type="text/javascript" src="<?= JQUERYUI_JS_PATH ?>"></script>
 <?php endif ?>
 <?php if (file_exists('js/' . ACTION . '.js')): ?>
     <script type="text/javascript" src="js/<?= ACTION ?>.js"></script>
-<?php endif ?>
-<?php if (ACTION === 'edit'): ?>
-    <script type="text/javascript" src="<?= JQUERYUI_JS_PATH ?>"></script>
 <?php endif ?>
 </body>
 </html>

@@ -112,8 +112,8 @@ $l10n['message_deleted_algorithm'] = "This algorithm was deleted.";
 $l10n['message_hidden_algorithm'] = "This algorithm is private and you are not allowed to see.";
 $l10n['no_vars'] = "No variables defined yet.";
 $l10n['no_algorithm'] = "No algorithm defined yet.";
-$l10n[''] = "";
-$l10n[''] = "";
+$l10n['steps_per_second'] = "Steps per second: ";
+$l10n['no_params_to_define'] = "No parameters to define.";
 $l10n[''] = "";
 $l10n[''] = "";
 

@@ -21,13 +21,41 @@
   }
 }
 
+.controls {
+  #speed-control {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: small;
+  }
+}
+
+.variables {
+  .value-container {
+    .read, .write {
+      display: none;
+    }
+    &.highlight-read {
+      padding: 6px 5px;
+      .read {
+        display: inline;
+      }
+    }
+    &.highlight-write {
+      padding: 6px 5px;
+      .write {
+        display: inline;
+      }
+    }
+  }
+}
+
 .highlight-write {
   font-weight: bold;
   background-color: #5cb85c !important;
   border-color: #4cae4c !important;
 }
 
-.highlight-compare {
+.highlight-read {
   font-weight: bold;
   background-color: #f0ad4e !important;
   border-color: #eea236 !important;

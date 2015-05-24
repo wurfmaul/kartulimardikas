@@ -57,7 +57,7 @@ if ($__algorithm && ($__public || $__owner)):
                     </div>
                     <div id="controls" class="panel-collapse">
                         <div class="panel-body controls">
-                            <div class="btn-group">
+                            <div class="col-md-5">
                                 <div class="btn-group">
                                     <button type="button" class="btn btn-default" title="<?= $l10n['back_to_start'] ?>"
                                             id="btn-reset">
@@ -82,6 +82,13 @@ if ($__algorithm && ($__public || $__owner)):
                                         <span class="glyphicon glyphicon-fast-forward"></span>
                                     </button>
                                 </div>
+                                <div id="speed-control">
+                                    <div id="speed-slider"></div>
+                                    <?= $l10n['steps_per_second'] ?> <span id="speed-info">2</span>
+                                </div>
+                            </div>
+                            <div class="col-md-7">
+                                <span style="color: grey"><?= $l10n['no_params_to_define'] ?></span>
                             </div>
                         </div>
                     </div>
@@ -186,14 +193,21 @@ if ($__algorithm && ($__public || $__owner)):
                                                 <div class="btn-group">
                                                     <?php if (substr($var->type, 0, 6) === "array-"): // deal with "array-{int}" ?>
                                                         <?php foreach (explode(',', $var->value) as $offset => $value): ?>
-                                                            <input type="button"
-                                                                   class="btn btn-default offset_<?= $offset ?>"
-                                                                   disabled="disabled" value="<?= $value ?>"/>
+                                                            <button
+                                                                class="btn btn-default value-container offset_<?= $offset ?>"
+                                                                disabled="disabled">
+                                                                <span class="glyphicon glyphicon-log-in write"></span>
+                                                                <span class="value"><?= $value ?></span>
+                                                                <span class="glyphicon glyphicon-log-out read"></span>
+                                                            </button>
                                                         <?php endforeach ?>
                                                     <?php else: // deal with "elem-{?,value}" ?>
-                                                        <input type="button" class="btn btn-default value"
-                                                               disabled="disabled"
-                                                               value="<?= $var->value ?>"/>
+                                                        <button class="btn btn-default value-container"
+                                                                disabled="disabled">
+                                                            <span class="glyphicon glyphicon-log-in write"></span>
+                                                            <span class="value"><?= $var->value ?></span>
+                                                            <span class="glyphicon glyphicon-log-out read"></span>
+                                                        </button>
                                                     <?php endif ?>
                                                 </div>
                                             </td>

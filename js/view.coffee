@@ -69,7 +69,7 @@ class Player
 
   clearHighlight: ->
     $('.highlight-write').removeClass('highlight-write')
-    $('.highlight-compare').removeClass('highlight-compare')
+    $('.highlight-read').removeClass('highlight-read')
 
   setControls: (settings) ->
     buttons = [$('#btn-reset'), $('#btn-back'), $('#btn-play'), $('#btn-step'), $('#btn-finish')]
@@ -102,18 +102,25 @@ class Stats
   incArithmeticOps: -> @inc(@stats[3])
 
   readVar: (vid) ->
-    $('#var-' + vid).find('.value').addClass('highlight-compare')
+    $('#var-' + vid).find('.value-container').addClass('highlight-read')
     @incAccessOps()
 
-  writeVar: (vid, value) ->
-    $('#var-' + vid).find('.value').val(value)
-    .removeClass('highlight-compare').addClass('highlight-write')
+  readArrayVar: (vid, index) ->
+    $('#var-' + vid).find('.offset_' + index).addClass('highlight-read')
+    @incAccessOps()
+
+  writeGeneric: (container, value) ->
+    container.removeClass('highlight-read').addClass('highlight-write')
+    container.find('.value').text(value)
     @incAssignOps()
 
+  writeVar: (vid, value) ->
+    container = $('#var-' + vid).find('.value-container')
+    @writeGeneric(container, value)
+
   writeArrayVar: (vid, index, value) ->
-    $('#var-' + vid).find('.offset_' + index).val(value)
-    .removeClass('highlight-compare').addClass('highlight-write')
-    @incAssignOps()
+    container = $('#var-' + vid).find('.offset_' + index)
+    @writeGeneric(container, value)
 
   reset: ->
     # reset variables
@@ -134,3 +141,16 @@ $ ->
   $('#btn-play').click -> player.play()
   $('#btn-step').click -> player.step()
   $('#btn-finish').click -> player.finish()
+
+  $('#speed-slider').slider(
+    value: 2,
+    min: 1,
+    max: 20,
+    slide: (event, ui) ->
+      $("#speed-info").text(ui.value)
+    change: (event, ui) ->
+      TIMEOUT = 1000 / ui.value
+      # press pause and play again in order to re-initialize timer
+      player.play()
+      player.play()
+  )
