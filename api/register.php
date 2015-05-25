@@ -4,6 +4,7 @@ define('BASEDIR', realpath('..') . '/');
 require_once BASEDIR . 'config/config.php';
 require_once BASEDIR . 'includes/dataModel.php';
 require_once BASEDIR . 'includes/validator.php';
+global $l10n;
 
 $response = array();
 $validator = new Validator();

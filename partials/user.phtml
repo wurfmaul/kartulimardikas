@@ -204,7 +204,8 @@ if (isset($_GET['uid'])) {
         <button type="button" class="close">
             <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
         </button>
-        <strong><?= $l10n['error'] ?></strong> <?= $l10n['error_no_such_user'] ?><br/>
+        <strong><?= $l10n['error'] ?></strong><br/>
+        <?= $l10n['error_no_such_user'] ?><br/>
         &rarr; <a href="javascript:history.back()"><?= $l10n['go_back'] ?></a>
     </div>
 <?php endif ?>

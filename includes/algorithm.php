@@ -927,6 +927,7 @@ class Value
     const CONST_KIND = "const";
     const INDEX_KIND = "index";
     const PROP_KIND = "prop";
+    const COMP_KIND = "comp";
 
     const INT_TYPE = "int";
 
@@ -944,6 +945,10 @@ class Value
     protected $index;
     /** @var string One of *_PROP. Used by array properties. */
     protected $prop;
+    /** @var Value Used by compound values. */
+    protected $left, $right;
+    /** @var string Used by compound values. */
+    protected $op;
 
     public function __construct($value)
     {
@@ -953,6 +958,9 @@ class Value
         if (isset($value->vid)) $this->vid = $value->vid;
         if (isset($value->index)) $this->index = new Value($value->index);
         if (isset($value->prop)) $this->prop = $value->prop;
+        if (isset($value->left)) $this->left = new Value($value->left);
+        if (isset($value->right)) $this->right = new Value($value->right);
+        if (isset($value->op)) $this->op = $value->op;
     }
 
     public function parse($params)
@@ -976,6 +984,8 @@ class Value
                 );
             case self::VAR_KIND:
                 return $vars[$this->vid]->name;
+            case self::COMP_KIND:
+                return $this->left->parse($params) . $this->op . $this->right->parse($params);
             default:
                 throw new ParseError("Kind not found: '$this->kind'!");
         }

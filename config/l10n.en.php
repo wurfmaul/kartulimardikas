@@ -3,6 +3,12 @@
  * English language file
  */
 
+// ADMIN
+$l10n['administration'] = "Administration";
+$l10n['no_privileges'] = "You don't have sufficient privileges to see this page!";
+$l10n['need_account'] = "You need to have an account and be signed in.";
+$l10n['need_admin_rights'] = "Your account has to have administration rights.";
+
 // GENERAL
 $l10n['close'] = "Close";
 $l10n['error'] = "Error!";
@@ -34,6 +40,9 @@ $l10n['password'] = "Password";
 $l10n['password_again'] = "Password, once again";
 $l10n['sign_in'] = "Sign in";
 $l10n['register'] = "Register";
+$l10n['already_registered'] = "You already have an account!";
+$l10n['registration_not_necessary'] = "Another registration is not necessary for you!";
+$l10n['use_form_to_signout'] = "Use the button in the top right corner to sign out.";
 $l10n['become_user'] = "Become a new user!";
 $l10n['user_not_signed_in'] = "You have to be signed in to change your account!";
 $l10n['username_changed'] = "Your username has been changed to '%s'! Please sign in again, using your new username!";
@@ -112,14 +121,29 @@ $l10n['play'] = "Play";
 $l10n['step_forward'] = "Step forward";
 $l10n['forward_to_end'] = "Forward to end";
 $l10n['message_invalid_aid'] = "The chosen algorithm cannot be displayed. This can have the following reasons:";
+$l10n['message_no_aid_specified'] = "No algorithm id was specified.";
 $l10n['message_deleted_algorithm'] = "This algorithm was deleted.";
 $l10n['message_hidden_algorithm'] = "This algorithm is private and you are not allowed to see.";
 $l10n['no_vars'] = "No variables defined yet.";
 $l10n['no_algorithm'] = "No algorithm defined yet.";
 $l10n['steps_per_second'] = "Steps per second: ";
 $l10n['no_params_to_define'] = "No parameters to define.";
-$l10n[''] = "";
-$l10n[''] = "";
+$l10n['runtime_error'] = "Runtime Error";
+$l10n['message_runtime_error'] = "A runtime error occurred during this step. The program execution was aborted. The following message could be useful for finding the error: ";
+$l10n['runtime_errors'] = [
+    'undefined' => "An unknown error has occurred!",
+    'index_out_of_bounds' => "The array index is outside the legal range! Array '%1' has no element at position %2, it is only %3 long!",
+    'too_many_steps' => "Could not terminate in %1 steps! The maximum number of steps is reached.",
+    'unknown_property' => "Unknown property: '%1'. This property cannot be computed!",
+    'unsupported_index' => "The used index of kind '%1' is too sophisticated! Only simple variables and constants are supported!",
+    'could_not_execute_value' => "The value '%1' could not be executed!",
+    'assign_to_const' => "A value cannot be assigned to a constant %1!",
+    'assign_to_prop' => "A value cannot be assigned to an array property!",
+    'unknown_kind' => "Unknown kind: '%1'. This kind cannot be computed!",
+    'unknown_arithmetic_op' => "The arithmetic calculation cannot be performed with '%1'!",
+    'no_array_for_index' => "The variable '%1' is no array, therefore it cannot be accessed via an index!",
+    'divide_by_zero' => "Division cannot have zero as denominator!",
+];
 
 // EDIT
 $l10n['edit'] = "Edit";
@@ -179,6 +203,7 @@ $l10n['delete_algorithm'] = "Delete algorithm";
 $l10n['delete_algorithm_warning'] = "Do you really want to remove this algorithm? This action cannot be undone!";
 $l10n['publish_not_possible'] = "If no name is specified, this algorithm cannot be published!";
 $l10n['algorithm_deleted'] = "Algorithm deleted.";
+$l10n['message_foreign_algorithm'] = "You are not the owner of this algorithm, therefore you are not allowed to modify it.";
 
 // USER
 $l10n['member_since'] = "Member since %s.";
@@ -196,6 +221,3 @@ $l10n['delete_user_warning'] = "Do you really want to remove your account? This 
 $l10n['user_not_deleted'] = "User could not be deleted!";
 $l10n['user_deleted'] = "User '%s' has successfully been deleted!";
 $l10n['password_invalid'] = "Password does not seem to be valid!";
-
-// ADMIN
-$l10n['administration'] = "Administration";

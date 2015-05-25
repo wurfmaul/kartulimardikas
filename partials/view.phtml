@@ -2,14 +2,8 @@
 if (!defined('BASEDIR')) die('You cannot call this script directly !');
 global $l10n;
 
-// redirect if no aid is specified
-if (!$__aid) {
-    header("Location:" . url(['action' => 'index']));
-    die();
-}
-
 // if algorithm is defined
-if ($__algorithm && ($__public || $__owner)):
+if ($__aid && $__algorithm && ($__public || $__owner)):
     // prepare algorithm meta-data
     $name = stripslashes($__algorithm->name);
     $description = stripslashes($__algorithm->description);
@@ -36,9 +30,20 @@ if ($__algorithm && ($__public || $__owner)):
             <small><?= $description ?></small>
         </h1>
     </div>
+    <!-- HEADER END -->
 
     <!-- CONTENT -->
     <div class="row">
+
+        <!-- ERROR MESSAGE -->
+        <div id="viewAlert" class="alert alert-danger" style="display:none">
+            <strong><?= $l10n['runtime_error'] ?></strong><br/>
+            <?= $l10n['message_runtime_error'] ?>
+            <ul>
+                <li id="viewAlertText"></li>
+            </ul>
+        </div>
+        <!-- ERROR MESSAGE END -->
 
         <!-- LEFT COLUMN -->
         <div class="col-md-6">
@@ -185,7 +190,8 @@ if ($__algorithm && ($__public || $__owner)):
                                         <tr id="var-<?= $vid ?>"
                                             data-vid="<?= $vid ?>"
                                             data-name="<?= $var->name ?>"
-                                            data-value="<?= $var->value ?>">
+                                            data-value="<?= $var->value ?>"
+                                            data-type="<?= $var->type ?>">
                                             <td>
                                                 <code class="name"><?= $var->name ?></code>
                                             </td>
@@ -282,8 +288,14 @@ if ($__algorithm && ($__public || $__owner)):
             </div>
         </div>
         <!-- RIGHT COLUMN END -->
-
     </div>
+    <script type="text/javascript">
+        window.errorCodes = {
+            <?php foreach ($l10n['runtime_errors'] as $key => $value): ?>
+            '<?= $key ?>': "<?= $value ?>",
+            <?php endforeach ?>
+        }
+    </script>
     <!-- CONTENT END -->
 <?php else: // no valid aid ?>
     <div class="alert alert-danger" role="alert">
@@ -291,8 +303,11 @@ if ($__algorithm && ($__public || $__owner)):
 
         <?= $l10n['message_invalid_aid'] ?>
         <ul>
+            <li><?= $l10n['message_no_aid_specified'] ?></li>
             <li><?= $l10n['message_deleted_algorithm'] ?></li>
             <li><?= $l10n['message_hidden_algorithm'] ?></li>
         </ul>
+        <br/>
+        &rarr; <a href="javascript:history.back()"><?= $l10n['go_back'] ?></a>
     </div>
 <?php endif ?>

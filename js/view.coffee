@@ -16,6 +16,7 @@ class Player
     @clearHighlight()
     @setCursor(@nextNode)
     @setControls([0, 0, 1, 1, 1])
+    $('#viewAlert').hide('slow')
 
   back: ->
     # check for prev step
@@ -38,8 +39,10 @@ class Player
       # set an interval and perform step after step
       @playStep = 0
       @timer = setInterval(=>
-        if (@playStep <= MAX_STEPS) then @step()
-        else throw new Error("Could not terminate in #{MAX_STEPS} iterations!")
+        if (@playStep <= MAX_STEPS)
+          @step()
+          @playStep++
+        else @handleError(new ExecutionError('too_many_steps', [MAX_STEPS]))
       , TIMEOUT)
       # set button icon to pause
       $('#img-play')
@@ -47,12 +50,21 @@ class Player
       .addClass('glyphicon-pause')
 
   step: ->
-    @clearHighlight()
-    # execute current step
-    @curNode = @nextNode
-    curNode = @tree.executeStep(@, @curNode)
+    error = false
+    try
+      @clearHighlight()
+      # execute current step
+      @curNode = @nextNode
+      curNode = @tree.executeStep(@, @curNode)
+    catch runtimeError
+      error = runtimeError
+      @handleError(error)
+
     # prepare the next step
-    if (curNode.next? and curNode.next >= 0)
+    if (error? and error)
+      @setControls([1, 1, 0, 0, 0])
+      false
+    else if (curNode.next? and curNode.next >= 0)
       @nextNode = @tree.tree[curNode.next].mark(@)
       @setControls([1, 1, 1, 1, 1])
       true
@@ -65,7 +77,21 @@ class Player
   finish: ->
     for i in [0..MAX_STEPS]
       return if !@step()
-    throw new Error("Could not terminate in #{MAX_STEPS} iterations!")
+    @handleError(new ExecutionError('too_many_steps', [MAX_STEPS]))
+
+  handleError: (error) ->
+    # errorCodes is defined by view.phtml
+    msg = errorCodes[error.message]
+    if (msg?)
+      # Insert all the parts into the message
+      $.each(error.parts, (index, elem) ->
+        msg = msg.replace(new RegExp('%' + (index + 1), 'g'), elem)
+      )
+    else
+      msg = errorCodes['undefined']
+      console.error(error)
+    $('#viewAlertText').html(msg)
+    $('#viewAlert').show('slow')
 
   clearHighlight: ->
     $('.highlight-write').removeClass('highlight-write')

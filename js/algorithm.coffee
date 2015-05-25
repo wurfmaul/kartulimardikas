@@ -36,6 +36,7 @@ class Node
     intVal = parseInt(value)
     if (intVal + "" is value)
       return {kind: 'const', type: 'int', value: intVal}
+
     # check for array ([])
     open = value.indexOf('[')
     close = value.lastIndexOf(']')
@@ -46,6 +47,7 @@ class Node
         memory.count(vid)
         return {kind: 'index', vid: vid, index: inner}
       else return null
+
     # check for property (.length)
     period = value.indexOf('.')
     if (period > -1 and value.substr(period + 1) is "length")
@@ -54,42 +56,65 @@ class Node
         memory.count(vid)
         return {kind: 'prop', type: 'int', vid: vid, prop: 'length'}
       else return null
+
     # check for variable name
     vid = memory.find(value)
     if (vid > -1)
       memory.count(vid)
       return {kind: 'var', vid: vid}
+
+    # check for simple computations
+    value = value.replace(/\s*/g, '') # remove white spaces
+    split = value.split(/(-|\+|\*|\/|%)/i)
+    if (split.length is 3) # e.g. "i-1"
+      left = @parseValue(split[0], memory)
+      right = @parseValue(split[2], memory)
+      if (left? and right? and "+-*/%".indexOf(split[1]) >= 0)
+        return {kind: 'comp', left: left, right: right, op: split[1]}
+
     # return null, if value is not valid
     null
 
   executeValue: (value, player) ->
     if (!value?.kind?)
-      throw new Error("Cannot execute value: '#{value}'!")
+      throw new ExecutionError('could_not_execute_value', [value])
     memory = player.memory
 
     switch value.kind
       when 'const' then value.value
+
       when 'index'
         index = value.index
         if (index.kind is 'const' and index.type is 'int')
-          player.stats.readArrayVar(value.vid, index.value)
-          memory.arrayGet(value.vid, index.value)
+          idx = index.value
         else if (index.kind is 'var')
           # get index variable
           player.stats.readVar(index.vid)
           idx = memory.get(index.vid).value
-          # use it for array
-          player.stats.readArrayVar(value.vid, idx)
-          memory.arrayGet(value.vid, idx)
+        else if (index.kind is 'comp')
+          # compute index
+          node = new ArithmeticNode(null, index.left, index.right, index.op)
+          idx = node.execute(player, null).value
         else
-          throw new Error("Not yet implemented: kind 'index' for complex variables!")
-      when 'prop' then throw new Error("Not yet implemented: kind 'prop'!")
+          throw new ExecutionError('unsupported_index', [index.kind])
+        player.stats.readArrayVar(value.vid, idx)
+        memory.arrayGet(value.vid, idx)
+
+      when 'prop'
+        if (value.prop is 'length')
+          variable = memory.get(value.vid)
+          if (variable.array) then variable.value.split(',').length
+          else 1
+        else
+          throw new ExecutionError('unknown_property', [value.prop])
+
       when 'var'
         vid = value.vid
         player.stats.readVar(vid) # tell the stats, that a variable has been read
         memory.get(vid).value # return the current value of the variable
+
       else
-        throw new Error("Unknown kind: '#{value.kind}'")
+        throw new ExecutionError('unknown_kind', [value.kind])
 
   ###
   # Returns node's first sub-node of class _class.
@@ -140,14 +165,15 @@ class ArithmeticNode extends Node
     leftVal = @executeValue(@left, player)
     rightVal = @executeValue(@right, player)
     player.stats.incArithmeticOps()
+    if (rightVal is 0) then throw new ExecutionError('divide_by_zero', [])
     switch @operator
-      when 'plus' then value: leftVal + rightVal
-      when 'minus' then value: leftVal - rightVal
-      when 'times' then value: leftVal * rightVal
-      when 'by' then value: parseInt(leftVal / rightVal)
-      when 'mod' then value: leftVal % rightVal
+      when 'plus', '+' then value: leftVal + rightVal
+      when 'minus', '-' then value: leftVal - rightVal
+      when 'times', '*' then value: leftVal * rightVal
+      when 'by', '/' then value: parseInt(leftVal / rightVal)
+      when 'mod', '%' then value: leftVal % rightVal
       else
-        throw new Error("ArithmeticNode: unknown operator: '#{@operator}'!")
+        throw new ExecutionError('unknown_arithmetic_op', [@operator])
 
   toJSON: ->
     {
@@ -175,8 +201,17 @@ class AssignNode extends Node
     # get new value
     value = fromNode.execute(player, node).value
     # set new value
-    player.memory.set(toVar.vid, value)
-    player.stats.writeVar(toVar.vid, value)
+    switch (toVar.kind)
+      when 'index'
+        player.memory.arraySet(toVar.vid, toVar.index.value, value)
+        player.stats.writeArrayVar(toVar.vid, toVar.index.value, value)
+      when 'var'
+        player.memory.set(toVar.vid, value)
+        player.stats.writeVar(toVar.vid, value)
+      when 'const' then throw new ExecutionError('assign_to_const', [toVar.value])
+      when 'prop' then throw new ExecutionError('assign_to_prop', [])
+      else
+        throw new ExecutionError('unknown_kind', [toVar.kind])
     # return value
     value: value
 
@@ -328,10 +363,11 @@ class IncNode extends Node
     vid = @variable.vid
     # increment value of variable
     value = @executeValue(@variable, player)
-    newValue = @operator is 'inc' ? value + 1: value - 1
+    if (@operator is 'inc') then newValue = value + 1
+    else newValue = value - 1
 
     if (@variable.kind is 'index')
-      index = @variable.index.value
+      index = @executeValue(@variable.index, player)
       player.memory.arraySet(vid, index, newValue)
       player.stats.writeArrayVar(vid, index, newValue)
     else
@@ -380,7 +416,7 @@ class ValueNode extends Node
   constructor: (@nid, @value) ->
 
   execute: (player, node) ->
-    # FIXME: execute value
+    {value: @executeValue(@value, player)}
 
   toJSON: ->
     {
@@ -469,10 +505,11 @@ class window.Memory
       vid = $(element).data('vid')
       name = $(element).data('name')
       value = $(element).data('value')
+      array = $(element).data('type').substr(0, 5) is 'array'
       @memory[vid] =
-        vid: vid, name: name, value: value, count: 0
+        vid: vid, name: name, value: value, array: array, count: 0
       @original[vid] =
-        vid: vid, name: name, value: value, count: 0
+        vid: vid, name: name, value: value, array: array, count: 0
     )
 
   count: (vid) =>
@@ -490,18 +527,32 @@ class window.Memory
     @memory[vid]
 
   set: (vid, value) =>
+    try
+      value.split(',')
+      @memory[vid].array = true
+    catch error
+      @memory[vid].array = false
     @memory[vid].value = value
 
-  arrayGet: (vid, index) =>
+  arrayCheck: (vid, index) =>
     variable = @get(vid)
+    # check if the variable is an array
+    if (!variable.array)
+      throw new ExecutionError('no_array_for_index', [variable.name])
     array = variable.value.split(',')
+    # check if the array is long enough
+    if (0 >= index >= array.length)
+      throw new ExecutionError('index_out_of_bounds', [variable.name, index, array.length])
+    array
+
+  arrayGet: (vid, index) =>
+    array = @arrayCheck(vid, index)
     value = array[index]
     if (parseInt(value) + '' is value) then parseInt(value)
     else value
 
   arraySet: (vid, index, value) =>
-    variable = @get(vid)
-    array = variable.value.split(',')
+    array = @arrayCheck(vid, index)
     array[index] = value
     @set(vid, array.join(','))
 
@@ -510,3 +561,6 @@ class window.Memory
       @memory[index].value = elem.value
       @memory[index].count = 0
     )
+
+class window.ExecutionError extends Error
+  constructor: (@message, @parts) ->

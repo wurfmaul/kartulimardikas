@@ -1,72 +1,81 @@
 <?php
 if (!defined('BASEDIR')) die('You cannot call this script directly !');
 global $l10n;
-
-// redirect if the user is already signed in
-if ($__uid) {
-    header("Location:" . url(['action' => 'user', 'uid' => $__uid]));
-    die();
-}
 ?>
-<!-- HEADER -->
-<div class="page-header">
-    <h1><?= $l10n['register'] ?>
-        <small><?= $l10n['become_user'] ?></small>
-    </h1>
-</div>
-<!-- CONTENT -->
-<div class="row">
-    <!-- LEFT COLUMN -->
-    <div class="col-md-6">
-        <div id="registerAlert" class="alert alert-danger alert-dismissible" style="display:none">
-            <button id="registerAlertClose" type="button" class="close">
-                <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
-            </button>
-            <strong><?= $l10n['error'] ?></strong>
-
-            <div id="registerAlertText"></div>
-        </div>
-
-        <form id="registerForm" class="form-horizontal" role="form" method="post" name="register" action="<?= url() ?>">
-            <div id="username-group" class="form-group">
-                <label for="in-username" class="control-label col-sm-3"><?= $l10n['username'] ?></label>
-
-                <div class="col-sm-9">
-                    <input type="text" class="form-control" id="in-username" name="username"
-                           <?php if (isset($username)): ?>value="<?= $username ?>"<?php endif ?>
-                           placeholder="<?= $l10n['username'] ?>"/>
-                </div>
-            </div>
-            <div id="email-group" class="form-group">
-                <label for="in-email" class="control-label col-sm-3"><?= $l10n['email_address'] ?></label>
-
-                <div class="col-sm-9">
-                    <input type="email" class="form-control" id="in-email" name="email"
-                           <?php if (isset($email)): ?>value="<?= $email ?>"<?php endif ?>
-                           placeholder="<?= $l10n['email_address'] ?>">
-                </div>
-            </div>
-            <div id="password1-group" class="form-group">
-                <label for="in-password1" class="control-label col-sm-3"><?= $l10n['password'] ?></label>
-
-                <div class="col-sm-9">
-                    <input type="password" class="form-control" id="in-password1" name="password"
-                           placeholder="<?= $l10n['password'] ?>">
-                </div>
-            </div>
-            <div id="password2-group" class="form-group">
-                <label for="in-password2" class="control-label col-sm-3"></label>
-
-                <div class="col-sm-9">
-                    <input type="password" class="form-control" id="in-password2" name="password2"
-                           placeholder="<?= $l10n['password_again'] ?>">
-                </div>
-            </div>
-            <a href="javascript:void(0)" id="registerBtn" class="btn btn-primary btn-lg"
-               data-url="<?= url(['action' => 'index']) ?>">
-                <?= $l10n['register'] ?>
-            </a>
-            <input name="registerBtn" style="display: none;"/>
-        </form>
+    <!-- HEADER -->
+    <div class="page-header">
+        <h1><?= $l10n['register'] ?>
+            <small><?= $l10n['become_user'] ?></small>
+        </h1>
     </div>
-</div>
+    <!-- CONTENT -->
+<?php if (!$__uid): ?>
+    <div class="row">
+        <!-- LEFT COLUMN -->
+        <div class="col-md-6">
+            <div id="registerAlert" class="alert alert-danger alert-dismissible" style="display:none">
+                <button id="registerAlertClose" type="button" class="close">
+                    <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
+                </button>
+                <strong><?= $l10n['error'] ?></strong>
+
+                <div id="registerAlertText"></div>
+            </div>
+
+            <form id="registerForm" class="form-horizontal" role="form" method="post" name="register"
+                  action="<?= url() ?>">
+                <div id="username-group" class="form-group">
+                    <label for="in-username" class="control-label col-sm-3"><?= $l10n['username'] ?></label>
+
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="in-username" name="username"
+                               <?php if (isset($username)): ?>value="<?= $username ?>"<?php endif ?>
+                               placeholder="<?= $l10n['username'] ?>"/>
+                    </div>
+                </div>
+                <div id="email-group" class="form-group">
+                    <label for="in-email" class="control-label col-sm-3"><?= $l10n['email_address'] ?></label>
+
+                    <div class="col-sm-9">
+                        <input type="email" class="form-control" id="in-email" name="email"
+                               <?php if (isset($email)): ?>value="<?= $email ?>"<?php endif ?>
+                               placeholder="<?= $l10n['email_address'] ?>">
+                    </div>
+                </div>
+                <div id="password1-group" class="form-group">
+                    <label for="in-password1" class="control-label col-sm-3"><?= $l10n['password'] ?></label>
+
+                    <div class="col-sm-9">
+                        <input type="password" class="form-control" id="in-password1" name="password"
+                               placeholder="<?= $l10n['password'] ?>">
+                    </div>
+                </div>
+                <div id="password2-group" class="form-group">
+                    <label for="in-password2" class="control-label col-sm-3"></label>
+
+                    <div class="col-sm-9">
+                        <input type="password" class="form-control" id="in-password2" name="password2"
+                               placeholder="<?= $l10n['password_again'] ?>">
+                    </div>
+                </div>
+                <a href="javascript:void(0)" id="registerBtn" class="btn btn-primary btn-lg"
+                   data-url="<?= url(['action' => 'index']) ?>">
+                    <?= $l10n['register'] ?>
+                </a>
+                <input name="registerBtn" style="display: none;"/>
+            </form>
+        </div>
+    </div>
+<?php else: ?>
+    <div class="alert alert-warning" role="alert">
+        <strong><?= $l10n['warning'] ?></strong><br/>
+
+        <?= $l10n['already_registered'] ?>
+        <ul>
+            <li><?= $l10n['registration_not_necessary'] ?></li>
+            <li><?= $l10n['use_form_to_signout'] ?></li>
+        </ul>
+        <br/>
+        &rarr; <a href="javascript:history.back()"><?= $l10n['go_back'] ?></a>
+    </div>
+<?php endif ?>

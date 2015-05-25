@@ -10,6 +10,7 @@ require_once BASEDIR . 'config/config.php';
 require_once BASEDIR . 'api/get-url.php';
 require_once BASEDIR . 'includes/authentication.php';
 require_once BASEDIR . "includes/dataModel.php";
+global $l10n;
 $__model = new DataModel();
 
 // setup and verify action
@@ -61,6 +62,8 @@ if (isset($_GET['aid'])) {
         /** @var bool $__public True if the algorithm is defined public. */
         $__public = !is_null($__algorithm->date_publish);
     }
+} else {
+    $__algorithm = false;
 }
 
 // make action permanent for this session

@@ -2,38 +2,28 @@
 if (!defined('BASEDIR')) die('You cannot call this script directly !');
 global $l10n;
 
-// redirect if no aid is specified
-if (!$__aid) {
-    header("Location:" . url(['action' => 'new']));
-    die();
+if ($__aid && $__uid && $__owner) {
+    // prepare algorithm meta data
+    $name = stripslashes($__algorithm->name);
+    $description = stripslashes($__algorithm->description);
+    $long_description = stripslashes($__algorithm->long_description);
+
+    // prepare variables and add prototype row to variables
+    $vars = json_decode($__algorithm->variables);
+    $vars['prototype'] = (object)['name' => '', 'type' => '', 'value' => '', 'size' => 2];
+
+    // prepare tree
+    require_once BASEDIR . "includes/algorithm.php";
+    $tree = new Tree(json_decode($__algorithm->tree));
+
+    // prepare sections
+    require_once BASEDIR . "includes/viewHelper.php";
+    $sectionNum = isset($_GET['section']) ? $_GET['section'] : SECTIONS_EDIT;
+    $section = sections($sectionNum, 3);
+
+    // use algorithm header
+    require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
 }
-
-// check authentication
-if (!$__uid || !$__owner) {
-    header("Location:" . url(['action' => 'view', 'aid' => $__aid]));
-    die();
-}
-
-// prepare algorithm meta data
-$name = stripslashes($__algorithm->name);
-$description = stripslashes($__algorithm->description);
-$long_description = stripslashes($__algorithm->long_description);
-
-// prepare variables and add prototype row to variables
-$vars = json_decode($__algorithm->variables);
-$vars['prototype'] = (object)['name' => '', 'type' => '', 'value' => '', 'size' => 2];
-
-// prepare tree
-require_once BASEDIR . "includes/algorithm.php";
-$tree = new Tree(json_decode($__algorithm->tree));
-
-// prepare sections
-require_once BASEDIR . "includes/viewHelper.php";
-$sectionNum = isset($_GET['section']) ? $_GET['section'] : SECTIONS_EDIT;
-$section = sections($sectionNum, 3);
-
-// use algorithm header
-require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
 ?>
 <!-- HEADER -->
 <div class="page-header">
@@ -44,242 +34,260 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
 </div>
 
 <!-- CONTENT -->
-<div class="row">
-    <!-- ERROR MESSAGE -->
-    <div id="editAlert" class="alert alert-danger alert-dismissible" style="display:none">
-        <button id="editAlertClose" type="button" class="close">
-            <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
-        </button>
-        <strong><?= $l10n['error'] ?></strong>
+<?php if ($__aid && $__uid && $__owner): ?>
+    <div class="row">
+        <!-- ERROR MESSAGE -->
+        <div id="editAlert" class="alert alert-danger alert-dismissible" style="display:none">
+            <button id="editAlertClose" type="button" class="close">
+                <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
+            </button>
+            <strong><?= $l10n['error'] ?></strong>
 
-        <div id="editAlertText"></div>
-    </div>
-    <!-- ERROR MESSAGE END -->
+            <div id="editAlertText"></div>
+        </div>
+        <!-- ERROR MESSAGE END -->
 
-    <!-- LEFT COLUMN -->
-    <div class="col-md-6">
-        <div class="panel-group" id="accordion-left">
-            <!-- TAB - GENERAL INFORMATION -->
-            <div class="panel panel-default">
-                <div class="panel-heading<?php if (!$section[0]): ?> collapsed<?php endif ?>" data-target="#infoPanel">
-                    <h4 class="panel-title">
-                        <span class="glyphicon glyphicon-chevron-down"></span>
-                        <?= $l10n['general_info'] ?>
-                    </h4>
-                </div>
-                <div id="infoPanel" class="panel-collapse">
-                    <div class="panel-body form-horizontal">
-                        <div class="form-group">
-                            <label for="in-name" class="control-label col-sm-3"><?= $l10n['algo_name'] ?></label>
+        <!-- LEFT COLUMN -->
+        <div class="col-md-6">
+            <div class="panel-group" id="accordion-left">
+                <!-- TAB - GENERAL INFORMATION -->
+                <div class="panel panel-default">
+                    <div class="panel-heading<?php if (!$section[0]): ?> collapsed<?php endif ?>"
+                         data-target="#infoPanel">
+                        <h4 class="panel-title">
+                            <span class="glyphicon glyphicon-chevron-down"></span>
+                            <?= $l10n['general_info'] ?>
+                        </h4>
+                    </div>
+                    <div id="infoPanel" class="panel-collapse">
+                        <div class="panel-body form-horizontal">
+                            <div class="form-group">
+                                <label for="in-name" class="control-label col-sm-3"><?= $l10n['algo_name'] ?></label>
 
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" id="in-name"
-                                       placeholder="<?= $l10n['algo_name'] ?>" value="<?= $name ?>">
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" id="in-name"
+                                           placeholder="<?= $l10n['algo_name'] ?>" value="<?= $name ?>">
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="in-title" class="control-label col-sm-3"><?= $l10n['description'] ?></label>
+                            <div class="form-group">
+                                <label for="in-title" class="control-label col-sm-3"><?= $l10n['description'] ?></label>
 
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" id="in-desc"
-                                       placeholder="<?= $l10n['description'] ?>" value="<?= $description ?>">
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" id="in-desc"
+                                           placeholder="<?= $l10n['description'] ?>" value="<?= $description ?>">
+                                </div>
                             </div>
-                        </div>
-                        <label for="in-long" class="sr-only"><?= $l10n['long_description'] ?></label>
+                            <label for="in-long" class="sr-only"><?= $l10n['long_description'] ?></label>
                         <textarea class="form-control" id="in-long" rows="3"
                                   data-placeholder="<?= $l10n['long_description'] ?>"><?= $long_description ?></textarea>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <!-- TAB - GENERAL INFORMATION END -->
+                <!-- TAB - GENERAL INFORMATION END -->
 
-            <!-- TAB - VARIABLES -->
-            <div class="panel panel-default">
-                <div class="panel-heading<?php if (!$section[1]): ?> collapsed<?php endif ?>" data-target="#varPanel">
-                    <h4 class="panel-title">
-                        <span class="glyphicon glyphicon-chevron-down"></span>
-                        <?= $l10n['variables'] ?>
-                    </h4>
+                <!-- TAB - VARIABLES -->
+                <div class="panel panel-default">
+                    <div class="panel-heading<?php if (!$section[1]): ?> collapsed<?php endif ?>"
+                         data-target="#varPanel">
+                        <h4 class="panel-title">
+                            <span class="glyphicon glyphicon-chevron-down"></span>
+                            <?= $l10n['variables'] ?>
+                        </h4>
+                    </div>
+                    <div id="varPanel" class="panel-collapse">
+                        <div class="panel-body" style="text-align: center;">
+                            <table class="table table-condensed table-bordered table-hover variables">
+                                <tbody id="insertVarsHere">
+                                <?php foreach ($vars as $vid => $var):
+                                    $rowVisible = ($vid === 'prototype') ? 'style="display:none"' : '';
+                                    ?>
+                                    <tr id="var-<?= $vid ?>" class="varRow" <?= $rowVisible ?>
+                                        data-vid="<?= $vid ?>"
+                                        data-name="<?= $var->name ?>"
+                                        data-type="<?= $var->type ?>"
+                                        data-value="<?= $var->value ?>"
+                                        data-size="<?= $var->size ?>">
+
+                                        <!-- Variable in view mode -->
+                                        <td class="view">
+                                            <div class="content">
+                                                <code class="cell"><?= $var->name ?> = <?= $var->value ?></code>
+                                            </div>
+                                            <div class="tools">
+                                                <button type="button" class="btn btn-default btn-sm btn-var-count"
+                                                        title="<?= $l10n['usage_count'] ?>"># <code
+                                                        class="counter">0</code>
+                                                </button>
+                                                <div class="btn-group btn-group-sm">
+                                                    <button type="button" class="btn btn-default btn-var-edit"
+                                                            title="<?= $l10n['edit_var'] ?>">
+                                                        <span class="glyphicon glyphicon-pencil"></span>
+                                                    </button>
+                                                    <button type="button" class="btn btn-default btn-var-remove"
+                                                            title="<?= $l10n['remove_var'] ?>">
+                                                        <span class="glyphicon glyphicon-trash"></span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <!-- Variable in edit mode -->
+                                        <td class="edit" style="display: none">
+                                            <div class="form-group name-group">
+                                                <label class="sr-only"><?= $l10n['var_name'] ?></label>
+                                                <input class="form-control input-sm name" value="<?= $var->name ?>"
+                                                       placeholder="<?= $l10n['name'] ?>" type="text">
+                                            </div>
+                                            <div class="form-group equals-group ">
+                                                <label class="sr-only"></label>
+                                                <button class="form-control input-sm disabled equals">:=</button>
+                                            </div>
+                                            <div class="form-group type-group">
+                                                <label class="sr-only"><?= $l10n['data_type'] ?></label>
+                                                <select class="form-control input-sm type">
+                                                    <optgroup label="<?= $l10n['element'] ?>">
+                                                        <option value="elem-int"
+                                                                <?php if ($var->type === 'elem-int'): ?>selected="selected"<?php endif ?>>
+                                                            <?= $l10n['int'] ?>
+                                                        </option>
+                                                    </optgroup>
+                                                    <optgroup label="<?= $l10n['array'] ?>">
+                                                        <option value="array-int" data-target=".size"
+                                                                <?php if ($var->type === 'array-int'): ?>selected="selected"<?php endif ?>>
+                                                            <?= $l10n['array_int'] ?>
+                                                        </option>
+                                                    </optgroup>
+                                                </select>
+                                            </div>
+                                            <div class="form-group value-group" data-random="<?= $l10n['random'] ?>"
+                                                 data-uninit="<?= $l10n['uninitialized'] ?>">
+                                                <label class="sr-only" for="value"><?= $l10n['init_value'] ?></label>
+                                                <input class="form-control input-sm value" value="<?= $var->value ?>"
+                                                       placeholder="<?= $l10n['value'] ?>" type="text">
+                                            </div>
+                                            <div class="form-group size-group">
+                                                <label class="sr-only"><?= $l10n['array_size'] ?></label>
+                                                <select class="form-control input-sm size">
+                                                    <optgroup label="<?= $l10n['size'] ?>">
+                                                        <?php for ($i = ARRAY_MIN_SIZE; $i <= ARRAY_MAX_SIZE; $i++): ?>
+                                                            <option
+                                                                <?php if ($var->size == $i): ?>selected="selected"<?php endif ?>><?= $i ?></option>
+                                                        <?php endfor ?>
+                                                    </optgroup>
+                                                </select>
+                                            </div>
+                                            <div class="tools">
+                                                <div class="btn-group btn-group-sm">
+                                                    <button type="button" class="btn btn-default btn-var-check"
+                                                            title="<?= $l10n['check_var'] ?>">
+                                                        <span class="glyphicon glyphicon-ok"></span>
+                                                    </button>
+                                                    <button type="button" class="btn btn-default btn-var-cancel"
+                                                            title="<?= $l10n['discard_changes'] ?>">
+                                                        <span class="glyphicon glyphicon-remove"></span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endforeach ?>
+                                </tbody>
+                            </table>
+                            <div class="btn btn-success btn-lg" id="btnAddVar">
+                                <span class="glyphicon glyphicon-plus" style="width: 100px;"></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div id="varPanel" class="panel-collapse">
-                    <div class="panel-body" style="text-align: center;">
-                        <table class="table table-condensed table-bordered table-hover variables">
-                            <tbody id="insertVarsHere">
-                            <?php foreach ($vars as $vid => $var):
-                                $rowVisible = ($vid === 'prototype') ? 'style="display:none"' : '';
+                <!-- TAB - VARIABLES END -->
+            </div>
+        </div>
+        <!-- LEFT COLUMN END -->
+
+        <!-- RIGHT COLUMN -->
+        <div class="col-md-6">
+            <div class="panel-group" id="accordion-right">
+                <!-- TAB - STEPS -->
+                <div class="panel panel-default">
+                    <div class="panel-heading<?php if (!$section[2]): ?> collapsed<?php endif ?>"
+                         data-target="#stepPanel">
+                        <h4 class="panel-title">
+                            <span class="glyphicon glyphicon-chevron-down"></span>
+                            <?= $l10n['algorithm'] ?>
+                        </h4>
+                    </div>
+                    <div id="stepPanel" class="panel-collapse">
+                        <div class="panel-body algorithm" style="text-align: center">
+                            <ul class="insertStepsHere" class="sortable"
+                                data-node-id="0"><?php $tree->printHtml(['vars' => $vars, 'mode' => 'edit']) ?></ul>
+
+                            <div id="node-btn-group" class="btn-group btn-group-sm" role="group"
+                                 aria-label="<?= $l10n['create_a_node'] ?>">
+                                <button id="btn-add-arithmetic" type="button" class="btn btn-default"
+                                        data-node="node_arithmetic"><?= $l10n['arithmetic_node_title'] ?>
+                                </button>
+                                <button id="btn-add-assign" type="button" class="btn btn-default"
+                                        data-node="node_assign"><?= $l10n['assign_node_title'] ?>
+                                </button>
+                                <button id="btn-add-compare" type="button" class="btn btn-default"
+                                        data-node="node_compare"><?= $l10n['compare_node_title'] ?>
+                                </button>
+                                <button id="btn-add-if" type="button" class="btn btn-default" data-node="node_if">
+                                    <?= $l10n['if_node_title'] ?>
+                                </button>
+                                <button id="btn-add-inc" type="button" class="btn btn-default" data-node="node_inc">
+                                    <?= $l10n['inc_node_title'] ?>
+                                </button>
+                                <button id="btn-add-return" type="button" class="btn btn-default"
+                                        data-node="node_return"><?= $l10n['return_node_title'] ?>
+                                </button>
+                                <button id="btn-add-value" type="button" class="btn btn-default" data-node="node_value">
+                                    <?= $l10n['value_node_title'] ?>
+                                </button>
+                                <button id="btn-add-while" type="button" class="btn btn-default"
+                                        data-node="node_while"><?= $l10n['while_node_title'] ?>
+                                </button>
+                            </div>
+
+                            <ul style="display: none">
+                                <?php
+                                // prepare parameters for prototypes
+                                $params = [
+                                    'vars' => $vars,  // attach variables
+                                    'mode' => 'edit', // start in edit-mode
+                                    'indent' => 0     // start indentation at 0
+                                ];
+                                // generate prototypes
+                                Node::printPrototype(Node::ARITHMETIC_NODE, $params);
+                                Node::printPrototype(Node::ASSIGN_NODE, $params);
+                                Node::printPrototype(Node::COMPARE_NODE, $params);
+                                Node::printPrototype(Node::RETURN_NODE, $params);
+                                Node::printPrototype(Node::IF_NODE, $params);
+                                Node::printPrototype(Node::INC_NODE, $params);
+                                Node::printPrototype(Node::VALUE_NODE, $params);
+                                Node::printPrototype(Node::WHILE_NODE, $params);
                                 ?>
-                                <tr id="var-<?= $vid ?>" class="varRow" <?= $rowVisible ?>
-                                    data-vid="<?= $vid ?>"
-                                    data-name="<?= $var->name ?>"
-                                    data-type="<?= $var->type ?>"
-                                    data-value="<?= $var->value ?>"
-                                    data-size="<?= $var->size ?>">
-
-                                    <!-- Variable in view mode -->
-                                    <td class="view">
-                                        <div class="content">
-                                            <code class="cell"><?= $var->name ?> = <?= $var->value ?></code>
-                                        </div>
-                                        <div class="tools">
-                                            <button type="button" class="btn btn-default btn-sm btn-var-count"
-                                                    title="<?= $l10n['usage_count'] ?>"># <code class="counter">0</code>
-                                            </button>
-                                            <div class="btn-group btn-group-sm">
-                                                <button type="button" class="btn btn-default btn-var-edit"
-                                                        title="<?= $l10n['edit_var'] ?>">
-                                                    <span class="glyphicon glyphicon-pencil"></span>
-                                                </button>
-                                                <button type="button" class="btn btn-default btn-var-remove"
-                                                        title="<?= $l10n['remove_var'] ?>">
-                                                    <span class="glyphicon glyphicon-trash"></span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </td>
-
-                                    <!-- Variable in edit mode -->
-                                    <td class="edit" style="display: none">
-                                        <div class="form-group name-group">
-                                            <label class="sr-only"><?= $l10n['var_name'] ?></label>
-                                            <input class="form-control input-sm name" value="<?= $var->name ?>"
-                                                   placeholder="<?= $l10n['name'] ?>" type="text">
-                                        </div>
-                                        <div class="form-group equals-group ">
-                                            <label class="sr-only"></label>
-                                            <button class="form-control input-sm disabled equals">:=</button>
-                                        </div>
-                                        <div class="form-group type-group">
-                                            <label class="sr-only"><?= $l10n['data_type'] ?></label>
-                                            <select class="form-control input-sm type">
-                                                <optgroup label="<?= $l10n['element'] ?>">
-                                                    <option value="elem-int"
-                                                            <?php if ($var->type === 'elem-int'): ?>selected="selected"<?php endif ?>>
-                                                        <?= $l10n['int'] ?>
-                                                    </option>
-                                                </optgroup>
-                                                <optgroup label="<?= $l10n['array'] ?>">
-                                                    <option value="array-int" data-target=".size"
-                                                            <?php if ($var->type === 'array-int'): ?>selected="selected"<?php endif ?>>
-                                                        <?= $l10n['array_int'] ?>
-                                                    </option>
-                                                </optgroup>
-                                            </select>
-                                        </div>
-                                        <div class="form-group value-group" data-random="<?= $l10n['random'] ?>"
-                                             data-uninit="<?= $l10n['uninitialized'] ?>">
-                                            <label class="sr-only" for="value"><?= $l10n['init_value'] ?></label>
-                                            <input class="form-control input-sm value" value="<?= $var->value ?>"
-                                                   placeholder="<?= $l10n['value'] ?>" type="text">
-                                        </div>
-                                        <div class="form-group size-group">
-                                            <label class="sr-only"><?= $l10n['array_size'] ?></label>
-                                            <select class="form-control input-sm size">
-                                                <optgroup label="<?= $l10n['size'] ?>">
-                                                    <?php for ($i = ARRAY_MIN_SIZE; $i <= ARRAY_MAX_SIZE; $i++): ?>
-                                                        <option
-                                                            <?php if ($var->size == $i): ?>selected="selected"<?php endif ?>><?= $i ?></option>
-                                                    <?php endfor ?>
-                                                </optgroup>
-                                            </select>
-                                        </div>
-                                        <div class="tools">
-                                            <div class="btn-group btn-group-sm">
-                                                <button type="button" class="btn btn-default btn-var-check"
-                                                        title="<?= $l10n['check_var'] ?>">
-                                                    <span class="glyphicon glyphicon-ok"></span>
-                                                </button>
-                                                <button type="button" class="btn btn-default btn-var-cancel"
-                                                        title="<?= $l10n['discard_changes'] ?>">
-                                                    <span class="glyphicon glyphicon-remove"></span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach ?>
-                            </tbody>
-                        </table>
-                        <div class="btn btn-success btn-lg" id="btnAddVar">
-                            <span class="glyphicon glyphicon-plus" style="width: 100px;"></span>
+                            </ul>
                         </div>
                     </div>
                 </div>
+                <!-- TAB - STEPS END -->
             </div>
-            <!-- TAB - VARIABLES END -->
         </div>
+        <!-- RIGHT COLUMN END -->
     </div>
-    <!-- LEFT COLUMN END -->
+<?php else: ?>
+    <div class="alert alert-danger" role="alert">
+        <strong><?= $l10n['error'] ?></strong><br/>
 
-    <!-- RIGHT COLUMN -->
-    <div class="col-md-6">
-        <div class="panel-group" id="accordion-right">
-            <!-- TAB - STEPS -->
-            <div class="panel panel-default">
-                <div class="panel-heading<?php if (!$section[2]): ?> collapsed<?php endif ?>" data-target="#stepPanel">
-                    <h4 class="panel-title">
-                        <span class="glyphicon glyphicon-chevron-down"></span>
-                        <?= $l10n['algorithm'] ?>
-                    </h4>
-                </div>
-                <div id="stepPanel" class="panel-collapse">
-                    <div class="panel-body algorithm" style="text-align: center">
-                        <ul class="insertStepsHere" class="sortable"
-                            data-node-id="0"><?php $tree->printHtml(['vars' => $vars, 'mode' => 'edit']) ?></ul>
-
-                        <div id="node-btn-group" class="btn-group btn-group-sm" role="group"
-                             aria-label="<?= $l10n['create_a_node'] ?>">
-                            <button id="btn-add-arithmetic" type="button" class="btn btn-default"
-                                    data-node="node_arithmetic"><?= $l10n['arithmetic_node_title'] ?>
-                            </button>
-                            <button id="btn-add-assign" type="button" class="btn btn-default"
-                                    data-node="node_assign"><?= $l10n['assign_node_title'] ?>
-                            </button>
-                            <button id="btn-add-compare" type="button" class="btn btn-default"
-                                    data-node="node_compare"><?= $l10n['compare_node_title'] ?>
-                            </button>
-                            <button id="btn-add-if" type="button" class="btn btn-default" data-node="node_if">
-                                <?= $l10n['if_node_title'] ?>
-                            </button>
-                            <button id="btn-add-inc" type="button" class="btn btn-default" data-node="node_inc">
-                                <?= $l10n['inc_node_title'] ?>
-                            </button>
-                            <button id="btn-add-return" type="button" class="btn btn-default"
-                                    data-node="node_return"><?= $l10n['return_node_title'] ?>
-                            </button>
-                            <button id="btn-add-value" type="button" class="btn btn-default" data-node="node_value">
-                                <?= $l10n['value_node_title'] ?>
-                            </button>
-                            <button id="btn-add-while" type="button" class="btn btn-default"
-                                    data-node="node_while"><?= $l10n['while_node_title'] ?>
-                            </button>
-                        </div>
-
-                        <ul style="display: none">
-                            <?php
-                            // prepare parameters for prototypes
-                            $params = [
-                                'vars' => $vars,  // attach variables
-                                'mode' => 'edit', // start in edit-mode
-                                'indent' => 0     // start indentation at 0
-                            ];
-                            // generate prototypes
-                            Node::printPrototype(Node::ARITHMETIC_NODE, $params);
-                            Node::printPrototype(Node::ASSIGN_NODE, $params);
-                            Node::printPrototype(Node::COMPARE_NODE, $params);
-                            Node::printPrototype(Node::RETURN_NODE, $params);
-                            Node::printPrototype(Node::IF_NODE, $params);
-                            Node::printPrototype(Node::INC_NODE, $params);
-                            Node::printPrototype(Node::VALUE_NODE, $params);
-                            Node::printPrototype(Node::WHILE_NODE, $params);
-                            ?>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <!-- TAB - STEPS END -->
-        </div>
+        <?= $l10n['message_invalid_aid'] ?>
+        <ul>
+            <li><?= $l10n['message_no_aid_specified'] ?></li>
+            <li><?= $l10n['message_deleted_algorithm'] ?></li>
+            <li><?= $l10n['message_foreign_algorithm'] ?></li>
+        </ul>
+        <br/>
+        &rarr; <a href="javascript:history.back()"><?= $l10n['go_back'] ?></a>
     </div>
-    <!-- RIGHT COLUMN END -->
-
-</div>
+<?php endif ?>
 <!-- CONTENT END -->

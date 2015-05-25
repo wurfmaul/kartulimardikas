@@ -1,0 +1,38 @@
+<?php
+if (!defined('BASEDIR')) die('You cannot call this script directly !');
+global $l10n;
+
+if ($__uid) {
+    $user = $__model->fetchUser($__uid);
+    $rights = $user->rights;
+    if ($rights) {
+
+    }
+} else {
+    $rights = 0;
+}
+?>
+    <!-- HEADER -->
+    <div class="page-header">
+        <h1><?= $l10n['administration'] ?></h1>
+    </div>
+    <!-- CONTENT -->
+<?php if ($__uid && $rights): ?>
+    <div class="row">
+        <!-- LEFT COLUMN -->
+        <div class="col-md-6">
+
+        </div>
+    </div>
+<?php else: ?>
+    <div class="alert alert-danger" role="alert">
+        <strong><?= $l10n['error'] ?></strong><br/>
+        <?= $l10n['no_privileges'] ?>
+        <ul>
+            <li><?= $l10n['need_account'] ?></li>
+            <li><?= $l10n['need_admin_rights'] ?></li>
+        </ul>
+        <br/>
+        &rarr; <a href="javascript:history.back()"><?= $l10n['go_back'] ?></a>
+    </div>
+<?php endif ?>

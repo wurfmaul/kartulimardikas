@@ -2,75 +2,80 @@
 if (!defined('BASEDIR')) die('You cannot call this script directly !');
 global $l10n;
 
-// redirect if no aid is specified
-if (!$__aid) {
-    header("Location:" . url(['action' => 'new']));
-    die();
+if ($__aid && $__uid && $__owner) {
+    // use algorithm header
+    require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
 }
-
-// check authentication
-if (!$__uid || !$__owner) {
-    header("Location:" . url(['action' => 'view', 'aid' => $__aid]));
-    die();
-}
-
-// use algorithm header
-require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
 ?>
-<!-- HEADER -->
-<div class="page-header">
-    <h1><?= $l10n['settings'] ?>
-        <small><?= $l10n['configure_algo'] ?></small>
-        <span id="saveSuccess" class="label label-success" style="display: none"></span>
-    </h1>
-</div>
-<!-- HEADER END -->
-
-<!-- ERROR MESSAGE -->
-<div id="editAlert" class="alert alert-danger alert-dismissible" style="display:none">
-    <button id="editAlertClose" type="button" class="close">
-        <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
-    </button>
-    <strong><?= $l10n['error'] ?></strong>
-
-    <div id="editAlertText"></div>
-</div>
-<!-- ERROR MESSAGE END -->
-
-<!-- CONTENT -->
-<div class="well">
-    <h3><?= $l10n['visibility'] ?></h3>
-    <?php if ($__algorithm->name): // allow publishing only if a name is defined! ?>
-        <div class="settings-visibility" <?php if (!$__public): ?>style="display: none;"<?php endif ?>>
-            <p><?= $l10n['public_message'] ?></p>
-            <button id="btn-private" type="button" class="btn btn-warning"><?= $l10n['make_private'] ?></button>
-        </div>
-        <div class="settings-visibility" <?php if ($__public): ?>style="display: none;"<?php endif ?>>
-            <p><?= $l10n['private_message'] ?></p>
-            <button id="btn-public" type="button" class="btn btn-success"><?= $l10n['make_public'] ?></button>
-        </div>
-    <?php else: ?>
-        <div class="settings-visibility">
-            <p><?= $l10n['private_message'] ?></p>
-
-            <div class="alert alert-danger"><?= $l10n['publish_not_possible'] ?></div>
-            <button type="button" class="btn btn-success disabled"><?= $l10n['make_public'] ?></button>
-        </div>
-    <?php endif ?>
-</div>
-<div class="alert alert-danger">
-    <h3><?= $l10n['delete_algorithm'] ?></h3>
-
-    <div class="settings-delete">
-        <p><?= $l10n['delete_algorithm_message'] ?></p>
-
-        <form id="delete-form" role="form" method="post" name="delete" action="<?= url(['action' => 'user']) ?>">
-            <input id="delete-msg" name="successMsg" style="display: none;"/>
-            <button id="btn-delete" type="button" class="btn btn-danger"
-                    data-warning="<?= $l10n['delete_algorithm_warning'] ?>">
-                <?= $l10n['delete_algorithm'] ?>
-            </button>
-        </form>
+    <!-- HEADER -->
+    <div class="page-header">
+        <h1><?= $l10n['settings'] ?>
+            <small><?= $l10n['configure_algo'] ?></small>
+            <span id="saveSuccess" class="label label-success" style="display: none"></span>
+        </h1>
     </div>
-</div>
-<!-- CONTENT END -->
+    <!-- HEADER END -->
+
+<?php if ($__aid && $__uid && $__owner): ?>
+    <!-- ERROR MESSAGE -->
+    <div id="editAlert" class="alert alert-danger alert-dismissible" style="display:none">
+        <button id="editAlertClose" type="button" class="close">
+            <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
+        </button>
+        <strong><?= $l10n['error'] ?></strong>
+
+        <div id="editAlertText"></div>
+    </div>
+    <!-- ERROR MESSAGE END -->
+
+    <!-- CONTENT -->
+    <div class="well">
+        <h3><?= $l10n['visibility'] ?></h3>
+        <?php if ($__algorithm->name): // allow publishing only if a name is defined! ?>
+            <div class="settings-visibility" <?php if (!$__public): ?>style="display: none;"<?php endif ?>>
+                <p><?= $l10n['public_message'] ?></p>
+                <button id="btn-private" type="button" class="btn btn-warning"><?= $l10n['make_private'] ?></button>
+            </div>
+            <div class="settings-visibility" <?php if ($__public): ?>style="display: none;"<?php endif ?>>
+                <p><?= $l10n['private_message'] ?></p>
+                <button id="btn-public" type="button" class="btn btn-success"><?= $l10n['make_public'] ?></button>
+            </div>
+        <?php else: ?>
+            <div class="settings-visibility">
+                <p><?= $l10n['private_message'] ?></p>
+
+                <div class="alert alert-danger"><?= $l10n['publish_not_possible'] ?></div>
+                <button type="button" class="btn btn-success disabled"><?= $l10n['make_public'] ?></button>
+            </div>
+        <?php endif ?>
+    </div>
+    <div class="alert alert-danger">
+        <h3><?= $l10n['delete_algorithm'] ?></h3>
+
+        <div class="settings-delete">
+            <p><?= $l10n['delete_algorithm_message'] ?></p>
+
+            <form id="delete-form" role="form" method="post" name="delete" action="<?= url(['action' => 'user']) ?>">
+                <input id="delete-msg" name="successMsg" style="display: none;"/>
+                <button id="btn-delete" type="button" class="btn btn-danger"
+                        data-warning="<?= $l10n['delete_algorithm_warning'] ?>">
+                    <?= $l10n['delete_algorithm'] ?>
+                </button>
+            </form>
+        </div>
+    </div>
+    <!-- CONTENT END -->
+<?php else: ?>
+    <div class="alert alert-danger" role="alert">
+        <strong><?= $l10n['error'] ?></strong><br/>
+
+        <?= $l10n['message_invalid_aid'] ?>
+        <ul>
+            <li><?= $l10n['message_no_aid_specified'] ?></li>
+            <li><?= $l10n['message_deleted_algorithm'] ?></li>
+            <li><?= $l10n['message_foreign_algorithm'] ?></li>
+        </ul>
+        <br/>
+        &rarr; <a href="javascript:history.back()"><?= $l10n['go_back'] ?></a>
+    </div>
+<?php endif ?>

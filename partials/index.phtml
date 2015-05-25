@@ -8,7 +8,7 @@ require_once BASEDIR . "includes/viewHelper.php";
 $latestAlgorithms = $__model->fetchLatestAlgorithms(MAX_NUMBER_OF_ENTRIES);
 $lastChanges = $__model->fetchModifiedAlgorithms(MAX_NUMBER_OF_ENTRIES);
 $diligentUsers = $__model->fetchUsersWithMostAlgorithms(MAX_NUMBER_OF_ENTRIES);
-if (isset($__uid)) {
+if ($__uid) {
     $my_algorithms = $__model->fetchAlgorithmsOfUser($__uid, true, 0, MAX_NUMBER_OF_ENTRIES);
     $my_changes = $__model->fetchModifiedAlgorithmsOfUser($__uid, true, MAX_NUMBER_OF_ENTRIES);
 }
@@ -125,7 +125,7 @@ if (isset($__uid)) {
             </table>
         </div>
     </div>
-<?php if (isset($__uid)): ?>
+<?php if ($__uid): ?>
     <div class="row">
         <div class="col-md-4">
             <!-- Own algorithms -->
@@ -194,7 +194,11 @@ if (isset($__uid)) {
                                 <?php if (is_null($algorithm['date_publish'])): ?>
                                     <span class="label label-info"><?= $l10n['private'] ?></span>
                                 <?php endif ?>
-                                <span class="name"><a href="<?= $linkAlgorithm ?>"><?= $algorithm['name'] ?></a></span>
+                                <span class="name">
+                                    <a href="<?= $linkAlgorithm ?>">
+                                        <?= $algorithm['name'] ? $algorithm['name'] : $l10n['untitled_algorithm'] ?>
+                                    </a>
+                                </span>
                                 <span class="properties">
                                     (<?= sprintf($l10n['modified_note'], getTimeFrame($algorithm['modified']),
                                         '<a href="' . $linkUser . '">' . $algorithm['username']) . '</a>' ?>)
