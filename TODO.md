@@ -3,7 +3,21 @@ Kartulimardikas - TODO list
 
 Open
 ----
+* [ ] Bug: execution of empty else
+* [ ] View: Cursor also in source code
+* [ ] View: Step back (history)
+* [ ] Edit: More data types
+    * [ ] characters
+    * [ ] boolean
+* [ ] Edit: Possibility for viewer-defined parameters
+* [ ] User: Administration for deleted users/algorithms
+* [ ] User: Verify email/Lost password
+* [ ] Save section state in cookies
 
+Done
+----
+* [x] View: Animation speed configurable by viewer
+* [x] View: Highlighting for R/W operations is not intuitive
 * [x] Edit: Compact nodes (compare, arithmetic)
 * [x] Edit: More commands
     * [x] While
@@ -13,20 +27,6 @@ Open
 * [x] Edit: More structures
     * [x] lists/arrays
 * [x] Edit: Variable definition: use combo box for value/undefined/random
-* [ ] View: Step back (history)
-* [ ] View: Highlighting for R/W operations is not intuitive
-* [ ] Edit: More data types
-    * [ ] characters
-    * [ ] boolean
-* [ ] View: Cursor also in source code
-* [ ] View: Animation speed configurable by viewer
-* [ ] Edit: Possibility for viewer-defined parameters
-* [ ] User: Administration for deleted users/algorithms
-* [ ] User: Verify email/Lost password
-* [ ] Save section state in cookies
-
-Done
-----
 * [x] View: Cursor between the steps
 * [x] View: Right edges are not in a line
 * [x] Edit: Warning, if a used variable is deleted
