@@ -124,7 +124,7 @@ class AssignNode extends Node
 
     public function getSource($params)
     {
-        return sprintf("%s = %s",
+        return sprintf("%s := %s",
             $this->to->parse($params),
             trim($this->from->getSource($params))
         );
@@ -361,10 +361,11 @@ class IfNode extends Node
     {
         $_indent = TreeHelper::getIndent($params['indent']++);
         $string = "if (" . trim($this->cond->getSource($params)) . ")" . PHP_EOL;
-        $string .= $this->then->getSource($params) . PHP_EOL;
+        $string .= $this->then->getSource($params);
         if ($this->else->size()) {
+            $string .= PHP_EOL;
             $string .= $_indent . "else" . PHP_EOL;
-            $string .= $this->else->getSource($params) . PHP_EOL;
+            $string .= $this->else->getSource($params);
         }
         return $string;
     }

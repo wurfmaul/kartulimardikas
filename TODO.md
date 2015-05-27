@@ -3,14 +3,18 @@ Kartulimardikas - TODO list
 
 Open
 ----
+* [ ] Edit: Support AND, OR in While- and IfNodes, if two or more conditions are defined
+* [ ] Edit: Reorder-aid when a node is dragged
+* [ ] Edit: BUG in WebKit-browsers: Combo boxes do not work properly!
+* [ ] Edit: Variable definition: hide size-field if not necessary.
+* [ ] Edit: Combo boxes' behavior when different variables with same starting letter
 * [ ] View: Cursor also in source code
-* [ ] Edit: More data types
-    * [ ] characters
-    * [ ] boolean
+* [ ] Edit: Data type character
 * [ ] Edit: Possibility for viewer-defined parameters
-* [ ] User: Administration for deleted users/algorithms
+* [ ] User: Administration for deleting and resurrecting users/algorithms
 * [ ] User: Verify email/Lost password
-* [ ] Save section state in cookies
+* [ ] Save section state and animation speed in cookies or browser memory
+* [ ] Edit: Data type boolean
 * [ ] View: Step back (history)
 
 Done

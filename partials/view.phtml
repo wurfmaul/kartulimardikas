@@ -235,10 +235,13 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
                     <div id="statistics" class="panel-collapse">
                         <div class="panel-body">
                             <table class="table table-hover table-bordered">
+                                <thead>
                                 <tr>
                                     <th><?= $l10n['operations'] ?></th>
                                     <th><?= $l10n['count'] ?></th>
                                 </tr>
+                                </thead>
+                                <tbody>
                                 <tr>
                                     <td><?= $l10n['accesses'] ?></td>
                                     <td>
@@ -275,6 +278,7 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
                                         </div>
                                     </td>
                                 </tr>
+                                </tbody>
                             </table>
                         </div>
                     </div>
