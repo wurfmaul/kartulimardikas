@@ -10,9 +10,12 @@ class Node
   ###
   # Sets the cursor to the position of the node. Override to place it somewhere else!
   ###
-  mark: (player) ->
-    player.setCursor(@nid)
-    @nid
+  mark: (player, node) ->
+    if (node is @nid)
+      player.setCursor(@nid)
+      @nid
+    else
+      -1
 
   ###
   # Must be overridden by all subclasses.
@@ -75,6 +78,27 @@ class Node
     # return null, if value is not valid
     null
 
+  ###
+  # This method executes the index part of an array access.
+  ###
+  executeIndex: (variable, player) ->
+    # constant value as index (e.g. a[1])
+    if (variable.kind is 'const' and variable.type is 'int')
+      variable.value
+
+      # variable as index (e.g. a[i])
+    else if (variable.kind is 'var')
+      player.stats.readVar(variable.vid)
+      player.memory.get(variable.vid).value
+
+      # compound value as index (e.g. a[i+1])
+    else if (variable.kind is 'comp')
+      node = new ArithmeticNode(null, variable.left, variable.right, variable.op)
+      node.execute(player, null).value
+
+    else
+      throw new ExecutionError('unsupported_index', [variable.kind])
+
   executeValue: (value, player) ->
     if (!value?.kind?)
       throw new ExecutionError('could_not_execute_value', [value])
@@ -84,21 +108,9 @@ class Node
       when 'const' then value.value
 
       when 'index'
-        index = value.index
-        if (index.kind is 'const' and index.type is 'int')
-          idx = index.value
-        else if (index.kind is 'var')
-          # get index variable
-          player.stats.readVar(index.vid)
-          idx = memory.get(index.vid).value
-        else if (index.kind is 'comp')
-          # compute index
-          node = new ArithmeticNode(null, index.left, index.right, index.op)
-          idx = node.execute(player, null).value
-        else
-          throw new ExecutionError('unsupported_index', [index.kind])
-        player.stats.readArrayVar(value.vid, idx)
-        memory.arrayGet(value.vid, idx)
+        index = @executeIndex(value.index, player)
+        player.stats.readArrayVar(value.vid, index)
+        memory.arrayGet(value.vid, index)
 
       when 'prop'
         if (value.prop is 'length')
@@ -165,12 +177,13 @@ class ArithmeticNode extends Node
     leftVal = @executeValue(@left, player)
     rightVal = @executeValue(@right, player)
     player.stats.incArithmeticOps()
-    if (rightVal is 0) then throw new ExecutionError('divide_by_zero', [])
     switch @operator
       when 'plus', '+' then value: leftVal + rightVal
       when 'minus', '-' then value: leftVal - rightVal
       when 'times', '*' then value: leftVal * rightVal
-      when 'by', '/' then value: parseInt(leftVal / rightVal)
+      when 'by', '/'
+        throw new ExecutionError('divide_by_zero', []) if (rightVal is 0)
+        value: parseInt(leftVal / rightVal)
       when 'mod', '%' then value: leftVal % rightVal
       else
         throw new ExecutionError('unknown_arithmetic_op', [@operator])
@@ -203,8 +216,9 @@ class AssignNode extends Node
     # set new value
     switch (toVar.kind)
       when 'index'
-        player.memory.arraySet(toVar.vid, toVar.index.value, value)
-        player.stats.writeArrayVar(toVar.vid, toVar.index.value, value)
+        index = @executeIndex(toVar.index, player)
+        player.memory.arraySet(toVar.vid, index, value)
+        player.stats.writeArrayVar(toVar.vid, index, value)
       when 'var'
         player.memory.set(toVar.vid, value)
         player.stats.writeVar(toVar.vid, value)
@@ -251,9 +265,25 @@ class BlockNode extends Node
     else if (@nodes.length > i + 1) then next: @nodes[i + 1] # if curNode is done, take next from nodes
     else {}
 
-  mark: (player) ->
-    first = player.tree.extract(@nodes[0])
-    first?.mark(player)
+  mark: (player, node) ->
+    # if BlockNode itself should be marked...
+    if (node is @nid)
+      # ... mark first child, if there is any
+      if (@nodes.length > 0)
+        firstNid = @nodes[0]
+        return player.tree.tree[firstNid].mark(player, firstNid)
+      else
+        return -1
+      # if a child node should be marked...
+    else
+      for n,i in @nodes
+        # ... find suitable child and try marking it
+        if (node <= n)
+          marked = player.tree.tree[n].mark(player, node)
+          if marked > -1 then return marked
+            # ... otherwise try the next child
+          else node = n + 1
+    return -1
 
   size: ->
     @nodes.length
@@ -329,9 +359,17 @@ class IfNode extends Node
     else
       next: player.tree.tree[@elseBody].execute(player, node).next
 
-  mark: (player) ->
-    condition = player.tree.extract(@condition)
-    condition.mark(player)
+  mark: (player, node) ->
+    # mark condition if the IfNode should be marked
+    if (node is @nid)
+      player.tree.tree[@condition].mark(player, @condition)
+      # redirect mark-command to sub-nodes of condition, ifBody or elseBody
+    else if (node <= @condition)
+      player.tree.tree[@condition].mark(player, node)
+    else if (node <= @ifBody)
+      player.tree.tree[@ifBody].mark(player, node)
+    else
+      player.tree.tree[@elseBody].mark(player, node)
 
   toJSON: ->
     {
@@ -445,9 +483,15 @@ class WhileNode extends Node
       if bodyValue.next? then next: bodyValue.next # if body has still more nodes to execute, let it!
       else next: @condition # otherwise jump back to condition
 
-  mark: (player) ->
-    condition = player.tree.extract(@condition)
-    condition.mark(player)
+  mark: (player, node) ->
+    # mark condition if the WhileNode should be marked
+    if (node is @nid)
+      player.tree.tree[@condition].mark(player, @condition)
+      # redirect mark-command to sub-nodes of condition, ifBody or elseBody
+    else if (node <= @condition)
+      player.tree.tree[@condition].mark(player, node)
+    else
+      player.tree.tree[@body].mark(player, node)
 
   toJSON: ->
     {
@@ -474,6 +518,9 @@ class window.Tree
 
   executeStep: (player, node) ->
     @tree[@root].execute(player, node)
+
+  mark: (player, node) ->
+    @tree[@root].mark(player, node)
 
   extract: (nid) ->
     node = @tree[nid]

@@ -3,9 +3,7 @@ Kartulimardikas - TODO list
 
 Open
 ----
-* [ ] Bug: execution of empty else
 * [ ] View: Cursor also in source code
-* [ ] View: Step back (history)
 * [ ] Edit: More data types
     * [ ] characters
     * [ ] boolean
@@ -13,9 +11,11 @@ Open
 * [ ] User: Administration for deleted users/algorithms
 * [ ] User: Verify email/Lost password
 * [ ] Save section state in cookies
+* [ ] View: Step back (history)
 
 Done
 ----
+* [x] Bug: execution of empty else
 * [x] View: Animation speed configurable by viewer
 * [x] View: Highlighting for R/W operations is not intuitive
 * [x] Edit: Compact nodes (compare, arithmetic)

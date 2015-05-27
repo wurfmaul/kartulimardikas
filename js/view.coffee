@@ -2,30 +2,23 @@ TIMEOUT = 500 # milliseconds between the steps
 MAX_STEPS = 1000 # number of steps an algorithm may take
 
 class Player
-
   constructor: (@tree, @stats) ->
     @memory = @tree.memory
     @reset()
 
   reset: ->
+    # reset components
     @tree.reset()
     @memory.reset()
     @stats.reset()
+    # find first node to execute
     @curNode = null
-    @nextNode = @tree.extract(@tree.root).mark(@)
+    @nextNode = @tree.mark(@, @tree.root)
+    # reset highlighting and cursor
     @clearHighlight()
-    @setCursor(@nextNode)
     @setControls([0, 0, 1, 1, 1])
+    # hide errors
     $('#viewAlert').hide('slow')
-
-  back: ->
-    # check for prev step
-#    if ($('#node_' + (@curNode - 1)).length)
-#      @setControls([1, 1, 1, 1, 1])
-#      @curNode--
-#      @setCursor(@curNode)
-#    else
-#      @setControls([0, 0, 1, 1, 1])
 
   play: ->
     if @timer? # if currently playing => pause
@@ -65,7 +58,7 @@ class Player
       @setControls([1, 1, 0, 0, 0])
       false
     else if (curNode.next? and curNode.next >= 0)
-      @nextNode = @tree.tree[curNode.next].mark(@)
+      @nextNode = @tree.mark(@, curNode.next)
       @setControls([1, 1, 1, 1, 1])
       true
     else
@@ -151,10 +144,17 @@ class Stats
   reset: ->
     # reset variables
     $.each(@memory.memory, (index, elem) ->
-      $('#var-' + index).find('.value').val(elem.value)
+      row = $('#var-' + index)
+      if (elem.array)
+        values = elem.value.split(',')
+        $.each(values, (i, n) ->
+          row.find(".offset_#{i}>.value").text(n)
+        )
+      else
+        row.find('.value').text(elem.value)
     )
     # reset statistics
-    $.each(@stats, (elem) ->
+    $.each(@stats, (index, elem) ->
       $('#stats-' + elem).val(0)
     )
 $ ->
@@ -163,13 +163,12 @@ $ ->
   player = new Player(tree, stats)
 
   $('#btn-reset').click -> player.reset()
-  $('#btn-back').click -> player.back()
   $('#btn-play').click -> player.play()
   $('#btn-step').click -> player.step()
   $('#btn-finish').click -> player.finish()
 
   $('#speed-slider').slider(
-    value: 2,
+    value: parseInt(1000 / TIMEOUT),
     min: 1,
     max: 20,
     slide: (event, ui) ->
