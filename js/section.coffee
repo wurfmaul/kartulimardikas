@@ -9,7 +9,7 @@ class Section
     Changes the url in the address bar according to the new parameters.
   ###
   @updateUrl = (parameters) ->
-    $.ajax("api/get-url.php",
+    $.ajax("api/url.php",
       type: 'GET'
       data: {parameters: parameters}
       dataType: 'text'

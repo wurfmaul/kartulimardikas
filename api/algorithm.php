@@ -1,15 +1,30 @@
 <?php
 define('BASEDIR', realpath('..') . '/');
-define('BR', "<br />");
-global $l10n;
+require_once BASEDIR . 'api/abstract.php';
 
-require_once BASEDIR . 'config/config.php';
-require_once BASEDIR . 'includes/authentication.php';
-require_once BASEDIR . 'includes/dataModel.php';
+class AlgorithmAPI extends AbstractAPI
+{
+    public function checkAndSend()
+    {
+        $l10n = $this->loadLanguage($_POST['lang']);
+        $uid = $this->authenticate();
 
-// in order to retrieve the uid we need access to the session
-secure_session_start();
-$uid = isSignedIn();
+        if (!isset($_POST['aid'])) {
+            $this->response['error'] = $l10n['no_algo_defined'];
+        } elseif (!isset($_GET['area'])) {
+            $this->response['error'] = $l10n['no_area_defined'];
+        } elseif (!$uid) {
+            $this->response['error'] = $l10n['edit_not_signed_in'];
+        } else {
+            // prepare variables
+            $aid = $_POST['aid'];
+            // start processing
+            $manager = new EditAlgorithmManager($uid, $aid, $l10n);
+            $this->response = $manager->process();
+        }
+        $this->sendResponse();
+    }
+}
 
 class EditAlgorithmManager
 {
@@ -23,15 +38,15 @@ class EditAlgorithmManager
     private $_response;
     private $_l10n;
 
-    function __construct($uid, $aid)
+    function __construct($uid, $aid, $l10n)
     {
-        global $l10n;
         $this->_uid = $uid;
         $this->_aid = $aid;
-        $this->_model = new DataModel();
         $this->_response = array();
         $this->_l10n = $l10n;
         // fetch algorithm details from database
+        require_once BASEDIR . 'includes/dataModel.php';
+        $this->_model = new DataModel();
         $this->_algorithm = $this->_model->fetchAlgorithm($this->_aid);
     }
 
@@ -259,19 +274,4 @@ class EditAlgorithmManager
     }
 }
 
-if (!isset($_POST['aid'])) {
-    $response['error'] = $l10n['no_algo_defined'];
-} elseif (!isset($_GET['area'])) {
-    $response['error'] = $l10n['no_area_defined'];
-} elseif (!$uid) {
-    $response['error'] = $l10n['edit_not_signed_in'];
-} else {
-    // prepare variables
-    $aid = $_POST['aid'];
-    // start processing
-    $manager = new EditAlgorithmManager($uid, $aid);
-    $response = $manager->process();
-}
-
-header('Content-type: application/json; charset=UTF-8');
-echo json_encode($response);
+(new AlgorithmAPI())->checkAndSend();

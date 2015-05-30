@@ -1,0 +1,227 @@
+<?php
+/**
+ * German language file
+ */
+// ADMIN
+$l10n['administration'] = "Administration";
+$l10n['no_privileges'] = "Du bist nicht berechtigt, diese Seite zu sehen!";
+$l10n['need_account'] = "Du musst ein Konto haben und angemeldet sein!";
+$l10n['need_admin_rights'] = "Dein Konto muss Administrationsrechte haben!";
+
+// GENERAL
+$l10n['close'] = "Schließen";
+$l10n['error'] = "Fehler!";
+$l10n['success'] = "Erfolg!";
+$l10n['warning'] = "Warnung!";
+$l10n['toggle_nav'] = "Menü ein-/ausblenden";
+
+// USER MANAGEMENT
+$l10n['welcome'] = "Hallo, %s!";
+$l10n['enter_username'] = "Bitte einen Benutzernamen eingeben!";
+$l10n['enter_email'] = "Bitte eine gültige Email-Adresse eingeben!";
+$l10n['enter_password'] = "Bitte ein Passwort eingeben!";
+$l10n['repeat_password'] = "Bitte das Passwort wiederholen!";
+$l10n['name_invalid'] = "Benutzername ist unzulässig. Erlaubte Zeichen: %s";
+$l10n['name_in_use'] = "Benutzername '%s' ist bereits in Verwendung!";
+$l10n['email_in_use'] = "Email-Adresse '%s' ist bereits in Verwendung!";
+$l10n['email_invalid'] = "Email-Adresse ist nicht gültig!";
+$l10n['weak_password'] = "Das eingegbene Passwort ist zu schwach!";
+$l10n['passwords_no_match'] = "Die eingegebenen Passwörter stimmen nicht überein!";
+$l10n['user_created'] = "Benutzer '%s' wurde erfolgreich angelegt.";
+$l10n['user_not_created'] = "Benutzer konnte nicht erstellt werden.";
+$l10n['signed_in'] = "Erfolgreich als '%s' angemeldet.";
+$l10n['credentials_invalid'] = "Benutzername und Passwort passen nicht zusammen.";
+$l10n['signed_out'] = "Erfolgreich abgemeldet.";
+$l10n['sign_out'] = "Abmelden";
+$l10n['username'] = "Benutzername";
+$l10n['email_address'] = "Email-Adresse";
+$l10n['password'] = "Passwort";
+$l10n['password_again'] = "Passwort, noch einmal";
+$l10n['sign_in'] = "Anmelden";
+$l10n['register'] = "Registrieren";
+$l10n['already_registered'] = "Du hast bereits ein Konto!";
+$l10n['registration_not_necessary'] = "Eine weitere Registrierung ist nicht nötig!";
+$l10n['use_form_to_signout'] = "Verwende den Knopf in der rechten oberen Ecke um dich abzumelden.";
+$l10n['become_user'] = "Werde Benutzer!";
+$l10n['user_not_signed_in'] = "Du musst angemeldet sein, um Änderungen am Konto durchführen zu dürfen!";
+$l10n['username_changed'] = "Dein Benutzername wurde auf '%s' geändert! Bitte melde dich mit diesem Benutzernamen neu an!";
+$l10n['username_not_changed'] = "Dein Benutzername konnte nicht geändert werden!";
+$l10n['email_changed'] = "Deine Email-Adresse wurde auf '%s' geändert!";
+$l10n['email_not_changed'] = "Deine Email-Adresse konnte nicht geändert werden!";
+$l10n['password_changed'] = "Dein Passwort wurde geändert! Bitte melde dich mit diesem Passwort neu an!";
+$l10n['password_not_changed'] = "Dein Passwort konnte nicht geändert werden!";
+
+// HOME
+$l10n['subtitle'] = "Online-Sammlung von Algorithmen";
+$l10n['welcome_msg'] = "Willkommen auf dieser interaktiven Plattform zum diskutieren, demonstrieren und vergleichen von üblichen Algorithmen.";
+$l10n['define_new_algo'] = "Verfasse deinen Algorithmus";
+
+// INDEX
+$l10n['index'] = "Index";
+$l10n['all_algos'] = "Alle verfassten Algorithmen.";
+$l10n['no_algorithms'] = "Keine Algorithmen gefunden!";
+$l10n['no_users'] = "Keine Benutzer gefunden!";
+$l10n['latest_algos'] = "Neueste Algorithmen";
+$l10n['my_algos'] = "Meine Algorithmen";
+$l10n['last_changes'] = "Letzte Änderungen";
+$l10n['my_last_changes'] = "Meine letzten Änderungen";
+$l10n['diligent_users'] = "Die eifrigsten Benutzer";
+$l10n['user_created_note'] = "verfasste %d Algorithmen";
+$l10n['created_note'] = "verfasst %s von %s";
+$l10n['modified_note'] = "bearbeitet %s von %s";
+$l10n['label_new'] = "NEU";
+$l10n['read_more'] = "weiter";
+$l10n['minutes_ago'] = "vor %d Minuten";
+$l10n['hours_ago'] = "vor %d Stunden";
+$l10n['days_ago'] = "vor %d Tagen";
+$l10n['one_minute_ago'] = "vor einer Minute";
+$l10n['one_hour_ago'] = "vor einer Stunde";
+$l10n['one_day_ago'] = "vor einem Tag";
+$l10n['see_more'] = "mehr";
+$l10n['private'] = "privat";
+
+// NEW
+$l10n['new'] = "Neu";
+$l10n['new_algo'] = "Neuer Algorithmus";
+$l10n['define_algo'] = "Verfasse deinen eigenen Algorithmus!";
+$l10n['message_not_signed_in'] = "Du musst angemeldet sein, um einen neuen Algorithmus verfassen zu können!";
+$l10n['use_form_to_signin'] = "Verwende das Formular oben rechts um dich anzumelden.";
+$l10n['if_no_account'] = "Wenn du noch kein Konto hast, kannst du ganz einfach eines erstellen:";
+
+// VIEW
+$l10n['view'] = "View";
+$l10n['controls'] = "Controls";
+$l10n['source_code'] = "Source Code";
+$l10n['memory'] = "Memory";
+$l10n['statistics'] = "Statistics";
+$l10n['variable'] = "Variable";
+$l10n['contents'] = "Contents";
+$l10n['operations'] = "Operations";
+$l10n['count'] = "Count";
+$l10n['accesses'] = "accesses";
+$l10n['assignments'] = "assignments";
+$l10n['comparisons'] = "comparisons";
+$l10n['arithmetic'] = "arithmetic (+ &minus; &times; / %)";
+$l10n['arithmetic_node_title'] = "Arithmetic";
+$l10n['assign_node_title'] = "Assign";
+$l10n['compare_node_title'] = "Compare";
+$l10n['compare_node_operation'] = "operation";
+$l10n['return_node_title'] = "Return";
+$l10n['if_node_title'] = "If";
+$l10n['if_node_then'] = "then";
+$l10n['if_node_else'] = "else";
+$l10n['inc_node_title'] = "Inc";
+$l10n['value_node_title'] = "Value";
+$l10n['while_node_title'] = "While";
+$l10n['while_node_do'] = "do";
+$l10n['back_to_start'] = "Back to start";
+$l10n['step_back'] = "Step back";
+$l10n['play'] = "Play";
+$l10n['step_forward'] = "Step forward";
+$l10n['forward_to_end'] = "Forward to end";
+$l10n['message_invalid_aid'] = "The chosen algorithm cannot be displayed. This can have the following reasons:";
+$l10n['message_no_aid_specified'] = "No algorithm id was specified.";
+$l10n['message_deleted_algorithm'] = "This algorithm was deleted.";
+$l10n['message_hidden_algorithm'] = "This algorithm is private and you are not allowed to see.";
+$l10n['no_vars'] = "No variables defined yet.";
+$l10n['no_algorithm'] = "No algorithm defined yet.";
+$l10n['no_description'] = "No description provided.";
+$l10n['no_params_to_define'] = "No parameters to define.";
+$l10n['input'] = "Input";
+$l10n['output'] = "Output";
+$l10n['runtime_error'] = "Runtime Error";
+$l10n['message_runtime_error'] = "A runtime error occurred during this step. The program execution was aborted. The following message could be useful for finding the error: ";
+$l10n['runtime_errors'] = [
+    'undefined' => "An unknown error has occurred!",
+    'index_out_of_bounds' => "The array index is outside the legal range! Array '%1' has no element at position %2, it is only %3 long!",
+    'too_many_steps' => "Could not terminate in %1 steps! The maximum number of steps is reached.",
+    'unknown_property' => "Unknown property: '%1'. This property cannot be computed!",
+    'unsupported_index' => "The used index of kind '%1' is too sophisticated! Only simple variables and constants are supported!",
+    'could_not_execute_value' => "The value '%1' could not be executed!",
+    'assign_to_const' => "A value cannot be assigned to a constant %1!",
+    'assign_to_prop' => "A value cannot be assigned to an array property!",
+    'unknown_kind' => "Unknown kind: '%1'. This kind cannot be computed!",
+    'unknown_arithmetic_op' => "The arithmetic calculation cannot be performed with '%1'!",
+    'no_array_for_index' => "The variable '%1' is no array, therefore it cannot be accessed via an index!",
+    'divide_by_zero' => "Division cannot have zero as denominator!",
+];
+
+// EDIT
+$l10n['edit'] = "Edit";
+$l10n['edit_algo'] = "Edit algorithm";
+$l10n['saved_to_db'] = "Successfully saved to database!";
+$l10n['need_to_be_owner'] = "You need to be the owner in order to change this algorithm!";
+$l10n['edit_not_signed_in'] = "You have to be signed in to publish an algorithm!";
+$l10n['general_info'] = "General Information";
+$l10n['algo_name'] = "Algorithm name";
+$l10n['description'] = "Description";
+$l10n['long_description'] = "Long description...";
+$l10n['variables'] = "Variables";
+$l10n['algorithm'] = "Algorithm";
+$l10n['save_algorithm'] = "Save";
+$l10n['var_name'] = "Variable name";
+$l10n['name'] = "name";
+$l10n['element'] = "Element";
+$l10n['array'] = "List";
+$l10n['int'] = "number";
+$l10n['array_int'] = "List of numbers";
+$l10n['init'] = "Initialization";
+$l10n['uninitialized'] = "uninitialized";
+$l10n['value'] = "value";
+$l10n['random'] = "random";
+$l10n['custom'] = "custom";
+$l10n['init_value'] = "Initial value";
+$l10n['array_size'] = "Array size";
+$l10n['size'] = "Size";
+$l10n['remove_var'] = "Remove variable";
+$l10n['check_var'] = "Check and add/edit variable";
+$l10n['discard_changes'] = "Discard changes";
+$l10n['edit_var'] = "Edit variable";
+$l10n['same_name'] = "Another variable uses the same name.";
+$l10n['size_out_of_bounds'] = "The array size has to be between %d and %d.";
+$l10n['empty_value'] = "The value cannot be empty.";
+$l10n['empty_name'] = "The variable name cannot be empty.";
+$l10n['invalid_init'] = "The initialization method seems to be invalid.";
+$l10n['no_algo_defined'] = "No algorithm specified!";
+$l10n['no_area_defined'] = "You cannot edit everything at once. Define area!";
+$l10n['invalid'] = "invalid";
+$l10n['untitled_algorithm'] = "[Untitled algorithm]";
+$l10n['usage_count'] = "Usage count";
+$l10n['contains'] = "contains";
+$l10n['public_without_name'] = "A public algorithm cannot be without a name!";
+$l10n['create_a_node'] = "Create a Node";
+
+// SETTINGS
+$l10n['settings'] = "Settings";
+$l10n['configure_algo'] = "Configure your algorithm.";
+$l10n['visibility'] = "Visibility";
+$l10n['private_message'] = "The algorithm is set to 'private' therefore nobody but you can see it. Click on the following button in order to publish the algorithm.";
+$l10n['public_message'] = "The algorithm is set to 'public' therefore everybody can see it. Click on the following button in order to hide the algorithm from the public.";
+$l10n['make_public'] = "Publish";
+$l10n['make_private'] = "Hide";
+$l10n['delete_algorithm_message'] = "Once you click on the button below, this algorithm will be erased. This action cannot be undone!";
+$l10n['delete_algorithm'] = "Delete algorithm";
+$l10n['delete_algorithm_warning'] = "Do you really want to remove this algorithm? This action cannot be undone!";
+$l10n['publish_not_possible'] = "If no name is specified, this algorithm cannot be published!";
+$l10n['algorithm_deleted'] = "Algorithm deleted.";
+$l10n['message_foreign_algorithm'] = "You are not the owner of this algorithm, therefore you are not allowed to modify it.";
+
+// USER
+$l10n['member_since'] = "Member since %s.";
+$l10n['error_no_such_user'] = "There is no such user!";
+$l10n['go_back'] = "go back";
+$l10n['created_at'] = "created %s";
+$l10n['algorithms'] = "Algorithms";
+$l10n['account_settings'] = "Account settings";
+$l10n['change'] = "Change";
+$l10n['delete_user_message'] = "Please enter your password and click on the button below in order to delete your account. This action cannot be undone!";
+$l10n['delete_all_algorithms'] = "All the algorithms you shared will be erased too!";
+$l10n['not_able_to_contribute'] = "You will not be able to contribute any more!";
+$l10n['delete_user'] = "Delete this account";
+$l10n['delete_user_warning'] = "Do you really want to remove your account? This action cannot be undone!";
+$l10n['user_not_deleted'] = "User could not be deleted!";
+$l10n['user_deleted'] = "User '%s' has successfully been deleted!";
+$l10n['password_invalid'] = "Password does not seem to be valid!";
+
+// LEGAL NOTICE
+$l10n['notice'] = "Impressum";

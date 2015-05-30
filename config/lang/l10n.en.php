@@ -2,7 +2,6 @@
 /**
  * English language file
  */
-
 // ADMIN
 $l10n['administration'] = "Administration";
 $l10n['no_privileges'] = "You don't have sufficient privileges to see this page!";
@@ -126,6 +125,7 @@ $l10n['message_deleted_algorithm'] = "This algorithm was deleted.";
 $l10n['message_hidden_algorithm'] = "This algorithm is private and you are not allowed to see.";
 $l10n['no_vars'] = "No variables defined yet.";
 $l10n['no_algorithm'] = "No algorithm defined yet.";
+$l10n['no_description'] = "No description provided.";
 $l10n['no_params_to_define'] = "No parameters to define.";
 $l10n['input'] = "Input";
 $l10n['output'] = "Output";
@@ -222,3 +222,6 @@ $l10n['delete_user_warning'] = "Do you really want to remove your account? This 
 $l10n['user_not_deleted'] = "User could not be deleted!";
 $l10n['user_deleted'] = "User '%s' has successfully been deleted!";
 $l10n['password_invalid'] = "Password does not seem to be valid!";
+
+// LEGAL NOTICE
+$l10n['notice'] = "Legal notice";

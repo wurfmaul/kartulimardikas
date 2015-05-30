@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: May 20, 2015 at 12:22 
+-- Generation Time: May 30, 2015 at 12:35 
 -- Server version: 5.6.21
 -- PHP Version: 5.6.3
 
@@ -68,7 +68,10 @@ CREATE TABLE IF NOT EXISTS `user` (
                       COLLATE utf8_bin NOT NULL,
   `password`          VARCHAR(255)
                       COLLATE utf8_bin NOT NULL,
-  `rights` TINYINT(4) NOT NULL DEFAULT '0'
+  `language` VARCHAR(8)
+             COLLATE utf8_bin NOT NULL
+  COMMENT 'language of user interface',
+  `rights`   TINYINT(4)       NOT NULL DEFAULT '0'
   COMMENT 'users rights: 0 = user, 1 = admin, 2 = superadmin',
   `date_registration` TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP
   COMMENT 'timestamp of registration',

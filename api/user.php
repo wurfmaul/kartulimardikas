@@ -1,14 +1,23 @@
 <?php
 define('BASEDIR', realpath('..') . '/');
+require_once BASEDIR . 'api/abstract.php';
 
-require_once BASEDIR . 'config/config.php';
-require_once BASEDIR . 'includes/authentication.php';
-require_once BASEDIR . 'includes/dataModel.php';
-require_once BASEDIR . 'includes/validator.php';
-
-// in order to retrieve the uid we need access to the session
-secure_session_start();
-$uid = isSignedIn();
+class UserAPI extends AbstractAPI
+{
+    public function checkAndSend()
+    {
+        $uid = $this->authenticate();
+        $l10n = $this->loadLanguage($_POST['lang']);
+        if (!$uid) {
+            $this->response['error'] = $l10n['user_not_signed_in'];
+        } else {
+            // start processing
+            $manager = new EditUserManager($uid, $l10n);
+            $this->response = $manager->process();
+        }
+        $this->sendResponse();
+    }
+}
 
 class EditUserManager
 {
@@ -19,15 +28,16 @@ class EditUserManager
     private $_l10n;
     private $_validator;
 
-    function __construct($uid)
+    function __construct($uid, $l10n)
     {
-        global $l10n;
         $this->_uid = $uid;
-        $this->_model = new DataModel();
         $this->_response = array();
         $this->_l10n = $l10n;
+        require_once BASEDIR . 'includes/validator.php';
         $this->_validator = new Validator();
         // fetch user details from database
+        require_once BASEDIR . 'includes/dataModel.php';
+        $this->_model = new DataModel();
         $this->_user = $this->_model->fetchUser($this->_uid);
     }
 
@@ -106,13 +116,4 @@ class EditUserManager
     }
 }
 
-if (!$uid) {
-    $response['error'] = $l10n['user_not_signed_in'];
-} else {
-    // start processing
-    $manager = new EditUserManager($uid);
-    $response = $manager->process();
-}
-
-header('Content-type: application/json; charset=UTF-8');
-echo json_encode($response);
+(new UserAPI())->checkAndSend();

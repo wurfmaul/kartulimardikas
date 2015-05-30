@@ -70,7 +70,7 @@ require_once BASEDIR . "includes/viewHelper.php";
                         <span class="label label-default"><?= $l10n['label_new'] ?></span>
                     <?php endif ?>
                     <?php if (is_null($algorithm['date_publish'])): ?>
-                        <span class="label label-info">private</span>
+                        <span class="label label-info"><?= $l10n['private'] ?></span>
                     <?php endif ?>
                     <span class="name">
                             <a href="<?= $link ?>">

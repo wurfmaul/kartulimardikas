@@ -2,8 +2,6 @@
 
 function secure_session_start()
 {
-    require_once BASEDIR . 'config/config.php';
-
     // use cookies for php sessions
     if (ini_set('session.use_only_cookies', 1) === false) {
         echo "Could not start secure session!";
@@ -13,13 +11,14 @@ function secure_session_start()
     // prepare and regenerate session cookie
     $oldCookie = session_get_cookie_params();
     session_set_cookie_params($oldCookie['lifetime'], $oldCookie['path'], $oldCookie['domain'], false, true);
-    session_name(PROJECT_NAME);
+    session_name($_SERVER['HTTP_HOST']);
     session_start();
     session_regenerate_id();
 }
 
 function signIn($username, $password)
 {
+    require_once BASEDIR . 'includes/settings.php';
     require_once BASEDIR . 'includes/dataModel.php';
     $model = new DataModel();
     $login = $model->fetchLoginByUsername($username);
@@ -34,6 +33,7 @@ function signIn($username, $password)
             // Password is correct!
             $_SESSION['uid'] = $uid;
             $_SESSION['username'] = $username;
+            $_SESSION['lang'] = $login->language;
             $_SESSION['rights'] = $rights;
             $_SESSION['token'] = password_hash($hash . $_SERVER['HTTP_USER_AGENT'], PASSWORD_BCRYPT);
             // log signing process

@@ -2,7 +2,6 @@
 
 class DataModel
 {
-
     /** @var mysqli */
     private $_sql;
 
@@ -13,7 +12,7 @@ class DataModel
 
     public function open()
     {
-        require_once BASEDIR . 'config/config.php';
+        require_once BASEDIR . 'includes/settings.php';
         $this->_sql = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
     }
 
@@ -249,7 +248,7 @@ class DataModel
         $username = $this->_sql->real_escape_string($username);
 
         $stmt = $this->_sql->prepare("
-            SELECT uid, password, rights FROM user
+            SELECT uid, password, language, rights FROM user
             WHERE username = ?
             AND date_deletion IS NULL
         ");
@@ -493,6 +492,25 @@ class DataModel
             WHERE uid=?
         ");
         $stmt->bind_param("si", $hash, $uid);
+        $stmt->execute();
+        $rows = $stmt->affected_rows;
+        $stmt->close();
+        return $rows;
+    }
+
+    /**
+     * @param int $uid The user id.
+     * @param string $lang The interface language.
+     * @return int The number of affected rows.
+     */
+    public function updateUserLang($uid, $lang)
+    {
+        $stmt = $this->_sql->prepare("
+            UPDATE user
+            SET language=?
+            WHERE uid=?
+        ");
+        $stmt->bind_param("si", $lang, $uid);
         $stmt->execute();
         $rows = $stmt->affected_rows;
         $stmt->close();

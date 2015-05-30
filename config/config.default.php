@@ -8,10 +8,16 @@ define('PROJECT_NAME', 'kartulimardikas');
 define('DEBUG_MODE', true);
 # defines, where the library packages are be taken from (one of LOCAL, DEBUG, CDN)
 define('LIBRARY_MODE', 'LOCAL');
-# defines the default language
-define('LANG', 'en');
-# defines an action that is used if the user does not specify a valid action
+# Action that is used if the user does not specify a valid action
 define('DEFAULT_PAGE', 'home');
+
+##### LANGUAGE SETTINGS #####
+$AVAILABLE_LANG = [
+    'en' => 'English',
+    'de' => 'German (Deutsch)'
+];
+# Default language
+define('DEFAULT_LANG', 'en');
 
 ##### DATABASE SETTINGS #####
 define('DB_HOST', 'localhost');
@@ -20,23 +26,27 @@ define('DB_USER', 'root');
 define('DB_PASSWORD', '');
 
 ##### ALGORITHM SETTINGS #####
-# the minimum definable size of an array
+# Minimum definable size of an array
 define('ARRAY_MIN_SIZE', 2);
-# the maximum definable size of an array
+# Maximum definable size of an array
 define('ARRAY_MAX_SIZE', 13);
-# specifies the indentation that is used for a block
+# Indentation that is used for a block
 define('DEFAULT_INDENT', '  ');
+# Animation speed, when playing an algorithm (milliseconds between the steps)
+define('SPEED', 500);
+# Number of steps an algorithm as allowed to take
+define('MAX_STEPS', 1000);
 
 ##### LIST SETTINGS #####
-# specifies the number of algorithms that are displayed in the home action
+# Number of algorithms that are displayed in the home action
 define('NUMBER_OF_LATEST_ALGORITHMS', 5);
-# specifies the maximum number of a registered user's algorithms
+# Maximum number of a registered user's algorithms
 define('NUMBER_OF_MY_ALGORITHMS', 25);
-# specifies the number of list entries that are displayed in the index action
+# Number of list entries that are displayed in the index action
 define('MAX_NUMBER_OF_ENTRIES', 10);
-# specifies the maximum age (in minutes) for an algorithm to be marked with a 'new' label
+# Maximum age (in minutes) for an algorithm to be marked with a 'new' label
 define('MAX_MINUTES_FOR_LABEL', 120);
-# specifies how many characters the description is compressed to, in algorithm lists
+# Number of characters the description is compressed to, in algorithm lists
 define('MAX_DESCRIPTION_LENGTH', 240);
 
 ##### SECTION SETTINGS #####
@@ -49,11 +59,3 @@ define('MAX_DESCRIPTION_LENGTH', 240);
 #   sum all the expanded panels' numbers, in our example 1 + 4 + 8 = 13
 define('SECTIONS_VIEW', 27);
 define('SECTIONS_EDIT', 4);
-
-##### DON'T TOUCH THE SETTINGS BELOW! #####
-# Configure PHP's error reporting mode
-error_reporting(DEBUG_MODE ? E_ALL : E_ERROR);
-# Load library paths
-require_once BASEDIR . 'config/paths.php';
-# Load language settings
-require_once BASEDIR . 'config/l10n.' . LANG . '.php';

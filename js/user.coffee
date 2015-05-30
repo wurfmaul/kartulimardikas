@@ -1,5 +1,5 @@
 change = (params, callback) ->
-  $.ajax "api/edit-user.php",
+  $.ajax "api/user.php",
     type: 'POST'
     data: params
     dataType: 'json'
@@ -27,19 +27,29 @@ change = (params, callback) ->
       $('#userAlert').show('slow')
 
 $ ->
-  $('#usernameBtn').click -> change({username: $('#in-username').val()}, (msg) ->
-    $('#usernameMsg').val(msg)
-    $('#usernameForm').submit()
-  )
-  $('#emailBtn').click -> change({email: $('#in-email').val()}, ->)
-  $('#passwordBtn').click -> change({password1: $('#in-password1').val(), password2: $('#in-password2').val()}, (msg) ->
-    $('#passwordMsg').val(msg)
-    $('#passwordForm').submit()
-  )
-  $('#deleteBtn').click -> change({password: $('#delete-password').val()}, (msg) ->
-    $('#deleteMsg').val(msg)
-    $('#deleteForm').submit()
-  ) if (confirm($(this).data('warning')))
+  lang = window.defaults.lang
+  $('#usernameBtn').click ->
+    username = $('#in-username').val()
+    change({username: username, lang: lang}, (msg) ->
+      $('#usernameMsg').val(msg)
+      $('#usernameForm').submit()
+    )
+  $('#emailBtn').click ->
+    email = $('#in-email').val()
+    change({email: email, lang: lang}, ->)
+  $('#passwordBtn').click ->
+    password1 = $('#in-password1').val()
+    password2 = $('#in-password2').val()
+    change({password1: password1, password2: password2, lang: lang}, (msg) ->
+      $('#passwordMsg').val(msg)
+      $('#passwordForm').submit()
+    )
+  $('#deleteBtn').click ->
+    password = $('#delete-password').val()
+    change({password: password}, (msg) ->
+      $('#deleteMsg').val(msg)
+      $('#deleteForm').submit()
+    ) if (confirm($(this).data('warning')))
 
   $('#userAlertClose').click ->
     $('#userAlert').hide('slow')

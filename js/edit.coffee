@@ -6,9 +6,14 @@ class Api
     name = $('#in-name').val()
     desc = $('#in-desc').val()
     long = $('#in-long').val()
-    $.ajax("api/edit-algorithm.php?area=info",
+    $.ajax("api/algorithm.php?area=info",
       type: 'POST'
-      data: {aid: aid, name: name, desc: desc, long: long}
+      data:
+        aid: aid
+        name: name
+        desc: desc
+        long: long
+        lang: window.defaults.lang
       dataType: 'json'
       success: (data) => # if response arrived...
         if data['error']?
@@ -31,9 +36,16 @@ class Api
     type = varRow.find('.type').val()
     value = varRow.find('.value').val()
     size = varRow.find('.size').val()
-    $.ajax("api/edit-algorithm.php?area=var&action=edit",
+    $.ajax("api/algorithm.php?area=var&action=edit",
       type: 'POST'
-      data: {aid: aid, vid: vid, name: name, type: type, value: value, size: size}
+      data:
+        aid: aid
+        vid: vid
+        name: name
+        type: type
+        value: value
+        size: size
+        lang: window.defaults.lang
       dataType: 'json'
       success: (data) => # if response arrived...
         msg = data['error'] ? ""
@@ -61,9 +73,12 @@ class Api
 
   @removeVariable: (vid) ->
     aid = window.defaults.aid
-    $.ajax("api/edit-algorithm.php?area=var&action=remove",
+    $.ajax("api/algorithm.php?area=var&action=remove",
       type: 'POST'
-      data: {aid: aid, vid: vid}
+      data:
+        aid: aid
+        vid: vid
+        lang: window.defaults.lang
       dataType: 'json'
       success: (data) => # if response arrived...
         # print response
@@ -78,9 +93,12 @@ class Api
 
   @editScript: (tree) ->
     aid = window.defaults.aid
-    $.ajax("api/edit-algorithm.php?area=script",
+    $.ajax("api/algorithm.php?area=script",
       type: 'POST'
-      data: {aid: aid, tree: tree}
+      data:
+        aid: aid
+        tree: tree
+        lang: window.defaults.lang
       dataType: 'json'
       success: (data) => # if response arrived...
         if data['error']? then @_printError(data['error'])

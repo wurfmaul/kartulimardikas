@@ -1,7 +1,7 @@
 class Api
   @setVisibility = (status) ->
     aid = window.defaults.aid
-    $.ajax "api/edit-algorithm.php?area=settings",
+    $.ajax "api/algorithm.php?area=settings",
       type: 'POST'
       data: {aid: aid, status: status}
       dataType: 'json'
@@ -15,7 +15,7 @@ class Api
 
   @delete = ->
     aid = window.defaults.aid
-    $.ajax "api/edit-algorithm.php?area=delete",
+    $.ajax "api/algorithm.php?area=delete",
       type: 'POST'
       data: {aid: aid}
       dataType: 'json'

@@ -1,6 +1,3 @@
-TIMEOUT = 500 # milliseconds between the steps
-MAX_STEPS = 1000 # number of steps an algorithm may take
-
 class Player
   constructor: (@tree, @stats) ->
     @memory = @tree.memory
@@ -19,7 +16,8 @@ class Player
     @nextNode = @tree.mark(@, @tree.root)
     # reset highlighting and cursor
     @clearHighlight()
-    @setControls([0, 0, 1, 1, 1])
+    if (@nextNode >= 0) then @setControls([0, 0, 1, 1, 1])
+    else @setControls([0, 0, 0, 0, 0])
     # hide errors
     $('#viewAlert').hide('slow')
 
@@ -33,12 +31,13 @@ class Player
       .addClass('glyphicon-play')
     else # play
       # set an interval and perform step after step
+      maxSteps = window.defaults.maxSteps
       @playStep = 0
       @timer = setInterval(=>
-        if (@playStep <= MAX_STEPS)
+        if (@playStep <= maxSteps)
           @step()
           @playStep++
-        else @handleError(new ExecutionError('too_many_steps', [MAX_STEPS]))
+        else @handleError(new ExecutionError('too_many_steps', [maxSteps]))
       , @speed)
       # set button icon to pause
       $('#img-play')
@@ -71,9 +70,10 @@ class Player
       false
 
   finish: ->
-    for i in [0..MAX_STEPS]
+    maxSteps = window.defaults.maxSteps
+    for i in [0..maxSteps]
       return if !@step()
-    @handleError(new ExecutionError('too_many_steps', [MAX_STEPS]))
+    @handleError(new ExecutionError('too_many_steps', [maxSteps]))
 
   changeSpeed: (value) ->
     @speed = value
@@ -89,7 +89,7 @@ class Player
       speed
     else
       # second instance: take default value
-      TIMEOUT
+      window.defaults.speed
 
   handleError: (error) ->
     # errorCodes is defined by view.phtml

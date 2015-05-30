@@ -5,11 +5,14 @@ define('BASEDIR', __DIR__ . '/');
 // deal with old browsers
 // TODO: IE <= 8 not supported by jquery
 
-// load configuration, helpers, authentication
-require_once BASEDIR . 'config/config.php';
-require_once BASEDIR . 'api/get-url.php';
+// deal with authentication
 require_once BASEDIR . 'includes/authentication.php';
-require_once BASEDIR . "includes/dataModel.php";
+secure_session_start();
+
+// load configuration, helpers, authentication
+require_once BASEDIR . 'includes/settings.php';
+require_once BASEDIR . 'includes/dataModel.php';
+require_once BASEDIR . 'includes/urlHelper.php';
 global $l10n;
 $__model = new DataModel();
 
@@ -18,8 +21,6 @@ $__action = isset($_GET['action']) ? $_GET['action'] : DEFAULT_PAGE;
 if (!file_exists(BASEDIR . "partials/$__action.phtml"))
     $__action = DEFAULT_PAGE;
 
-// deal with authentication
-secure_session_start();
 // SIGN IN
 if ((isset($_POST['signInBtn']) || isset($_POST['registerBtn'])) &&
     isset($_POST['username']) && isset($_POST['password'])
@@ -100,16 +101,109 @@ if ($__aid && $__algorithm) {
     <script type="text/javascript">
         window.defaults = {
             'action': '<?= ACTION ?>',
-            'section': <?= isset($_GET['section']) ? $_GET['section'] : 'null' ?>
+            'section': <?= isset($_GET['section']) ? $_GET['section'] : 'null' ?>,
+            'lang': '<?= LANG ?>'
         };
     </script>
 </head>
 <body>
-<!-- NAVIGATION BAR -->
-<nav class="navbar navbar-default" role="navigation">
+<div class="content-wrapper">
+    <!-- NAVIGATION BAR TOP -->
+    <nav class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                    <span class="sr-only"><?= $l10n['toggle_nav'] ?></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="<?= url(['action' => 'home']) ?>"><?= PROJECT_NAME ?></a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+                <ul class="nav navbar-nav">
+                    <li<?php if (ACTION === 'index'): ?> class="active"<?php endif ?>>
+                        <a href="<?= url(['action' => 'index']) ?>"><?= $l10n['index'] ?></a>
+                    </li>
+                    <?php if ($__uid && $_SESSION['rights'] > 0): ?>
+                        <li<?php if (ACTION === 'admin'): ?> class="active"<?php endif ?>>
+                            <a href="<?= url(['action' => 'admin']) ?>"><?= $l10n['administration'] ?></a>
+                        </li>
+                    <?php endif ?>
+                    <li<?php if (ACTION === 'new'): ?> class="active"<?php endif ?>>
+                        <a href="<?= url(['action' => 'new']) ?>"><?= $l10n['new'] ?></a>
+                    </li>
+                </ul>
+                <?php if ($__uid): ?>
+                    <form class="navbar-form navbar-right" role="form" method="post" action="<?= $signOutAction ?>">
+                        <span>
+                            <?= sprintf($l10n['welcome'],
+                                '<a href="' . url(['action' => 'user']) . '">' . $_SESSION['username'] . '</a>') ?>
+                        </span>
+                        <button type="submit" name="signOutBtn"
+                                class="btn btn-default"><?= $l10n['sign_out'] ?></button>
+                    </form>
+                <?php else: ?>
+                    <form class="navbar-form navbar-right" role="form" method="post">
+                        <div class="form-group">
+                            <label class="sr-only" for="username"><?= $l10n['username'] ?></label>
+                            <input class="form-control" name="username" placeholder="<?= $l10n['username'] ?>">
+                        </div>
+                        <div class="form-group">
+                            <label class="sr-only" for="password"><?= $l10n['password'] ?></label>
+                            <input type="password" class="form-control" name="password"
+                                   placeholder="<?= $l10n['password'] ?>">
+                        </div>
+                        <button type="submit" name="signInBtn" class="btn btn-default"><?= $l10n['sign_in'] ?></button>
+                        <a class="btn btn-link" href="<?= url(['action' => 'register']) ?>"><?= $l10n['register'] ?></a>
+                    </form>
+                <?php endif ?>
+            </div>
+        </div>
+    </nav>
+    <!-- NAVIGATION BAR TOP END -->
+
+    <div class="container">
+        <?php if (isset($errorMsg)): ?>
+            <!-- MESSAGE BOX FOR ERRORS -->
+            <div id="generalAlert" class="alert alert-danger alert-dismissible">
+                <button id="generalAlertClose" type="button" class="close">
+                    <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
+                </button>
+                <strong><?= $l10n['error'] ?></strong> <?= $errorMsg ?>
+            </div>
+        <?php endif ?>
+
+        <?php if (isset($successMsg)): ?>
+            <!-- MESSAGE BOX FOR SUCCESSES -->
+            <div id="generalSuccess" class="alert alert-success alert-dismissible">
+                <button id="generalSuccessClose" type="button" class="close">
+                    <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
+                </button>
+                <strong><?= $l10n['success'] ?></strong>
+                <?php if (isset($registerMsg)): ?>
+                    <ul>
+                        <li><?= $registerMsg ?></li>
+                        <li><?= $successMsg ?></li>
+                    </ul>
+                <?php else: ?>
+                    <?= $successMsg ?>
+                <?php endif ?>
+            </div>
+        <?php endif ?>
+
+        <!-- PAGE CONTENT BEGIN -->
+        <?php require_once BASEDIR . 'partials/' . ACTION . '.phtml' ?>
+        <!-- PAGE CONTENT END -->
+
+        <div class="footer-placeholder"></div>
+    </div>
+</div>
+
+<nav class="footer navbar navbar-default">
     <div class="container-fluid">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <div class="navbar-footer">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-footer">
                 <span class="sr-only"><?= $l10n['toggle_nav'] ?></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
@@ -117,80 +211,33 @@ if ($__aid && $__algorithm) {
             </button>
             <a class="navbar-brand" href="<?= url(['action' => 'home']) ?>"><?= PROJECT_NAME ?></a>
         </div>
-        <div class="collapse navbar-collapse" id="navbar">
-            <ul class="nav navbar-nav">
-                <li<?php if (ACTION === 'index'): ?> class="active"<?php endif ?>>
-                    <a href="<?= url(['action' => 'index']) ?>"><?= $l10n['index'] ?></a>
+        <div class="collapse navbar-collapse" id="navbar-footer">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="https://github.com/wurfmaul/kartulimardikas">GitHub</a>
                 </li>
-                <?php if ($__uid && $_SESSION['rights'] > 0): ?>
-                    <li<?php if (ACTION === 'admin'): ?> class="active"<?php endif ?>>
-                        <a href="<?= url(['action' => 'admin']) ?>"><?= $l10n['administration'] ?></a>
-                    </li>
-                <?php endif ?>
-                <li<?php if (ACTION === 'new'): ?> class="active"<?php endif ?>>
-                    <a href="<?= url(['action' => 'new']) ?>"><?= $l10n['new'] ?></a>
+                <li<?php if (ACTION === 'notice'): ?> class="active"<?php endif ?>>
+                    <a href="<?= url(['action' => 'notice']) ?>"><?= $l10n['notice'] ?></a>
+                </li>
+                <li class="dropup">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                        <span class="glyphicon glyphicon-globe"></span>
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu" role="menu">
+                        <?php foreach (Language::getInstance()->availableLanguages as $code => $name): ?>
+                            <li<?php if ($code === LANG): ?> class="disabled"<?php endif ?>>
+                                <a role="menuitem" tabindex="-1"
+                                   href="<?= url(['lang' => $code], true) ?>"><?= $name ?></a>
+                            </li>
+                        <?php endforeach ?>
+                    </ul>
                 </li>
             </ul>
-            <?php if ($__uid): ?>
-                <form class="navbar-form navbar-right" role="form" method="post" action="<?= $signOutAction ?>">
-                    <span>
-                        <?= sprintf($l10n['welcome'],
-                            '<a href="' . url(['action' => 'user']) . '">' . $_SESSION['username'] . '</a>') ?>
-                    </span>
-                    <button type="submit" name="signOutBtn" class="btn btn-default"><?= $l10n['sign_out'] ?></button>
-                </form>
-            <?php else: ?>
-                <form class="navbar-form navbar-right" role="form" method="post">
-                    <div class="form-group">
-                        <label class="sr-only" for="username"><?= $l10n['username'] ?></label>
-                        <input class="form-control" name="username" placeholder="<?= $l10n['username'] ?>">
-                    </div>
-                    <div class="form-group">
-                        <label class="sr-only" for="password"><?= $l10n['password'] ?></label>
-                        <input type="password" class="form-control" name="password"
-                               placeholder="<?= $l10n['password'] ?>">
-                    </div>
-                    <button type="submit" name="signInBtn" class="btn btn-default"><?= $l10n['sign_in'] ?></button>
-                    <a class="btn btn-link" href="<?= url(['action' => 'register']) ?>"><?= $l10n['register'] ?></a>
-                </form>
-            <?php endif ?>
         </div>
     </div>
 </nav>
 
-<div class="container">
-    <?php if (isset($errorMsg)): ?>
-        <!-- MESSAGE BOX FOR ERRORS -->
-        <div id="generalAlert" class="alert alert-danger alert-dismissible">
-            <button id="generalAlertClose" type="button" class="close">
-                <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
-            </button>
-            <strong><?= $l10n['error'] ?></strong> <?= $errorMsg ?>
-        </div>
-    <?php endif ?>
-
-    <?php if (isset($successMsg)): ?>
-        <!-- MESSAGE BOX FOR SUCCESSES -->
-        <div id="generalSuccess" class="alert alert-success alert-dismissible">
-            <button id="generalSuccessClose" type="button" class="close">
-                <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
-            </button>
-            <strong><?= $l10n['success'] ?></strong>
-            <?php if (isset($registerMsg)): ?>
-                <ul>
-                    <li><?= $registerMsg ?></li>
-                    <li><?= $successMsg ?></li>
-                </ul>
-            <?php else: ?>
-                <?= $successMsg ?>
-            <?php endif ?>
-        </div>
-    <?php endif ?>
-
-    <!-- PAGE CONTENT BEGIN -->
-    <?php require_once BASEDIR . 'partials/' . ACTION . '.phtml' ?>
-    <!-- PAGE CONTENT END -->
-</div>
 <script type="text/javascript" src="<?= JQUERY_PATH ?>"></script>
 <script type="text/javascript" src="<?= BOOTSTRAP_JS_PATH ?>"></script>
 <script type="text/javascript" src="js/common.js"></script>

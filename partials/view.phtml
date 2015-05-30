@@ -168,7 +168,11 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
                     </div>
                     <div id="description" class="panel-collapse">
                         <div class="panel-body">
+                            <?php if ($long_description): ?>
                             <?= $long_description ?>
+                            <?php else: ?>
+                                <?= $l10n['no_description'] ?>
+                            <?php endif ?>
                         </div>
                     </div>
                 </div>
@@ -301,6 +305,8 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
     <script type="text/javascript">
         // hand default values over to js
         window.defaults.sectionDefault = <?= SECTIONS_VIEW ?>;
+        window.defaults.maxSteps = <?= MAX_STEPS ?>;
+        window.defaults.speed = <?= SPEED ?>;
         // hand error messages over to js
         window.errorCodes = {
             <?php foreach ($l10n['runtime_errors'] as $key => $value): ?>
