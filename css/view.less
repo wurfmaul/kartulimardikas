@@ -2,49 +2,53 @@
 
 .algorithm {
   .cursor > table > tbody > tr {
-    > .node-box {
-      background-color: #3a8dd4 !important;
+    > .handle > .cursor-icon {
+      display: table-cell;
+      background: url("../img/cursor.png") no-repeat;
+      height: 18px;
+      width: 18px;
+      position: relative;
+      left: 1px;
     }
-    > .handle .glyphicon {
-      left: 5px;
-      visibility: visible;
-      @angle: 225deg;
-      -moz-transform: rotate(@angle);
-      -webkit-transform: rotate(@angle);
-      -o-transform: rotate(@angle);
-      -ms-transform: rotate(@angle);
-    }
-  }
-  input, select {
-    background-color: transparent !important;
-    border-color: transparent !important;
   }
 }
 
 .controls {
+  #returnValue {
+    text-align: center;
+    font-weight: bold;
+  }
   #speed-control {
-    display: inline-block;
-    margin-top: 10px;
-    font-size: small;
+    margin: 10px auto;
+  }
+  #speed-slider {
+    margin: auto 10px;
+    .ui-slider-handle {
+      margin-left: -9px;
+    }
+  }
+  #input-footer, #output-footer {
+    padding: 2px;
+    font-size: x-small;
+    text-align: left;
   }
 }
 
 .variables {
   .value-container {
     .read, .write {
+      font-size: x-small;
       display: none;
+      position: absolute;
+      top: auto;
+      right: 1px;
+      bottom: 1px;
     }
-    &.highlight-read {
-      padding: 6px 5px;
-      .read {
-        display: inline;
-      }
+    &.highlight-read .read {
+      display: inline-block;
     }
-    &.highlight-write {
-      padding: 6px 5px;
-      .write {
-        display: inline;
-      }
+    &.highlight-write .write {
+      display: inline-block;
     }
   }
 }
@@ -56,7 +60,6 @@
 }
 
 .highlight-read {
-  font-weight: bold;
   background-color: #f0ad4e !important;
   border-color: #eea236 !important;
 }

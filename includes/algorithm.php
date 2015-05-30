@@ -13,10 +13,8 @@ class ArithmeticNode extends Node
         'plus' => '+',
         'minus' => '&minus;',
         'times' => '&times;',
-        'by' => '&frasl;',
-        'mod' => '%',
-//        'and' => '&&',
-//        'or' => '||'
+        'by' => '/',
+        'mod' => '%'
     ];
 
     public function __construct($nid, $left, $right, $op)
@@ -56,7 +54,7 @@ class ArithmeticNode extends Node
             <table>
                 <tr>
                     <td class="handle node-box top bottom left">
-                        <span class="glyphicon glyphicon-map-marker"></span>
+                        <span class="cursor-icon"></span>
                     </td>
                     <td class="node-box top right bottom full-width">
                         <?php if ($params['mode'] === 'edit'): ?>
@@ -141,7 +139,7 @@ class AssignNode extends Node
             <table>
                 <tr>
                     <td class="handle node-box top left">
-                        <span class="glyphicon glyphicon-map-marker"></span>
+                        <span class="cursor-icon"></span>
                     </td>
                     <td class="node-box top right bottom full-width">
                         <?php if ($params['mode'] === 'edit'): ?>
@@ -282,7 +280,7 @@ class CompareNode extends Node
             <table>
                 <tr>
                     <td class="handle node-box top bottom left">
-                        <span class="glyphicon glyphicon-map-marker"></span>
+                        <span class="cursor-icon"></span>
                     </td>
                     <td class="node-box top right bottom full-width">
                         <?php if ($params['mode'] === 'edit'): ?>
@@ -381,7 +379,7 @@ class IfNode extends Node
             <table>
                 <tr>
                     <td class="handle node-box top left">
-                        <span class="glyphicon glyphicon-map-marker"></span>
+                        <span class="cursor-icon"></span>
                     </td>
                     <td class="node-box top right bottom full-width">
                         <?php if ($params['mode'] === 'edit'): ?>
@@ -482,7 +480,7 @@ class IncNode extends Node
             <table>
                 <tr>
                     <td class="handle node-box top bottom left">
-                        <span class="glyphicon glyphicon-map-marker"></span>
+                        <span class="cursor-icon"></span>
                     </td>
                     <td class="node-box top right bottom full-width">
                         <?php if ($params['mode'] === 'edit'): ?>
@@ -552,7 +550,7 @@ class ReturnNode extends Node
             <table>
                 <tr>
                     <td class="handle node-box top left bottom">
-                        <span class="glyphicon glyphicon-map-marker"></span>
+                        <span class="cursor-icon"></span>
                     </td>
                     <td class="node-box top right bottom full-width">
                         <?php if ($params['mode'] === 'edit'): ?>
@@ -614,7 +612,7 @@ class ValueNode extends Node
             <table>
                 <tr>
                     <td class="handle node-box top left bottom">
-                        <span class="glyphicon glyphicon-map-marker"></span>
+                        <span class="cursor-icon"></span>
                     </td>
                     <td class="node-box top right bottom full-width">
                         <?php if ($params['mode'] === 'edit'): ?>
@@ -690,7 +688,7 @@ class WhileNode extends Node
             <table>
                 <tr>
                     <td class="handle node-box top left">
-                        <span class="glyphicon glyphicon-map-marker"></span>
+                        <span class="cursor-icon"></span>
                     </td>
                     <td class="node-box top right bottom full-width">
                         <?php if ($params['mode'] === 'edit'): ?>

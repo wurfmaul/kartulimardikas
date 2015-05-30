@@ -434,7 +434,7 @@ class ReturnNode extends Node
 
   execute: (player, node) ->
     value = @executeValue(@value, player)
-    alert('Return value: ' + value)
+    $('#returnValue').val(value)
     -1 # no further steps
 
   toJSON: ->

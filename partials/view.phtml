@@ -16,11 +16,6 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
     require_once BASEDIR . "includes/algorithm.php";
     $tree = new Tree(json_decode($__algorithm->tree));
 
-    // prepare sections
-    require_once BASEDIR . "includes/viewHelper.php";
-    $sectionNum = isset($_GET['section']) ? $_GET['section'] : SECTIONS_VIEW;
-    $section = sections($sectionNum, 6);
-
     // use algorithm header
     require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
     ?>
@@ -53,8 +48,7 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
 
                 <!-- TAB - CONTROLS -->
                 <div class="panel panel-default">
-                    <div class="panel-heading<?php if (!$section[0]): ?> collapsed<?php endif ?>"
-                         data-target="#controls">
+                    <div class="panel-heading" data-target="#controls">
                         <h4 class="panel-title">
                             <span class="glyphicon glyphicon-chevron-down"></span>
                             <?= $l10n['controls'] ?>
@@ -82,12 +76,35 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
                                     </button>
                                 </div>
                                 <div id="speed-control">
-                                    <div id="speed-slider"></div>
-                                    <?= $l10n['steps_per_second'] ?> <span id="speed-info">2</span>
+                                    <table>
+                                        <tr>
+                                            <td><span class="fa fa-bicycle"></span></td>
+                                            <td style="width:100%">
+                                                <div id="speed-slider"></div>
+                                            </td>
+                                            <td><span class="fa fa-rocket"></span></td>
+                                        </tr>
+                                    </table>
                                 </div>
                             </div>
                             <div class="col-md-7">
-                                <span style="color: grey"><?= $l10n['no_params_to_define'] ?></span>
+                                <div class="panel panel-default">
+                                    <div class="panel-body">
+                                        <span style="color: grey"><?= $l10n['no_params_to_define'] ?></span>
+                                    </div>
+                                    <div id="input-footer" class="panel-footer">
+                                        <?= $l10n['input'] ?>
+                                    </div>
+                                </div>
+                                <div class="panel panel-default">
+                                    <div class="panel-body">
+                                        <label for="returnValue" class="sr-only">Return value</label>
+                                        <input id="returnValue" class="form-control input-sm" disabled="disabled">
+                                    </div>
+                                    <div id="output-footer" class="panel-footer">
+                                        <?= $l10n['output'] ?>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -95,8 +112,7 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
 
                 <!-- TAB - PSEUDOCODE -->
                 <div class="panel panel-default">
-                    <div class="panel-heading<?php if (!$section[1]): ?> collapsed<?php endif ?>"
-                         data-target="#pseudocode">
+                    <div class="panel-heading" data-target="#pseudocode">
                         <h4 class="panel-title">
                             <span class="glyphicon glyphicon-chevron-down"></span>
                             <?= $name ?>
@@ -118,8 +134,7 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
 
                 <!-- TAB - SOURCE CODE -->
                 <div class="panel panel-default">
-                    <div class="panel-heading<?php if (!$section[2]): ?> collapsed<?php endif ?>"
-                         data-target="#sourcecode">
+                    <div class="panel-heading" data-target="#sourcecode">
                         <h4 class="panel-title">
                         <span
                             class="glyphicon glyphicon-chevron-down"></span>
@@ -136,11 +151,16 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+        <!-- LEFT COLUMN END -->
 
+        <!-- RIGHT COLUMN -->
+        <div class="col-md-6">
+            <div class="panel-group" id="accordion-right">
                 <!-- TAB - DESCRIPTION -->
-                <div class="panel panel-default" <?php if (!$long_description): ?>style="display: none;"<?php endif ?>>
-                    <div class="panel-heading<?php if (!$section[3]): ?> collapsed<?php endif ?>"
-                         data-target="#description">
+                <div class="panel panel-default">
+                    <div class="panel-heading" data-target="#description">
                         <h4 class="panel-title">
                             <span class="glyphicon glyphicon-chevron-down"></span>
                             <?= $l10n['description'] ?>
@@ -152,18 +172,10 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        <!-- LEFT COLUMN END -->
-
-        <!-- RIGHT COLUMN -->
-        <div class="col-md-6">
-            <div class="panel-group" id="accordion-right">
 
                 <!-- TAB - MEMORY -->
                 <div class="panel panel-default">
-                    <div class="panel-heading<?php if (!$section[4]): ?> collapsed<?php endif ?>" data-target="#memory"
-                         data-speed="100">
+                    <div class="panel-heading" data-target="#memory" data-speed="100">
                         <h4 class="panel-title">
                             <span class="glyphicon glyphicon-chevron-down"></span>
                             <?= $l10n['memory'] ?>
@@ -196,17 +208,17 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
                                                             <button
                                                                 class="btn btn-default value-container offset_<?= $offset ?>"
                                                                 disabled="disabled">
-                                                                <span class="glyphicon glyphicon-log-in write"></span>
                                                                 <span class="value"><?= $value ?></span>
-                                                                <span class="glyphicon glyphicon-log-out read"></span>
+                                                                <span class="glyphicon glyphicon-pencil write"></span>
+                                                                <span class="glyphicon glyphicon-eye-open read"></span>
                                                             </button>
                                                         <?php endforeach ?>
                                                     <?php else: // deal with "elem-{?,value}" ?>
                                                         <button class="btn btn-default value-container"
                                                                 disabled="disabled">
-                                                            <span class="glyphicon glyphicon-log-in write"></span>
                                                             <span class="value"><?= $var->value ?></span>
-                                                            <span class="glyphicon glyphicon-log-out read"></span>
+                                                            <span class="glyphicon glyphicon-pencil write"></span>
+                                                            <span class="glyphicon glyphicon-eye-open read"></span>
                                                         </button>
                                                     <?php endif ?>
                                                 </div>
@@ -224,8 +236,7 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
 
                 <!-- TAB - STATISTICS -->
                 <div class="panel panel-default">
-                    <div class="panel-heading<?php if (!$section[5]): ?> collapsed<?php endif ?>"
-                         data-target="#statistics">
+                    <div class="panel-heading" data-target="#statistics">
                         <h4 class="panel-title">
                         <span
                             class="glyphicon glyphicon-chevron-down"></span>
@@ -288,6 +299,9 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
         <!-- RIGHT COLUMN END -->
     </div>
     <script type="text/javascript">
+        // hand default values over to js
+        window.defaults.sectionDefault = <?= SECTIONS_VIEW ?>;
+        // hand error messages over to js
         window.errorCodes = {
             <?php foreach ($l10n['runtime_errors'] as $key => $value): ?>
             '<?= $key ?>': "<?= $value ?>",

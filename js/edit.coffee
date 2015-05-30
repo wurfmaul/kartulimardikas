@@ -2,7 +2,7 @@ window.VARSITE = $("#insertVarsHere") # Specifies the site, where variables are 
 
 class Api
   @editInfo: ->
-    aid = $('#aid').data('val')
+    aid = window.defaults.aid
     name = $('#in-name').val()
     desc = $('#in-desc').val()
     long = $('#in-long').val()
@@ -26,7 +26,7 @@ class Api
 
   @editVariable: (vid) ->
     varRow = $('#var-' + vid)
-    aid = $('#aid').data('val')
+    aid = window.defaults.aid
     name = varRow.find('.name').val()
     type = varRow.find('.type').val()
     value = varRow.find('.value').val()
@@ -60,7 +60,7 @@ class Api
     )
 
   @removeVariable: (vid) ->
-    aid = $('#aid').data('val')
+    aid = window.defaults.aid
     $.ajax("api/edit-algorithm.php?area=var&action=remove",
       type: 'POST'
       data: {aid: aid, vid: vid}
@@ -77,7 +77,7 @@ class Api
     )
 
   @editScript: (tree) ->
-    aid = $('#aid').data('val')
+    aid = window.defaults.aid
     $.ajax("api/edit-algorithm.php?area=script",
       type: 'POST'
       data: {aid: aid, tree: tree}

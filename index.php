@@ -89,6 +89,7 @@ if ($__aid && $__algorithm) {
     <title><?= PROJECT_NAME ?></title>
 
     <link href="<?= BOOTSTRAP_CSS_PATH ?>" rel="stylesheet">
+    <link href="<?= FONT_AWESOME_PATH ?>" rel="stylesheet">
     <link href="css/common.css" rel="stylesheet">
     <?php if (file_exists('css/' . ACTION . '.css')): ?>
         <link href="css/<?= ACTION ?>.css" rel="stylesheet"/>
@@ -96,6 +97,12 @@ if ($__aid && $__algorithm) {
     <?php if (ACTION === 'edit' || ACTION === 'view'): ?>
         <link href="<?= JQUERYUI_CSS_PATH ?>" rel="stylesheet"/>
     <?php endif ?>
+    <script type="text/javascript">
+        window.defaults = {
+            'action': '<?= ACTION ?>',
+            'section': <?= isset($_GET['section']) ? $_GET['section'] : 'null' ?>
+        };
+    </script>
 </head>
 <body>
 <!-- NAVIGATION BAR -->
@@ -152,9 +159,6 @@ if ($__aid && $__algorithm) {
 </nav>
 
 <div class="container">
-    <!-- The current ACTION for jquery to use -->
-    <div id="action" data-val="<?= ACTION ?>" style="display: none"></div>
-
     <?php if (isset($errorMsg)): ?>
         <!-- MESSAGE BOX FOR ERRORS -->
         <div id="generalAlert" class="alert alert-danger alert-dismissible">
@@ -187,11 +191,11 @@ if ($__aid && $__algorithm) {
     <?php require_once BASEDIR . 'partials/' . ACTION . '.phtml' ?>
     <!-- PAGE CONTENT END -->
 </div>
-
 <script type="text/javascript" src="<?= JQUERY_PATH ?>"></script>
 <script type="text/javascript" src="<?= BOOTSTRAP_JS_PATH ?>"></script>
 <script type="text/javascript" src="js/common.js"></script>
 <?php if (ACTION === 'edit' || ACTION === 'view'): ?>
+    <script type="text/javascript" src="js/section.js"></script>
     <script type="text/javascript" src="js/algorithm.js"></script>
     <script type="text/javascript" src="<?= JQUERYUI_JS_PATH ?>"></script>
 <?php endif ?>

@@ -16,11 +16,6 @@ if ($__aid && $__uid && $__owner) {
     require_once BASEDIR . "includes/algorithm.php";
     $tree = new Tree(json_decode($__algorithm->tree));
 
-    // prepare sections
-    require_once BASEDIR . "includes/viewHelper.php";
-    $sectionNum = isset($_GET['section']) ? $_GET['section'] : SECTIONS_EDIT;
-    $section = sections($sectionNum, 3);
-
     // use algorithm header
     require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
 }
@@ -52,8 +47,7 @@ if ($__aid && $__uid && $__owner) {
             <div class="panel-group" id="accordion-left">
                 <!-- TAB - GENERAL INFORMATION -->
                 <div class="panel panel-default">
-                    <div class="panel-heading<?php if (!$section[0]): ?> collapsed<?php endif ?>"
-                         data-target="#infoPanel">
+                    <div class="panel-heading" data-target="#infoPanel">
                         <h4 class="panel-title">
                             <span class="glyphicon glyphicon-chevron-down"></span>
                             <?= $l10n['general_info'] ?>
@@ -87,8 +81,7 @@ if ($__aid && $__uid && $__owner) {
 
                 <!-- TAB - VARIABLES -->
                 <div class="panel panel-default">
-                    <div class="panel-heading<?php if (!$section[1]): ?> collapsed<?php endif ?>"
-                         data-target="#varPanel">
+                    <div class="panel-heading" data-target="#varPanel" data-speed="100">
                         <h4 class="panel-title">
                             <span class="glyphicon glyphicon-chevron-down"></span>
                             <?= $l10n['variables'] ?>
@@ -209,8 +202,7 @@ if ($__aid && $__uid && $__owner) {
             <div class="panel-group" id="accordion-right">
                 <!-- TAB - STEPS -->
                 <div class="panel panel-default">
-                    <div class="panel-heading<?php if (!$section[2]): ?> collapsed<?php endif ?>"
-                         data-target="#stepPanel">
+                    <div class="panel-heading" data-target="#stepPanel">
                         <h4 class="panel-title">
                             <span class="glyphicon glyphicon-chevron-down"></span>
                             <?= $l10n['algorithm'] ?>
@@ -276,6 +268,10 @@ if ($__aid && $__uid && $__owner) {
         </div>
         <!-- RIGHT COLUMN END -->
     </div>
+    <script type="text/javascript">
+        // hand default values over to js
+        window.defaults.sectionDefault = <?= SECTIONS_EDIT ?>;
+    </script>
 <?php else: ?>
     <div class="alert alert-danger" role="alert">
         <strong><?= $l10n['error'] ?></strong><br/>

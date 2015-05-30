@@ -22,7 +22,7 @@ if (isset($_GET['uid'])) {
 
 <?php if (isset($user)):
     $ownAccount = $__uid === $user->uid;
-    $algorithms = $__model->fetchAlgorithmsOfUser($user->uid, $ownAccount, 0, MAX_NUMBER_OF_ALGORITHMS);
+    $algorithms = $__model->fetchAlgorithmsOfUser($user->uid, $ownAccount, 0, NUMBER_OF_MY_ALGORITHMS);
     ?>
     <!-- HEADER -->
     <div class="page-header">

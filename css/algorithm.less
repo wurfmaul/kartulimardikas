@@ -7,6 +7,12 @@
 @value-node-color: #d3d3d3;
 @while-node-color: #d5a2da;
 
+.prepare-color(@c) {
+  @color: screen(@c, #cccccc);
+  @color-strong: @c;
+  @color-stronger: darken(@c, 30%);
+}
+
 .algorithm {
   ul {
     padding: 0;
@@ -16,9 +22,6 @@
     .node {
       @border: 1px solid gray;
       @radius: 5px;
-      @form-background-color-factor: 5%;
-      @form-border-color-factor: 40%;
-      @form-border-style: 1px dashed;
 
       list-style-type: none;
 
@@ -32,13 +35,6 @@
         background: none;
         border: none;
         line-height: normal;
-      }
-
-      .handle {
-        .glyphicon {
-          // hide image, when not cursor
-          visibility: hidden;
-        }
       }
 
       .invalid {
@@ -90,15 +86,19 @@
         }
       }
 
-      .nodeStyle(@color) {
-        & > table > tbody > tr > td {
-          &.node-box {
-            background-color: @color;
-            select, input {
-              background-color: darken(@color, @form-background-color-factor);
-              border: @form-border-style darken(@color, @form-border-color-factor);
-            }
+      .nodeStyle(@c) {
+        // generate @color, @color-strong, @color-stronger
+        .prepare-color(@c);
+        // format node-box
+        & > table > tbody > tr > td.node-box {
+          background-color: @color;
+          select, input {
+            border: 1px dashed @color-stronger;
           }
+        }
+        // format highlighted node-box (cursor)
+        &.cursor > table > tbody > tr > td.node-box {
+          background-color: @color-strong;
         }
       }
 
@@ -109,22 +109,22 @@
         .nodeStyle(@assign-node-color);
       }
       &.compare-node {
-        .nodeStyle(@compare-node-color)
+        .nodeStyle(@compare-node-color);
       }
       &.return-node {
-        .nodeStyle(@return-node-color)
+        .nodeStyle(@return-node-color);
       }
       &.if-node {
-        .nodeStyle(@if-node-color)
+        .nodeStyle(@if-node-color);
       }
       &.inc-node {
-        .nodeStyle(@inc-node-color)
+        .nodeStyle(@inc-node-color);
       }
       &.value-node {
-        .nodeStyle(@value-node-color)
+        .nodeStyle(@value-node-color);
       }
       &.while-node {
-        .nodeStyle(@while-node-color)
+        .nodeStyle(@while-node-color);
       }
     }
   }

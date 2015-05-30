@@ -23,6 +23,7 @@
             <?php endif ?>
         </ul>
     <?php endif ?>
-    <!-- The current AID for jquery to use -->
-    <div id="aid" data-val="<?= $__aid ?>" style="display: none"></div>
+    <script type="text/javascript">
+        window.defaults.aid = <?= $__aid ?>;
+    </script>
 <?php endif ?>

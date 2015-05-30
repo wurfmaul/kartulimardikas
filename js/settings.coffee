@@ -1,6 +1,6 @@
 class Api
   @setVisibility = (status) ->
-    aid = $('#aid').data('val')
+    aid = window.defaults.aid
     $.ajax "api/edit-algorithm.php?area=settings",
       type: 'POST'
       data: {aid: aid, status: status}
@@ -14,7 +14,7 @@ class Api
         @_printError("Storage Error: " + errorThrown)
 
   @delete = ->
-    aid = $('#aid').data('val')
+    aid = window.defaults.aid
     $.ajax "api/edit-algorithm.php?area=delete",
       type: 'POST'
       data: {aid: aid}

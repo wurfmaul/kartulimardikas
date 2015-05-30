@@ -4,6 +4,7 @@ MAX_STEPS = 1000 # number of steps an algorithm may take
 class Player
   constructor: (@tree, @stats) ->
     @memory = @tree.memory
+    @speed = @computeSpeed()
     @reset()
 
   reset: ->
@@ -11,6 +12,8 @@ class Player
     @tree.reset()
     @memory.reset()
     @stats.reset()
+    # delete return value
+    $('#returnValue').val('')
     # find first node to execute
     @curNode = null
     @nextNode = @tree.mark(@, @tree.root)
@@ -36,7 +39,7 @@ class Player
           @step()
           @playStep++
         else @handleError(new ExecutionError('too_many_steps', [MAX_STEPS]))
-      , TIMEOUT)
+      , @speed)
       # set button icon to pause
       $('#img-play')
       .removeClass('glyphicon-play')
@@ -71,6 +74,22 @@ class Player
     for i in [0..MAX_STEPS]
       return if !@step()
     @handleError(new ExecutionError('too_many_steps', [MAX_STEPS]))
+
+  changeSpeed: (value) ->
+    @speed = value
+    # press pause and play again in order to re-initialize timer
+    @play()
+    @play()
+    # store the new speed to the browser's local storage
+    localStorage.setItem('speed', value)
+
+  computeSpeed: ->
+    if (localStorage? and (speed = localStorage.getItem('speed'))?)
+      # first instance: ask local storage about speed
+      speed
+    else
+      # second instance: take default value
+      TIMEOUT
 
   handleError: (error) ->
     # errorCodes is defined by view.phtml
@@ -168,14 +187,8 @@ $ ->
   $('#btn-finish').click -> player.finish()
 
   $('#speed-slider').slider(
-    value: parseInt(1000 / TIMEOUT),
+    value: parseInt(1000 / player.speed),
     min: 1,
     max: 20,
-    slide: (event, ui) ->
-      $("#speed-info").text(ui.value)
-    change: (event, ui) ->
-      TIMEOUT = 1000 / ui.value
-      # press pause and play again in order to re-initialize timer
-      player.play()
-      player.play()
+    change: (event, ui) -> player.changeSpeed(1000 / ui.value)
   )
