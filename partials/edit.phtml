@@ -10,7 +10,7 @@ if ($__aid && $__uid && $__owner) {
         require_once BASEDIR . 'includes/markdownHelper.php';
         $long_preview = parseMarkdown($long_description);
     } else {
-        $long_description = $l10n['long_description'];
+        $long_description = "";
         $long_preview = "";
     }
 
@@ -240,6 +240,9 @@ if ($__aid && $__uid && $__owner) {
                                 <button id="btn-add-assign" type="button" class="btn btn-default"
                                         data-node="node_assign"><?= $l10n['assign_node_title'] ?>
                                 </button>
+                                <button id="btn-add-comment" type="button" class="btn btn-default"
+                                        data-node="node_comment"><?= $l10n['comment_node_title'] ?>
+                                </button>
                                 <button id="btn-add-compare" type="button" class="btn btn-default"
                                         data-node="node_compare"><?= $l10n['compare_node_title'] ?>
                                 </button>
@@ -273,6 +276,7 @@ if ($__aid && $__uid && $__owner) {
                                 ];
                                 // generate prototypes
                                 Node::printPrototype(Node::ASSIGN_NODE, $params);
+                                Node::printPrototype(Node::COMMENT_NODE, $params);
                                 Node::printPrototype(Node::COMPARE_NODE, $params);
                                 Node::printPrototype(Node::RETURN_NODE, $params);
                                 Node::printPrototype(Node::IF_NODE, $params);

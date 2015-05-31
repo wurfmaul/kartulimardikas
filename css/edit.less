@@ -58,13 +58,26 @@
       list-style-type: none;
     }
     .error {
-      background-color: #ff4a46;
-      border: 1px dashed red;
+      background-color: lighten(#ff4a46, 20%);
+      border: 1px dashed #ff4a46;
     }
   }
 
   .handle {
     cursor: move;
+  }
+
+  .toggle-comment {
+    margin: 3px;
+    cursor: pointer;
+  }
+  .comment-container {
+    width: 100%;
+    padding: 0 3px 3px 0;
+
+    .comment-text {
+      width: 100%;
+    }
   }
 
   #node-btn-group {
@@ -74,6 +87,9 @@
     }
     #btn-add-assign {
       .btnStyle(@assign-node-color);
+    }
+    #btn-add-comment {
+      .btnStyle(@comment-node-color);
     }
     #btn-add-compare {
       .btnStyle(@compare-node-color);

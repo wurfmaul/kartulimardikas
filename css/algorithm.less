@@ -1,4 +1,5 @@
 @assign-node-color: #ffb181;
+@comment-node-color: #808080;
 @compare-node-color: #fff465;
 @return-node-color: #a6e0ff;
 @if-node-color: #b2e792;
@@ -104,6 +105,9 @@
 
       &.assign-node {
         .nodeStyle(@assign-node-color);
+      }
+      &.comment-node {
+        .nodeStyle(@comment-node-color);
       }
       &.compare-node {
         .nodeStyle(@compare-node-color);

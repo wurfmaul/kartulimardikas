@@ -11,9 +11,22 @@
       left: 1px;
     }
   }
+
+  .comment-container {
+    overflow: hidden;
+    &.collapsed {
+      height: 20px;
+    }
+    .toggle-comment {
+      float: right;
+      margin: 3px;
+      cursor: pointer;
+    }
+  }
 }
 
 .controls {
+  text-align: center;
   #returnValue {
     text-align: center;
     font-weight: bold;
@@ -57,8 +70,4 @@
 .highlight-read {
   background-color: #f0ad4e !important;
   border-color: #eea236 !important;
-}
-
-.controls {
-  text-align: center;
 }

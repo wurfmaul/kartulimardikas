@@ -103,6 +103,7 @@ $l10n['assignments'] = "Zuweisungen";
 $l10n['comparisons'] = "Vergleiche";
 $l10n['arithmetic'] = "Arithmetische (+ &minus; &times; / %)";
 $l10n['assign_node_title'] = "Zuweisung";
+$l10n['comment_node_title'] = "Kommentar";
 $l10n['compare_node_title'] = "Vergleich";
 $l10n['compare_node_operation'] = "Operation";
 $l10n['return_node_title'] = "Rückgabe";

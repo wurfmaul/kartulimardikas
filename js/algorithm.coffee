@@ -114,6 +114,7 @@ class Node
     # call proper parsing method
     switch type
       when 'assign' then AssignNode.parse(node, tree, memory)
+      when 'comment' then CommentNode.parse(node, tree, memory)
       when 'compare' then CompareNode.parse(node, tree, memory)
       when 'if' then IfNode.parse(node, tree, memory)
       when 'inc' then IncNode.parse(node, tree, memory)
@@ -290,12 +291,11 @@ class BlockNode extends Node
   mark: (player, node) ->
     # if BlockNode itself should be marked...
     if (node is @nid)
-      # ... mark first child, if there is any
-      if (@nodes.length > 0)
-        firstNid = @nodes[0]
-        return player.tree.tree[firstNid].mark(player, firstNid)
-      else
-        return -1
+      # ... mark first child that wants
+      for n,i in @nodes
+        marked = player.tree.tree[n].mark(player, n)
+        return marked if marked > -1
+      return -1
       # if a child node should be marked...
     else
       for n,i in @nodes
@@ -330,6 +330,26 @@ class BlockNode extends Node
     )
     nid = tree.length
     new @(nid, nodes)
+
+class CommentNode extends Node
+  constructor: (@nid, @comment) ->
+
+  execute: (player, node) ->
+
+  mark: (player, node) ->
+    -1 # never let this node be marked
+
+  toJSON: ->
+    {
+    nid: @nid
+    node: 'comment'
+    comment: @comment
+    }
+
+  @parse: (node, tree, memory) =>
+    comment = @findSubNode(node, '.comment-text').val()
+    nid = tree.length
+    new @(nid, comment)
 
 class CompareNode extends Node
   constructor: (@nid, @left, @right, @operator) ->

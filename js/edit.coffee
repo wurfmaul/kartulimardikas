@@ -213,7 +213,6 @@ class StepForm
     @updateActionHandlers(node)
 
   removeNode: (node) ->
-    # TODO: undo function
     node.hide('slow', =>
       node.remove()
       @varForm.updateVarCount()
@@ -233,7 +232,7 @@ class StepForm
   updateActionHandlers: (parent) ->
     # update action handlers
     initVarInput(parent.find('.combobox'))
-    parent.find('input').off('blur').blur => @saveChanges() # save when leaving inputs
+    parent.find('input, textarea').off('blur').blur => @saveChanges() # save when leaving inputs
     parent.find('select').off('change').change => @saveChanges() # save when changing selects
     parent.find('.node-remove').off('click').click (event) =>
       @removeNode($(event.currentTarget).parents('.node:first'))
@@ -334,9 +333,7 @@ $ ->
 
   # INFORMATION SECTION
   $('#in-name, #in-desc, #in-long').blur -> Api.editInfo()
-  $('#in-long').keyup(->
-    typeWatch((-> refreshPreview()), 500)
-  )
+  $('#in-long').keyup(-> typeWatch((-> refreshPreview()), 500))
   $('#refresh-preview').click(-> refreshPreview())
 
   # VARIABLE SECTION
@@ -355,3 +352,7 @@ $ ->
   $('#node-btn-group').children('button').click ->
     stepForm.addNode($(this).data('node'))
     Api.editScript(Tree.toJSON())
+  $('.toggle-comment').click(->
+    $(this).parent().find('.comment-container').toggle('slow')
+    $(this).toggleClass('fa-plus-square fa-minus-square')
+  )

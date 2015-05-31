@@ -1,9 +1,9 @@
 <?php
-function parseMarkdown($code)
+function parseMarkdown($code, $printContainer = true, $printBreaks = true)
 {
     require_once BASEDIR . 'lib/parsedown/Parsedown.php';
     $parser = Parsedown::instance();
-    $parser->setBreaksEnabled(true);
+    $parser->setBreaksEnabled($printBreaks);
     $parser->setMarkupEscaped(true);
-    return $parser->text($code);
+    return $printContainer ? $parser->text($code) : $parser->line($code);
 }

@@ -201,6 +201,67 @@ class BlockNode extends Node
     }
 }
 
+class CommentNode extends Node
+{
+    /** @var string */
+    protected $comment;
+
+    public function __construct($nid, $comment)
+    {
+        $this->nodeId = $nid;
+        $this->comment = $comment;
+    }
+
+    public static function parse($node, $tree)
+    {
+        $comment = isset($node->comment) ? $node->comment : null;
+        return new self($node->nid, $comment);
+    }
+
+    public function getSource($params)
+    {
+        require_once BASEDIR . 'includes/markdownHelper.php';
+        $comment = parseMarkdown($this->comment, false, false);
+        $comment = preg_replace('/\n/', '<br/># ', $comment);
+        return "# " . $comment;
+    }
+
+    public function printHtml(&$params)
+    { ?>
+        <!-- COMMENT NODE -->
+        <li id="node_<?= $this->nodeId ?>" class="node comment-node" data-node-type="comment"
+            data-node-id="<?= $this->nodeId ?>">
+            <table>
+                <tr>
+                    <td class="handle node-box top bottom left">
+                        <span class="cursor-icon"></span>
+                    </td>
+                    <td class="node-box top right bottom full-width">
+                        <?php if ($params['mode'] === 'edit'): ?>
+                            <?= TreeHelper::l10n('comment_node_title') ?>
+                            <span class="toggle-comment fa fa-plus-square"></span>
+                            <span class="invalid label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
+                            <button type="button" class="close node-remove" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            <div class="comment-container" style="display: none;">
+                                <textarea class="form-control comment-text" rows="1"><?= $this->comment ?></textarea>
+                            </div>
+                        <?php else: ?>
+                            <div class="comment-container collapsed">
+                                <span class="toggle-comment fa fa-plus-square"></span>
+                                <span class="fa fa-comment"></span>
+                                <?php require_once BASEDIR . 'includes/markdownHelper.php' ?>
+                                <?= parseMarkdown($this->comment, false) ?>
+                            </div>
+                        <?php endif ?>
+                    </td>
+                </tr>
+            </table>
+        </li>
+    <?php }
+}
+
 class CompareNode extends Node
 {
     /** @var Value */
@@ -719,6 +780,7 @@ abstract class Node
 {
     const ASSIGN_NODE = "assign";
     const BLOCK_NODE = "block";
+    const COMMENT_NODE = "comment";
     const COMPARE_NODE = "compare";
     const RETURN_NODE = "return";
     const IF_NODE = "if";
@@ -754,6 +816,8 @@ abstract class Node
                 return AssignNode::parse($node, $tree);
             case self::BLOCK_NODE:
                 return BlockNode::parse($node, $tree);
+            case self::COMMENT_NODE:
+                return CommentNode::parse($node, $tree);
             case self::COMPARE_NODE:
                 return CompareNode::parse($node, $tree);
             case self::RETURN_NODE:
@@ -815,6 +879,9 @@ abstract class Node
         switch ($type) {
             case self::ASSIGN_NODE:
                 $node = new AssignNode($type, null, null);
+                break;
+            case self::COMMENT_NODE:
+                $node = new CommentNode($type, null);
                 break;
             case self::COMPARE_NODE:
                 $node = new CompareNode($type, null, null, null);

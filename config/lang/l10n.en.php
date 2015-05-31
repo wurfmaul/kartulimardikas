@@ -103,6 +103,7 @@ $l10n['assignments'] = "assignments";
 $l10n['comparisons'] = "comparisons";
 $l10n['arithmetic'] = "arithmetic (+ &minus; &times; / %)";
 $l10n['assign_node_title'] = "Assign";
+$l10n['comment_node_title'] = "Comment";
 $l10n['compare_node_title'] = "Compare";
 $l10n['compare_node_operation'] = "operation";
 $l10n['return_node_title'] = "Return";

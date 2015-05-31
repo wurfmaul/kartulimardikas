@@ -181,14 +181,35 @@ $ ->
   stats = new Stats(tree.memory)
   player = new Player(tree, stats)
 
+  # CONTROLS SECTION
   $('#btn-reset').click -> player.reset()
   $('#btn-play').click -> player.play()
   $('#btn-step').click -> player.step()
   $('#btn-finish').click -> player.finish()
-
   $('#speed-slider').slider(
     value: parseInt(1000 / player.speed),
     min: 1,
     max: 20,
     change: (event, ui) -> player.changeSpeed(1000 / ui.value)
+  )
+
+  # ALGORITHM SECTION
+  $('.toggle-comment').click(->
+    container = $(this).parent()
+    # toggle collapse/expand icon
+    $(this).toggleClass('fa-plus-square fa-minus-square')
+
+    # animate collapsing
+    if (container.hasClass('collapsed'))
+      # dirty hack as animating to 'auto' does not work!
+      curHeight = container.height()
+      container.css('height', 'auto')
+      autoHeight = container.height()
+      container.css('height', curHeight)
+      newHeight = autoHeight
+    else
+      newHeight = '20px'
+    container.animate({height: newHeight}, 'slow', 'linear', ->
+      container.toggleClass('collapsed')
+    )
   )
