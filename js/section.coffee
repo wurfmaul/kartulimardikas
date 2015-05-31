@@ -42,9 +42,12 @@ class Section
     Collapses/Expands a section.
   ###
   @toggleSection = (element, speed) ->
-    element.find("span").toggleClass("glyphicon-chevron-right glyphicon-chevron-down") # change arrow
-    $(element.data("target")).toggle(speed) # expand/collapse body
-    $(element).toggleClass('collapsed') # mark heading as collapsed
+    # change arrow
+    element.find("span").toggleClass("glyphicon-chevron-right glyphicon-chevron-down")
+    # expand/collapse body
+    $(element.data("target")).toggle(speed)
+    # mark heading as collapsed
+    $(element).toggleClass('collapsed')
 
   ###
     Computes a section number from expansion state of panels.

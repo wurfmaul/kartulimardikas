@@ -107,6 +107,20 @@ class Api
         @_printError("Storage Error: " + errorThrown)
     )
 
+  @parseMarkdown: (source, target) ->
+    $.ajax("api/markdown.php",
+      type: 'POST'
+      data: {source: $(source).val()}
+      dataType: 'json'
+      success: (data) =>
+        if (data['html'] is '')
+          $(target).parent().hide('slow')
+        else
+          $(target).html(data['html']).parent().show('slow')
+      error: (jqXHR, textStatus, errorThrown) => # if request failed
+        @_printError("Request Error: " + errorThrown)
+    )
+
   @_printError: (msg) ->
     $('#editAlertText').html(msg)
     $('#editAlert').show('slow')
@@ -302,15 +316,28 @@ initValueInput = (elem) ->
     $(this).autocomplete("close")
   )
 
+###
+  Calls the callback function after a while, if it is not interrupted.
+###
+typeWatch = (->
+  timer = 0
+  return (callback, ms) ->
+    clearTimeout (timer)
+    timer = setTimeout(callback, ms))()
+
+refreshPreview = ->
+  Api.parseMarkdown($("#in-long"), $('#description-preview'))
+
 $ ->
   # GENERAL
   $('#editAlertClose').click -> $('#editAlert').hide('slow')
 
   # INFORMATION SECTION
   $('#in-name, #in-desc, #in-long').blur -> Api.editInfo()
-  $('#in-long')
-  .focus -> $(this).val("") if ($(this).data('placeholder') == $(this).val())
-  .blur -> $(this).val($(this).data('placeholder')) if ($(this).val() == "")
+  $('#in-long').keyup(->
+    typeWatch((-> refreshPreview()), 500)
+  )
+  $('#refresh-preview').click(-> refreshPreview())
 
   # VARIABLE SECTION
   varForm = new VariableForm()

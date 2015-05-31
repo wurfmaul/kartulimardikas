@@ -345,7 +345,6 @@ class DataModel
     {
         $name = $this->_sql->real_escape_string($name);
         $desc = $this->_sql->real_escape_string($desc);
-        $long = $this->_sql->real_escape_string($long);
 
         $stmt = $this->_sql->prepare("
             UPDATE algorithm

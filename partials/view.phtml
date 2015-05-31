@@ -7,7 +7,12 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
     // prepare algorithm meta-data
     $name = stripslashes($__algorithm->name);
     $description = stripslashes($__algorithm->description);
-    $long_description = stripslashes($__algorithm->long_description);
+    if ($long_description = $__algorithm->long_description) {
+        require_once BASEDIR . 'includes/markdownHelper.php';
+        $long_description = parseMarkdown($long_description);
+    } else {
+        $long_description = $l10n['no_description'];
+    }
 
     // prepare variables
     $vars = json_decode($__algorithm->variables);
@@ -92,7 +97,7 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
                                     <div class="panel-body">
                                         <span style="color: grey"><?= $l10n['no_params_to_define'] ?></span>
                                     </div>
-                                    <div id="input-footer" class="panel-footer">
+                                    <div id="input-footer" class="panel-footer panel-footer-sm">
                                         <?= $l10n['input'] ?>
                                     </div>
                                 </div>
@@ -101,7 +106,7 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
                                         <label for="returnValue" class="sr-only">Return value</label>
                                         <input id="returnValue" class="form-control input-sm" disabled="disabled">
                                     </div>
-                                    <div id="output-footer" class="panel-footer">
+                                    <div id="output-footer" class="panel-footer panel-footer-sm">
                                         <?= $l10n['output'] ?>
                                     </div>
                                 </div>
@@ -167,19 +172,13 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
                         </h4>
                     </div>
                     <div id="description" class="panel-collapse">
-                        <div class="panel-body">
-                            <?php if ($long_description): ?>
-                            <?= $long_description ?>
-                            <?php else: ?>
-                                <?= $l10n['no_description'] ?>
-                            <?php endif ?>
-                        </div>
+                        <div class="panel-body"><?= $long_description ?></div>
                     </div>
                 </div>
 
                 <!-- TAB - MEMORY -->
                 <div class="panel panel-default">
-                    <div class="panel-heading" data-target="#memory" data-speed="100">
+                    <div class="panel-heading" data-target="#memory" data-speed="400">
                         <h4 class="panel-title">
                             <span class="glyphicon glyphicon-chevron-down"></span>
                             <?= $l10n['memory'] ?>

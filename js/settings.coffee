@@ -1,9 +1,11 @@
 class Api
   @setVisibility = (status) ->
-    aid = window.defaults.aid
     $.ajax "api/algorithm.php?area=settings",
       type: 'POST'
-      data: {aid: aid, status: status}
+      data:
+        aid: window.defaults.aid
+        status: status
+        lang: window.defaults.lang
       dataType: 'json'
       success: (data) =>
         if data['error']? then @_printError(data['error'])
@@ -14,10 +16,11 @@ class Api
         @_printError("Storage Error: " + errorThrown)
 
   @delete = ->
-    aid = window.defaults.aid
     $.ajax "api/algorithm.php?area=delete",
       type: 'POST'
-      data: {aid: aid}
+      data:
+        aid: window.defaults.aid
+        lang: window.defaults.lang
       dataType: 'json'
       success: (data) =>
         if data['error']? then @_printError(data['error'])

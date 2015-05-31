@@ -6,7 +6,13 @@ if ($__aid && $__uid && $__owner) {
     // prepare algorithm meta data
     $name = stripslashes($__algorithm->name);
     $description = stripslashes($__algorithm->description);
-    $long_description = stripslashes($__algorithm->long_description);
+    if ($long_description = $__algorithm->long_description) {
+        require_once BASEDIR . 'includes/markdownHelper.php';
+        $long_preview = parseMarkdown($long_description);
+    } else {
+        $long_description = $l10n['long_description'];
+        $long_preview = "";
+    }
 
     // prepare variables and add prototype row to variables
     $vars = json_decode($__algorithm->variables);
@@ -71,9 +77,25 @@ if ($__aid && $__uid && $__owner) {
                                            placeholder="<?= $l10n['description'] ?>" value="<?= $description ?>">
                                 </div>
                             </div>
-                            <label for="in-long" class="sr-only"><?= $l10n['long_description'] ?></label>
-                        <textarea class="form-control" id="in-long" rows="3"
-                                  data-placeholder="<?= $l10n['long_description'] ?>"><?= $long_description ?></textarea>
+                            <div class="description-group">
+                                <label for="in-long">
+                                    <?= $l10n['long_description'] ?>
+                                    <small>
+                                        (<?= $l10n['use_markdown'] ?>
+                                        <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet"
+                                           target="_blank"><span class="glyphicon glyphicon-info-sign"></span></a>)
+                                    </small>
+                                </label>
+                                <textarea class="form-control" id="in-long" rows="3"><?= $long_description ?></textarea>
+                            </div>
+                            <div class="panel panel-default"
+                                 <?php if ($long_preview === ""): ?>style="display: none;"<?php endif ?>>
+                                <div id="description-preview" class="panel-body"><?= $long_preview ?></div>
+                                <div class="panel-footer panel-footer-sm">
+                                    <?= $l10n['preview'] ?>
+                                    <span id="refresh-preview" class="fa fa-refresh"></span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -81,7 +103,7 @@ if ($__aid && $__uid && $__owner) {
 
                 <!-- TAB - VARIABLES -->
                 <div class="panel panel-default">
-                    <div class="panel-heading" data-target="#varPanel" data-speed="100">
+                    <div class="panel-heading" data-target="#varPanel" data-speed="500">
                         <h4 class="panel-title">
                             <span class="glyphicon glyphicon-chevron-down"></span>
                             <?= $l10n['variables'] ?>

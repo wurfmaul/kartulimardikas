@@ -155,7 +155,8 @@ $l10n['edit_not_signed_in'] = "You have to be signed in to publish an algorithm!
 $l10n['general_info'] = "General Information";
 $l10n['algo_name'] = "Algorithm name";
 $l10n['description'] = "Description";
-$l10n['long_description'] = "Long description...";
+$l10n['long_description'] = "Long description";
+$l10n['use_markdown'] = "You can use markdown for formatting";
 $l10n['variables'] = "Variables";
 $l10n['algorithm'] = "Algorithm";
 $l10n['save_algorithm'] = "Save";
@@ -190,6 +191,7 @@ $l10n['usage_count'] = "Usage count";
 $l10n['contains'] = "contains";
 $l10n['public_without_name'] = "A public algorithm cannot be without a name!";
 $l10n['create_a_node'] = "Create a Node";
+$l10n['preview'] = "Preview";
 
 // SETTINGS
 $l10n['settings'] = "Settings";
