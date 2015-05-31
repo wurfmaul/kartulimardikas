@@ -1,80 +1,5 @@
 <?php
 
-class SwapNode extends Node
-{
-    /** @var Value */
-    protected $left;
-    /** @var Value */
-    protected $right;
-
-    public function __construct($nid, $left, $right)
-    {
-        $this->nodeId = $nid;
-        $this->left = new Value($left);
-        $this->right = new Value($right);
-    }
-
-    public static function parse($node, $tree)
-    {
-        $left = isset($node->left) ? $node->left : null;
-        $right = isset($node->right) ? $node->right : null;
-        return new self($node->nid, $left, $right);
-    }
-
-    public function getSource($params)
-    {
-        return sprintf("%s %s %s",
-            $this->left->parse($params),
-            '<->',
-            $this->right->parse($params)
-        );
-    }
-
-    public function printHtml(&$params)
-    {
-        $leftVal = $this->left->parse($params);
-        $rightVal = $this->right->parse($params);
-        ?>
-        <!-- SWAP NODE -->
-        <li id="node_<?= $this->nodeId ?>" class="node swap-node" data-node-type="swap"
-            data-node-id="<?= $this->nodeId ?>">
-            <table>
-                <tr>
-                    <td class="handle node-box top bottom left">
-                        <span class="cursor-icon"></span>
-                    </td>
-                    <td class="node-box top right bottom full-width">
-                        <?php if ($params['mode'] === 'edit'): ?>
-                            <label>
-                                <?= TreeHelper::l10n('swap_node_title') ?>
-                                <div class="ui-widget combobox-container">
-                                    <input class="swap-left combobox" value="<?= $leftVal ?>"/>
-                                </div>
-                                <->
-                                <div class="ui-widget combobox-container">
-                                    <input class="swap-right combobox" value="<?= $rightVal ?>"/>
-                                </div>
-                            </label>
-                            <span class="invalid label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
-                            <button type="button" class="close node-remove" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        <?php else: ?>
-                            <label>
-                                <?= $leftVal ?> <-> <?= $rightVal ?>
-                                <div style="display: none;">
-                                    <input class="swap-left" value="<?= $leftVal ?>"/>
-                                    <input class="swap-right" value="<?= $rightVal ?>"/>
-                                </div>
-                            </label>
-                        <?php endif ?>
-                    </td>
-                </tr>
-            </table>
-        </li>
-    <?php }
-}
-
 class AssignNode extends Node
 {
     /** @var Value */
@@ -607,6 +532,81 @@ class ReturnNode extends Node
                                 <?= $varValue ?>
                                 <div style="display: none;">
                                     <input class="return-value" value="<?= $varValue ?>"/>
+                                </div>
+                            </label>
+                        <?php endif ?>
+                    </td>
+                </tr>
+            </table>
+        </li>
+    <?php }
+}
+
+class SwapNode extends Node
+{
+    /** @var Value */
+    protected $left;
+    /** @var Value */
+    protected $right;
+
+    public function __construct($nid, $left, $right)
+    {
+        $this->nodeId = $nid;
+        $this->left = new Value($left);
+        $this->right = new Value($right);
+    }
+
+    public static function parse($node, $tree)
+    {
+        $left = isset($node->left) ? $node->left : null;
+        $right = isset($node->right) ? $node->right : null;
+        return new self($node->nid, $left, $right);
+    }
+
+    public function getSource($params)
+    {
+        return sprintf("%s %s %s",
+            $this->left->parse($params),
+            '&hArr;',
+            $this->right->parse($params)
+        );
+    }
+
+    public function printHtml(&$params)
+    {
+        $leftVal = $this->left->parse($params);
+        $rightVal = $this->right->parse($params);
+        ?>
+        <!-- SWAP NODE -->
+        <li id="node_<?= $this->nodeId ?>" class="node swap-node" data-node-type="swap"
+            data-node-id="<?= $this->nodeId ?>">
+            <table>
+                <tr>
+                    <td class="handle node-box top bottom left">
+                        <span class="cursor-icon"></span>
+                    </td>
+                    <td class="node-box top right bottom full-width">
+                        <?php if ($params['mode'] === 'edit'): ?>
+                            <label>
+                                <?= TreeHelper::l10n('swap_node_title') ?>
+                                <div class="ui-widget combobox-container">
+                                    <input class="swap-left combobox" value="<?= $leftVal ?>"/>
+                                </div>
+                                &hArr;
+                                <div class="ui-widget combobox-container">
+                                    <input class="swap-right combobox" value="<?= $rightVal ?>"/>
+                                </div>
+                            </label>
+                            <span class="invalid label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
+                            <button type="button" class="close node-remove" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        <?php else: ?>
+                            <label>
+                                <?= $leftVal ?> &hArr; <?= $rightVal ?>
+                                <div style="display: none;">
+                                    <input class="swap-left" value="<?= $leftVal ?>"/>
+                                    <input class="swap-right" value="<?= $rightVal ?>"/>
                                 </div>
                             </label>
                         <?php endif ?>

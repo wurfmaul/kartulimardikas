@@ -500,6 +500,7 @@ class SwapNode extends Node
     # write values
     @writeVar(@left, rightVal, player)
     @writeVar(@right, leftVal, player)
+    {}
 
   toJSON: ->
     {
