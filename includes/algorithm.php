@@ -984,7 +984,13 @@ class Value
             case self::VAR_KIND:
                 return $vars[$this->vid]->name;
             case self::COMP_KIND:
-                return $this->left->parse($params) . $this->op . $this->right->parse($params);
+                $left = $this->left->parse($params);
+                $right = $this->right->parse($params);
+                if ($this->left->kind === self::COMP_KIND)
+                    $left = "($left)";
+                if ($this->right->kind === self::COMP_KIND)
+                    $right = "($right)";
+                return $left . $this->op . $right;
             default:
                 throw new ParseError("Kind not found: '$this->kind'!");
         }

@@ -225,7 +225,7 @@ class StepForm
     tree = Tree.toJSON()
     # search for invalid-flags
     if (SCRIPTSITE.find('.invalid:visible').length)
-      console.error('ParseErrors!')
+      console.error('Not saved due to parsing errors!')
     else
       @varForm.updateVarCount()
       Api.editScript(tree)

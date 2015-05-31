@@ -2,13 +2,77 @@ window.SCRIPTSITE = $(".insertStepsHere") # Specifies the site, where variables 
 
 class Node
   ###
-  # Must be overridden by all subclasses.
+    Must be overridden by all subclasses.
   ###
   execute: (player) ->
     throw new Error('Node must override execute() method!')
 
   ###
-  # Sets the cursor to the position of the node. Override to place it somewhere else!
+    This method executes the index part of an array access.
+  ###
+  executeIndex: (variable, player) ->
+    # constant value as index (e.g. a[1])
+    if (variable.kind is 'const' and variable.type is 'int')
+      variable.value
+
+      # variable as index (e.g. a[i])
+    else if (variable.kind is 'var')
+      player.stats.readVar(variable.vid)
+      player.memory.get(variable.vid).value
+
+      # compound value as index (e.g. a[i+1])
+    else if (variable.kind is 'comp')
+      @executeValue(variable, player)
+
+    else
+      throw new ExecutionError('unsupported_index', [variable.kind])
+
+  executeValue: (value, player) ->
+    if (!value?.kind?)
+      throw new ExecutionError('could_not_execute_value', [value])
+    memory = player.memory
+
+    switch value.kind
+      when 'const' then value.value
+
+      when 'index'
+        index = @executeIndex(value.index, player)
+        player.stats.readArrayVar(value.vid, index)
+        memory.arrayGet(value.vid, index)
+
+      when 'prop'
+        if (value.prop is 'length')
+          variable = memory.get(value.vid)
+          if (variable.array) then variable.value.split(',').length
+          else 1
+        else
+          throw new ExecutionError('unknown_property', [value.prop])
+
+      when 'var'
+        vid = value.vid
+        player.stats.readVar(vid) # tell the stats, that a variable has been read
+        memory.get(vid).value # return the current value of the variable
+
+      when 'comp'
+        leftVal = @executeValue(value.left, player)
+        rightVal = @executeValue(value.right, player)
+        player.stats.incArithmeticOps()
+        switch value.op
+          when '+' then leftVal + rightVal
+          when '-' then leftVal - rightVal
+          when '*' then leftVal * rightVal
+          when '/'
+            throw new ExecutionError('divide_by_zero', []) if (rightVal is 0)
+            parseInt(leftVal / rightVal)
+          when '%' then leftVal % rightVal
+          else
+            throw new ExecutionError('unknown_arithmetic_op', [@operator])
+
+      else
+        throw new ExecutionError('unknown_kind', [value.kind])
+
+  ###
+    Sets the cursor to the position of the node. Override to place it somewhere else!
   ###
   mark: (player, node) ->
     if (node is @nid)
@@ -18,10 +82,31 @@ class Node
       -1
 
   ###
-  # Must be overridden by all subclasses.
+    Must be overridden by all subclasses.
   ###
   toJSON: ->
     throw new Error('Node must override toJSON() method!')
+
+  ###
+    Delegates the parse function to the right subclass.
+    Must be overridden by all subclasses.
+  ###
+  @parse: (node, tree, memory) ->
+    # extract the type
+    type = node.data('node-type')
+
+    # call proper parsing method
+    switch type
+      when 'arithmetic' then ArithmeticNode.parse(node, tree, memory)
+      when 'assign' then AssignNode.parse(node, tree, memory)
+      when 'compare' then CompareNode.parse(node, tree, memory)
+      when 'if' then IfNode.parse(node, tree, memory)
+      when 'inc' then IncNode.parse(node, tree, memory)
+      when 'return' then ReturnNode.parse(node, tree, memory)
+      when 'value' then ValueNode.parse(node, tree, memory)
+      when 'while' then WhileNode.parse(node, tree, memory)
+      else
+        throw new Error("Parse error: unknown type: '#{type}'")
 
   ###
   # For combo boxes: Inspects the given value and defines its kind
@@ -66,95 +151,72 @@ class Node
       memory.count(vid)
       return {kind: 'var', vid: vid}
 
-    # check for simple computations
     value = value.replace(/\s*/g, '') # remove white spaces
-    split = value.split(/(-|\+|\*|\/|%)/i)
-    if (split.length is 3) # e.g. "i-1"
-      left = @parseValue(split[0], memory)
-      right = @parseValue(split[2], memory)
-      if (left? and right? and "+-*/%".indexOf(split[1]) >= 0)
-        return {kind: 'comp', left: left, right: right, op: split[1]}
+    # check for simple computations (e.g. i+1)
+    if (value.indexOf('(') is -1)
+      split = value.split(/(-|\+|\*|\/|%)/i)
+      if (split.length is 3) # e.g. "i-1"
+        left = @parseValue(split[0], memory)
+        right = @parseValue(split[2], memory)
+        if (left? and right? and "+-*/%".indexOf(split[1]) >= 0)
+          return {kind: 'comp', left: left, right: right, op: split[1]}
+        else return null
+
+    # check for complex computations (using parenthesis)
+    if (value = @parsePars(value))?
+      switch (Object.keys(value).length)
+        when 1 # unnecessary pars
+          return @parseValue(value[0], memory)
+        when 3 # binary
+          left = @parseValue(value[0], memory)
+          right = @parseValue(value[2], memory)
+          op = value[1]
+          if (left? and right? and "+-*/%".indexOf(value[1]) >= 0)
+            return {kind: 'comp', left: left, right: right, op: op}
 
     # return null, if value is not valid
     null
 
   ###
-  # This method executes the index part of an array access.
+    Deals with complex binary expressions within parenthesis. It goes one level
+    deep (say: not recursive). Returns an object with one value if it is just
+    a simple expression within parenthesis. It the expression is more complex,
+    it returns an object of size 3 that contains two expressions left, right along
+    with the used operator.
   ###
-  executeIndex: (variable, player) ->
-    # constant value as index (e.g. a[1])
-    if (variable.kind is 'const' and variable.type is 'int')
-      variable.value
+  @parsePars: (value) ->
+    level = 0
+    result = {}
+    index = 0
+    split = value.split(/(-|\+|\*|\/|%@|\(|\))/g)
+    for i in [0...split.length]
+      chunk = split[i]
+      if (chunk is '') then continue
 
-      # variable as index (e.g. a[i])
-    else if (variable.kind is 'var')
-      player.stats.readVar(variable.vid)
-      player.memory.get(variable.vid).value
+      if (level is 0)
+        if (chunk is '(') then level++
+        else if (chunk is ')') then level--
+        else result[index++] = chunk
+      else # level > 0
+        if (chunk is '(') then level++
+        else if (chunk is ')')
+          if (--level is 0)
+            index++
+            continue
+        if (result[index]?) then result[index] += chunk
+        else result[index] = chunk
 
-      # compound value as index (e.g. a[i+1])
-    else if (variable.kind is 'comp')
-      node = new ArithmeticNode(null, variable.left, variable.right, variable.op)
-      node.execute(player, null).value
-
+    if (level isnt 0)
+      console.log("Unbalanced")
+      null
     else
-      throw new ExecutionError('unsupported_index', [variable.kind])
-
-  executeValue: (value, player) ->
-    if (!value?.kind?)
-      throw new ExecutionError('could_not_execute_value', [value])
-    memory = player.memory
-
-    switch value.kind
-      when 'const' then value.value
-
-      when 'index'
-        index = @executeIndex(value.index, player)
-        player.stats.readArrayVar(value.vid, index)
-        memory.arrayGet(value.vid, index)
-
-      when 'prop'
-        if (value.prop is 'length')
-          variable = memory.get(value.vid)
-          if (variable.array) then variable.value.split(',').length
-          else 1
-        else
-          throw new ExecutionError('unknown_property', [value.prop])
-
-      when 'var'
-        vid = value.vid
-        player.stats.readVar(vid) # tell the stats, that a variable has been read
-        memory.get(vid).value # return the current value of the variable
-
-      else
-        throw new ExecutionError('unknown_kind', [value.kind])
+      result
 
   ###
   # Returns node's first sub-node of class _class.
   ###
   @findSubNode: (node, _class) ->
     node.find(_class + ':first')
-
-  ###
-  # Delegates the parse function to the right subclass.
-  #
-  # Must be overridden by all subclasses.
-  ###
-  @parse: (node, tree, memory) ->
-    # extract the type
-    type = node.data('node-type')
-
-    # call proper parsing method
-    switch type
-      when 'arithmetic' then ArithmeticNode.parse(node, tree, memory)
-      when 'assign' then AssignNode.parse(node, tree, memory)
-      when 'compare' then CompareNode.parse(node, tree, memory)
-      when 'if' then IfNode.parse(node, tree, memory)
-      when 'inc' then IncNode.parse(node, tree, memory)
-      when 'return' then ReturnNode.parse(node, tree, memory)
-      when 'value' then ValueNode.parse(node, tree, memory)
-      when 'while' then WhileNode.parse(node, tree, memory)
-      else
-        throw new Error("Parse error: unknown type: '#{type}'")
 
   @validate: (node, check) ->
     flag = node.find('.invalid:first')
