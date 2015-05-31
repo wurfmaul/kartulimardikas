@@ -1,43 +1,31 @@
 <?php
 
-class ArithmeticNode extends Node
+class SwapNode extends Node
 {
     /** @var Value */
     protected $left;
     /** @var Value */
     protected $right;
-    /** @var string */
-    protected $op;
 
-    protected $ops = [
-        'plus' => '+',
-        'minus' => '&minus;',
-        'times' => '&times;',
-        'by' => '/',
-        'mod' => '%'
-    ];
-
-    public function __construct($nid, $left, $right, $op)
+    public function __construct($nid, $left, $right)
     {
         $this->nodeId = $nid;
         $this->left = new Value($left);
         $this->right = new Value($right);
-        $this->op = $op;
     }
 
     public static function parse($node, $tree)
     {
         $left = isset($node->left) ? $node->left : null;
         $right = isset($node->right) ? $node->right : null;
-        $op = isset($node->operator) ? $node->operator : null;
-        return new self($node->nid, $left, $right, $op);
+        return new self($node->nid, $left, $right);
     }
 
     public function getSource($params)
     {
         return sprintf("%s %s %s",
             $this->left->parse($params),
-            $this->ops[$this->op],
+            '<->',
             $this->right->parse($params)
         );
     }
@@ -46,10 +34,9 @@ class ArithmeticNode extends Node
     {
         $leftVal = $this->left->parse($params);
         $rightVal = $this->right->parse($params);
-        $selected_op = $this->isPrototype ? 'plus' : $this->op;
         ?>
-        <!-- ARITHMETIC NODE -->
-        <li id="node_<?= $this->nodeId ?>" class="node arithmetic-node" data-node-type="arithmetic"
+        <!-- SWAP NODE -->
+        <li id="node_<?= $this->nodeId ?>" class="node swap-node" data-node-type="swap"
             data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr>
@@ -59,21 +46,13 @@ class ArithmeticNode extends Node
                     <td class="node-box top right bottom full-width">
                         <?php if ($params['mode'] === 'edit'): ?>
                             <label>
-                                <?= TreeHelper::l10n('arithmetic_node_title') ?>
+                                <?= TreeHelper::l10n('swap_node_title') ?>
                                 <div class="ui-widget combobox-container">
-                                    <input class="arithmetic-left combobox" value="<?= $leftVal ?>"/>
+                                    <input class="swap-left combobox" value="<?= $leftVal ?>"/>
                                 </div>
-                                <select class="arithmetic-operation">
-                                    <?php foreach ($this->ops as $op => $char): ?>
-                                        <option value="<?= $op ?>"
-                                                <?php if ($selected_op === $op): ?>selected="selected"<?php endif ?>>
-                                            <?= $char ?>
-                                        </option>
-                                    <?php endforeach ?>
-                                </select>
-
+                                <->
                                 <div class="ui-widget combobox-container">
-                                    <input class="arithmetic-right combobox" value="<?= $rightVal ?>"/>
+                                    <input class="swap-right combobox" value="<?= $rightVal ?>"/>
                                 </div>
                             </label>
                             <span class="invalid label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
@@ -82,13 +61,10 @@ class ArithmeticNode extends Node
                             </button>
                         <?php else: ?>
                             <label>
-                                <?= $leftVal ?>
-                                <?= $this->ops[$selected_op] ?>
-                                <?= $rightVal ?>
+                                <?= $leftVal ?> <-> <?= $rightVal ?>
                                 <div style="display: none;">
-                                    <input class="arithmetic-left" value="<?= $leftVal ?>"/>
-                                    <input class="arithmetic-operation" value="<?= $selected_op ?>"/>
-                                    <input class="arithmetic-right" value="<?= $rightVal ?>"/>
+                                    <input class="swap-left" value="<?= $leftVal ?>"/>
+                                    <input class="swap-right" value="<?= $rightVal ?>"/>
                                 </div>
                             </label>
                         <?php endif ?>
@@ -741,13 +717,13 @@ class WhileNode extends Node
  */
 abstract class Node
 {
-    const ARITHMETIC_NODE = "arithmetic";
     const ASSIGN_NODE = "assign";
     const BLOCK_NODE = "block";
     const COMPARE_NODE = "compare";
     const RETURN_NODE = "return";
     const IF_NODE = "if";
     const INC_NODE = "inc";
+    const SWAP_NODE = "swap";
     const VALUE_NODE = "value";
     const WHILE_NODE = "while";
 
@@ -774,8 +750,6 @@ abstract class Node
         }
         // parse node
         switch ($node->node) {
-            case self::ARITHMETIC_NODE:
-                return ArithmeticNode::parse($node, $tree);
             case self::ASSIGN_NODE:
                 return AssignNode::parse($node, $tree);
             case self::BLOCK_NODE:
@@ -788,6 +762,8 @@ abstract class Node
                 return IfNode::parse($node, $tree);
             case self::INC_NODE:
                 return IncNode::parse($node, $tree);
+            case self::SWAP_NODE:
+                return SwapNode::parse($node, $tree);
             case self::VALUE_NODE:
                 return ValueNode::parse($node, $tree);
             case self::WHILE_NODE:
@@ -837,9 +813,6 @@ abstract class Node
         /** @var $node Node */
         $node = null;
         switch ($type) {
-            case self::ARITHMETIC_NODE:
-                $node = new ArithmeticNode($type, null, null, null);
-                break;
             case self::ASSIGN_NODE:
                 $node = new AssignNode($type, null, null);
                 break;
@@ -854,6 +827,9 @@ abstract class Node
                 break;
             case self::INC_NODE:
                 $node = new IncNode($type, null, null);
+                break;
+            case self::SWAP_NODE:
+                $node = new SwapNode($type, null, null, null);
                 break;
             case self::VALUE_NODE:
                 $node = new ValueNode($type, null);

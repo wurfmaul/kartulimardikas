@@ -237,9 +237,6 @@ if ($__aid && $__uid && $__owner) {
 
                             <div id="node-btn-group" class="btn-group btn-group-sm" role="group"
                                  aria-label="<?= $l10n['create_a_node'] ?>">
-                                <button id="btn-add-arithmetic" type="button" class="btn btn-default"
-                                        data-node="node_arithmetic"><?= $l10n['arithmetic_node_title'] ?>
-                                </button>
                                 <button id="btn-add-assign" type="button" class="btn btn-default"
                                         data-node="node_assign"><?= $l10n['assign_node_title'] ?>
                                 </button>
@@ -254,6 +251,9 @@ if ($__aid && $__uid && $__owner) {
                                 </button>
                                 <button id="btn-add-return" type="button" class="btn btn-default"
                                         data-node="node_return"><?= $l10n['return_node_title'] ?>
+                                </button>
+                                <button id="btn-add-swap" type="button" class="btn btn-default"
+                                        data-node="node_swap"><?= $l10n['swap_node_title'] ?>
                                 </button>
                                 <button id="btn-add-value" type="button" class="btn btn-default" data-node="node_value">
                                     <?= $l10n['value_node_title'] ?>
@@ -272,12 +272,12 @@ if ($__aid && $__uid && $__owner) {
                                     'indent' => 0     // start indentation at 0
                                 ];
                                 // generate prototypes
-                                Node::printPrototype(Node::ARITHMETIC_NODE, $params);
                                 Node::printPrototype(Node::ASSIGN_NODE, $params);
                                 Node::printPrototype(Node::COMPARE_NODE, $params);
                                 Node::printPrototype(Node::RETURN_NODE, $params);
                                 Node::printPrototype(Node::IF_NODE, $params);
                                 Node::printPrototype(Node::INC_NODE, $params);
+                                Node::printPrototype(Node::SWAP_NODE, $params);
                                 Node::printPrototype(Node::VALUE_NODE, $params);
                                 Node::printPrototype(Node::WHILE_NODE, $params);
                                 ?>

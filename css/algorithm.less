@@ -1,9 +1,9 @@
-@arithmetic-node-color: #82ffd2;
 @assign-node-color: #ffb181;
 @compare-node-color: #fff465;
 @return-node-color: #a6e0ff;
 @if-node-color: #b2e792;
 @inc-node-color: #b75946;
+@swap-node-color: #82ffd2;
 @value-node-color: #d3d3d3;
 @while-node-color: #d5a2da;
 
@@ -102,9 +102,6 @@
         }
       }
 
-      &.arithmetic-node {
-        .nodeStyle(@arithmetic-node-color);
-      }
       &.assign-node {
         .nodeStyle(@assign-node-color);
       }
@@ -119,6 +116,9 @@
       }
       &.inc-node {
         .nodeStyle(@inc-node-color);
+      }
+      &.swap-node {
+        .nodeStyle(@swap-node-color);
       }
       &.value-node {
         .nodeStyle(@value-node-color);

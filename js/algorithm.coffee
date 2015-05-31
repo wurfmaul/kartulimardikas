@@ -71,6 +71,22 @@ class Node
       else
         throw new ExecutionError('unknown_kind', [value.kind])
 
+  readVar: () ->
+
+  writeVar: (destination, value, player) ->
+    switch (destination.kind)
+      when 'index'
+        index = @executeIndex(destination.index, player)
+        player.memory.arraySet(destination.vid, index, value)
+        player.stats.writeArrayVar(destination.vid, index, value)
+      when 'var'
+        player.memory.set(destination.vid, value)
+        player.stats.writeVar(destination.vid, value)
+      when 'const' then throw new ExecutionError('assign_to_const', [destination.value])
+      when 'prop' then throw new ExecutionError('assign_to_prop', [])
+      else
+        throw new ExecutionError('unknown_kind', [destination.kind])
+
   ###
     Sets the cursor to the position of the node. Override to place it somewhere else!
   ###
@@ -97,12 +113,12 @@ class Node
 
     # call proper parsing method
     switch type
-      when 'arithmetic' then ArithmeticNode.parse(node, tree, memory)
       when 'assign' then AssignNode.parse(node, tree, memory)
       when 'compare' then CompareNode.parse(node, tree, memory)
       when 'if' then IfNode.parse(node, tree, memory)
       when 'inc' then IncNode.parse(node, tree, memory)
       when 'return' then ReturnNode.parse(node, tree, memory)
+      when 'swap' then SwapNode.parse(node, tree, memory)
       when 'value' then ValueNode.parse(node, tree, memory)
       when 'while' then WhileNode.parse(node, tree, memory)
       else
@@ -223,71 +239,15 @@ class Node
     if (check) then flag.hide()
     else flag.show()
 
-class ArithmeticNode extends Node
-  constructor: (@nid, @left, @right, @operator) ->
-
-  check: (tree) ->
-    # check for right dimensions
-    return false if (tree[@left].size() != 1 or tree[@right].size() != 1)
-    # extract children
-    left = tree.extract(@left)
-    right = tree.extract(@right)
-    # check for right classes
-    (left instanceof ValueNode) and (right instanceof ValueNode)
-
-  execute: (player, node) ->
-    leftVal = @executeValue(@left, player)
-    rightVal = @executeValue(@right, player)
-    player.stats.incArithmeticOps()
-    switch @operator
-      when 'plus', '+' then value: leftVal + rightVal
-      when 'minus', '-' then value: leftVal - rightVal
-      when 'times', '*' then value: leftVal * rightVal
-      when 'by', '/'
-        throw new ExecutionError('divide_by_zero', []) if (rightVal is 0)
-        value: parseInt(leftVal / rightVal)
-      when 'mod', '%' then value: leftVal % rightVal
-      else
-        throw new ExecutionError('unknown_arithmetic_op', [@operator])
-
-  toJSON: ->
-    {
-    nid: @nid
-    node: 'arithmetic'
-    left: @left
-    right: @right
-    operator: @operator
-    }
-
-  @parse: (node, tree, memory) =>
-    left = @parseAndCheckValue('.arithmetic-left', node, memory)
-    right = @parseAndCheckValue('.arithmetic-right', node, memory)
-    @validate(node, left? and right?)
-    operator = @findSubNode(node, '.arithmetic-operation').val()
-    nid = tree.length
-    new @(nid, left, right, operator)
-
 class AssignNode extends Node
   constructor: (@nid, @from, @to) ->
 
   execute: (player, node) ->
-    toVar = @to
-    fromNode = player.tree.extract(@from)
     # get new value
+    fromNode = player.tree.extract(@from)
     value = fromNode.execute(player, node).value
-    # set new value
-    switch (toVar.kind)
-      when 'index'
-        index = @executeIndex(toVar.index, player)
-        player.memory.arraySet(toVar.vid, index, value)
-        player.stats.writeArrayVar(toVar.vid, index, value)
-      when 'var'
-        player.memory.set(toVar.vid, value)
-        player.stats.writeVar(toVar.vid, value)
-      when 'const' then throw new ExecutionError('assign_to_const', [toVar.value])
-      when 'prop' then throw new ExecutionError('assign_to_prop', [])
-      else
-        throw new ExecutionError('unknown_kind', [toVar.kind])
+    # write new value
+    @writeVar(@to, value, player)
     # return value
     value: value
 
@@ -373,8 +333,6 @@ class BlockNode extends Node
 
 class CompareNode extends Node
   constructor: (@nid, @left, @right, @operator) ->
-
-  check: (tree) -> true
 
   execute: (player, node) ->
     leftVal = @executeValue(@left, player)
@@ -511,6 +469,32 @@ class ReturnNode extends Node
     @validate(node, value?)
     nid = tree.length
     new @(nid, value)
+
+class SwapNode extends Node
+  constructor: (@nid, @left, @right) ->
+
+  execute: (player, node) ->
+    # get values
+    leftVal = @executeValue(@left, player)
+    rightVal = @executeValue(@right, player)
+    # write values
+    @writeVar(@left, rightVal, player)
+    @writeVar(@right, leftVal, player)
+
+  toJSON: ->
+    {
+    nid: @nid
+    node: 'swap'
+    left: @left
+    right: @right
+    }
+
+  @parse: (node, tree, memory) =>
+    left = @parseAndCheckValue('.swap-left', node, memory)
+    right = @parseAndCheckValue('.swap-right', node, memory)
+    @validate(node, left? and right?)
+    nid = tree.length
+    new @(nid, left, right)
 
 class ValueNode extends Node
   constructor: (@nid, @value) ->
@@ -650,7 +634,7 @@ class window.Memory
       throw new ExecutionError('no_array_for_index', [variable.name])
     array = variable.value.split(',')
     # check if the array is long enough
-    if (0 >= index >= array.length)
+    if (index < 0 or array.length <= index)
       throw new ExecutionError('index_out_of_bounds', [variable.name, index, array.length])
     array
 
