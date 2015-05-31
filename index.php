@@ -213,9 +213,7 @@ if ($__aid && $__algorithm) {
         </div>
         <div class="collapse navbar-collapse" id="navbar-footer">
             <ul class="nav navbar-nav navbar-right">
-                <li>
-                    <a href="https://github.com/wurfmaul/kartulimardikas">GitHub</a>
-                </li>
+                <li><a href="https://github.com/wurfmaul/kartulimardikas" target="_blank">GitHub</a></li>
                 <li<?php if (ACTION === 'notice'): ?> class="active"<?php endif ?>>
                     <a href="<?= url(['action' => 'notice']) ?>"><?= $l10n['notice'] ?></a>
                 </li>

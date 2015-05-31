@@ -79,11 +79,11 @@ if ($__aid && $__uid && $__owner) {
                             </div>
                             <div class="description-group">
                                 <label for="in-long">
-                                    <?= $l10n['long_description'] ?>
+                                    <?= $l10n['long_description'] ?><br/>
                                     <small>
-                                        (<?= $l10n['use_markdown'] ?>
+                                        <?= $l10n['use_markdown'] ?>
                                         <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet"
-                                           target="_blank"><span class="glyphicon glyphicon-info-sign"></span></a>)
+                                           target="_blank"><span class="glyphicon glyphicon-info-sign"></span></a>
                                     </small>
                                 </label>
                                 <textarea class="form-control" id="in-long" rows="3"><?= $long_description ?></textarea>
