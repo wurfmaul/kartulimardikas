@@ -283,7 +283,8 @@ class BlockNode extends Node
         curNode = player.tree.tree[n].execute(player, node)
         break
     # use the value if there is one
-    value = curNode?.value? ? null
+    if (curNode?.value?) then value = curNode.value
+    else value = null
     # compute next node
     if (curNode?.next?)
       {next: curNode.next, value: value}
@@ -462,7 +463,7 @@ class IfNode extends Node
     size = condition.size()
     @validate(node, size > 0)
     # parse operator
-    op = $('.if-operator')
+    op = @findSubNode(node, '.if-operator')
     if (size > 1) then op.show()
     else op.hide()
     # create node
@@ -622,7 +623,7 @@ class WhileNode extends Node
     size = condition.size()
     @validate(node, size > 0)
     # parse operator
-    op = $('.while-operator')
+    op = @findSubNode(node, '.while-operator')
     if (size > 1) then op.show()
     else op.hide()
     # create node
