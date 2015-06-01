@@ -374,7 +374,7 @@ class IfNode extends Node
                             </button>
                         <?php else: ?>
                             <?= TreeHelper::l10n('if_node_title') ?>
-                            <?= TreeHelper::l10n($this->ops[$selected_op]) ?>
+                            <?= $this->cond->size() > 1 ? TreeHelper::l10n($this->ops[$selected_op]) : '' ?>
                             <div style="display: none;">
                                 <input class="if-operator" value="<?= $selected_op ?>"/>
                             </div>
@@ -705,8 +705,8 @@ class WhileNode extends Node
     protected $op;
 
     protected $ops = [
-        'any' => 'condition_any',
-        'all' => 'condition_all'
+        'all' => 'condition_all',
+        'any' => 'condition_any'
     ];
 
     public function __construct($nid, $cond, $body, $op)
@@ -768,7 +768,7 @@ class WhileNode extends Node
                             </button>
                         <?php else: ?>
                             <?= TreeHelper::l10n('while_node_title') ?>
-                            <?= TreeHelper::l10n($this->ops[$selected_op]) ?>
+                            <?= $this->cond->size() > 1 ? TreeHelper::l10n($this->ops[$selected_op]) : '' ?>
                             <div style="display: none;">
                                 <input class="while-operator" value="<?= $selected_op ?>"/>
                             </div>

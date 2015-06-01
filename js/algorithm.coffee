@@ -246,8 +246,7 @@ class AssignNode extends Node
 
   execute: (player, node) ->
     # get new value
-    fromNode = player.tree.extract(@from)
-    value = fromNode.execute(player, node).value
+    value = player.tree.tree[@from].execute(player, 0).value
     # write new value
     @writeVar(@to, value, player)
     # return value
@@ -281,13 +280,19 @@ class BlockNode extends Node
     # find matching sub-node
     for n,i in @nodes
       if (node <= n)
-        curNode = player.tree.extract(n).execute(player, node)
+        curNode = player.tree.tree[n].execute(player, node)
         break
+    # use the value if there is one
+    value = curNode?.value? ? null
     # compute next node
-    if curNode?.next? then next: curNode.next
-    else if (curNode is -1) then next: -1 # return node was executed
-    else if (@nodes.length > i + 1) then next: @nodes[i + 1] # if curNode is done, take next from nodes
-    else {}
+    if (curNode?.next?)
+      {next: curNode.next, value: value}
+    else if (curNode is -1) # return node was executed
+      {next: -1, value: value}
+    else if (@nodes.length > i + 1) # if curNode is done, take next from nodes
+      {next: @nodes[i + 1], value: value}
+    else
+      {value: value}
 
   executeAll: (player, node, combine) ->
     value = combine is 'all'
@@ -297,7 +302,7 @@ class BlockNode extends Node
         next = i
         break
       else
-        curValue = player.tree.extract(n).execute(player, n).value
+        curValue = player.tree.tree[n].execute(player, n).value
         value = value and curValue if (combine is 'all')
         value = value or curValue if (combine is 'any')
         break if (SHORT_CIRCUIT and not value)
@@ -406,7 +411,7 @@ class IfNode extends Node
   execute: (player, node) ->
     # find matching sub-node
     if (node <= @condition)
-      cond = player.tree.extract(@condition)
+      cond = player.tree.tree[@condition]
       # execute the condition
       size = cond.size()
       if (size is 1) then condRetVal = cond.execute(player, node)
@@ -572,7 +577,7 @@ class WhileNode extends Node
   execute: (player, node) ->
     # find matching sub-node
     if (node <= @condition)
-      cond = player.tree.extract(@condition)
+      cond = player.tree.tree[@condition]
       # execute the condition
       size = cond.size()
       if (size is 1) then condValue = cond.execute(player, node)
@@ -603,6 +608,7 @@ class WhileNode extends Node
     node: 'while'
     condition: @condition
     body: @body
+    op: @op
     }
 
   @parse: (node, tree, memory) =>
@@ -633,11 +639,8 @@ class window.Tree
   mark: (player, node) ->
     @tree[@root].mark(player, node)
 
-  extract: (nid) ->
-    node = @tree[nid]
-    # if node is a BlockNode, extract the first child
-    if (node instanceof BlockNode and node.size() == 1) then @tree[node.nodes[0]]
-    else node
+  get: (nid) ->
+    @tree[nid]
 
   reset: () ->
     @memory = new Memory($('.variables>tbody'))
