@@ -300,7 +300,7 @@ class BlockNode extends Node
     next = -1
     for n,i in @nodes
       if (node < n)
-        next = i
+        next = n
         break
       else
         curValue = player.tree.tree[n].execute(player, n).value
