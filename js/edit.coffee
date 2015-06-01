@@ -356,3 +356,4 @@ $ ->
     $(this).parent().find('.comment-container').toggle('slow')
     $(this).toggleClass('fa-plus-square fa-minus-square')
   )
+  Tree.toJSON()

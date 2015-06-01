@@ -1,4 +1,5 @@
 window.SCRIPTSITE = $(".insertStepsHere") # Specifies the site, where variables are to place.
+SHORT_CIRCUIT = false # Short-circuit evaluation
 
 class Node
   ###
@@ -288,6 +289,20 @@ class BlockNode extends Node
     else if (@nodes.length > i + 1) then next: @nodes[i + 1] # if curNode is done, take next from nodes
     else {}
 
+  executeAll: (player, node, combine) ->
+    value = combine is 'all'
+    next = -1
+    for n,i in @nodes
+      if (node < n)
+        next = i
+        break
+      else
+        curValue = player.tree.extract(n).execute(player, n).value
+        value = value and curValue if (combine is 'all')
+        value = value or curValue if (combine is 'any')
+        break if (SHORT_CIRCUIT and not value)
+    {value: value, next: next}
+
   mark: (player, node) ->
     # if BlockNode itself should be marked...
     if (node is @nid)
@@ -386,13 +401,20 @@ class CompareNode extends Node
     new @(nid, left, right, operator)
 
 class IfNode extends Node
-  constructor: (@nid, @condition, @ifBody, @elseBody) ->
+  constructor: (@nid, @condition, @ifBody, @elseBody, @op) ->
 
   execute: (player, node) ->
     # find matching sub-node
     if (node <= @condition)
-      condRetVal = player.tree.extract(@condition).execute(player, node)
-      if condRetVal.value then next: @ifBody
+      cond = player.tree.extract(@condition)
+      # execute the condition
+      size = cond.size()
+      if (size is 1) then condRetVal = cond.execute(player, node)
+      else if (size > 1) then condRetVal = cond.executeAll(player, node, @op)
+      else throw new ExecutionError('no_condition', [])
+      # define the next step
+      if condRetVal.next > -1 then next: condRetVal.next
+      else if condRetVal.value then next: @ifBody
       else next: @elseBody
     else if (node <= @ifBody)
       next: player.tree.tree[@ifBody].execute(player, node).next
@@ -418,6 +440,7 @@ class IfNode extends Node
     condition: @condition
     ifBody: @ifBody
     elseBody: @elseBody
+    op: @op
     }
 
   @parse: (node, tree, memory) =>
@@ -430,9 +453,16 @@ class IfNode extends Node
     # parse else node
     elseBody = BlockNode.parse(@findSubNode(node, '.if-else'), tree, memory)
     tree.push elseBody
+    # deal with condition nodes
+    size = condition.size()
+    @validate(node, size > 0)
+    # parse operator
+    op = $('.if-operator')
+    if (size > 1) then op.show()
+    else op.hide()
     # create node
     nid = tree.length
-    new @(nid, condition.nid, ifBody.nid, elseBody.nid)
+    new @(nid, condition.nid, ifBody.nid, elseBody.nid, op.val())
 
 class IncNode extends Node
   constructor: (@nid, @variable, @operator) ->
@@ -537,13 +567,20 @@ class ValueNode extends Node
     new @(nid, value)
 
 class WhileNode extends Node
-  constructor: (@nid, @condition, @body) ->
+  constructor: (@nid, @condition, @body, @op) ->
 
   execute: (player, node) ->
     # find matching sub-node
     if (node <= @condition)
-      condValue = player.tree.extract(@condition).execute(player, node)
-      if condValue.value then next: @body # if condition is true, next node should be the body
+      cond = player.tree.extract(@condition)
+      # execute the condition
+      size = cond.size()
+      if (size is 1) then condValue = cond.execute(player, node)
+      else if (size > 1) then condValue = cond.executeAll(player, node, @op)
+      else throw new ExecutionError('no_condition', [])
+      # define the next step
+      if condValue.next > -1 then next: condValue.next
+      else if condValue.value then next: @body # if condition is true, next node should be the body
       else {} # otherwise don't return a next node in order to mark this node as done
     else if (node <= @body)
       bodyValue = player.tree.tree[@body].execute(player, node)
@@ -575,9 +612,16 @@ class WhileNode extends Node
     # parse body node
     body = BlockNode.parse(@findSubNode(node, '.while-body'), tree, memory)
     tree.push body
+    # deal with condition nodes
+    size = condition.size()
+    @validate(node, size > 0)
+    # parse operator
+    op = $('.while-operator')
+    if (size > 1) then op.show()
+    else op.hide()
     # create node
     nid = tree.length
-    new @(nid, condition.nid, body.nid)
+    new @(nid, condition.nid, body.nid, op.val())
 
 class window.Tree
   constructor: ->

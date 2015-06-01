@@ -100,15 +100,22 @@ class BlockNode extends Node
         return new self($node->nid, $nodes);
     }
 
-    public function getSource($params)
+    public function getSource($params, $combine = false)
     {
         $_indent = TreeHelper::getIndent($params['indent']);
         $source = "";
         foreach ($this->nodes as $index => $node) {
             /** @var Node $node */
-            $source .= $_indent . $node->getSource($params);
+            if (!$combine) {
+                $source .= $_indent;
+            }
+            $source .= $node->getSource($params);
             if ($index < sizeof($this->nodes) - 1)
-                $source .= PHP_EOL;
+                if ($combine) {
+                    $source .= $combine === 'any' ? ' or ' : ' and ';
+                } else {
+                    $source .= PHP_EOL;
+                }
         }
         return $source;
     }
@@ -295,18 +302,21 @@ class IfNode extends Node
     protected $then;
     /** @var BlockNode */
     protected $else;
+    /** @var string */
+    protected $op;
 
     protected $ops = [
-        'and' => '&&',
-        'or' => '||'
+        'all' => 'condition_all',
+        'any' => 'condition_any'
     ];
 
-    function __construct($nid, $cond, $then, $else)
+    function __construct($nid, $cond, $then, $else, $op)
     {
         $this->nodeId = $nid;
         $this->cond = $cond;
         $this->then = $then;
         $this->else = $else;
+        $this->op = $op;
     }
 
     public static function parse($node, $tree)
@@ -314,13 +324,14 @@ class IfNode extends Node
         $cond = isset($node->condition) ? parent::parse($tree[$node->condition], $tree) : null;
         $body = isset($node->ifBody) ? parent::parse($tree[$node->ifBody], $tree) : null;
         $else = isset($node->elseBody) ? parent::parse($tree[$node->elseBody], $tree) : null;
-        return new self($node->nid, $cond, $body, $else);
+        $op = isset($node->op) ? $node->op : null;
+        return new self($node->nid, $cond, $body, $else, $op);
     }
 
     public function getSource($params)
     {
         $_indent = TreeHelper::getIndent($params['indent']++);
-        $string = "if (" . trim($this->cond->getSource($params)) . ")" . PHP_EOL;
+        $string = "if (" . trim($this->cond->getSource($params, $this->op)) . ")" . PHP_EOL;
         $string .= $this->then->getSource($params);
         if ($this->else->size()) {
             $string .= PHP_EOL;
@@ -335,6 +346,7 @@ class IfNode extends Node
         $condNid = isset($this->cond) ? $this->cond->nodeId : null;
         $thenNid = isset($this->then) ? $this->then->nodeId : null;
         $elseNid = isset($this->else) ? $this->else->nodeId : null;
+        $selected_op = $this->isPrototype ? 'all' : $this->op;
         ?>
         <!-- IF NODE -->
         <li id="node_<?= $this->nodeId ?>" class="node if-node" data-node-type="if" data-node-id="<?= $this->nodeId ?>">
@@ -347,10 +359,11 @@ class IfNode extends Node
                         <?php if ($params['mode'] === 'edit'): ?>
                             <label>
                                 <?= TreeHelper::l10n('if_node_title') ?>
-                                <select class="assign-operation" style="display: none;">
+                                <select class="if-operator" style="display: none;">
                                     <?php foreach ($this->ops as $op => $char): ?>
-                                        <option value="<?= $op ?>">
-                                            <?= $char ?>
+                                        <option value="<?= $op ?>"
+                                                <?php if ($selected_op === $op): ?>selected="selected"<?php endif ?>>
+                                            <?= TreeHelper::l10n($char) ?>
                                         </option>
                                     <?php endforeach ?>
                                 </select>
@@ -360,7 +373,11 @@ class IfNode extends Node
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         <?php else: ?>
-                            <?= TreeHelper::l10n('if_node_title') // TODO: op!       ?>
+                            <?= TreeHelper::l10n('if_node_title') ?>
+                            <?= TreeHelper::l10n($this->ops[$selected_op]) ?>
+                            <div style="display: none;">
+                                <input class="if-operator" value="<?= $selected_op ?>"/>
+                            </div>
                         <?php endif ?>
                     </td>
                 </tr>
@@ -684,24 +701,28 @@ class WhileNode extends Node
     protected $cond;
     /** @var BlockNode */
     protected $body;
+    /** @var string */
+    protected $op;
 
     protected $ops = [
-        'and' => '&&',
-        'or' => '||'
+        'any' => 'condition_any',
+        'all' => 'condition_all'
     ];
 
-    public function __construct($nid, $cond, $body)
+    public function __construct($nid, $cond, $body, $op)
     {
         $this->nodeId = $nid;
         $this->cond = $cond;
         $this->body = $body;
+        $this->op = $op;
     }
 
     public static function parse($node, $tree)
     {
         $condition = isset($node->condition) ? parent::parse($tree[$node->condition], $tree) : null;
         $body = isset($node->body) ? parent::parse($tree[$node->body], $tree) : null;
-        return new self($node->nid, $condition, $body);
+        $op = isset($node->op) ? $node->op : null;
+        return new self($node->nid, $condition, $body, $op);
     }
 
     public function getSource($params)
@@ -709,7 +730,7 @@ class WhileNode extends Node
         // increase the indent for the body
         $params['indent']++;
         // build string
-        $string = "while (" . trim($this->cond->getSource($params)) . ")" . PHP_EOL;
+        $string = "while (" . trim($this->cond->getSource($params, $this->op)) . ")" . PHP_EOL;
         $string .= $this->body->getSource($params);
         return $string;
     }
@@ -718,6 +739,7 @@ class WhileNode extends Node
     {
         $condNid = isset($this->cond) ? $this->cond->nodeId : null;
         $bodyNid = isset($this->body) ? $this->body->nodeId : null;
+        $selected_op = $this->isPrototype ? 'all' : $this->op;
         ?>
         <!-- WHILE NODE -->
         <li id="node_<?= $this->nodeId ?>" class="node while-node" data-node-type="while"
@@ -731,9 +753,12 @@ class WhileNode extends Node
                         <?php if ($params['mode'] === 'edit'): ?>
                             <label>
                                 <?= TreeHelper::l10n('while_node_title') ?>
-                                <select class="assign-operation" style="display: none;">
+                                <select class="while-operator" style="display: none;">
                                     <?php foreach ($this->ops as $op => $char): ?>
-                                        <option value="<?= $op ?>"><?= $char ?></option>
+                                        <option value="<?= $op ?>"
+                                                <?php if ($selected_op === $op): ?>selected="selected"<?php endif ?>>
+                                            <?= TreeHelper::l10n($char) ?>
+                                        </option>
                                     <?php endforeach ?>
                                 </select>
                             </label>
@@ -742,7 +767,11 @@ class WhileNode extends Node
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         <?php else: ?>
-                            <?= TreeHelper::l10n('while_node_title') // TODO: op!                   ?>
+                            <?= TreeHelper::l10n('while_node_title') ?>
+                            <?= TreeHelper::l10n($this->ops[$selected_op]) ?>
+                            <div style="display: none;">
+                                <input class="while-operator" value="<?= $selected_op ?>"/>
+                            </div>
                         <?php endif ?>
                     </td>
                 </tr>
@@ -890,7 +919,7 @@ abstract class Node
                 $node = new ReturnNode($type, null);
                 break;
             case self::IF_NODE:
-                $node = new IfNode($type, null, null, null);
+                $node = new IfNode($type, null, null, null, null);
                 break;
             case self::INC_NODE:
                 $node = new IncNode($type, null, null);
@@ -902,7 +931,7 @@ abstract class Node
                 $node = new ValueNode($type, null);
                 break;
             case self::WHILE_NODE:
-                $node = new WhileNode($type, null, null);
+                $node = new WhileNode($type, null, null, null);
                 break;
             default:
                 throw new Exception("No prototype prepared for '$type'.");

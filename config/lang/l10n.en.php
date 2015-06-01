@@ -110,6 +110,8 @@ $l10n['return_node_title'] = "Return";
 $l10n['if_node_title'] = "If";
 $l10n['if_node_then'] = "then";
 $l10n['if_node_else'] = "else";
+$l10n['condition_all'] = "all";
+$l10n['condition_any'] = "any";
 $l10n['inc_node_title'] = "Inc";
 $l10n['swap_node_title'] = "Swap";
 $l10n['value_node_title'] = "Value";
@@ -145,6 +147,7 @@ $l10n['runtime_errors'] = [
     'unknown_arithmetic_op' => "The arithmetic calculation cannot be performed with '%1'!",
     'no_array_for_index' => "The variable '%1' is no array, therefore it cannot be accessed via an index!",
     'divide_by_zero' => "Division cannot have zero as denominator!",
+    'no_condition' => "There were no conditions specified.",
 ];
 
 // EDIT
