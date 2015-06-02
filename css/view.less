@@ -61,6 +61,19 @@
   }
 }
 
+.source {
+  .line {
+    padding-left: 3px;
+    @border-style: 2px solid transparent;
+    border-top: @border-style;
+    border-left: @border-style;
+    .border-top-left-radius(3px);
+    &.source-cursor {
+      border-color: blue;
+    }
+  }
+}
+
 .highlight-write {
   font-weight: bold;
   background-color: #5cb85c !important;

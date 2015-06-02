@@ -147,7 +147,7 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
                         </h4>
                     </div>
                     <div id="sourcecode" class="panel-collapse">
-                        <div class="panel-body">
+                        <div class="panel-body source">
                             <?php if (is_null($__algorithm->tree)): ?>
                                 <?= $l10n['no_algorithm'] ?>
                             <?php else: ?>
@@ -178,7 +178,7 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
 
                 <!-- TAB - MEMORY -->
                 <div class="panel panel-default">
-                    <div class="panel-heading" data-target="#memory" data-speed="400">
+                    <div class="panel-heading" data-target="#memory">
                         <h4 class="panel-title">
                             <span class="glyphicon glyphicon-chevron-down"></span>
                             <?= $l10n['memory'] ?>

@@ -73,8 +73,7 @@ class Section
         sectionNumber -= code
       else
         panel = $(panels[panelNumber])
-        # some panels have to be displayed briefly in order to initialize (e.g. the memory)!
-        @toggleSection(panel, panel.data('speed') ? 0)
+        @toggleSection(panel, 0)
       panelNumber--
 
   ###
@@ -82,13 +81,13 @@ class Section
   ###
   @computeSectionNumber = ->
     if ((section = window.defaults.section)?)
-      # first instance: section is set by parameter
+      # first priority: section is set by parameter
       section
     else if (localStorage and (section = localStorage.getItem('section_' + window.defaults.action))?)
-      # second instance: value in the browser's local storage
+      # second priority: value in the browser's local storage
       section
     else
-      # third instance: default value
+      # third priority: default value
       window.defaults.sectionDefault
 
   ###

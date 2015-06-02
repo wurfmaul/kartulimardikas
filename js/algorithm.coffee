@@ -1,5 +1,5 @@
 window.SCRIPTSITE = $(".insertStepsHere") # Specifies the site, where variables are to place.
-SHORT_CIRCUIT = false # Short-circuit evaluation
+SHORT_CIRCUIT = true # Short-circuit evaluation
 
 class Node
   ###
@@ -237,9 +237,13 @@ class Node
     node.find(_class + ':first')
 
   @validate: (node, check) ->
-    flag = node.find('.invalid:first')
-    if (check) then flag.hide()
-    else flag.show()
+    flag = node.find('.invalid-flag:first')
+    if (check)
+      node.removeClass('invalid')
+      flag.hide()
+    else
+      node.addClass('invalid')
+      flag.show()
 
 class AssignNode extends Node
   constructor: (@nid, @from, @to) ->
@@ -663,7 +667,7 @@ class window.Memory
   constructor: (@table) ->
     @memory = []
     @original = []
-    @table.children(':visible').each((index, element) =>
+    @table.children().not('#var-prototype').each((index, element) =>
       vid = $(element).data('vid')
       name = $(element).data('name')
       value = $(element).data('value')

@@ -7,7 +7,6 @@ Open
 * [ ] Edit: BUG in WebKit-browsers: Combo boxes do not work properly!
 * [ ] Edit: Variable definition: hide size-field if not necessary.
 * [ ] Edit: Combo boxes' behavior when different variables with same starting letter
-* [ ] View: Cursor also in source code
 * [ ] Edit: Data type character
 * [ ] Edit: Possibility for viewer-defined parameters
 * [ ] User: Administration for deleting and resurrecting users/algorithms
@@ -17,6 +16,7 @@ Open
 
 Done
 ----
+* [x] View: Cursor also in source code
 * [x] Edit: Support AND, OR in While- and IfNodes, if two or more conditions are defined
 * [x] Save section state and animation speed in cookies or browser memory
 * [x] Bug: execution of empty else

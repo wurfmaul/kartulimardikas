@@ -223,7 +223,7 @@ class StepForm
     # parse the tree
     tree = Tree.toJSON()
     # search for invalid-flags
-    if (SCRIPTSITE.find('.invalid:visible').length)
+    if (SCRIPTSITE.find('.invalid').length)
       console.error('Not saved due to parsing errors!')
     else
       @varForm.updateVarCount()
@@ -253,7 +253,7 @@ updateVisibility = (variable) ->
 
 initVarInput = (elem) ->
   vars = []
-  $('.varRow:visible').each(->
+  $('.varRow').not('#var-prototype').each(->
     vars.push($(this).data('name'))
   )
   properties = ["", "[*]", ".length"]

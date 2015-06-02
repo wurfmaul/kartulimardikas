@@ -5,6 +5,8 @@ class Player
     @reset()
 
   reset: ->
+    # stop if playing
+    @play() if @timer?
     # reset components
     @tree.reset()
     @memory.reset()
@@ -117,10 +119,16 @@ class Player
 
   setCursor: (node) ->
     @unsetCursor()
+    # set cursor in algorithm
     $('#node_' + node).addClass('cursor')
+    # set cursor in source code
+    $('#source-node-' + node).closest('.line').addClass('source-cursor')
 
   unsetCursor: ->
+    # remove cursor from algorithm
     $('.cursor').removeClass('cursor')
+    # remove cursor from source code
+    $('.source-cursor').removeClass('source-cursor')
 
 class Stats
   constructor: (@memory) ->

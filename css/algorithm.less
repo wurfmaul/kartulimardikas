@@ -1,3 +1,5 @@
+@import "mixins";
+
 @assign-node-color: #ffb181;
 @comment-node-color: #808080;
 @compare-node-color: #fff465;
@@ -38,7 +40,7 @@
         line-height: normal;
       }
 
-      .invalid {
+      .invalid-flag {
         display: none;
       }
 
@@ -56,14 +58,10 @@
         &.top {
           border-top: @border;
           &.left {
-            -moz-border-radius-topleft: @radius;
-            -webkit-border-top-left-radius: @radius;
-            border-top-left-radius: @radius;
+            .border-top-left-radius(@radius);
           }
           &.right {
-            -moz-border-radius-topright: @radius;
-            -webkit-border-top-right-radius: @radius;
-            border-top-right-radius: @radius;
+            .border-top-right-radius(@radius);
           }
         }
         &.right {
@@ -72,14 +70,10 @@
         &.bottom {
           border-bottom: @border;
           &.left {
-            -moz-border-radius-bottomleft: @radius;
-            -webkit-border-bottom-left-radius: @radius;
-            border-bottom-left-radius: @radius;
+            .border-bottom-left-radius(@radius);
           }
           &.right {
-            -moz-border-radius-bottomright: @radius;
-            -webkit-border-bottom-right-radius: @radius;
-            border-bottom-right-radius: @radius;
+            .border-bottom-right-radius(@radius);
           }
         }
         &.left {

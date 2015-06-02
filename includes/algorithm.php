@@ -23,9 +23,11 @@ class AssignNode extends Node
 
     public function getSource($params)
     {
-        return sprintf("%s := %s",
-            $this->to->parse($params),
-            trim($this->from->getSource($params))
+        return $this->wrapLine(
+            sprintf("%s := %s",
+                $this->to->parse($params),
+                trim($this->from->getSource($params))
+            )
         );
     }
 
@@ -51,7 +53,7 @@ class AssignNode extends Node
                                 </div>
                                 :=
                             </label>
-                            <span class="invalid label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
+                            <span class="invalid-flag label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
                             <button type="button" class="close node-remove" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -110,7 +112,7 @@ class BlockNode extends Node
                 $source .= $_indent;
             }
             $source .= $node->getSource($params);
-            if ($index < sizeof($this->nodes) - 1)
+            if ($index < sizeof($this->nodes) - 1) // not the last node
                 if ($combine) {
                     $source .= $combine === 'any' ? ' or ' : ' and ';
                 } else {
@@ -155,7 +157,7 @@ class CommentNode extends Node
         require_once BASEDIR . 'includes/markdownHelper.php';
         $comment = parseMarkdown($this->comment, false, false);
         $comment = preg_replace('/\n/', '<br/># ', $comment);
-        return "# " . $comment;
+        return '<span style="color:grey"># ' . $comment . '</span>';
     }
 
     public function printHtml(&$params)
@@ -172,7 +174,7 @@ class CommentNode extends Node
                         <?php if ($params['mode'] === 'edit'): ?>
                             <?= TreeHelper::l10n('comment_node_title') ?>
                             <span class="toggle-comment fa fa-plus-square"></span>
-                            <span class="invalid label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
+                            <span class="invalid-flag label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
                             <button type="button" class="close node-remove" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -230,10 +232,12 @@ class CompareNode extends Node
 
     public function getSource($params)
     {
-        return sprintf("%s %s %s",
-            $this->left->parse($params),
-            $this->ops[$this->op],
-            $this->right->parse($params)
+        return $this->wrapLine(
+            sprintf("%s %s %s",
+                $this->left->parse($params),
+                $this->ops[$this->op],
+                $this->right->parse($params)
+            )
         );
     }
 
@@ -271,7 +275,7 @@ class CompareNode extends Node
                                     <input class="compare-right combobox" value="<?= $rightVal ?>"/>
                                 </div>
                             </label>
-                            <span class="invalid label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
+                            <span class="invalid-flag label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
                             <button type="button" class="close node-remove" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -368,7 +372,7 @@ class IfNode extends Node
                                     <?php endforeach ?>
                                 </select>
                             </label>
-                            <span class="invalid label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
+                            <span class="invalid-flag label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
                             <button type="button" class="close node-remove" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -445,7 +449,7 @@ class IncNode extends Node
 
     public function getSource($params)
     {
-        return $this->var->parse($params) . "++";
+        return $this->wrapLine($this->var->parse($params) . "++");
     }
 
     public function printHtml(&$params)
@@ -477,7 +481,7 @@ class IncNode extends Node
                                     <?php endforeach ?>
                                 </select>
                             </label>
-                            <span class="invalid label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
+                            <span class="invalid-flag label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
                             <button type="button" class="close node-remove" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -516,7 +520,7 @@ class ReturnNode extends Node
 
     public function getSource($params)
     {
-        return "return " . $this->value->parse($params);
+        return $this->wrapLine("return " . $this->value->parse($params));
     }
 
     public function printHtml(&$params)
@@ -539,7 +543,7 @@ class ReturnNode extends Node
                                     <input class="return-value combobox" value="<?= $varValue ?>"/>
                                 </div>
                             </label>
-                            <span class="invalid label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
+                            <span class="invalid-flag label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
                             <button type="button" class="close node-remove" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -582,10 +586,12 @@ class SwapNode extends Node
 
     public function getSource($params)
     {
-        return sprintf("%s %s %s",
-            $this->left->parse($params),
-            '&hArr;',
-            $this->right->parse($params)
+        return $this->wrapLine(
+            sprintf("%s %s %s",
+                $this->left->parse($params),
+                '&hArr;',
+                $this->right->parse($params)
+            )
         );
     }
 
@@ -614,7 +620,7 @@ class SwapNode extends Node
                                     <input class="swap-right combobox" value="<?= $rightVal ?>"/>
                                 </div>
                             </label>
-                            <span class="invalid label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
+                            <span class="invalid-flag label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
                             <button type="button" class="close node-remove" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -653,7 +659,7 @@ class ValueNode extends Node
 
     public function getSource($params)
     {
-        return $this->value->parse($params);
+        return $this->wrapLine($this->value->parse($params));
     }
 
     public function printHtml(&$params)
@@ -676,7 +682,7 @@ class ValueNode extends Node
                                     <input class="value-var combobox" value="<?= $varValue ?>"/>
                                 </div>
                             </label>
-                            <span class="invalid label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
+                            <span class="invalid-flag label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
                             <button type="button" class="close node-remove" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -762,7 +768,7 @@ class WhileNode extends Node
                                     <?php endforeach ?>
                                 </select>
                             </label>
-                            <span class="invalid label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
+                            <span class="invalid-flag label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
                             <button type="button" class="close node-remove" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -952,6 +958,11 @@ abstract class Node
      * @return string
      */
     public abstract function getSource($params);
+
+    public function wrapLine($line)
+    {
+        return "<span id=\"source-node-$this->nodeId\">$line</span>";
+    }
 }
 
 class Tree
@@ -988,7 +999,11 @@ class Tree
             $params['indent'] = 0;
         }
         // start recursion
-        print(trim($this->root->getSource($params)));
+        $source = "";
+        foreach (explode(PHP_EOL, trim($this->root->getSource($params))) as $line) {
+            $source .= '<div class="line">' . $line . '</div>';
+        }
+        print($source);
     }
 }
 
