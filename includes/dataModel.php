@@ -183,8 +183,6 @@ class DataModel
      */
     public function fetchUserByUsername($username)
     {
-        $username = $this->_sql->real_escape_string($username);
-
         $stmt = $this->_sql->prepare("
             SELECT * FROM user
             WHERE username = ?
@@ -203,8 +201,6 @@ class DataModel
      */
     public function fetchUserByMail($email)
     {
-        $email = $this->_sql->real_escape_string($email);
-
         $stmt = $this->_sql->prepare("
             SELECT * FROM user
             WHERE email = ?
@@ -285,8 +281,6 @@ class DataModel
      */
     public function insertUser($username, $email, $password)
     {
-        $username = $this->_sql->real_escape_string($username);
-        $email = $this->_sql->real_escape_string($email);
         $password = $this->_sql->real_escape_string($password);
 
         $stmt = $this->_sql->prepare("
@@ -343,9 +337,6 @@ class DataModel
      */
     public function updateAlgorithmInfo($aid, $name, $desc, $long)
     {
-        $name = $this->_sql->real_escape_string($name);
-        $desc = $this->_sql->real_escape_string($desc);
-
         $stmt = $this->_sql->prepare("
             UPDATE algorithm
             SET name=?, description=?, long_description=?, date_lastedit=NOW()

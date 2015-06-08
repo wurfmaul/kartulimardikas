@@ -4,8 +4,8 @@ global $l10n;
 
 if ($__aid && $__uid && $__owner) {
     // prepare algorithm meta data
-    $name = stripslashes($__algorithm->name);
-    $description = stripslashes($__algorithm->description);
+    $name = htmlspecialchars_decode($__algorithm->name);
+    $description = htmlspecialchars_decode($__algorithm->description);
     if ($long_description = $__algorithm->long_description) {
         require_once BASEDIR . 'includes/markdownHelper.php';
         $long_preview = parseMarkdown($long_description);

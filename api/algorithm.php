@@ -91,8 +91,8 @@ class EditAlgorithmManager
         if (!isset($_POST['name'], $_POST['desc'], $_POST['long']))
             die("Post parameters not set properly!");
 
-        $name = trim($_POST['name']);
-        $desc = trim($_POST['desc']);
+        $name = htmlspecialchars(trim($_POST['name']));
+        $desc = htmlspecialchars(trim($_POST['desc']));
         $long = trim($_POST['long']);
 
         if (empty($name) && $this->_algorithm->date_publish) {

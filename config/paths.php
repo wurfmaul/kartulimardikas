@@ -19,10 +19,10 @@ if (LIBRARY_MODE == 'LOCAL') {
     define('BOOTSTRAP_JS_PATH', "lib/bootstrap/$_bootstrapVersion/js/bootstrap.js");
     define('BOOTSTRAP_CSS_PATH', "lib/bootstrap/$_bootstrapVersion/css/bootstrap.css");
     define('FONT_AWESOME_PATH', "lib/font-awesome/$_fontAwesomeVersion/css/font-awesome.css");
-} else {
+} else { // CDN
     define('JQUERY_PATH', "https://code.jquery.com/jquery-$_jqueryVersion.min.js");
     define('JQUERYUI_JS_PATH', "https://code.jquery.com/ui/$_jqueryUiVersion/jquery-ui.min.js");
-    define('JQUERYUI_CSS_PATH', "https://code.jquery.com/ui/$_jqueryUiVersion/jquery-ui.min.css");
+    define('JQUERYUI_CSS_PATH', "https://code.jquery.com/ui/$_jqueryUiVersion/themes/smoothness/jquery-ui.min.css");
     define('BOOTSTRAP_JS_PATH', "https://maxcdn.bootstrapcdn.com/bootstrap/$_bootstrapVersion/js/bootstrap.min.js");
     define('BOOTSTRAP_CSS_PATH', "https://maxcdn.bootstrapcdn.com/bootstrap/$_bootstrapVersion/css/bootstrap.min.css");
     define('FONT_AWESOME_PATH', "https://maxcdn.bootstrapcdn.com/font-awesome/$_fontAwesomeVersion/css/font-awesome.min.css");

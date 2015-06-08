@@ -5,8 +5,8 @@ global $l10n;
 // if algorithm is defined
 if ($__aid && $__algorithm && ($__public || $__owner)):
     // prepare algorithm meta-data
-    $name = stripslashes($__algorithm->name);
-    $description = stripslashes($__algorithm->description);
+    $name = $__algorithm->name;
+    $description = $__algorithm->description;
     if ($long_description = $__algorithm->long_description) {
         require_once BASEDIR . 'includes/markdownHelper.php';
         $long_description = parseMarkdown($long_description);
