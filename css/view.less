@@ -63,24 +63,26 @@
 
 .source {
   .line {
-    padding-left: 3px;
-    @border-style: 2px solid transparent;
-    border-top: @border-style;
-    border-left: @border-style;
-    .border-top-left-radius(3px);
+    padding-left: 20px;
+    border: 1px solid transparent;
+    .border-radius(3px);
     &.source-cursor {
-      border-color: blue;
+      background: darkgray url("../img/cursor.png") no-repeat;
+      position: relative;
+      left: 0;
     }
   }
 }
 
 .highlight-write {
+  @color: #ffb181;
   font-weight: bold;
-  background-color: #5cb85c !important;
-  border-color: #4cae4c !important;
+  background-color: @color !important;
+  border-color: darken(@color, 20%) !important;
 }
 
 .highlight-read {
-  background-color: #f0ad4e !important;
-  border-color: #eea236 !important;
+  @color: #5cb85c;
+  background-color: @color !important;
+  border-color: darken(@color, 20%) !important;
 }
