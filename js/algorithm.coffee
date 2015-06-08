@@ -62,8 +62,8 @@ class Node
             throw new ExecutionError('divide_by_zero', []) if (rightVal is 0)
             parseInt(leftVal / rightVal)
           when '%' then leftVal % rightVal
-        when '&' then (if leftVal and rightVal then 1 else 0)
-        when '|' then (if leftVal or rightVal then 1 else 0)
+          when '&' then (if leftVal and rightVal then 1 else 0)
+          when '|' then (if leftVal or rightVal then 1 else 0)
           else
             throw new ExecutionError('unknown_arithmetic_op', [@operator])
 
@@ -72,17 +72,15 @@ class Node
 
   readVar: (source, player) ->
     switch (source.kind)
-    when 'index'
-      index = @executeIndex(source.index, player)
-      player.stats.readArrayVar(source.vid, index)
-      player.memory.arrayGet(source.vid, index)
-
-    when 'var'
-      vid = source.vid
-      player.stats.readVar(vid) # tell the stats, that a variable has been read
-      player.memory.get(vid).value # return the current value of the variable
-
-    else throw new ExecutionError('unknown_kind', [source.kind])
+      when 'index'
+        index = @executeIndex(source.index, player)
+        player.stats.readArrayVar(source.vid, index)
+        player.memory.arrayGet(source.vid, index)
+      when 'var'
+        vid = source.vid
+        player.stats.readVar(vid) # tell the stats, that a variable has been read
+        player.memory.get(vid).value # return the current value of the variable
+      else throw new ExecutionError('unknown_kind', [source.kind])
 
   writeVar: (destination, value, player) ->
     switch (destination.kind)
@@ -95,7 +93,7 @@ class Node
         player.stats.writeVar(destination.vid, value)
       when 'const' then throw new ExecutionError('assign_to_const', [destination.value])
       when 'prop' then throw new ExecutionError('assign_to_prop', [])
-    else throw new ExecutionError('unknown_kind', [destination.kind])
+      else throw new ExecutionError('unknown_kind', [destination.kind])
 
   ###
     Sets the cursor to the position of the node. Override to place it somewhere else!
@@ -393,14 +391,13 @@ class CompareNode extends Node
     rightVal = @executeValue(@right, player)
     player.stats.incCompareOps()
     switch @operator
-    when 'le' then value: (if leftVal <= rightVal then 1 else 0)
-    when 'lt' then value: (if leftVal < rightVal then 1 else 0)
-    when 'eq' then value: (if leftVal == rightVal then 1 else 0)
-    when 'gt' then value: (if leftVal > rightVal then 1 else 0)
-    when 'ge' then value: (if leftVal >= rightVal then 1 else 0)
-    when 'ne' then value: (if leftVal != rightVal then 1 else 0)
-      else
-        throw new Error("CompareNode: unknown operator: '#{@operator}'!")
+      when 'le' then value: (if leftVal <= rightVal then 1 else 0)
+      when 'lt' then value: (if leftVal < rightVal then 1 else 0)
+      when 'eq' then value: (if leftVal == rightVal then 1 else 0)
+      when 'gt' then value: (if leftVal > rightVal then 1 else 0)
+      when 'ge' then value: (if leftVal >= rightVal then 1 else 0)
+      when 'ne' then value: (if leftVal != rightVal then 1 else 0)
+      else throw new Error("CompareNode: unknown operator: '#{@operator}'!")
 
   toJSON: ->
     {
