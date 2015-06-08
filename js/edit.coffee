@@ -216,7 +216,7 @@ class StepForm
     node.hide('slow', =>
       node.remove()
       @varForm.updateVarCount()
-      Api.editScript(Tree.toJSON())
+      @saveChanges()
     )
 
   saveChanges: ->
@@ -239,7 +239,7 @@ class StepForm
 
   updateSortable: ->
     update = =>
-      Api.editScript(Tree.toJSON())
+      @saveChanges()
     sortParams =
       connectWith: ".sortable"
       placeholder: "sortable-highlight"
@@ -249,7 +249,10 @@ class StepForm
 
 updateVisibility = (variable) ->
   # show/hide input fields according to the init selection
-  # FIXME: show/hide size-group
+  option = $(variable).find('option:selected')
+  size = option.closest('.varRow').find('.size-group')
+  if (option.data('target') is '.size') then size.show('slow')
+  else size.hide('slow')
 
 initVarInput = (elem) ->
   vars = []
@@ -306,7 +309,6 @@ initValueInput = (elem) ->
     delay: 0
     minLength: 0
     source: [elem.data('random'), elem.data('uninit')]
-    select: -> updateVisibility(elem)
   ).click(->
     # open search with basic options
     $(this).autocomplete("search", "")
@@ -349,11 +351,13 @@ $ ->
   stepForm = new StepForm(varForm)
   stepForm.updateActionHandlers(SCRIPTSITE)
   stepForm.updateSortable()
+  # handlers for new-node buttons
   $('#node-btn-group').children('button').click ->
     stepForm.addNode($(this).data('node'))
-    Api.editScript(Tree.toJSON())
+  # handlers for expanding/collapsing comments
   $('.toggle-comment').click(->
     $(this).parent().find('.comment-container').toggle('slow')
     $(this).toggleClass('fa-plus-square fa-minus-square')
   )
+  # parse once in order to validate the tree
   Tree.toJSON()

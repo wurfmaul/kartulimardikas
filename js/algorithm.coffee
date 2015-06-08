@@ -144,6 +144,16 @@ class Node
     else node.removeClass('error')
     value
 
+  @parseAndCheckVar: (_class, node, memory) ->
+    node = @findSubNode(node, _class)
+    value = @parseValue(node.val(), memory)
+    if value? and (value.kind is 'var' or value.kind is 'index')
+      node.removeClass('error')
+      value
+    else
+      node.addClass('error')
+      null
+
   @parseValue: (value, memory) ->
     # check for const (int)
     intVal = parseInt(value)
@@ -171,10 +181,12 @@ class Node
       else return null
 
     # check for variable name
-    vid = memory.find(value)
-    if (vid > -1)
-      memory.count(vid)
-      return {kind: 'var', vid: vid}
+    if (value.match(/\w*/i))
+      vid = memory.find(value)
+      if (vid > -1)
+        memory.count(vid)
+        return {kind: 'var', vid: vid}
+      else return null
 
     value = value.replace(/\s*/g, '') # remove white spaces
     # check for simple computations (e.g. i+1)
@@ -276,8 +288,8 @@ class AssignNode extends Node
     from = BlockNode.parse(@findSubNode(node, '.assign-from'), tree, memory)
     tree.push from
     # parse to-value
-    to = @parseAndCheckValue('.assign-to', node, memory)
-    @validate(node, to?)
+    to = @parseAndCheckVar('.assign-to', node, memory)
+    @validate(node, to? and from.size())
     # create the node
     nid = tree.length
     new @(nid, from.nid, to)

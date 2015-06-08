@@ -180,7 +180,8 @@ if ($__aid && $__uid && $__owner) {
                                                 <input class="form-control input-sm value" value="<?= $var->value ?>"
                                                        placeholder="<?= $l10n['value'] ?>" type="text">
                                             </div>
-                                            <div class="form-group size-group">
+                                            <div class="form-group size-group"
+                                                <?php if (substr($var->type,0,5) !== 'array'): ?> style="display: none;"<?php endif ?>>
                                                 <label class="sr-only"><?= $l10n['array_size'] ?></label>
                                                 <select class="form-control input-sm size">
                                                     <optgroup label="<?= $l10n['size'] ?>">
