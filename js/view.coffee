@@ -132,7 +132,7 @@ class Player
 
 class Stats
   constructor: (@memory) ->
-    @stats = ['accesses', 'assignments', 'comparisons', 'arithmetic']
+    @stats = ['accesses', 'assignments', 'comparisons', 'arithmeticLogic']
 
   inc: (element) ->
     elem = $('#stats-' + element)
@@ -145,7 +145,7 @@ class Stats
 
   incCompareOps: -> @inc(@stats[2])
 
-  incArithmeticOps: -> @inc(@stats[3])
+  incArithmeticLogicOps: -> @inc(@stats[3])
 
   readVar: (vid) ->
     $('#var-' + vid).find('.value-container').addClass('highlight-read')

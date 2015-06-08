@@ -102,6 +102,7 @@ $l10n['accesses'] = "Zugriffe";
 $l10n['assignments'] = "Zuweisungen";
 $l10n['comparisons'] = "Vergleiche";
 $l10n['arithmetic'] = "Arithmetische (+ &minus; &times; / %)";
+$l10n['logic'] = "Logische (& |)";
 $l10n['assign_node_title'] = "Zuweisung";
 $l10n['comment_node_title'] = "Kommentar";
 $l10n['compare_node_title'] = "Vergleich";

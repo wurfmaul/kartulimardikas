@@ -37,9 +37,7 @@ class Node
       when 'const' then value.value
 
       when 'index'
-        index = @executeIndex(value.index, player)
-        player.stats.readArrayVar(value.vid, index)
-        memory.arrayGet(value.vid, index)
+        @readVar(value, player)
 
       when 'prop'
         if (value.prop is 'length')
@@ -50,14 +48,12 @@ class Node
           throw new ExecutionError('unknown_property', [value.prop])
 
       when 'var'
-        vid = value.vid
-        player.stats.readVar(vid) # tell the stats, that a variable has been read
-        memory.get(vid).value # return the current value of the variable
+        @readVar(value, player)
 
       when 'comp'
         leftVal = @executeValue(value.left, player)
         rightVal = @executeValue(value.right, player)
-        player.stats.incArithmeticOps()
+        player.stats.incArithmeticLogicOps()
         switch value.op
           when '+' then leftVal + rightVal
           when '-' then leftVal - rightVal
@@ -66,13 +62,27 @@ class Node
             throw new ExecutionError('divide_by_zero', []) if (rightVal is 0)
             parseInt(leftVal / rightVal)
           when '%' then leftVal % rightVal
+        when '&' then (if leftVal and rightVal then 1 else 0)
+        when '|' then (if leftVal or rightVal then 1 else 0)
           else
             throw new ExecutionError('unknown_arithmetic_op', [@operator])
 
       else
         throw new ExecutionError('unknown_kind', [value.kind])
 
-  readVar: () ->
+  readVar: (source, player) ->
+    switch (source.kind)
+    when 'index'
+      index = @executeIndex(source.index, player)
+      player.stats.readArrayVar(source.vid, index)
+      player.memory.arrayGet(source.vid, index)
+
+    when 'var'
+      vid = source.vid
+      player.stats.readVar(vid) # tell the stats, that a variable has been read
+      player.memory.get(vid).value # return the current value of the variable
+
+    else throw new ExecutionError('unknown_kind', [source.kind])
 
   writeVar: (destination, value, player) ->
     switch (destination.kind)
@@ -85,8 +95,7 @@ class Node
         player.stats.writeVar(destination.vid, value)
       when 'const' then throw new ExecutionError('assign_to_const', [destination.value])
       when 'prop' then throw new ExecutionError('assign_to_prop', [])
-      else
-        throw new ExecutionError('unknown_kind', [destination.kind])
+    else throw new ExecutionError('unknown_kind', [destination.kind])
 
   ###
     Sets the cursor to the position of the node. Override to place it somewhere else!
@@ -172,11 +181,11 @@ class Node
     value = value.replace(/\s*/g, '') # remove white spaces
     # check for simple computations (e.g. i+1)
     if (value.indexOf('(') is -1)
-      split = value.split(/(-|\+|\*|\/|%)/i)
+      split = value.split(/(-|\+|\*|\/|%|&|\|)/i)
       if (split.length is 3) # e.g. "i-1"
         left = @parseValue(split[0], memory)
         right = @parseValue(split[2], memory)
-        if (left? and right? and "+-*/%".indexOf(split[1]) >= 0)
+        if (left? and right? and "+-*/%&|".indexOf(split[1]) >= 0)
           return {kind: 'comp', left: left, right: right, op: split[1]}
         else return null
 
@@ -189,7 +198,7 @@ class Node
           left = @parseValue(value[0], memory)
           right = @parseValue(value[2], memory)
           op = value[1]
-          if (left? and right? and "+-*/%".indexOf(value[1]) >= 0)
+          if (left? and right? and "+-*/%&|".indexOf(value[1]) >= 0)
             return {kind: 'comp', left: left, right: right, op: op}
 
     # return null, if value is not valid
@@ -206,7 +215,7 @@ class Node
     level = 0
     result = {}
     index = 0
-    split = value.split(/(-|\+|\*|\/|%@|\(|\))/g)
+    split = value.split(/(-|\+|\*|\/|%|&|\||\(|\))/g)
     for i in [0...split.length]
       chunk = split[i]
       if (chunk is '') then continue
@@ -384,12 +393,12 @@ class CompareNode extends Node
     rightVal = @executeValue(@right, player)
     player.stats.incCompareOps()
     switch @operator
-      when 'le' then value: leftVal <= rightVal
-      when 'lt' then value: leftVal < rightVal
-      when 'eq' then value: leftVal == rightVal
-      when 'gt' then value: leftVal > rightVal
-      when 'ge' then value: leftVal >= rightVal
-      when 'ne' then value: leftVal != rightVal
+    when 'le' then value: (if leftVal <= rightVal then 1 else 0)
+    when 'lt' then value: (if leftVal < rightVal then 1 else 0)
+    when 'eq' then value: (if leftVal == rightVal then 1 else 0)
+    when 'gt' then value: (if leftVal > rightVal then 1 else 0)
+    when 'ge' then value: (if leftVal >= rightVal then 1 else 0)
+    when 'ne' then value: (if leftVal != rightVal then 1 else 0)
       else
         throw new Error("CompareNode: unknown operator: '#{@operator}'!")
 
