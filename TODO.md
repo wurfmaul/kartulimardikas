@@ -3,12 +3,11 @@ Kartulimardikas - TODO list
 
 Open
 ----
+* [ ] Edit: Possibility for viewer-defined parameters
 * [ ] Edit: Reorder-aid when a node is dragged
 * [ ] Edit: BUG in WebKit-browsers: Combo boxes do not work properly!
-* [ ] Edit: Variable definition: hide size-field if not necessary.
 * [ ] Edit: Combo boxes' behavior when different variables with same starting letter
 * [ ] Edit: Data type character
-* [ ] Edit: Possibility for viewer-defined parameters
 * [ ] User: Administration for deleting and resurrecting users/algorithms
 * [ ] User: Verify email/Lost password
 * [ ] Edit: Data type boolean
@@ -16,6 +15,7 @@ Open
 
 Done
 ----
+* [x] Edit: Variable definition: hide size-field if not necessary.
 * [x] View: Cursor also in source code
 * [x] Edit: Support AND, OR in While- and IfNodes, if two or more conditions are defined
 * [x] Save section state and animation speed in cookies or browser memory

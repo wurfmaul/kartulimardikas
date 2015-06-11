@@ -11,7 +11,7 @@ function secure_session_start()
     // prepare and regenerate session cookie
     $oldCookie = session_get_cookie_params();
     session_set_cookie_params($oldCookie['lifetime'], $oldCookie['path'], $oldCookie['domain'], false, true);
-    session_name($_SERVER['HTTP_HOST']);
+    session_name('kartulimardikas');
     session_start();
     session_regenerate_id();
 }

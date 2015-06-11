@@ -5,7 +5,7 @@ class Node
   ###
     Must be overridden by all subclasses.
   ###
-  execute: (player) ->
+  execute: (player, node) ->
     throw new Error('Node must override execute() method!')
 
   ###
@@ -181,7 +181,7 @@ class Node
       else return null
 
     # check for variable name
-    if (value.match(/\w*/i))
+    if (/^[A-Za-z]+$/.test(value))
       vid = memory.find(value)
       if (vid > -1)
         memory.count(vid)
@@ -269,7 +269,7 @@ class AssignNode extends Node
 
   execute: (player, node) ->
     # get new value
-    value = player.tree.tree[@from].execute(player, 0).value
+    value = player.tree.get(@from).execute(player, 0).value
     # write new value
     @writeVar(@to, value, player)
     # return value
@@ -303,7 +303,7 @@ class BlockNode extends Node
     # find matching sub-node
     for n,i in @nodes
       if (node <= n)
-        curNode = player.tree.tree[n].execute(player, node)
+        curNode = player.tree.get(n).execute(player, node)
         break
     # use the value if there is one
     if (curNode?.value?) then value = curNode.value
@@ -326,7 +326,7 @@ class BlockNode extends Node
         next = n
         break
       else
-        curValue = player.tree.tree[n].execute(player, n).value
+        curValue = player.tree.get(n).execute(player, n).value
         value = value and curValue if (combine is 'all')
         value = value or curValue if (combine is 'any')
         break if (SHORT_CIRCUIT and not value)
@@ -337,7 +337,7 @@ class BlockNode extends Node
     if (node is @nid)
       # ... mark first child that wants
       for n,i in @nodes
-        marked = player.tree.tree[n].mark(player, n)
+        marked = player.tree.get(n).mark(player, n)
         return marked if marked > -1
       return -1
       # if a child node should be marked...
@@ -345,7 +345,7 @@ class BlockNode extends Node
       for n,i in @nodes
         # ... find suitable child and try marking it
         if (node <= n)
-          marked = player.tree.tree[n].mark(player, node)
+          marked = player.tree.get(n).mark(player, node)
           if marked > -1 then return marked
             # ... otherwise try the next child
           else node = n + 1
@@ -434,7 +434,7 @@ class IfNode extends Node
   execute: (player, node) ->
     # find matching sub-node
     if (node <= @condition)
-      cond = player.tree.tree[@condition]
+      cond = player.tree.get(@condition)
       # execute the condition
       size = cond.size()
       if (size is 1) then condRetVal = cond.execute(player, node)
@@ -445,21 +445,21 @@ class IfNode extends Node
       else if condRetVal.value then next: @ifBody
       else next: @elseBody
     else if (node <= @ifBody)
-      next: player.tree.tree[@ifBody].execute(player, node).next
+      next: player.tree.get(@ifBody).execute(player, node).next
     else
-      next: player.tree.tree[@elseBody].execute(player, node).next
+      next: player.tree.get(@elseBody).execute(player, node).next
 
   mark: (player, node) ->
     # mark condition if the IfNode should be marked
     if (node is @nid)
-      player.tree.tree[@condition].mark(player, @condition)
+      player.tree.get(@condition).mark(player, @condition)
       # redirect mark-command to sub-nodes of condition, ifBody or elseBody
     else if (node <= @condition)
-      player.tree.tree[@condition].mark(player, node)
+      player.tree.get(@condition).mark(player, node)
     else if (node <= @ifBody)
-      player.tree.tree[@ifBody].mark(player, node)
+      player.tree.get(@ifBody).mark(player, node)
     else
-      player.tree.tree[@elseBody].mark(player, node)
+      player.tree.get(@elseBody).mark(player, node)
 
   toJSON: ->
     {
@@ -600,7 +600,7 @@ class WhileNode extends Node
   execute: (player, node) ->
     # find matching sub-node
     if (node <= @condition)
-      cond = player.tree.tree[@condition]
+      cond = player.tree.get(@condition)
       # execute the condition
       size = cond.size()
       if (size is 1) then condValue = cond.execute(player, node)
@@ -611,19 +611,19 @@ class WhileNode extends Node
       else if condValue.value then next: @body # if condition is true, next node should be the body
       else {} # otherwise don't return a next node in order to mark this node as done
     else if (node <= @body)
-      bodyValue = player.tree.tree[@body].execute(player, node)
+      bodyValue = player.tree.get(@body).execute(player, node)
       if bodyValue.next? then next: bodyValue.next # if body has still more nodes to execute, let it!
       else next: @condition # otherwise jump back to condition
 
   mark: (player, node) ->
     # mark condition if the WhileNode should be marked
     if (node is @nid)
-      player.tree.tree[@condition].mark(player, @condition)
+      player.tree.get(@condition).mark(player, @condition)
       # redirect mark-command to sub-nodes of condition, ifBody or elseBody
     else if (node <= @condition)
-      player.tree.tree[@condition].mark(player, node)
+      player.tree.get(@condition).mark(player, node)
     else
-      player.tree.tree[@body].mark(player, node)
+      player.tree.get(@body).mark(player, node)
 
   toJSON: ->
     {
@@ -654,27 +654,28 @@ class WhileNode extends Node
 
 class window.Tree
   constructor: ->
+    @memory = new Memory($('.variables>tbody'))
     @reset()
 
-  executeStep: (player, node) ->
-    @tree[@root].execute(player, node)
+  execute: (player, node) ->
+    @get(@root).execute(player, node)
 
   mark: (player, node) ->
-    @tree[@root].mark(player, node)
+    @get(@root).mark(player, node)
 
   get: (nid) ->
-    @tree[nid]
+    @nodes[nid]
 
   reset: () ->
-    @memory = new Memory($('.variables>tbody'))
-    @tree = []
-    rootNode = BlockNode.parse(SCRIPTSITE, @tree, @memory)
-    @root = @tree.length
-    @tree.push rootNode
+    @memory.reset()
+    @nodes = []
+    rootNode = BlockNode.parse(SCRIPTSITE, @nodes, @memory)
+    @root = @nodes.length
+    @nodes.push rootNode
 
   toJSON: ->
     json = []
-    for node, i in @tree
+    for node, i in @nodes
       json[i] = node.toJSON()
     json
 

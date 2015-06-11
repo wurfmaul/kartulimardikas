@@ -1,6 +1,7 @@
 class Player
-  constructor: (@tree, @stats) ->
+  constructor: (@tree) ->
     @memory = @tree.memory
+    @stats = new Stats(@memory)
     @speed = @computeSpeed()
     @reset()
 
@@ -9,7 +10,6 @@ class Player
     @play() if @timer?
     # reset components
     @tree.reset()
-    @memory.reset()
     @stats.reset()
     # delete return value
     $('#returnValue').val('')
@@ -52,7 +52,7 @@ class Player
       @clearHighlight()
       # execute current step
       @curNode = @nextNode
-      curNode = @tree.executeStep(@, @curNode)
+      curNode = @tree.execute(@, @curNode)
     catch runtimeError
       error = runtimeError
       @handleError(error)
@@ -186,8 +186,7 @@ class Stats
     )
 $ ->
   tree = new Tree()
-  stats = new Stats(tree.memory)
-  player = new Player(tree, stats)
+  player = new Player(tree)
 
   # CONTROLS SECTION
   $('#btn-reset').click -> player.reset()
