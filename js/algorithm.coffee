@@ -31,7 +31,6 @@ class Node
   executeValue: (value, player) ->
     if (!value?.kind?)
       throw new ExecutionError('could_not_execute_value', [value])
-    memory = player.memory
 
     switch value.kind
       when 'const' then value.value
@@ -41,7 +40,7 @@ class Node
 
       when 'prop'
         if (value.prop is 'length')
-          variable = memory.get(value.vid)
+          variable = player.memory.get(value.vid)
           if (variable.array) then variable.value.split(',').length
           else 1
         else
@@ -616,14 +615,18 @@ class WhileNode extends Node
       else next: @condition # otherwise jump back to condition
 
   mark: (player, node) ->
-    # mark condition if the WhileNode should be marked
+    condition = player.tree.get(@condition)
     if (node is @nid)
-      player.tree.get(@condition).mark(player, @condition)
-      # redirect mark-command to sub-nodes of condition, ifBody or elseBody
+      # mark condition if the WhileNode should be marked
+      condition.mark(player, @condition)
     else if (node <= @condition)
-      player.tree.get(@condition).mark(player, node)
+      # redirect mark-command to sub-nodes of condition
+      condition.mark(player, node)
     else
-      player.tree.get(@body).mark(player, node)
+      # redirect mark-command to sub-nodes of body
+      body = player.tree.get(@body)
+      if (body.size()) then body.mark(player, node) # deal with empty body
+      else condition.mark(player, @condition)
 
   toJSON: ->
     {
