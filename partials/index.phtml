@@ -17,11 +17,13 @@ $list = isset($_GET['list']) ? $_GET['list'] : false;
     </div>
     <!-- CONTENT -->
     <table class="table table-striped table-hover algorithms">
-        <?php if ($latestAlgorithms): ?>
-            <?php foreach ($latestAlgorithms as $algorithm): ?>
-                <?php require(BASEDIR . 'partials/partials/item_date_name.phtml') ?>
-            <?php endforeach ?>
-        <?php else: ?>
+        <?php if ($latestAlgorithms):
+            $transKeys = ['created_at', 'created_note'];
+            $userData = true;
+            foreach ($latestAlgorithms as $algorithm) {
+                require(BASEDIR . 'partials/partials/item_algorithm.phtml');
+            }
+        else: ?>
             <tr>
                 <td><?= $l10n['no_algorithms'] ?></td>
             </tr>
@@ -39,11 +41,13 @@ $list = isset($_GET['list']) ? $_GET['list'] : false;
     </div>
     <!-- CONTENT -->
     <table class="table table-striped table-hover algorithms">
-        <?php if ($lastChanges): ?>
-            <?php foreach ($lastChanges as $algorithm): ?>
-                <?php require(BASEDIR . 'partials/partials/changed_date_name.phtml') ?>
-            <?php endforeach ?>
-        <?php else: ?>
+        <?php if ($lastChanges):
+            $transKeys = ['modified_at', 'modified_note'];
+            $userData = true;
+            foreach ($lastChanges as $algorithm) {
+                require(BASEDIR . 'partials/partials/item_algorithm.phtml');
+            }
+        else: ?>
             <tr>
                 <td><?= $l10n['no_algorithms'] ?></td>
             </tr>
@@ -61,11 +65,11 @@ $list = isset($_GET['list']) ? $_GET['list'] : false;
     </div>
     <!-- CONTENT -->
     <table class="table table-striped table-hover algorithms">
-        <?php if ($diligentUsers): ?>
-            <?php foreach ($diligentUsers as $user): ?>
-                <?php require(BASEDIR . 'partials/partials/users.phtml') ?>
-            <?php endforeach ?>
-        <?php else: ?>
+        <?php if ($diligentUsers):
+            foreach ($diligentUsers as $user){
+                require(BASEDIR . 'partials/partials/item_user.phtml');
+            }
+        else: ?>
             <tr>
                 <td><?= $l10n['no_users'] ?></td>
             </tr>
@@ -84,11 +88,13 @@ $list = isset($_GET['list']) ? $_GET['list'] : false;
     </div>
     <!-- CONTENT -->
     <table class="table table-striped table-hover algorithms">
-        <?php if ($algorithms): ?>
-            <?php foreach ($algorithms as $algorithm): ?>
-                <?php require(BASEDIR . 'partials/partials/item_date_name.phtml') ?>
-            <?php endforeach ?>
-        <?php else: ?>
+        <?php if ($algorithms):
+            $transKeys = ['created_at', 'created_note'];
+            $userData = true;
+            foreach ($algorithms as $algorithm) {
+                require(BASEDIR . 'partials/partials/item_algorithm.phtml');
+            }
+        else: ?>
             <tr>
                 <td><?= $l10n['no_algorithms'] ?></td>
             </tr>
@@ -106,7 +112,7 @@ $list = isset($_GET['list']) ? $_GET['list'] : false;
     </div>
     <!-- CONTENT -->
     <div class="tagcloud tagcloud-background">
-    <?php require(BASEDIR . 'partials/partials/tagcloud.phtml') ?>
+        <?php require(BASEDIR . 'partials/partials/tagcloud.phtml') ?>
     </div>
 <?php elseif ($__uid && $list === 'myAlgorithms'): ?>
     <?php
@@ -120,11 +126,13 @@ $list = isset($_GET['list']) ? $_GET['list'] : false;
     </div>
     <!-- CONTENT -->
     <table class="table table-striped table-hover algorithms">
-        <?php if (isset($my_algorithms) && $my_algorithms): ?>
-            <?php foreach ($my_algorithms as $algorithm): ?>
-                <?php require(BASEDIR . 'partials/partials/item_date.phtml') ?>
-            <?php endforeach ?>
-        <?php else: ?>
+        <?php if (isset($my_algorithms) && $my_algorithms):
+            $transKeys = ['created_at', 'created_note'];
+            $userData = false;
+            foreach ($my_algorithms as $algorithm) {
+                require(BASEDIR . 'partials/partials/item_algorithm.phtml');
+            }
+        else: ?>
             <tr>
                 <td><?= $l10n['no_algorithms'] ?></td>
             </tr>
@@ -132,7 +140,7 @@ $list = isset($_GET['list']) ? $_GET['list'] : false;
     </table>
 <?php elseif ($__uid && $list === 'myChanges'): ?>
     <?php
-    $my_changes = $__model->fetchModifiedAlgorithmsOfUser($__uid, true, 250);
+    $my_changes = $__model->fetchModifiedAlgorithmsOfUser($__uid, 250);
     ?>
     <!-- HEADER -->
     <div class="page-header">
@@ -142,11 +150,13 @@ $list = isset($_GET['list']) ? $_GET['list'] : false;
     </div>
     <!-- CONTENT -->
     <table class="table table-striped table-hover algorithms">
-        <?php if (isset($my_changes) && $my_changes): ?>
-            <?php foreach ($my_changes as $algorithm): ?>
-                <?php require(BASEDIR . 'partials/partials/changed_date.phtml') ?>
-            <?php endforeach ?>
-        <?php else: ?>
+        <?php if (isset($my_changes) && $my_changes):
+            $transKeys = ['modified_at', 'modified_note'];
+            $userData = false;
+            foreach ($my_changes as $algorithm) {
+                require(BASEDIR . 'partials/partials/item_algorithm.phtml');
+            }
+        else: ?>
             <tr>
                 <td><?= $l10n['no_algorithms'] ?></td>
             </tr>
@@ -160,7 +170,7 @@ $list = isset($_GET['list']) ? $_GET['list'] : false;
     $tags = $__model->fetchTagStats(25);
     if ($__uid) {
         $my_algorithms = $__model->fetchAlgorithmsOfUser($__uid, true, 0, MAX_NUMBER_OF_ENTRIES);
-        $my_changes = $__model->fetchModifiedAlgorithmsOfUser($__uid, true, MAX_NUMBER_OF_ENTRIES);
+        $my_changes = $__model->fetchModifiedAlgorithmsOfUser($__uid, MAX_NUMBER_OF_ENTRIES);
     }
     ?>
     <!-- HEADER -->
@@ -180,11 +190,13 @@ $list = isset($_GET['list']) ? $_GET['list'] : false;
                 </tr>
                 </thead>
                 <tbody>
-                <?php if ($latestAlgorithms): ?>
-                    <?php foreach ($latestAlgorithms as $algorithm): ?>
-                        <?php require(BASEDIR . 'partials/partials/item_date_name.phtml') ?>
-                    <?php endforeach ?>
-                <?php else: ?>
+                <?php if ($latestAlgorithms):
+                    $transKeys = ['created_at', 'created_note'];
+                    $userData = true;
+                    foreach ($latestAlgorithms as $algorithm) {
+                        require(BASEDIR . 'partials/partials/item_algorithm.phtml');
+                    }
+                else: ?>
                     <tr>
                         <td><?= $l10n['no_algorithms'] ?></td>
                     </tr>
@@ -208,11 +220,13 @@ $list = isset($_GET['list']) ? $_GET['list'] : false;
                 </tr>
                 </thead>
                 <tbody>
-                <?php if ($lastChanges): ?>
-                    <?php foreach ($lastChanges as $algorithm): ?>
-                        <?php require(BASEDIR . 'partials/partials/changed_date_name.phtml') ?>
-                    <?php endforeach ?>
-                <?php else: ?>
+                <?php if ($lastChanges):
+                    $transKeys = ['modified_at', 'modified_note'];
+                    $userData = true;
+                    foreach ($lastChanges as $algorithm) {
+                        require(BASEDIR . 'partials/partials/item_algorithm.phtml');
+                    }
+                else: ?>
                     <tr>
                         <td><?= $l10n['no_algorithms'] ?></td>
                     </tr>
@@ -235,11 +249,11 @@ $list = isset($_GET['list']) ? $_GET['list'] : false;
                 </tr>
                 </thead>
                 <tbody>
-                <?php if ($diligentUsers): ?>
-                    <?php foreach ($diligentUsers as $user): ?>
-                        <?php require(BASEDIR . 'partials/partials/users.phtml') ?>
-                    <?php endforeach ?>
-                <?php else: ?>
+                <?php if ($diligentUsers):
+                    foreach ($diligentUsers as $user) {
+                        require(BASEDIR . 'partials/partials/item_user.phtml');
+                    }
+                else: ?>
                     <tr>
                         <td><?= $l10n['no_users'] ?></td>
                     </tr>
@@ -265,11 +279,13 @@ $list = isset($_GET['list']) ? $_GET['list'] : false;
                     </tr>
                     </thead>
                     <tbody>
-                    <?php if (isset($my_algorithms) && $my_algorithms): ?>
-                        <?php foreach ($my_algorithms as $algorithm): ?>
-                            <?php require(BASEDIR . 'partials/partials/item_date.phtml') ?>
-                        <?php endforeach ?>
-                    <?php else: ?>
+                    <?php if (isset($my_algorithms) && $my_algorithms):
+                        $transKeys = ['created_at', 'created_note'];
+                        $userData = false;
+                        foreach ($my_algorithms as $algorithm) {
+                            require(BASEDIR . 'partials/partials/item_algorithm.phtml');
+                        }
+                    else: ?>
                         <tr>
                             <td><?= $l10n['no_algorithms'] ?></td>
                         </tr>
@@ -293,11 +309,13 @@ $list = isset($_GET['list']) ? $_GET['list'] : false;
                     </tr>
                     </thead>
                     <tbody>
-                    <?php if (isset($my_changes) && $my_changes): ?>
-                        <?php foreach ($my_changes as $algorithm): ?>
-                            <?php require(BASEDIR . 'partials/partials/changed_date.phtml') ?>
-                        <?php endforeach ?>
-                    <?php else: ?>
+                    <?php if (isset($my_changes) && $my_changes):
+                        $transKeys = ['modified_at', 'modified_note'];
+                        $userData = false;
+                        foreach ($my_changes as $algorithm) {
+                            require(BASEDIR . 'partials/partials/item_algorithm.phtml');
+                        }
+                    else: ?>
                         <tr>
                             <td><?= $l10n['no_algorithms'] ?></td>
                         </tr>

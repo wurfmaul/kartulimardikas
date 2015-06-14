@@ -1,0 +1,37 @@
+<?php
+/**
+ * Used by index.phtml
+ * The surrounding file has to guarantee the existence of the following variables:
+ * - $algorithm: array containing algorithm information
+ * - $userData: true, if owner should be displayed
+ * - $l10n: array used for translation
+ */
+$linkAlgorithm = url(['action' => 'view', 'aid' => $algorithm['aid']]);
+$linkUser = url(['action' => 'user', 'uid' => $algorithm['uid']]);
+?>
+<tr>
+    <td>
+        <?php if (isset($algorithm['age']) && $algorithm['age'] <= MAX_MINUTES_FOR_LABEL): ?>
+            <span class="label label-default"><?= $l10n['label_new'] ?></span>
+        <?php endif ?>
+        <?php if (!$userData && !isset($algorithm['date_publish'])): ?>
+            <span class="label label-info"><?= $l10n['private'] ?></span>
+        <?php endif ?>
+        <span class="name">
+            <a href="<?= $linkAlgorithm ?>">
+                <?= $algorithm['name'] ? $algorithm['name'] : $l10n['untitled_algorithm'] ?>
+            </a>
+        </span>
+        <span class="properties">
+            <?php if ($userData): ?>
+                (<?= sprintf($l10n[$transKeys[1]], getTimeFrame($algorithm['age']),
+                    '<a href="' . $linkUser . '">' . $algorithm['username']) . '</a>' ?>)
+            <?php else: ?>
+                (<?= sprintf($l10n[$transKeys[0]], getTimeFrame($algorithm['age'])) ?>)
+            <?php endif ?>
+        </span>
+        <?php if (!empty($algorithm['description'])): ?>
+            <span class="description"><?= skipDescription($algorithm['description']) ?></span>
+        <?php endif ?>
+    </td>
+</tr>

@@ -169,24 +169,19 @@ class DataModel
     }
 
     /**
-     * @param int $uid
-     * @param bool $fetchPrivate
-     * @param int $amount
+     * @param int $uid The user's id.
+     * @param int $amount The amount of algorithms that should be displayed.
      * @return array
      */
-    public function fetchModifiedAlgorithmsOfUser($uid, $fetchPrivate, $amount)
+    public function fetchModifiedAlgorithmsOfUser($uid, $amount)
     {
-        $privateFilter = $fetchPrivate ? "" : "AND date_publish IS NOT NULL";
         $stmt = $this->_sql->prepare("
             SELECT
               aid, name, description, long_description, date_publish,
-              TIMESTAMPDIFF(MINUTE, date_lastedit, NOW()) AS modified,
-              uid, username
-            FROM algorithm a
-            JOIN user u USING(uid)
-            WHERE a.date_deletion IS NULL
+              TIMESTAMPDIFF(MINUTE, date_lastedit, NOW()) AS modified
+            FROM algorithm
+            WHERE date_deletion IS NULL
             AND uid = ?
-            $privateFilter
             ORDER BY date_lastedit DESC
             LIMIT ?
         ");

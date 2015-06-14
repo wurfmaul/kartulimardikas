@@ -199,7 +199,7 @@ $l10n['create_a_node'] = "Erstelle einen Knoten";
 $l10n['preview'] = "Vorschau";
 $l10n['tag'] = "Schlagwort";
 $l10n['tags'] = "Schlagwörter";
-$l10n['tag_cloud'] = "Tag cloud";
+$l10n['tag_cloud'] = "Schlagwörter";
 
 // SETTINGS
 $l10n['settings'] = "Einstellungen";
@@ -220,7 +220,8 @@ $l10n['message_foreign_algorithm'] = "You are not the owner of this algorithm, t
 $l10n['member_since'] = "Member since %s.";
 $l10n['error_no_such_user'] = "There is no such user!";
 $l10n['go_back'] = "go back";
-$l10n['created_at'] = "created %s";
+$l10n['created_at'] = "verfasst %s";
+$l10n['modified_at'] = "bearbeitet %s";
 $l10n['algorithms'] = "Algorithms";
 $l10n['account_settings'] = "Account settings";
 $l10n['change'] = "Change";

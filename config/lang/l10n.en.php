@@ -221,6 +221,7 @@ $l10n['member_since'] = "Member since %s.";
 $l10n['error_no_such_user'] = "There is no such user!";
 $l10n['go_back'] = "go back";
 $l10n['created_at'] = "created %s";
+$l10n['modified_at'] = "modified %s";
 $l10n['algorithms'] = "Algorithms";
 $l10n['account_settings'] = "Account settings";
 $l10n['change'] = "Change";

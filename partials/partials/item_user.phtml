@@ -1,4 +1,10 @@
 <?php
+/**
+ * Used by index.phtml
+ * The surrounding file has to guarantee the existence of the following variables:
+ * - $user: array containing user information
+ * - $l10n: array used for translation
+ */
 $linkUser = url(['action' => 'user', 'uid' => $user['uid']]);
 ?>
 <tr>
