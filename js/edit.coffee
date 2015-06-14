@@ -29,6 +29,29 @@ class Api
         @_printError("Request Error: " + errorThrown)
     )
 
+  @editTags: ->
+    aid = window.defaults.aid
+    tags = $('#in-tags').val()
+    $.ajax("api/tag.php",
+      type: 'POST'
+      data:
+        aid: aid
+        tags: tags
+        lang: window.defaults.lang
+      dataType: 'json'
+      success: (data) => # if response arrived...
+        $('#in-tags').val(data['tags'])
+        if data['error']?
+          @_printError(data['error'])
+          if data['tags']?
+            $('#in-tags').closest('.form-group').addClass('has-error') # mark as invalid
+        else
+          @_printSuccess(data['success'])
+          $('.has-error').removeClass('has-error')
+      error: (jqXHR, textStatus, errorThrown) => # if request failed
+        @_printError("Request Error: " + errorThrown)
+    )
+
   @editVariable: (vid) ->
     varRow = $('#var-' + vid)
     aid = window.defaults.aid
@@ -254,69 +277,6 @@ updateVisibility = (variable) ->
   if (option.data('target') is '.size') then size.show('slow')
   else size.hide('slow')
 
-initVarInput = (elem) ->
-  vars = []
-  $('.varRow').not('#var-prototype').each(->
-    vars.push($(this).data('name'))
-  )
-  properties = ["", "[*]", ".length"]
-  if (elem.autocomplete("instance")?)
-    elem.autocomplete("destroy")
-  elem.autocomplete(
-    delay: 0
-    minLength: 0
-    source: (request, response) ->
-      # the entered search term
-      val = request.term
-      if (val is "")
-        # use var names for empty term
-        @src = vars
-      else if ($.inArray(val, vars) > -1)
-        # use var operations if a variable name was typed/selected
-        newSrc = []
-        $.each(properties, (i, elem) ->
-          newSrc.push(
-            value: val + elem
-            label: val + elem
-            variable: val
-          )
-        )
-        @src = newSrc
-      # try to find a match in the array of possible matches
-      matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i")
-      response($.grep(@src, (value)->
-        value = value.label || value.value || value
-        matcher.test(value)
-      ))
-    select: (event, ui) ->
-      val = ui.item.variable ? ui.item.label
-      $(this).autocomplete("search", val)
-  ).click(->
-    # open search with basic options
-    $(this).autocomplete("search", $(this).val())
-  ).focusout(->
-    # collapse search, when losing focus
-    $(this).autocomplete("close")
-  )
-
-initValueInput = (elem) ->
-  input = elem.find('.value')
-  # destroy old instance of auto-completion
-  if (input.autocomplete("instance")?)
-    input.autocomplete("destroy")
-  # init auto-completion
-  input.autocomplete(
-    delay: 0
-    minLength: 0
-    source: [elem.data('random'), elem.data('uninit')]
-  ).click(->
-    # open search with basic options
-    $(this).autocomplete("search", "")
-  ).focusout(->
-    # collapse search, when losing focus
-    $(this).autocomplete("close")
-  )
-
 ###
   Calls the callback function after a while, if it is not interrupted.
 ###
@@ -334,7 +294,9 @@ $ ->
   $('#editAlertClose').click -> $('#editAlert').hide('slow')
 
   # INFORMATION SECTION
+  initTagInput($('#in-tags'))
   $('#in-name, #in-desc, #in-long').blur -> Api.editInfo()
+  $('#in-tags').blur -> Api.editTags()
   $('#in-long').keyup(-> typeWatch((-> refreshPreview()), 500))
   $('#refresh-preview').click(-> refreshPreview())
 

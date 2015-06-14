@@ -35,6 +35,28 @@ class DataModel
         return $rows;
     }
 
+    public function deleteTags($tags, $aid)
+    {
+        $values = "";
+        $bind_types = "i";
+        $bind_vars = [&$bind_types, &$aid];
+        for ($i = 0; $i < sizeof($tags); $i++) {
+            $values .= "?";
+            $bind_types .= "s";
+            $bind_vars[] = &$tags[$i];
+            if ($i < sizeof($tags) - 1) {
+                $values .= ",";
+            }
+        }
+        $stmt = $this->_sql->prepare("DELETE FROM tags WHERE aid = ? AND tag IN ($values)");
+        // work-around because $stmt->bind_param($bind_types, $bind_vars) does not work.
+        call_user_func_array([$stmt, "bind_param"], $bind_vars);
+        $stmt->execute();
+        $rows = $stmt->affected_rows;
+        $stmt->close();
+        return $rows;
+    }
+
     /**
      * @param $aid int
      * @return object|stdClass
@@ -51,6 +73,22 @@ class DataModel
         $result = $stmt->get_result();
         $stmt->close();
         return $result->fetch_object();
+    }
+
+    public function fetchAlgorithmsByTag($tag)
+    {
+        $stmt = $this->_sql->prepare("
+            SELECT *, TIMESTAMPDIFF(MINUTE, date_creation, NOW()) AS age
+            FROM tags
+            LEFT JOIN algorithm a USING (aid)
+            LEFT JOIN user u USING (uid)
+            WHERE tag = ?
+        ");
+        $stmt->bind_param("s", $tag);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return $result->fetch_all(MYSQLI_ASSOC);
     }
 
     /**
@@ -160,7 +198,66 @@ class DataModel
     }
 
     /**
-     * @param $uid int
+     * @return array
+     */
+    public function fetchAllTags()
+    {
+        $stmt = $this->_sql->prepare("SELECT DISTINCT tag FROM tags");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return $this->flatten($result->fetch_all());
+    }
+
+    /**
+     * @param array $array Two-dimensional array with exactly one element in the inner array.
+     * @return array One-dimensional array using the inner value instead of the array.
+     */
+    private function flatten($array)
+    {
+        return call_user_func_array('array_merge', $array);
+    }
+
+    /**
+     * @param int $aid The algorithm's id.
+     * @return array All the tags the specified algorithm uses.
+     */
+    public function fetchTags($aid)
+    {
+        $stmt = $this->_sql->prepare("
+            SELECT tag FROM tags
+            WHERE aid = ?
+        ");
+        $stmt->bind_param("i", $aid);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return $this->flatten($result->fetch_all());
+    }
+
+    public function fetchTagStats($amount)
+    {
+        $stmt = $this->_sql->prepare("
+            SELECT * FROM (
+                SELECT
+                  tag,
+                  COUNT(aid) AS count,
+                  COUNT(aid) / (SELECT COUNT(aid) FROM tags) AS total
+                FROM tags
+                GROUP BY tag
+                ORDER BY count DESC
+                LIMIT ?) AS grouped
+            ORDER BY tag
+        ");
+        $stmt->bind_param("i", $amount);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    /**
+     * @param int $uid The user id.
      * @return object|stdClass
      */
     public function fetchUser($uid)
@@ -178,7 +275,7 @@ class DataModel
     }
 
     /**
-     * @param $username string
+     * @param string $username The user's name
      * @return object|stdClass
      */
     public function fetchUserByUsername($username)
@@ -196,7 +293,7 @@ class DataModel
     }
 
     /**
-     * @param $email string
+     * @param string $email The user's email address.
      * @return object|stdClass
      */
     public function fetchUserByMail($email)
@@ -274,6 +371,50 @@ class DataModel
     }
 
     /**
+     * @param int $uid The user id.
+     * @return int The new algorithm's id.
+     */
+    public function insertAlgorithm($uid)
+    {
+        $stmt = $this->_sql->prepare("
+            INSERT INTO algorithm (uid)
+            VALUES (?)
+        ");
+        $stmt->bind_param("i", $uid);
+        $stmt->execute();
+        $aid = $stmt->insert_id;
+        $stmt->close();
+        return $aid;
+    }
+
+    public function insertTags($tags, $aid)
+    {
+        $values = "";
+        // preparation of the bind_param method
+        $bind_types = "";
+        $bind_vars = [&$bind_types];
+        for ($i = 0; $i < sizeof($tags); $i++) {
+            $values .= "(?, ?)";
+            $bind_types .= "si";
+            $bind_vars[] = &$tags[$i];
+            $bind_vars[] = &$aid;
+            if ($i < sizeof($tags) - 1) {
+                $values .= ",";
+            }
+        }
+        $stmt = $this->_sql->prepare("
+            INSERT INTO tags (tag, aid)
+            VALUES $values
+        ");
+        // work-around because $stmt->bind_param($bind_types, $bind_vars) does not work.
+        call_user_func_array([$stmt, "bind_param"], $bind_vars);
+        $stmt->execute();
+        $count = $stmt->affected_rows;
+        $stmt->close();
+        return $count;
+    }
+
+    /**
      * @param string $username The user's username.
      * @param string $email The user's email address.
      * @param string $password The user's encrypted password.
@@ -292,23 +433,6 @@ class DataModel
         $uid = $stmt->insert_id;
         $stmt->close();
         return $uid;
-    }
-
-    /**
-     * @param int $uid The user id.
-     * @return int The new algorithm's id.
-     */
-    public function insertAlgorithm($uid)
-    {
-        $stmt = $this->_sql->prepare("
-            INSERT INTO algorithm (uid)
-            VALUES (?)
-        ");
-        $stmt->bind_param("i", $uid);
-        $stmt->execute();
-        $aid = $stmt->insert_id;
-        $stmt->close();
-        return $aid;
     }
 
     /**

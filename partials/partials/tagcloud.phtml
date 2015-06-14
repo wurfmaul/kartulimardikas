@@ -1,0 +1,11 @@
+<?php foreach ($tags as $tag): ?>
+    <?php
+    if ($tag['total'] < 0.2) $class = 'smallest';
+    elseif ($tag['total'] < 0.4) $class = 'small';
+    elseif ($tag['total'] < 0.6) $class = 'medium';
+    elseif ($tag['total'] < 0.8) $class = 'large';
+    else $class = 'largest';
+    ?>
+    <a href="<?= url(['action' => 'index', 'list' => 'tag', 'tag' => $tag['tag']]) ?>"><span
+            class="badge <?= $class ?>"><?= $tag['tag'] ?></span></a>
+<?php endforeach ?>

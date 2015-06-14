@@ -10,11 +10,11 @@ Open
 * [ ] Edit: Data type character
 * [ ] User: Administration for deleting and resurrecting users/algorithms
 * [ ] User: Verify email/Lost password
-* [ ] Edit: Data type boolean
 * [ ] View: Step back (history)
 
 Done
 ----
+* [x] Edit: Data type boolean
 * [x] Edit: Variable definition: hide size-field if not necessary.
 * [x] View: Cursor also in source code
 * [x] Edit: Support AND, OR in While- and IfNodes, if two or more conditions are defined

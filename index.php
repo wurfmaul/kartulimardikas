@@ -63,6 +63,7 @@ if (isset($_GET['aid'])) {
         /** @var bool $__public True if the algorithm is defined public. */
         $__public = !is_null($__algorithm->date_publish);
     }
+    $__algorithm->tags = $__model->fetchTags($__aid);
 } else {
     $__algorithm = false;
 }
@@ -241,6 +242,7 @@ if ($__aid && $__algorithm) {
 <script type="text/javascript" src="js/common.js"></script>
 <?php if (ACTION === 'edit' || ACTION === 'view'): ?>
     <script type="text/javascript" src="js/section.js"></script>
+    <script type="text/javascript" src="js/autocomplete.js"></script>
     <script type="text/javascript" src="js/algorithm.js"></script>
     <script type="text/javascript" src="<?= JQUERYUI_JS_PATH ?>"></script>
 <?php endif ?>

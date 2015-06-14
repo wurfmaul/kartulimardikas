@@ -1,0 +1,16 @@
+<?php
+$linkAlgorithm = url(['action' => 'view', 'aid' => $algorithm['aid']]);
+$linkUser = url(['action' => 'user', 'uid' => $algorithm['uid']]);
+?>
+<tr>
+    <td>
+        <span class="name"><a href="<?= $linkAlgorithm ?>"><?= $algorithm['name'] ?></a></span>
+        <span class="properties">
+            (<?= sprintf($l10n['modified_note'], getTimeFrame($algorithm['modified']),
+                '<a href="' . $linkUser . '">' . $algorithm['username']) . '</a>' ?>)
+        </span>
+        <?php if (!empty($algorithm['description'])): ?>
+            <span class="description"><?= skipDescription($algorithm['description']) ?></span>
+        <?php endif ?>
+    </td>
+</tr>

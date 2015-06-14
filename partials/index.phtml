@@ -1,18 +1,168 @@
 <?php
 if (!defined('BASEDIR')) die('You cannot call this script directly !');
 global $l10n;
-
 require_once BASEDIR . "includes/viewHelper.php";
 
-// ask database for latest algorithms
-$latestAlgorithms = $__model->fetchLatestAlgorithms(MAX_NUMBER_OF_ENTRIES);
-$lastChanges = $__model->fetchModifiedAlgorithms(MAX_NUMBER_OF_ENTRIES);
-$diligentUsers = $__model->fetchUsersWithMostAlgorithms(MAX_NUMBER_OF_ENTRIES);
-if ($__uid) {
-    $my_algorithms = $__model->fetchAlgorithmsOfUser($__uid, true, 0, MAX_NUMBER_OF_ENTRIES);
-    $my_changes = $__model->fetchModifiedAlgorithmsOfUser($__uid, true, MAX_NUMBER_OF_ENTRIES);
-}
+$list = isset($_GET['list']) ? $_GET['list'] : false;
 ?>
+<?php if ($list === "algorithms"): ?>
+    <?php
+    $latestAlgorithms = $__model->fetchLatestAlgorithms(250);
+    ?>
+    <!-- HEADER -->
+    <div class="page-header">
+        <h1><?= $l10n['index'] ?>
+            <small><?= $l10n['latest_algos'] ?></small>
+        </h1>
+    </div>
+    <!-- CONTENT -->
+    <table class="table table-striped table-hover algorithms">
+        <?php if ($latestAlgorithms): ?>
+            <?php foreach ($latestAlgorithms as $algorithm): ?>
+                <?php require(BASEDIR . 'partials/partials/item_date_name.phtml') ?>
+            <?php endforeach ?>
+        <?php else: ?>
+            <tr>
+                <td><?= $l10n['no_algorithms'] ?></td>
+            </tr>
+        <?php endif ?>
+    </table>
+<?php elseif ($list === "changes"): ?>
+    <?php
+    $lastChanges = $__model->fetchModifiedAlgorithms(250);
+    ?>
+    <!-- HEADER -->
+    <div class="page-header">
+        <h1><?= $l10n['index'] ?>
+            <small><?= $l10n['last_changes'] ?></small>
+        </h1>
+    </div>
+    <!-- CONTENT -->
+    <table class="table table-striped table-hover algorithms">
+        <?php if ($lastChanges): ?>
+            <?php foreach ($lastChanges as $algorithm): ?>
+                <?php require(BASEDIR . 'partials/partials/changed_date_name.phtml') ?>
+            <?php endforeach ?>
+        <?php else: ?>
+            <tr>
+                <td><?= $l10n['no_algorithms'] ?></td>
+            </tr>
+        <?php endif ?>
+    </table>
+<?php elseif ($list === 'users'): ?>
+    <?php
+    $diligentUsers = $__model->fetchUsersWithMostAlgorithms(250);
+    ?>
+    <!-- HEADER -->
+    <div class="page-header">
+        <h1><?= $l10n['index'] ?>
+            <small><?= $l10n['diligent_users'] ?></small>
+        </h1>
+    </div>
+    <!-- CONTENT -->
+    <table class="table table-striped table-hover algorithms">
+        <?php if ($diligentUsers): ?>
+            <?php foreach ($diligentUsers as $user): ?>
+                <?php require(BASEDIR . 'partials/partials/users.phtml') ?>
+            <?php endforeach ?>
+        <?php else: ?>
+            <tr>
+                <td><?= $l10n['no_users'] ?></td>
+            </tr>
+        <?php endif ?>
+    </table>
+<?php elseif ($list === 'tag' && isset($_GET['tag'])): ?>
+    <?php
+    $tag = $_GET['tag'];
+    $algorithms = $__model->fetchAlgorithmsByTag($tag);
+    ?>
+    <!-- HEADER -->
+    <div class="page-header">
+        <h1><?= $l10n['index'] ?>
+            <small><?= $l10n['tag'] ?> <span class="badge"><?= $tag ?></span></small>
+        </h1>
+    </div>
+    <!-- CONTENT -->
+    <table class="table table-striped table-hover algorithms">
+        <?php if ($algorithms): ?>
+            <?php foreach ($algorithms as $algorithm): ?>
+                <?php require(BASEDIR . 'partials/partials/item_date_name.phtml') ?>
+            <?php endforeach ?>
+        <?php else: ?>
+            <tr>
+                <td><?= $l10n['no_algorithms'] ?></td>
+            </tr>
+        <?php endif ?>
+    </table>
+<?php elseif ($list === 'tag'): ?>
+    <?php
+    $tags = $__model->fetchTagStats(150);
+    ?>
+    <!-- HEADER -->
+    <div class="page-header">
+        <h1><?= $l10n['index'] ?>
+            <small><?= $l10n['tags'] ?></small>
+        </h1>
+    </div>
+    <!-- CONTENT -->
+    <div class="tagcloud tagcloud-background">
+    <?php require(BASEDIR . 'partials/partials/tagcloud.phtml') ?>
+    </div>
+<?php elseif ($__uid && $list === 'myAlgorithms'): ?>
+    <?php
+    $my_algorithms = $__model->fetchAlgorithmsOfUser($__uid, true, 0, 250);
+    ?>
+    <!-- HEADER -->
+    <div class="page-header">
+        <h1><?= $l10n['index'] ?>
+            <small><?= $l10n['my_algos'] ?></small>
+        </h1>
+    </div>
+    <!-- CONTENT -->
+    <table class="table table-striped table-hover algorithms">
+        <?php if (isset($my_algorithms) && $my_algorithms): ?>
+            <?php foreach ($my_algorithms as $algorithm): ?>
+                <?php require(BASEDIR . 'partials/partials/item_date.phtml') ?>
+            <?php endforeach ?>
+        <?php else: ?>
+            <tr>
+                <td><?= $l10n['no_algorithms'] ?></td>
+            </tr>
+        <?php endif ?>
+    </table>
+<?php elseif ($__uid && $list === 'myChanges'): ?>
+    <?php
+    $my_changes = $__model->fetchModifiedAlgorithmsOfUser($__uid, true, 250);
+    ?>
+    <!-- HEADER -->
+    <div class="page-header">
+        <h1><?= $l10n['index'] ?>
+            <small><?= $l10n['my_last_changes'] ?></small>
+        </h1>
+    </div>
+    <!-- CONTENT -->
+    <table class="table table-striped table-hover algorithms">
+        <?php if (isset($my_changes) && $my_changes): ?>
+            <?php foreach ($my_changes as $algorithm): ?>
+                <?php require(BASEDIR . 'partials/partials/changed_date.phtml') ?>
+            <?php endforeach ?>
+        <?php else: ?>
+            <tr>
+                <td><?= $l10n['no_algorithms'] ?></td>
+            </tr>
+        <?php endif ?>
+    </table>
+<?php else: ?>
+    <?php
+    $latestAlgorithms = $__model->fetchLatestAlgorithms(MAX_NUMBER_OF_ENTRIES);
+    $lastChanges = $__model->fetchModifiedAlgorithms(MAX_NUMBER_OF_ENTRIES);
+    $diligentUsers = $__model->fetchUsersWithMostAlgorithms(MAX_NUMBER_OF_ENTRIES);
+    $tags = $__model->fetchTagStats(25);
+    if ($__uid) {
+        $my_algorithms = $__model->fetchAlgorithmsOfUser($__uid, true, 0, MAX_NUMBER_OF_ENTRIES);
+        $my_changes = $__model->fetchModifiedAlgorithmsOfUser($__uid, true, MAX_NUMBER_OF_ENTRIES);
+    }
+    ?>
     <!-- HEADER -->
     <div class="page-header">
         <h1><?= $l10n['index'] ?>
@@ -31,25 +181,8 @@ if ($__uid) {
                 </thead>
                 <tbody>
                 <?php if ($latestAlgorithms): ?>
-                    <?php foreach ($latestAlgorithms as $algorithm):
-                        $linkAlgorithm = url(['action' => 'view', 'aid' => $algorithm['aid']]);
-                        $linkUser = url(['action' => 'user', 'uid' => $algorithm['uid']]);
-                        ?>
-                        <tr>
-                            <td>
-                                <?php if ($algorithm['age'] <= MAX_MINUTES_FOR_LABEL): ?>
-                                    <span class="label label-default"><?= $l10n['label_new'] ?></span>
-                                <?php endif ?>
-                                <span class="name"><a href="<?= $linkAlgorithm ?>"><?= $algorithm['name'] ?></a></span>
-                                <span class="properties">
-                                    (<?= sprintf($l10n['created_note'], getTimeFrame($algorithm['age']),
-                                        '<a href="' . $linkUser . '">' . $algorithm['username']) . '</a>' ?>)
-                                </span>
-                                <?php if (!empty($algorithm['description'])): ?>
-                                    <span class="description"><?= skipDescription($algorithm['description']) ?></span>
-                                <?php endif ?>
-                            </td>
-                        </tr>
+                    <?php foreach ($latestAlgorithms as $algorithm): ?>
+                        <?php require(BASEDIR . 'partials/partials/item_date_name.phtml') ?>
                     <?php endforeach ?>
                 <?php else: ?>
                     <tr>
@@ -57,6 +190,13 @@ if ($__uid) {
                     </tr>
                 <?php endif ?>
                 </tbody>
+                <tfoot>
+                <tr>
+                    <td>
+                        (<a href="<?= url(['action' => 'index', 'list' => 'algorithms']) ?>"><?= $l10n['see_more'] ?></a>)
+                    </td>
+                </tr>
+                </tfoot>
             </table>
         </div>
         <div class="col-md-4">
@@ -69,22 +209,8 @@ if ($__uid) {
                 </thead>
                 <tbody>
                 <?php if ($lastChanges): ?>
-                    <?php foreach ($lastChanges as $algorithm):
-                        $linkAlgorithm = url(['action' => 'view', 'aid' => $algorithm['aid']]);
-                        $linkUser = url(['action' => 'user', 'uid' => $algorithm['uid']]);
-                        ?>
-                        <tr>
-                            <td>
-                                <span class="name"><a href="<?= $linkAlgorithm ?>"><?= $algorithm['name'] ?></a></span>
-                                <span class="properties">
-                                    (<?= sprintf($l10n['modified_note'], getTimeFrame($algorithm['modified']),
-                                        '<a href="' . $linkUser . '">' . $algorithm['username']) . '</a>' ?>)
-                                </span>
-                                <?php if (!empty($algorithm['description'])): ?>
-                                    <span class="description"><?= skipDescription($algorithm['description']) ?></span>
-                                <?php endif ?>
-                            </td>
-                        </tr>
+                    <?php foreach ($lastChanges as $algorithm): ?>
+                        <?php require(BASEDIR . 'partials/partials/changed_date_name.phtml') ?>
                     <?php endforeach ?>
                 <?php else: ?>
                     <tr>
@@ -92,6 +218,12 @@ if ($__uid) {
                     </tr>
                 <?php endif ?>
                 </tbody>
+                <tfoot>
+                <tr>
+                    <td>(<a href="<?= url(['action' => 'index', 'list' => 'changes']) ?>"><?= $l10n['see_more'] ?></a>)
+                    </td>
+                </tr>
+                </tfoot>
             </table>
         </div>
         <div class="col-md-4">
@@ -104,17 +236,8 @@ if ($__uid) {
                 </thead>
                 <tbody>
                 <?php if ($diligentUsers): ?>
-                    <?php foreach ($diligentUsers as $user):
-                        $linkUser = url(['action' => 'user', 'uid' => $user['uid']]);
-                        ?>
-                        <tr>
-                            <td>
-                                <span class="name"><a href="<?= $linkUser ?>"><?= $user['username'] ?></a></span>
-                                <span class="properties">
-                                    (<?= sprintf($l10n['user_created_note'], $user['algorithm_count']) ?>)
-                                </span>
-                            </td>
-                        </tr>
+                    <?php foreach ($diligentUsers as $user): ?>
+                        <?php require(BASEDIR . 'partials/partials/users.phtml') ?>
                     <?php endforeach ?>
                 <?php else: ?>
                     <tr>
@@ -122,99 +245,95 @@ if ($__uid) {
                     </tr>
                 <?php endif ?>
                 </tbody>
-            </table>
-        </div>
-    </div>
-<?php if ($__uid): ?>
-    <div class="row">
-        <div class="col-md-4">
-            <!-- Own algorithms -->
-            <table class="table table-striped table-hover algorithms">
-                <thead>
-                <tr>
-                    <th><?= $l10n['my_algos'] ?></th>
-                </tr>
-                </thead>
-                <tbody>
-                <?php if (isset($my_algorithms) && $my_algorithms): ?>
-                    <?php foreach ($my_algorithms as $algorithm): $link = url(['action' => 'view', 'aid' => $algorithm['aid']]) ?>
-                        <tr>
-                            <td>
-                                <?php if ($algorithm['age'] <= MAX_MINUTES_FOR_LABEL): ?>
-                                    <span class="label label-default"><?= $l10n['label_new'] ?></span>
-                                <?php endif ?>
-                                <?php if (is_null($algorithm['date_publish'])): ?>
-                                    <span class="label label-info"><?= $l10n['private'] ?></span>
-                                <?php endif ?>
-                                <span class="name">
-                                    <a href="<?= $link ?>">
-                                        <?= $algorithm['name'] ? $algorithm['name'] : $l10n['untitled_algorithm'] ?>
-                                    </a>
-                                </span>
-                                <span class="properties">
-                                    (<?= sprintf($l10n['created_at'], getTimeFrame($algorithm['age'])) ?>)
-                                </span>
-                                <?php if (!empty($algorithm['description'])): ?>
-                                    <span class="description">
-                                        <?= skipDescription($algorithm['description']) ?>
-                                    </span>
-                                <?php endif ?>
-                            </td>
-                        </tr>
-                    <?php endforeach ?>
-                <?php else: ?>
-                    <tr>
-                        <td><?= $l10n['no_algorithms'] ?></td>
-                    </tr>
-                <?php endif ?>
-                </tbody>
                 <tfoot>
                 <tr>
-                    <td>(<a href="<?= url(['action' => 'user']) ?>"><?= $l10n['see_more'] ?></a>)</td>
+                    <td>(<a href="<?= url(['action' => 'index', 'list' => 'users']) ?>"><?= $l10n['see_more'] ?></a>)
+                    </td>
                 </tr>
                 </tfoot>
             </table>
         </div>
+    </div>
+    <div class="row">
+        <?php if ($__uid): ?>
+            <div class="col-md-4">
+                <!-- Own algorithms -->
+                <table class="table table-striped table-hover algorithms">
+                    <thead>
+                    <tr>
+                        <th><?= $l10n['my_algos'] ?></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php if (isset($my_algorithms) && $my_algorithms): ?>
+                        <?php foreach ($my_algorithms as $algorithm): ?>
+                            <?php require(BASEDIR . 'partials/partials/item_date.phtml') ?>
+                        <?php endforeach ?>
+                    <?php else: ?>
+                        <tr>
+                            <td><?= $l10n['no_algorithms'] ?></td>
+                        </tr>
+                    <?php endif ?>
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <td>
+                            (<a href="<?= url(['action' => 'index', 'list' => 'myAlgorithms']) ?>"><?= $l10n['see_more'] ?></a>)
+                        </td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="col-md-4">
+                <!-- Last changes -->
+                <table class="table table-striped table-hover algorithms">
+                    <thead>
+                    <tr>
+                        <th><?= $l10n['my_last_changes'] ?></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php if (isset($my_changes) && $my_changes): ?>
+                        <?php foreach ($my_changes as $algorithm): ?>
+                            <?php require(BASEDIR . 'partials/partials/changed_date.phtml') ?>
+                        <?php endforeach ?>
+                    <?php else: ?>
+                        <tr>
+                            <td><?= $l10n['no_algorithms'] ?></td>
+                        </tr>
+                    <?php endif ?>
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <td>
+                            (<a href="<?= url(['action' => 'index', 'list' => 'myChanges']) ?>"><?= $l10n['see_more'] ?></a>)
+                        </td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+        <?php endif ?>
         <div class="col-md-4">
-            <!-- Last changes -->
-            <table class="table table-striped table-hover algorithms">
+            <table class="table">
                 <thead>
                 <tr>
-                    <th><?= $l10n['my_last_changes'] ?></th>
+                    <th><?= $l10n['tag_cloud'] ?></th>
                 </tr>
                 </thead>
                 <tbody>
-                <?php if (isset($my_changes) && $my_changes): ?>
-                    <?php foreach ($my_changes as $algorithm):
-                        $linkAlgorithm = url(['action' => 'view', 'aid' => $algorithm['aid']]);
-                        $linkUser = url(['action' => 'user', 'uid' => $algorithm['uid']]);
-                        ?>
-                        <tr>
-                            <td>
-                                <?php if (is_null($algorithm['date_publish'])): ?>
-                                    <span class="label label-info"><?= $l10n['private'] ?></span>
-                                <?php endif ?>
-                                <span class="name">
-                                    <a href="<?= $linkAlgorithm ?>">
-                                        <?= $algorithm['name'] ? $algorithm['name'] : $l10n['untitled_algorithm'] ?>
-                                    </a>
-                                </span>
-                                <span class="properties">
-                                    (<?= sprintf($l10n['modified_note'], getTimeFrame($algorithm['modified']),
-                                        '<a href="' . $linkUser . '">' . $algorithm['username']) . '</a>' ?>)
-                                </span>
-                                <?php if (!empty($algorithm['description'])): ?>
-                                    <span class="description"><?= skipDescription($algorithm['description']) ?></span>
-                                <?php endif ?>
-                            </td>
-                        </tr>
-                    <?php endforeach ?>
-                <?php else: ?>
-                    <tr>
-                        <td><?= $l10n['no_algorithms'] ?></td>
-                    </tr>
-                <?php endif ?>
+                <tr>
+                    <td class="tagcloud">
+                        <?php require(BASEDIR . 'partials/partials/tagcloud.phtml') ?>
+                    </td>
+                </tr>
                 </tbody>
+                <tfoot>
+                <tr>
+                    <td>
+                        (<a href="<?= url(['action' => 'index', 'list' => 'tag']) ?>"><?= $l10n['see_more'] ?></a>)
+                    </td>
+                </tr>
+                </tfoot>
             </table>
         </div>
     </div>

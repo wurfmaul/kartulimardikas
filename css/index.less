@@ -1,4 +1,32 @@
+@import "mixins";
+
 tfoot td {
   font-size: small;
   text-align: center;
+}
+
+.tagcloud {
+  padding: 10px;
+
+  &.tagcloud-background {
+    background: #d3d3d3;
+    border: 1px solid gray;
+    .border-radius(5px);
+  }
+
+  .smallest {
+    font-size: x-small;
+  }
+  .small {
+    font-size: small;
+  }
+  .medium {
+    font-size: medium;
+  }
+  .large {
+    font-size: large;
+  }
+  .largest {
+    font-size: x-large;
+  }
 }

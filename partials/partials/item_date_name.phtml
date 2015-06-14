@@ -1,0 +1,19 @@
+<?php
+$linkAlgorithm = url(['action' => 'view', 'aid' => $algorithm['aid']]);
+$linkUser = url(['action' => 'user', 'uid' => $algorithm['uid']]);
+?>
+<tr>
+    <td>
+        <?php if ($algorithm['age'] <= MAX_MINUTES_FOR_LABEL): ?>
+            <span class="label label-default"><?= $l10n['label_new'] ?></span>
+        <?php endif ?>
+        <span class="name"><a href="<?= $linkAlgorithm ?>"><?= $algorithm['name'] ?></a></span>
+        <span class="properties">
+            (<?= sprintf($l10n['created_note'], getTimeFrame($algorithm['age']),
+                '<a href="' . $linkUser . '">' . $algorithm['username']) . '</a>' ?>)
+        </span>
+        <?php if (!empty($algorithm['description'])): ?>
+            <span class="description"><?= skipDescription($algorithm['description']) ?></span>
+        <?php endif ?>
+    </td>
+</tr>

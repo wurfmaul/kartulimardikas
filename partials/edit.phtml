@@ -13,6 +13,10 @@ if ($__aid && $__uid && $__owner) {
         $long_description = "";
         $long_preview = "";
     }
+    $tags = "";
+    foreach ($__algorithm->tags as $tag) {
+        $tags .= "$tag, ";
+    }
 
     // prepare variables and add prototype row to variables
     $vars = json_decode($__algorithm->variables);
@@ -70,22 +74,23 @@ if ($__aid && $__uid && $__owner) {
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="in-title" class="control-label col-sm-3"><?= $l10n['description'] ?></label>
+                                <label for="in-desc" class="control-label col-sm-3"><?= $l10n['description'] ?></label>
 
                                 <div class="col-sm-9">
                                     <input type="text" class="form-control" id="in-desc"
                                            placeholder="<?= $l10n['description'] ?>" value="<?= $description ?>">
                                 </div>
                             </div>
+                            <div class="form-group">
+                                <label for="in-tags" class="control-label col-sm-3"><?= $l10n['tags'] ?></label>
+
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" id="in-tags"
+                                           placeholder="<?= $l10n['tags'] ?>" value="<?= $tags ?>">
+                                </div>
+                            </div>
                             <div class="description-group">
-                                <label for="in-long">
-                                    <?= $l10n['long_description'] ?><br/>
-                                    <small>
-                                        <?= $l10n['use_markdown'] ?>
-                                        <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet"
-                                           target="_blank"><span class="glyphicon glyphicon-info-sign"></span></a>
-                                    </small>
-                                </label>
+                                <label for="in-long"><?= $l10n['long_description'] ?></label>
                                 <textarea class="form-control" id="in-long" rows="3"><?= $long_description ?></textarea>
                             </div>
                             <div class="panel panel-default"
@@ -95,6 +100,11 @@ if ($__aid && $__uid && $__owner) {
                                     <?= $l10n['preview'] ?>
                                     <span id="refresh-preview" class="fa fa-refresh"></span>
                                 </div>
+                            </div>
+                            <div class="footnote">
+                                <?= $l10n['use_markdown'] ?>
+                                <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet"
+                                   target="_blank"><span class="glyphicon glyphicon-info-sign"></span></a>
                             </div>
                         </div>
                     </div>

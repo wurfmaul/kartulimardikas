@@ -13,6 +13,7 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
     } else {
         $long_description = $l10n['no_description'];
     }
+    $tags = $__algorithm->tags;
 
     // prepare variables
     $vars = json_decode($__algorithm->variables);
@@ -29,6 +30,11 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
         <h1><?= $name ?>
             <small><?= $description ?></small>
         </h1>
+        <?php foreach ($tags as $tag): ?>
+        <a href="<?= url(['action' => 'index', 'list' => 'tag', 'tag' => $tag]) ?>">
+            <span class="badge"><?= $tag ?></span>
+        </a>
+        <?php endforeach ?>
     </div>
     <!-- HEADER END -->
 

@@ -197,6 +197,9 @@ $l10n['contains'] = "enthält";
 $l10n['public_without_name'] = "Ein öffentlicher Algorithmus braucht einen Titel!";
 $l10n['create_a_node'] = "Erstelle einen Knoten";
 $l10n['preview'] = "Vorschau";
+$l10n['tag'] = "Schlagwort";
+$l10n['tags'] = "Schlagwörter";
+$l10n['tag_cloud'] = "Tag cloud";
 
 // SETTINGS
 $l10n['settings'] = "Einstellungen";

@@ -61,8 +61,8 @@ class Node
             throw new ExecutionError('divide_by_zero', []) if (rightVal is 0)
             parseInt(leftVal / rightVal)
           when '%' then leftVal % rightVal
-          when '&' then (if leftVal and rightVal then 1 else 0)
-          when '|' then (if leftVal or rightVal then 1 else 0)
+          when '&' then leftVal and rightVal
+          when '|' then leftVal or rightVal
           else
             throw new ExecutionError('unknown_arithmetic_op', [@operator])
 
@@ -154,10 +154,20 @@ class Node
       null
 
   @parseValue: (value, memory) ->
+    value = $.trim(value)
     # check for const (int)
     intVal = parseInt(value)
     if (intVal + "" is value)
       return {kind: 'const', type: 'int', value: intVal}
+
+    # check for const (bool)
+    boolVal = value.toLowerCase()
+    if (boolVal is 'true' or boolVal is 'false')
+      return {kind: 'const', type: 'bool', value: boolVal is 'true'}
+
+    # check for const (char) TODO: data-type char
+#    if (/^'[A-Za-z]'$/.test(value))
+#      return {kind: 'const', type: 'char', value: value}
 
     # check for array ([])
     open = value.indexOf('[')
