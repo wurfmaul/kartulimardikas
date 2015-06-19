@@ -1,22 +1,9 @@
 ###
-Unbiased shuffle algorithm for arrays
-https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
-
-  @param array the unshuffled array
-  @returns the shuffled array
+ @license
+ This file was created 2014-2015 by https://github.com/wurfmaul
+ and licensed under the GNU GENERAL PUBLIC LICENSE Version 3
+ https://gnu.org/licenses/gpl-3.0.txt
 ###
-window.shuffle = (array) ->
-  currentIndex = array.length
-
-  # While there remain elements to shuffle...
-  while (currentIndex isnt 0)
-    # Pick a remaining element...
-    randomIndex = Math.floor(Math.random() * currentIndex--)
-
-    # And swap it with the current element.
-    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]]
-  array
-
 $ ->
   $('#generalAlertClose').click -> $('#generalAlert').hide('slow')
   $('#generalSuccessClose').click -> $('#generalSuccess').hide('slow')

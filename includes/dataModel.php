@@ -35,6 +35,11 @@ class DataModel
         return $rows;
     }
 
+    /**
+     * @param array $tags A list of all the tags that should be removed from the algorithm.
+     * @param int $aid The algorithm's id.
+     * @return int The number of affected rows.
+     */
     public function deleteTags($tags, $aid)
     {
         $values = "";
@@ -58,8 +63,8 @@ class DataModel
     }
 
     /**
-     * @param $aid int
-     * @return object|stdClass
+     * @param int $aid The algorithm's id.
+     * @return stdClass All the properties of the specified algorithms.
      */
     public function fetchAlgorithm($aid)
     {
@@ -75,10 +80,17 @@ class DataModel
         return $result->fetch_object();
     }
 
+    /**
+     * @param string $tag Name of the tag.
+     * @return array List of algorithms that are tagged with the specified tag.
+     */
     public function fetchAlgorithmsByTag($tag)
     {
         $stmt = $this->_sql->prepare("
-            SELECT *, TIMESTAMPDIFF(MINUTE, date_creation, NOW()) AS age
+            SELECT
+              aid, name, description, long_description, date_publish,
+              TIMESTAMPDIFF(MINUTE, date_creation, NOW()) AS age,
+              u.uid, u.username
             FROM tags
             LEFT JOIN algorithm a USING (aid)
             LEFT JOIN user u USING (uid)
@@ -92,26 +104,27 @@ class DataModel
     }
 
     /**
-     * @param int $uid
-     * @param bool $fetchPrivate
-     * @param int $from
-     * @param int $amount
-     * @return mixed
+     * @param int $uid The user's id.
+     * @param bool $fetchPrivate True if private algorithms should be fetched too.
+     * @param int $amount The number of algorithms to fetch.
+     * @return array List of algorithms that were defined by the specified user.
      */
-    public function fetchAlgorithmsOfUser($uid, $fetchPrivate, $from, $amount)
+    public function fetchAlgorithmsOfUser($uid, $fetchPrivate, $amount)
     {
         $privateFilter = $fetchPrivate ? "" : "AND date_publish IS NOT NULL";
 
         $stmt = $this->_sql->prepare("
-            SELECT *, TIMESTAMPDIFF(MINUTE, date_creation, NOW()) AS age
+            SELECT
+              aid, name, description, long_description, date_publish,
+              TIMESTAMPDIFF(MINUTE, date_creation, NOW()) AS age
             FROM algorithm
             WHERE uid = ?
             $privateFilter
             AND date_deletion IS NULL
             ORDER BY date_creation DESC
-            LIMIT ?, ?
+            LIMIT ?
         ");
-        $stmt->bind_param("iii", $uid, $from, $amount);
+        $stmt->bind_param("ii", $uid, $amount);
         $stmt->execute();
         $result = $stmt->get_result();
         $stmt->close();
@@ -119,8 +132,8 @@ class DataModel
     }
 
     /**
-     * @param $amount int
-     * @return array
+     * @param int $amount Number of algorithms to fetch.
+     * @return array List of latest algorithms.
      */
     public function fetchLatestAlgorithms($amount)
     {
@@ -144,15 +157,15 @@ class DataModel
     }
 
     /**
-     * @param int $amount
-     * @return array
+     * @param int $amount Number of algorithms to fetch.
+     * @return array Algorithms with latest changes.
      */
     public function fetchModifiedAlgorithms($amount)
     {
         $stmt = $this->_sql->prepare("
             SELECT
               aid, name, description, long_description,
-              TIMESTAMPDIFF(MINUTE, date_lastedit, NOW()) AS modified,
+              TIMESTAMPDIFF(MINUTE, date_lastedit, NOW()) AS age,
               uid, username
             FROM algorithm a
             JOIN user u USING(uid)
@@ -171,14 +184,14 @@ class DataModel
     /**
      * @param int $uid The user's id.
      * @param int $amount The amount of algorithms that should be displayed.
-     * @return array
+     * @return array A list of the algorithms with the latest modifications by the specified user.
      */
     public function fetchModifiedAlgorithmsOfUser($uid, $amount)
     {
         $stmt = $this->_sql->prepare("
             SELECT
               aid, name, description, long_description, date_publish,
-              TIMESTAMPDIFF(MINUTE, date_lastedit, NOW()) AS modified
+              TIMESTAMPDIFF(MINUTE, date_lastedit, NOW()) AS age
             FROM algorithm
             WHERE date_deletion IS NULL
             AND uid = ?
@@ -193,7 +206,7 @@ class DataModel
     }
 
     /**
-     * @return array
+     * @return array All different tag names.
      */
     public function fetchAllTags()
     {
@@ -210,7 +223,7 @@ class DataModel
      */
     private function flatten($array)
     {
-        return call_user_func_array('array_merge', $array);
+        return empty($array) ? $array : call_user_func_array('array_merge', $array);
     }
 
     /**
@@ -230,6 +243,10 @@ class DataModel
         return $this->flatten($result->fetch_all());
     }
 
+    /**
+     * @param int $amount Number of tags.
+     * @return array Most popular tags.
+     */
     public function fetchTagStats($amount)
     {
         $stmt = $this->_sql->prepare("
@@ -253,7 +270,7 @@ class DataModel
 
     /**
      * @param int $uid The user id.
-     * @return object|stdClass
+     * @return stdClass The user's properties.
      */
     public function fetchUser($uid)
     {
@@ -271,7 +288,7 @@ class DataModel
 
     /**
      * @param string $username The user's name
-     * @return object|stdClass
+     * @return stdClass The user's properties.
      */
     public function fetchUserByUsername($username)
     {
@@ -289,7 +306,7 @@ class DataModel
 
     /**
      * @param string $email The user's email address.
-     * @return object|stdClass
+     * @return stdClass The user's properties.
      */
     public function fetchUserByMail($email)
     {
@@ -305,6 +322,10 @@ class DataModel
         return $result->fetch_object();
     }
 
+    /**
+     * @param int $amount The number of users to fetch.
+     * @return array A list of users with the most defined algorithms.
+     */
     public function fetchUsersWithMostAlgorithms($amount)
     {
         $stmt = $this->_sql->prepare("
@@ -328,8 +349,8 @@ class DataModel
     }
 
     /**
-     * @param $username string
-     * @return object|stdClass
+     * @param string $username The user's username.
+     * @return stdClass The login-specific properties of the user.
      */
     public function fetchLoginByUsername($username)
     {
@@ -348,8 +369,8 @@ class DataModel
     }
 
     /**
-     * @param $uid int
-     * @return object|stdClass
+     * @param int $uid The user's id.
+     * @return stdClass The user's login-specific properties.
      */
     public function fetchLoginByUID($uid)
     {
@@ -382,6 +403,11 @@ class DataModel
         return $aid;
     }
 
+    /**
+     * @param array $tags List of all the tag names that should be added to the algorithm.
+     * @param int $aid The algorithm's id.
+     * @return int The number of affected rows.
+     */
     public function insertTags($tags, $aid)
     {
         $values = "";
@@ -490,7 +516,7 @@ class DataModel
     }
 
     /**
-     * @param $aid int The algorithm id.
+     * @param int $aid The algorithm id.
      * @param string $tree JSON representation of tree.
      * @return int Number of changed rows.
      */

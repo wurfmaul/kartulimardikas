@@ -7,7 +7,6 @@
  * - $l10n: array used for translation
  */
 $linkAlgorithm = url(['action' => 'view', 'aid' => $algorithm['aid']]);
-$linkUser = url(['action' => 'user', 'uid' => $algorithm['uid']]);
 ?>
 <tr>
     <td>
@@ -23,7 +22,7 @@ $linkUser = url(['action' => 'user', 'uid' => $algorithm['uid']]);
             </a>
         </span>
         <span class="properties">
-            <?php if ($userData): ?>
+            <?php if ($userData): $linkUser = url(['action' => 'user', 'uid' => $algorithm['uid']]) ?>
                 (<?= sprintf($l10n[$transKeys[1]], getTimeFrame($algorithm['age']),
                     '<a href="' . $linkUser . '">' . $algorithm['username']) . '</a>' ?>)
             <?php else: ?>

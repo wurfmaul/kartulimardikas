@@ -300,7 +300,10 @@ $ ->
     newVal = varRow.find('.value-edit').hide().val()
     varRow.find('.value-show').show()
 
-    if (/^[0-9]+((\s*,\s*)?[0-9])+$/.test(newVal))
+    if (/^[0-9]+$/.test(newVal))
+      # single value
+    else if (/^[0-9]+((\s*,\s*)?[0-9])+$/.test(newVal))
+      # list values
       varRow.data('value', newVal)
       console.log('new value: ' + newVal)
   )

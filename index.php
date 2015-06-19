@@ -92,13 +92,20 @@ if ($__aid && $__algorithm) {
 
     <link href="<?= BOOTSTRAP_CSS_PATH ?>" rel="stylesheet">
     <link href="<?= FONT_AWESOME_PATH ?>" rel="stylesheet">
-    <link href="css/common.css" rel="stylesheet">
-    <?php if (file_exists('css/' . ACTION . '.css')): ?>
-        <link href="css/<?= ACTION ?>.css" rel="stylesheet"/>
+
+    <?php if (DEBUG_MODE): ?>
+        <link href="css/common.css" rel="stylesheet">
+        <?php if (file_exists('css/' . ACTION . '.css')): ?>
+            <link href="css/<?= ACTION ?>.css" rel="stylesheet"/>
+        <?php endif ?>
+    <?php elseif (file_exists('css/' . ACTION . '.min.css')): ?>
+        <link href="css/<?= ACTION ?>.min.css" rel="stylesheet"/>
     <?php endif ?>
+
     <?php if (ACTION === 'edit' || ACTION === 'view'): ?>
         <link href="<?= JQUERYUI_CSS_PATH ?>" rel="stylesheet"/>
     <?php endif ?>
+
     <script type="text/javascript">
         window.defaults = {
             'action': '<?= ACTION ?>',
@@ -239,16 +246,23 @@ if ($__aid && $__algorithm) {
 
 <script type="text/javascript" src="<?= JQUERY_PATH ?>"></script>
 <script type="text/javascript" src="<?= BOOTSTRAP_JS_PATH ?>"></script>
-<script type="text/javascript" src="js/common.js"></script>
+<?php if (ACTION === 'edit' || ACTION === 'view'): ?>
+    <script type="text/javascript" src="<?= JQUERYUI_JS_PATH ?>"></script>
+<?php endif ?>
+<?php if (DEBUG_MODE): ?>
+    <script type="text/javascript" src="js/common.js"></script>
 <?php if (ACTION === 'edit' || ACTION === 'view'): ?>
     <script type="text/javascript" src="js/section.js"></script>
     <script type="text/javascript" src="js/autocomplete.js"></script>
     <script type="text/javascript" src="js/algorithm.js"></script>
-    <script type="text/javascript" src="<?= JQUERYUI_JS_PATH ?>"></script>
 <?php endif ?>
 <?php if (file_exists('js/' . ACTION . '.js')): ?>
     <script type="text/javascript" src="js/<?= ACTION ?>.js"></script>
 <?php endif ?>
+<?php elseif (file_exists('js/' . ACTION . '.min.js')): ?>
+    <script type="text/javascript" src="js/<?= ACTION ?>.min.js"></script>
+<?php endif ?>
+
 </body>
 </html>
 <?php $__model->close() ?>

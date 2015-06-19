@@ -328,19 +328,6 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
         </div>
         <!-- RIGHT COLUMN END -->
     </div>
-    <script type="text/javascript">
-        // hand default values over to js
-        window.defaults.sectionDefault = <?= SECTIONS_VIEW ?>;
-        window.defaults.maxSteps = <?= MAX_STEPS ?>;
-        window.defaults.speed = <?= SPEED ?>;
-        window.defaults.breaks = '<?= DEFAULT_BREAKPOINT ?>';
-        // hand error messages over to js
-        window.errorCodes = {
-            <?php foreach ($l10n['runtime_errors'] as $key => $value): ?>
-            '<?= $key ?>': "<?= $value ?>",
-            <?php endforeach ?>
-        }
-    </script>
     <!-- CONTENT END -->
 <?php else: // no valid aid ?>
     <div class="alert alert-danger" role="alert">
@@ -356,3 +343,16 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
         &rarr; <a href="javascript:history.back()"><?= $l10n['go_back'] ?></a>
     </div>
 <?php endif ?>
+<script type="text/javascript">
+    // hand default values over to js
+    window.defaults.sectionDefault = <?= SECTIONS_VIEW ?>;
+    window.defaults.maxSteps = <?= MAX_STEPS ?>;
+    window.defaults.speed = <?= SPEED ?>;
+    window.defaults.breaks = '<?= DEFAULT_BREAKPOINT ?>';
+    // hand error messages over to js
+    window.errorCodes = {
+        <?php foreach ($l10n['runtime_errors'] as $key => $value): ?>
+        '<?= $key ?>': "<?= $value ?>",
+        <?php endforeach ?>
+    }
+</script>

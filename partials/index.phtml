@@ -116,7 +116,7 @@ $list = isset($_GET['list']) ? $_GET['list'] : false;
     </div>
 <?php elseif ($__uid && $list === 'myAlgorithms'): ?>
     <?php
-    $my_algorithms = $__model->fetchAlgorithmsOfUser($__uid, true, 0, 250);
+    $my_algorithms = $__model->fetchAlgorithmsOfUser($__uid, true, 250);
     ?>
     <!-- HEADER -->
     <div class="page-header">
@@ -169,7 +169,7 @@ $list = isset($_GET['list']) ? $_GET['list'] : false;
     $diligentUsers = $__model->fetchUsersWithMostAlgorithms(MAX_NUMBER_OF_ENTRIES);
     $tags = $__model->fetchTagStats(25);
     if ($__uid) {
-        $my_algorithms = $__model->fetchAlgorithmsOfUser($__uid, true, 0, MAX_NUMBER_OF_ENTRIES);
+        $my_algorithms = $__model->fetchAlgorithmsOfUser($__uid, true, MAX_NUMBER_OF_ENTRIES);
         $my_changes = $__model->fetchModifiedAlgorithmsOfUser($__uid, MAX_NUMBER_OF_ENTRIES);
     }
     ?>

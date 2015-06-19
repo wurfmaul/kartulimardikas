@@ -5,7 +5,7 @@ global $l10n;
 // ask database for latest algorithms
 $algorithms = $__model->fetchLatestAlgorithms(NUMBER_OF_LATEST_ALGORITHMS);
 if ($__uid) {
-    $my_algorithms = $__model->fetchAlgorithmsOfUser($__uid, true, 0, NUMBER_OF_MY_ALGORITHMS);
+    $my_algorithms = $__model->fetchAlgorithmsOfUser($__uid, true, NUMBER_OF_MY_ALGORITHMS);
 }
 require_once BASEDIR . "includes/viewHelper.php";
 ?>
