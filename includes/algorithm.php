@@ -68,7 +68,9 @@ class AssignNode extends Node
                     </td>
                 </tr>
                 <tr>
-                    <td class="handle node-box left right bottom">&nbsp;</td>
+                    <td class="handle node-box left right bottom">
+                        <span class="cursor-icon"></span>
+                    </td>
                     <td>
                         <ul class="assign-from sortable" data-node-id="<?= $fromNid ?>">
                             <?php self::printNode($this->from, $params) ?>

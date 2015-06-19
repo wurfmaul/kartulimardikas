@@ -34,8 +34,10 @@ define('ARRAY_MAX_SIZE', 13);
 define('DEFAULT_INDENT', '  ');
 # Animation speed, when playing an algorithm (milliseconds between the steps)
 define('SPEED', 500);
-# Number of steps an algorithm as allowed to take
+# Number of steps an algorithm is allowed to take
 define('MAX_STEPS', 1000);
+# Default breakpoint (values: 'before', 'after', 'both')
+define('DEFAULT_BREAKPOINT', 'before');
 
 ##### LIST SETTINGS #####
 # Number of algorithms that are displayed in the home action

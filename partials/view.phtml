@@ -97,20 +97,24 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
                                         </tr>
                                     </table>
                                 </div>
-                            </div>
-                            <div class="col-md-7">
-                                <div class="panel panel-default" style="display: none;">
-                                    <div class="panel-body">
-                                        <span style="color: grey"><?= $l10n['no_params_to_define'] ?></span>
-                                    </div>
-                                    <div id="input-footer" class="panel-footer panel-footer-sm">
-                                        <?= $l10n['input'] ?>
+                                <div id="step-control">
+                                    <div class="btn-group btn-group-sm" data-toggle="buttons">
+                                        <label id="stop-before-btn" class="btn btn-default" data-break="before">
+                                            <input id="stop-before" type="checkbox" autocomplete="off">
+                                            <span class="icon icon-stop-before"></span>
+                                        </label>
+                                        <label id="stop-after-btn" class="btn btn-default" data-break="after">
+                                            <input id="stop-after" type="checkbox" autocomplete="off">
+                                            <span class="icon icon-stop-after"></span>
+                                        </label>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="col-md-7">
                                 <div class="panel panel-default">
                                     <div class="panel-body">
                                         <label for="returnValue" class="sr-only">Return value</label>
-                                        <input id="returnValue" class="form-control input-sm" disabled="disabled">
+                                        <input id="returnValue" class="form-control input-sm" readonly="readonly">
                                     </div>
                                     <div id="output-footer" class="panel-footer panel-footer-sm">
                                         <?= $l10n['output'] ?>
@@ -206,12 +210,13 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
                                             data-vid="<?= $vid ?>"
                                             data-name="<?= $var->name ?>"
                                             data-value="<?= $var->value ?>"
-                                            data-type="<?= $var->type ?>">
+                                            data-type="<?= $var->type ?>"
+                                            class="variable">
                                             <td>
                                                 <code class="name"><?= $var->name ?></code>
                                             </td>
-                                            <td>
-                                                <div class="btn-group">
+                                            <td class="var-value">
+                                                <div class="btn-group value-show">
                                                     <?php if (substr($var->type, 0, 6) === "array-"): // deal with "array-{int}" ?>
                                                         <?php foreach (explode(',', $var->value) as $offset => $value): ?>
                                                             <button
@@ -231,6 +236,7 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
                                                         </button>
                                                     <?php endif ?>
                                                 </div>
+                                                <input class="form-control value-edit" value="<?= $var->value ?>" />
                                             </td>
                                         </tr>
                                     <?php endforeach ?>
@@ -312,6 +318,7 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
         window.defaults.sectionDefault = <?= SECTIONS_VIEW ?>;
         window.defaults.maxSteps = <?= MAX_STEPS ?>;
         window.defaults.speed = <?= SPEED ?>;
+        window.defaults.breaks = '<?= DEFAULT_BREAKPOINT ?>';
         // hand error messages over to js
         window.errorCodes = {
             <?php foreach ($l10n['runtime_errors'] as $key => $value): ?>

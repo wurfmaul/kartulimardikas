@@ -99,7 +99,7 @@ class Node
   ###
   mark: (player, node) ->
     if (node is @nid)
-      player.setCursor(@nid)
+      player.setCursor(@nid, 0)
       @nid
     else
       -1

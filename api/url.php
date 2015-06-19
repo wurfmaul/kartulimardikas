@@ -8,7 +8,7 @@ class UrlAPI extends AbstractAPI
     {
         if (isset($_GET['parameters'])) {
             require_once BASEDIR . 'includes/urlHelper.php';
-            $this->response = url($_GET['parameters']);
+            $this->response = url($_GET['parameters'], true);
             $this->sendResponse(false);
         }
     }

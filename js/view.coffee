@@ -2,7 +2,8 @@ class Player
   constructor: (@tree) ->
     @memory = @tree.memory
     @stats = new Stats(@memory)
-    @speed = @computeSpeed()
+    @speed = @loadSpeed()
+    @breaks = @loadBreaks()
     @reset()
 
   reset: ->
@@ -16,6 +17,8 @@ class Player
     # find first node to execute
     @curNode = null
     @nextNode = @tree.mark(@, @tree.root)
+    @nextCandidate = null
+    @cursorState = 0
     # reset highlighting and cursor
     @clearHighlight()
     if (@nextNode >= 0) then @setControls([0, 0, 1, 1, 1])
@@ -47,29 +50,39 @@ class Player
       .addClass('glyphicon-pause')
 
   step: ->
-    error = false
-    try
-      @clearHighlight()
-      # execute current step
-      @curNode = @nextNode
-      curNode = @tree.execute(@, @curNode)
-    catch runtimeError
-      error = runtimeError
-      @handleError(error)
+    @clearHighlight()
 
-    # prepare the next step
-    if (error? and error)
-      @setControls([1, 1, 0, 0, 0])
-      false
-    else if (curNode.next? and curNode.next >= 0)
-      @nextNode = @tree.mark(@, curNode.next)
-      @setControls([1, 1, 1, 1, 1])
+    if (@cursorState is 0) # if cursor is BEFORE the statement
+      @curNode = @nextNode
+      try
+        # execute current step
+        curNode = @tree.execute(@, @curNode)
+        # set potential next node
+        if (curNode.next? and curNode.next >= 0) then @nextCandidate = curNode.next
+        else @nextCandidate = null
+      catch runtimeError
+        @handleError(runtimeError)
+        @setControls([1, 1, 0, 0, 0])
+        return false
+
+      # update cursor
+      if ($('#stop-after').is(':checked'))
+        @cursorState = 1
+        @setCursor(@curNode, @cursorState)
+        return true
+      else if (!@nextCandidate?)
+        @play() if @timer?
+        @unsetCursor()
+        @setControls([1, 1, 0, 0, 0])
+        return false
+
+    @cursorState = 0
+    @nextNode = @tree.mark(@, @nextCandidate)
+    @setControls([1, 1, 1, 1, 1])
+    if ($('#stop-before').is(':checked'))
       true
     else
-      @play() if @timer?
-      @unsetCursor()
-      @setControls([1, 1, 0, 0, 0])
-      false
+      @step()
 
   finish: ->
     maxSteps = window.defaults.maxSteps
@@ -83,15 +96,38 @@ class Player
     @play()
     @play()
     # store the new speed to the browser's local storage
-    localStorage.setItem('speed', value)
+    if (localStorage?) then localStorage.setItem('speed', value)
 
-  computeSpeed: ->
+  loadSpeed: ->
     if (localStorage? and (speed = localStorage.getItem('speed'))?)
-      # first instance: ask local storage about speed
+      # first priority: ask local storage about speed
       speed
     else
-      # second instance: take default value
+      # second priority: take default value
       window.defaults.speed
+
+  changeBreaks: (status) ->
+    # store value to browser's local storage
+    if (localStorage?) then localStorage.setItem('breaks', status)
+
+  loadBreaks: ->
+    if (localStorage? and (localBreaks = localStorage.getItem('breaks'))?)
+      # first priority: ask local storage about speed
+      breaks = localBreaks
+    else
+      # second priority: take default value
+      breaks = window.defaults.breaks
+    # store settings
+    @changeBreaks(breaks)
+    # change the ui
+    if (breaks is 'before' or breaks is 'both')
+      $('#stop-before').prop('checked', true)
+      $('#stop-before-btn').addClass('active')
+    if (breaks is 'after' or breaks is 'both')
+      $('#stop-after').prop('checked', true)
+      $('#stop-after-btn').addClass('active')
+    # return status
+    breaks
 
   handleError: (error) ->
     # errorCodes is defined by view.phtml
@@ -117,18 +153,25 @@ class Player
       if (settings[i] is 0) then buttons[i].attr('disabled', 'disabled')
       else buttons[i].removeAttr('disabled')
 
-  setCursor: (node) ->
+  ###
+    node = node_id of the node the cursor should be attached to
+    position = the position of the cursor: 0 => before statement, 1 => after statement
+  ###
+  setCursor: (node, position) ->
+    switch (position)
+      when 0 then newClass = 'cursor-up'
+      when 1 then newClass = 'cursor-down'
     @unsetCursor()
     # set cursor in algorithm
-    $('#node_' + node).addClass('cursor')
+    $('#node_' + node).addClass('cursor ' + newClass)
     # set cursor in source code
-    $('#source-node-' + node).closest('.line').addClass('source-cursor')
+    $('#source-node-' + node).closest('.line').addClass('source-cursor ' + newClass)
 
   unsetCursor: ->
     # remove cursor from algorithm
-    $('.cursor').removeClass('cursor')
+    $('.cursor').removeClass('cursor cursor-up cursor-down')
     # remove cursor from source code
-    $('.source-cursor').removeClass('source-cursor')
+    $('.source-cursor').removeClass('source-cursor cursor-up cursor-down')
 
 class Stats
   constructor: (@memory) ->
@@ -184,6 +227,46 @@ class Stats
     $.each(@stats, (index, elem) ->
       $('#stats-' + elem).val(0)
     )
+
+###
+  Deal with the breakpoint buttons and compute a valid state ('none' forbidden)
+###
+toggleBreakpoints = (button, player) ->
+  # compute status before clicking
+  statusBefore = $('#stop-before-btn').hasClass('active')
+  statusAfter = $('#stop-after-btn').hasClass('active')
+  # compute status after clicking
+  if (button.data('break') is 'before') then statusBefore = !statusBefore
+  if (button.data('break') is 'after') then statusAfter = !statusAfter
+
+  if (statusBefore and statusAfter)
+    player.changeBreaks('both')
+  else if (statusBefore)
+    player.changeBreaks('before')
+  else if (statusAfter)
+    player.changeBreaks('after')
+  else
+    button.button('toggle') # toggle button back to state before clicking
+
+toggleComment = (element) ->
+  container = element.parent()
+  # toggle collapse/expand icon
+  element.toggleClass('fa-plus-square fa-minus-square')
+
+  # animate collapsing
+  if (container.hasClass('collapsed'))
+    # dirty hack as animating to 'auto' does not work!
+    curHeight = container.height()
+    container.css('height', 'auto')
+    autoHeight = container.height()
+    container.css('height', curHeight)
+    newHeight = autoHeight
+  else
+    newHeight = '20px'
+  container.animate({height: newHeight}, 'slow', 'linear', ->
+    container.toggleClass('collapsed')
+  )
+
 $ ->
   tree = new Tree()
   player = new Player(tree)
@@ -199,24 +282,23 @@ $ ->
     max: 20,
     change: (event, ui) -> player.changeSpeed(1000 / ui.value)
   )
+  $('#stop-before-btn, #stop-after-btn').click -> toggleBreakpoints($(this), player)
 
   # ALGORITHM SECTION
-  $('.toggle-comment').click(->
-    container = $(this).parent()
-    # toggle collapse/expand icon
-    $(this).toggleClass('fa-plus-square fa-minus-square')
+  $('.toggle-comment').click -> toggleComment($(this))
 
-    # animate collapsing
-    if (container.hasClass('collapsed'))
-      # dirty hack as animating to 'auto' does not work!
-      curHeight = container.height()
-      container.css('height', 'auto')
-      autoHeight = container.height()
-      container.css('height', curHeight)
-      newHeight = autoHeight
-    else
-      newHeight = '20px'
-    container.animate({height: newHeight}, 'slow', 'linear', ->
-      container.toggleClass('collapsed')
-    )
+  # MEMORY SECTION
+  $('.var-value').dblclick(->
+    varRow = $(this).closest('.variable')
+    varRow.find('.value-show').hide()
+    varRow.find('.value-edit').show().focus()
+  )
+  $('.value-edit').blur(->
+    varRow = $(this).closest('.variable')
+    newVal = varRow.find('.value-edit').hide().val()
+    varRow.find('.value-show').show()
+
+    if (/^[0-9]+((\s*,\s*)?[0-9])+$/.test(newVal))
+      varRow.data('value', newVal)
+      console.log('new value: ' + newVal)
   )
