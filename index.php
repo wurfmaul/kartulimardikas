@@ -227,7 +227,7 @@ if ($__aid && $__algorithm) {
                     <a href="<?= url(['action' => 'notice']) ?>"><?= $l10n['notice'] ?></a>
                 </li>
                 <li class="dropup">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                    <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
                         <span class="glyphicon glyphicon-globe"></span>
                         <span class="caret"></span>
                     </a>

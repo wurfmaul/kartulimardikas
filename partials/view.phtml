@@ -176,7 +176,7 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
                             <?php if (is_null($__algorithm->tree)): ?>
                                 <?= $l10n['no_algorithm'] ?>
                             <?php else: ?>
-                                <pre><?php $tree->printSource(['vars' => $vars]) ?></pre>
+                                <div class="code"><?php $tree->printSource(['vars' => $vars]) ?></div>
                             <?php endif ?>
                         </div>
                     </div>
