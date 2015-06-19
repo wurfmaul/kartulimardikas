@@ -541,7 +541,7 @@ class ReturnNode extends Node
 
   execute: (player, node) ->
     value = @executeValue(@value, player)
-    $('#returnValue').val(value)
+    $('#returnValue').val(value).focus()
     -1 # no further steps
 
   toJSON: ->
