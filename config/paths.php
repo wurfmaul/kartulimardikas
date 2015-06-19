@@ -2,7 +2,7 @@
 # Library paths
 $_jqueryVersion = '2.1.4';
 $_jqueryUiVersion = '1.11.4';
-$_bootstrapVersion = '3.3.4';
+$_bootstrapVersion = '3.3.5';
 $_fontAwesomeVersion = '4.3.0';
 
 if (LIBRARY_MODE == 'LOCAL') {

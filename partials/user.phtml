@@ -5,7 +5,7 @@ global $l10n;
 // if a user name is specified, redirect to uid
 if (isset($_GET['name'])) {
     $user = $__model->fetchUserByUsername($_GET['name']);
-    header("Location:" . url(['action' => 'user', 'uid' => $user->uid]));
+    header("Location:" . url(['action' => 'user', 'uid' => $user->uid], false, false));
     die();
 }
 

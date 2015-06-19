@@ -9,14 +9,15 @@
  *  parts. If null, nothing is replaced.
  * @return string The newly computed relative url.
  */
-function url($parameters = [], $replace = false)
+function url($parameters = [], $replace = false, $encode = true)
 {
     $_url = "index.php";
+    $_amp = $encode ? '&amp;' : '&';
     $_index = 0;
     if ($replace) {
         // Run through all the old parameters
         foreach ($_GET as $key => $value) {
-            $_url .= ($_index++ === 0) ? '?' : '&';
+            $_url .= ($_index++ === 0) ? '?' : $_amp;
             // Check if there is something to replace...
             if (array_key_exists($key, $parameters)) {
                 // ... use the new value.
@@ -27,7 +28,7 @@ function url($parameters = [], $replace = false)
         }
     }
     foreach ($parameters as $key => $value) {
-        $_url .= ($_index++ === 0) ? '?' : '&';
+        $_url .= ($_index++ === 0) ? '?' : $_amp;
         $_url .= $key . '=' . $value;
     }
     return $_url;

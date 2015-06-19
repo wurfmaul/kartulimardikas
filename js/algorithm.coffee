@@ -412,12 +412,12 @@ class CompareNode extends Node
     rightVal = @executeValue(@right, player)
     player.stats.incCompareOps()
     switch @operator
-      when 'le' then value: (if leftVal <= rightVal then 1 else 0)
-      when 'lt' then value: (if leftVal < rightVal then 1 else 0)
-      when 'eq' then value: (if leftVal == rightVal then 1 else 0)
-      when 'gt' then value: (if leftVal > rightVal then 1 else 0)
-      when 'ge' then value: (if leftVal >= rightVal then 1 else 0)
-      when 'ne' then value: (if leftVal != rightVal then 1 else 0)
+      when 'le' then value: leftVal <= rightVal
+      when 'lt' then value: leftVal < rightVal
+      when 'eq' then value: leftVal == rightVal
+      when 'gt' then value: leftVal > rightVal
+      when 'ge' then value: leftVal >= rightVal
+      when 'ne' then value: leftVal != rightVal
       else throw new Error("CompareNode: unknown operator: '#{@operator}'!")
 
   toJSON: ->

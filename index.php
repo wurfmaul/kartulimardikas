@@ -154,12 +154,13 @@ if ($__aid && $__algorithm) {
                 <?php else: ?>
                     <form class="navbar-form navbar-right" role="form" method="post">
                         <div class="form-group">
-                            <label class="sr-only" for="username"><?= $l10n['username'] ?></label>
-                            <input class="form-control" name="username" placeholder="<?= $l10n['username'] ?>">
+                            <label class="sr-only" for="login-username"><?= $l10n['username'] ?></label>
+                            <input class="form-control" id="login-username" name="username"
+                                   placeholder="<?= $l10n['username'] ?>">
                         </div>
                         <div class="form-group">
-                            <label class="sr-only" for="password"><?= $l10n['password'] ?></label>
-                            <input type="password" class="form-control" name="password"
+                            <label class="sr-only" for="login-password"><?= $l10n['password'] ?></label>
+                            <input type="password" class="form-control" id="login-password" name="password"
                                    placeholder="<?= $l10n['password'] ?>">
                         </div>
                         <button type="submit" name="signInBtn" class="btn btn-default"><?= $l10n['sign_in'] ?></button>
