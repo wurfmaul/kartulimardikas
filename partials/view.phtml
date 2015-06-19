@@ -31,9 +31,9 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
             <small><?= $description ?></small>
         </h1>
         <?php foreach ($tags as $tag): ?>
-        <a href="<?= url(['action' => 'index', 'list' => 'tag', 'tag' => $tag]) ?>">
-            <span class="badge"><?= $tag ?></span>
-        </a>
+            <a href="<?= url(['action' => 'index', 'list' => 'tag', 'tag' => $tag]) ?>">
+                <span class="badge"><?= $tag ?></span>
+            </a>
         <?php endforeach ?>
     </div>
     <!-- HEADER END -->
@@ -67,50 +67,65 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
                     </div>
                     <div id="controls" class="panel-collapse">
                         <div class="panel-body controls">
-                            <div class="col-md-5">
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-default" title="<?= $l10n['back_to_start'] ?>"
-                                            id="btn-reset">
-                                        <span class="glyphicon glyphicon-fast-backward"></span>
-                                    </button>
-                                    <button type="button" class="btn btn-default" title="<?= $l10n['play'] ?>"
-                                            id="btn-play">
-                                        <span class="glyphicon glyphicon-play" id="img-play"></span>
-                                    </button>
-                                    <button type="button" class="btn btn-default" title="<?= $l10n['step_forward'] ?>"
-                                            id="btn-step">
-                                        <span class="glyphicon glyphicon-step-forward"></span>
-                                    </button>
-                                    <button type="button" class="btn btn-default" title="<?= $l10n['forward_to_end'] ?>"
-                                            id="btn-finish">
-                                        <span class="glyphicon glyphicon-fast-forward"></span>
-                                    </button>
-                                </div>
-                                <div id="speed-control">
-                                    <table>
-                                        <tr>
-                                            <td><span class="fa fa-bicycle"></span></td>
-                                            <td style="width:100%">
+                            <div class="col-lg-5 col-md-6 col-sm-4">
+                                <table>
+                                    <tr>
+                                        <td colspan="3" style="width: 100%;">
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-default"
+                                                        title="<?= $l10n['back_to_start'] ?>"
+                                                        id="btn-reset">
+                                                    <span class="glyphicon glyphicon-fast-backward"></span>
+                                                </button>
+                                                <button type="button" class="btn btn-default"
+                                                        title="<?= $l10n['play'] ?>"
+                                                        id="btn-play">
+                                                    <span class="glyphicon glyphicon-play" id="img-play"></span>
+                                                </button>
+                                                <button type="button" class="btn btn-default"
+                                                        title="<?= $l10n['step_forward'] ?>"
+                                                        id="btn-step">
+                                                    <span class="glyphicon glyphicon-step-forward"></span>
+                                                </button>
+                                                <button type="button" class="btn btn-default"
+                                                        title="<?= $l10n['forward_to_end'] ?>"
+                                                        id="btn-finish">
+                                                    <span class="glyphicon glyphicon-fast-forward"></span>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td title="<?= $l10n['slow'] ?>"><span class="fa fa-bicycle"></span></td>
+                                        <td style="width:100%" title="<?= $l10n['set_speed'] ?>">
+                                            <div id="speed-control">
                                                 <div id="speed-slider"></div>
-                                            </td>
-                                            <td><span class="fa fa-rocket"></span></td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div id="step-control">
-                                    <div class="btn-group btn-group-sm" data-toggle="buttons">
-                                        <label id="stop-before-btn" class="btn btn-default" data-break="before">
-                                            <input id="stop-before" type="checkbox" autocomplete="off">
-                                            <span class="icon icon-stop-before"></span>
-                                        </label>
-                                        <label id="stop-after-btn" class="btn btn-default" data-break="after">
-                                            <input id="stop-after" type="checkbox" autocomplete="off">
-                                            <span class="icon icon-stop-after"></span>
-                                        </label>
-                                    </div>
-                                </div>
+                                            </div>
+                                        </td>
+                                        <td title="<?= $l10n['fast'] ?>"><span class="fa fa-rocket"></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td title="<?= $l10n['set_breakpoints'] ?>"><span class="fa fa-eye"></span></td>
+                                        <td colspan="2" style="width: 100%">
+                                            <div id="step-control">
+                                                <div class="btn-group btn-group-sm" data-toggle="buttons">
+                                                    <label id="stop-before-btn" class="btn btn-default"
+                                                           data-break="before" title="<?= $l10n['break_before'] ?>">
+                                                        <input id="stop-before" type="checkbox" autocomplete="off">
+                                                        <span class="icon icon-stop-before"></span>
+                                                    </label>
+                                                    <label id="stop-after-btn" class="btn btn-default"
+                                                           data-break="after" title="<?= $l10n['break_after'] ?>">
+                                                        <input id="stop-after" type="checkbox" autocomplete="off">
+                                                        <span class="icon icon-stop-after"></span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
                             </div>
-                            <div class="col-md-7">
+                            <div class="col-lg-7 col-md-6 col-sm-8">
                                 <div class="panel panel-default">
                                     <div class="panel-body">
                                         <label for="returnValue" class="sr-only">Return value</label>
@@ -236,7 +251,7 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
                                                         </button>
                                                     <?php endif ?>
                                                 </div>
-                                                <input class="form-control value-edit" value="<?= $var->value ?>" />
+                                                <input class="form-control value-edit" value="<?= $var->value ?>"/>
                                             </td>
                                         </tr>
                                     <?php endforeach ?>

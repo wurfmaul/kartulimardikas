@@ -51,8 +51,8 @@ class Player
 
   step: ->
     @clearHighlight()
-
-    if (@cursorState is 0) # if cursor is BEFORE the statement
+    # if cursor is BEFORE the statement, perform execution
+    if (@cursorState is 0)
       @curNode = @nextNode
       try
         # execute current step
@@ -65,24 +65,26 @@ class Player
         @setControls([1, 1, 0, 0, 0])
         return false
 
-      # update cursor
+      # if algorithm is stopped AFTER statement, update cursor and wait for next step
       if ($('#stop-after').is(':checked'))
         @cursorState = 1
         @setCursor(@curNode, @cursorState)
         return true
-      else if (!@nextCandidate?)
-        @play() if @timer?
-        @unsetCursor()
-        @setControls([1, 1, 0, 0, 0])
-        return false
 
-    @cursorState = 0
-    @nextNode = @tree.mark(@, @nextCandidate)
-    @setControls([1, 1, 1, 1, 1])
-    if ($('#stop-before').is(':checked'))
-      true
+    # mark next node if available
+    if (@nextCandidate?)
+      @cursorState = 0
+      @nextNode = @tree.mark(@, @nextCandidate)
+      @setControls([1, 1, 1, 1, 1])
+      # if algorithm is stopped before next execution, return true. Execute otherwise.
+      if ($('#stop-before').is(':checked')) then true
+      else @step()
     else
-      @step()
+      @play() if @timer?
+      @unsetCursor()
+      @setControls([1, 1, 0, 0, 0])
+      false
+
 
   finish: ->
     maxSteps = window.defaults.maxSteps
