@@ -2,9 +2,6 @@
 // setup environment
 define('BASEDIR', __DIR__ . '/');
 
-// deal with old browsers
-// TODO: IE <= 8 not supported by jquery
-
 // deal with authentication
 require_once BASEDIR . 'includes/authentication.php';
 secure_session_start();
@@ -13,6 +10,7 @@ secure_session_start();
 require_once BASEDIR . 'includes/settings.php';
 require_once BASEDIR . 'includes/dataModel.php';
 require_once BASEDIR . 'includes/urlHelper.php';
+require_once BASEDIR . 'includes/browserchecker.php';
 global $l10n;
 $__model = new DataModel();
 
@@ -173,6 +171,32 @@ if ($__aid && $__algorithm) {
     <!-- NAVIGATION BAR TOP END -->
 
     <div class="container">
+        <noscript>
+            <!-- MESSAGE BOX FOR DISABLED JAVASCRIPT -->
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert">
+                    <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
+                </button>
+                <strong><?= $l10n['enable_js'] ?></strong><br/>
+                <?= $l10n['no_script_warning'] ?>
+                <ul>
+                    <li><a href="http://www.enable-javascript.com/<?= LANG ?>/" target="_blank"><?= $l10n['enable_js'] ?></a></li>
+                </ul>
+            </div>
+        </noscript>
+        <?php if (($_browser = BrowserChecker::isUnsupported())): ?>
+            <!-- MESSAGE BOX FOR UNSUPPORTED BROWSER -->
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert">
+                    <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
+                </button>
+                <strong><?= $l10n['unsupported_browser'] ?></strong>: <?= $_browser ?><br/>
+                <?= $l10n['unsupported_browser_warning'] ?>
+                <ul>
+                    <li><a href="http://choosebrowser.com/" target="_blank"><?= $l10n['choose_browser'] ?></a></li>
+                </ul>
+            </div>
+        <?php endif ?>
         <?php if (isset($errorMsg)): ?>
             <!-- MESSAGE BOX FOR ERRORS -->
             <div id="generalAlert" class="alert alert-danger alert-dismissible">
@@ -182,7 +206,6 @@ if ($__aid && $__algorithm) {
                 <strong><?= $l10n['error'] ?></strong> <?= $errorMsg ?>
             </div>
         <?php endif ?>
-
         <?php if (isset($successMsg)): ?>
             <!-- MESSAGE BOX FOR SUCCESSES -->
             <div id="generalSuccess" class="alert alert-success alert-dismissible">

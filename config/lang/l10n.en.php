@@ -14,6 +14,11 @@ $l10n['error'] = "Error!";
 $l10n['success'] = "Success!";
 $l10n['warning'] = "Warning!";
 $l10n['toggle_nav'] = "Toggle navigation";
+$l10n['no_script_warning'] = "For full functionality of this site it is necessary to enable JavaScript. Here are the instructions how to enable JavaScript in your web browser:";
+$l10n['enable_js'] = "Enable JavaScript";
+$l10n['unsupported_browser'] = "Unsupported web browser";
+$l10n['unsupported_browser_warning'] = "The web browser you are using is not supported by this platform. Please update your web browser or consider using a supported alternative:";
+$l10n['choose_browser'] = "Choose supported browser";
 
 // USER MANAGEMENT
 $l10n['welcome'] = "Hello, %s!";

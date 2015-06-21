@@ -14,6 +14,11 @@ $l10n['error'] = "Fehler!";
 $l10n['success'] = "Erfolg!";
 $l10n['warning'] = "Warnung!";
 $l10n['toggle_nav'] = "Menü ein-/ausblenden";
+$l10n['no_script_warning'] = "Um den vollen Funktionsumfang dieser Webseite zu erfahren, benötigen Sie JavaScript. Eine Anleitung wie Sie JavaScript in Ihrem Browser einschalten, befindet sich hier:";
+$l10n['enable_js'] = "JavaScript aktivieren";
+$l10n['unsupported_browser'] = "Dieser Browser wird nicht unterstützt";
+$l10n['unsupported_browser_warning'] = "Der verwendete Web Browser wird nicht unterstützt. Bitte aktualisiere deinen Browser oder denke über eine unterstützte Alternative nach:";
+$l10n['choose_browser'] = "Wähle einen unterstützten Web Browser";
 
 // USER MANAGEMENT
 $l10n['welcome'] = "Hallo, %s!";
