@@ -7,8 +7,16 @@ $l10n['administration'] = "Administration";
 $l10n['no_privileges'] = "Du bist nicht berechtigt, diese Seite zu sehen!";
 $l10n['need_account'] = "Du musst ein Konto haben und angemeldet sein!";
 $l10n['need_admin_rights'] = "Dein Konto muss Administrationsrechte haben!";
-$l10n['not_allowed_to_delete_user'] = "Du bist nicht berechtigt, dieses Konto zu löschen.";
+$l10n['username'] = "Benutzername";
+$l10n['number_of_algorithms'] = "Anzahl der Algorithmen";
+$l10n['language'] = "Sprache";
+$l10n['registration_date'] = "Datum der Registrierung";
+$l10n['sign-in_date'] = "Datum des letzten Besuches";
+$l10n['actions'] = "Aktionen";
+$l10n['administrator'] = "Administrator";
+$l10n['view_profile'] = "Profil ansehen";
 $l10n['confirm_delete_user'] = "Du bist im Begriff, dieses Konto mit allen Algorithmen zu löschen. Bist du sicher?";
+$l10n['not_allowed_to_delete_user'] = "Du bist nicht berechtigt, dieses Konto zu löschen.";
 
 // GENERAL
 $l10n['close'] = "Schließen";

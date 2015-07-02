@@ -37,19 +37,23 @@ if ($__uid) {
             <table class="users">
                 <thead>
                     <tr>
-                        <th>Username</th>
-                        <th title="Number of algorithms">#</th>
-                        <th title="Language"><span class="fa fa-globe"></span></th>
-                        <th title="Registration date"><span class="fa fa-user-plus"></th>
-                        <th title="Date of last sign-in"><span class="fa fa-sign-in"></span></th>
-                        <th>Actions</th>
+                        <th><?= $l10n['username'] ?></th>
+                        <th title="<?= $l10n['number_of_algorithms'] ?>">#</th>
+                        <th title="<?= $l10n['language'] ?>"><span class="fa fa-globe"></span></th>
+                        <th title="<?= $l10n['registration_date'] ?>"><span class="fa fa-user-plus"></th>
+                        <th title="<?= $l10n['sign-in_date'] ?>"><span class="fa fa-sign-in"></span></th>
+                        <th><?= $l10n['actions'] ?></th>
                     </tr>
                 </thead>
                 <tbody>
                 <?php foreach ($__model->fetchUsers() as $member): ?>
                     <tr <?php if($member['date_deletion']): ?>class="deleted"<?php endif ?>>
                         <td>
-                            <?= $member['username'] ?>
+                            <?php if ($member['rights'] > 0): ?>
+                                <strong title="<?= $l10n['administrator'] ?>"><?= $member['username'] ?></strong>
+                            <?php else: ?>
+                                <?= $member['username'] ?>
+                            <?php endif ?>
                             <div style="float:right">
                                 <a href="mailto:<?= $member['email'] ?>"><span class="glyphicon glyphicon-envelope"></span></a>
                             </div>
@@ -61,8 +65,8 @@ if ($__uid) {
                         <td><?= (new DateTime($member['date_registration']))->format('Y-m-d') ?></td>
                         <td><?= (new DateTime($member['date_lastsignin']))->format('Y-m-d') ?></td>
                         <td>
-                            <a href="<?= url(['action' => 'user', 'uid' => $member['uid']]) ?>" title="View profile"><span class="fa fa-user"></span></a>
-                            <a class="delete-user" data-uid="<?= $member['uid'] ?>" data-warning="<?= $l10n['confirm_delete_user'] ?>" title="Delete this user"><span class="fa fa-trash-o"></span></a>
+                            <a href="<?= url(['action' => 'user', 'uid' => $member['uid']]) ?>" title="<?= $l10n['view_profile'] ?></th>"><span class="fa fa-user"></span></a>
+                            <a class="delete-user" data-uid="<?= $member['uid'] ?>" data-warning="<?= $l10n['confirm_delete_user'] ?>" title="<?= $l10n['delete_user'] ?>"><span class="fa fa-trash-o"></span></a>
                         </td>
                     </tr>
                 <?php endforeach ?>

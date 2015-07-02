@@ -7,8 +7,16 @@ $l10n['administration'] = "Administration";
 $l10n['no_privileges'] = "You don't have sufficient privileges to see this page!";
 $l10n['need_account'] = "You need to have an account and be signed in.";
 $l10n['need_admin_rights'] = "Your account has to have administration rights.";
+$l10n['username'] = "Username";
+$l10n['number_of_algorithms'] = "Number of algorithms";
+$l10n['language'] = "Language";
+$l10n['registration_date'] = "Registration date";
+$l10n['sign-in_date'] = "Date of last sign-in";
+$l10n['actions'] = "Actions";
+$l10n['administrator'] = "Administrator";
+$l10n['view_profile'] = "View profile";
+$l10n['confirm_delete_user'] = "You are about to delete this account and all of the defined algorithms. Are you sure?";
 $l10n['not_allowed_to_delete_user'] = "You are not allowed to delete this user because you don't have sufficient privileges.";
-$l10n['confirm_delete_user'] = "You are about to delete this user and all of the defined algorithms. Are you sure?";
 
 // GENERAL
 $l10n['close'] = "Close";
