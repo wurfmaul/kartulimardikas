@@ -7,6 +7,8 @@ $l10n['administration'] = "Administration";
 $l10n['no_privileges'] = "Du bist nicht berechtigt, diese Seite zu sehen!";
 $l10n['need_account'] = "Du musst ein Konto haben und angemeldet sein!";
 $l10n['need_admin_rights'] = "Dein Konto muss Administrationsrechte haben!";
+$l10n['not_allowed_to_delete_user'] = "Du bist nicht berechtigt, dieses Konto zu löschen.";
+$l10n['confirm_delete_user'] = "Du bist im Begriff, dieses Konto mit allen Algorithmen zu löschen. Bist du sicher?";
 
 // GENERAL
 $l10n['close'] = "Schließen";

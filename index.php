@@ -102,6 +102,8 @@ if ($__aid && $__algorithm) {
 
     <?php if (ACTION === 'edit' || ACTION === 'view'): ?>
         <link href="<?= JQUERYUI_CSS_PATH ?>" rel="stylesheet"/>
+    <?php elseif (ACTION === 'admin'): ?>
+        <link href="<?= TABLESORTER_CSS_PATH ?>" rel="stylesheet"/>
     <?php endif ?>
 
     <script type="text/javascript">
@@ -272,7 +274,11 @@ if ($__aid && $__algorithm) {
 <script type="text/javascript" src="<?= BOOTSTRAP_JS_PATH ?>"></script>
 <?php if (ACTION === 'edit' || ACTION === 'view'): ?>
     <script type="text/javascript" src="<?= JQUERYUI_JS_PATH ?>"></script>
+<?php elseif (ACTION === 'admin'): ?>
+    <script type="text/javascript" src="<?= TABLESORTER_JS_PATH ?>"></script>
+    <script type="text/javascript" src="<?= TABLESORTER_WIDGETS_JS_PATH ?>"></script>
 <?php endif ?>
+
 <?php if (DEBUG_MODE): ?>
     <script type="text/javascript" src="js/common.js"></script>
 <?php if (ACTION === 'edit' || ACTION === 'view'): ?>

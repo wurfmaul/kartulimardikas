@@ -5,9 +5,6 @@ global $l10n;
 if ($__uid) {
     $user = $__model->fetchUser($__uid);
     $rights = $user->rights;
-    if ($rights) {
-
-    }
 } else {
     $rights = 0;
 }
@@ -18,10 +15,59 @@ if ($__uid) {
     </div>
     <!-- CONTENT -->
 <?php if ($__uid && $rights): ?>
+    <div id="adminSuccess" class="alert alert-success alert-dismissible" style="display:none">
+        <button id="adminSuccessClose" type="button" class="close">
+            <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
+        </button>
+        <strong><?= $l10n['success'] ?></strong>
+
+        <div id="adminSuccessText"></div>
+    </div>
+    <div id="adminAlert" class="alert alert-danger alert-dismissible" style="display:none">
+        <button id="adminAlertClose" type="button" class="close">
+            <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
+        </button>
+        <strong><?= $l10n['error'] ?></strong>
+
+        <div id="adminAlertText"></div>
+    </div>
     <div class="row">
         <!-- LEFT COLUMN -->
         <div class="col-md-6">
-
+            <table class="users">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th title="Number of algorithms">#</th>
+                        <th title="Language"><span class="fa fa-globe"></span></th>
+                        <th title="Registration date"><span class="fa fa-user-plus"></th>
+                        <th title="Date of last sign-in"><span class="fa fa-sign-in"></span></th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($__model->fetchUsers() as $member): ?>
+                    <tr <?php if($member['date_deletion']): ?>class="deleted"<?php endif ?>>
+                        <td>
+                            <?= $member['username'] ?>
+                            <div style="float:right">
+                                <a href="mailto:<?= $member['email'] ?>"><span class="glyphicon glyphicon-envelope"></span></a>
+                            </div>
+                        </td>
+                        <td><?= $member['count'] ?></td>
+                        <td title="<?= $AVAILABLE_LANG[$member['language']] ?>">
+                            <?= $member['language'] ?>
+                        </td>
+                        <td><?= (new DateTime($member['date_registration']))->format('Y-m-d') ?></td>
+                        <td><?= (new DateTime($member['date_lastsignin']))->format('Y-m-d') ?></td>
+                        <td>
+                            <a href="<?= url(['action' => 'user', 'uid' => $member['uid']]) ?>" title="View profile"><span class="fa fa-user"></span></a>
+                            <a class="delete-user" data-uid="<?= $member['uid'] ?>" data-warning="<?= $l10n['confirm_delete_user'] ?>" title="Delete this user"><span class="fa fa-trash-o"></span></a>
+                        </td>
+                    </tr>
+                <?php endforeach ?>
+                </tbody>
+            </table>
         </div>
     </div>
 <?php else: ?>

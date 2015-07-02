@@ -322,6 +322,20 @@ class DataModel
         return $result->fetch_object();
     }
 
+    public function fetchUsers()
+    {
+        $stmt = $this->_sql->prepare("
+            SELECT u.*, COUNT(aid) AS count
+            FROM user u
+            LEFT JOIN algorithm USING (uid)
+            GROUP BY uid
+        ");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
     /**
      * @param int $amount The number of users to fetch.
      * @return array A list of users with the most defined algorithms.
@@ -565,11 +579,10 @@ class DataModel
         $stmt = $this->_sql->prepare("
             UPDATE user u, algorithm a
             SET u.date_deletion=NOW(), a.date_deletion=NOW()
-            WHERE u.uid=a.uid
-            AND a.date_deletion IS NULL
-            AND u.uid=?
+            WHERE (u.uid=? AND u.date_deletion IS NULL)
+            OR (a.uid=? AND a.date_deletion IS NULL)
         ");
-        $stmt->bind_param("i", $uid);
+        $stmt->bind_param("ii", $uid, $uid);
         $stmt->execute();
         $rows = $stmt->affected_rows;
         $stmt->close();

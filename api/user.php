@@ -43,7 +43,9 @@ class EditUserManager
 
     public function process()
     {
-        if (isset($_POST['username'])) {
+        if (isset($_POST['remove'])) {
+            $this->_adminDeleteUser();
+        } elseif (isset($_POST['username'])) {
             $this->_changeUsername();
         } elseif (isset($_POST['email'])) {
             $this->_changeEmail();
@@ -55,6 +57,21 @@ class EditUserManager
 
         $this->_model->close();
         return $this->_response;
+    }
+
+    private function _adminDeleteUser()
+    {
+        $uid = $_POST['remove'];
+        $user = $this->_model->fetchUser($uid);
+        if ($this->_user->rights > $user->rights) {
+            if ($this->_model->updateDeleteUser($uid)) {
+                $this->_response['success'] = sprintf($this->_l10n['user_deleted'], $user->username);
+            } else {
+                $this->_response['error'] = $this->_l10n['user_not_deleted'];
+            }
+        } else {
+            $this->_response['error'] = $this->_l10n['not_allowed_to_delete_user'];
+        }
     }
 
     private function _changeUsername()

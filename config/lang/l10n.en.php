@@ -7,6 +7,8 @@ $l10n['administration'] = "Administration";
 $l10n['no_privileges'] = "You don't have sufficient privileges to see this page!";
 $l10n['need_account'] = "You need to have an account and be signed in.";
 $l10n['need_admin_rights'] = "Your account has to have administration rights.";
+$l10n['not_allowed_to_delete_user'] = "You are not allowed to delete this user because you don't have sufficient privileges.";
+$l10n['confirm_delete_user'] = "You are about to delete this user and all of the defined algorithms. Are you sure?";
 
 // GENERAL
 $l10n['close'] = "Close";
