@@ -47,22 +47,21 @@ if (isset($_POST['errorMsg'])) {
     $errorMsg = $_POST['errorMsg'];
 }
 
-/** @var int $__uid Currently signed in user or false if not signed in. */
+/**
+ * @var int $__uid Currently signed in user or false if not signed in.
+ * @var int $__aid Current algorithm id or false if no algorithm selected.
+ * @var bool $__owner True if the signed in user is the owner of the current algorithm.
+ * @var bool $__public True if the algorithm is defined public.
+ */
 $__uid = isSignedIn();
-
-/** @var int $__aid Current algorithm id or false if no algorithm selected. */
-$__aid = false;
-if (isset($_GET['aid'])) {
-    $__aid = $_GET['aid'];
-    $__algorithm = $__model->fetchAlgorithm($__aid);
-    if ($__algorithm) {
-        /** @var bool $__owner True if the signed in user is the owner of the current algorithm. */
-        $__owner = $__algorithm->uid === $__uid;
-        /** @var bool $__public True if the algorithm is defined public. */
-        $__public = !is_null($__algorithm->date_publish);
-    }
+if (isset($_GET['aid']) && $__algorithm = $__model->fetchAlgorithm($__aid = $_GET['aid'])) {
+    $__owner = $__algorithm->uid === $__uid;
+    $__public = !is_null($__algorithm->date_publish);
     $__algorithm->tags = $__model->fetchTags($__aid);
 } else {
+    $__aid = false;
+    $__owner = false;
+    $__public = false;
     $__algorithm = false;
 }
 

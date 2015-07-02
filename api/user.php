@@ -43,8 +43,14 @@ class EditUserManager
 
     public function process()
     {
-        if (isset($_POST['remove'])) {
+        if (isset($_POST['admin'])) {
+            $this->_adminToggleUserRights();
+        } elseif (isset($_POST['remove'])) {
             $this->_adminDeleteUser();
+        } elseif (isset($_POST['erase'])) {
+            $this->_adminEraseUser();
+        } elseif (isset($_POST['resurrect'])) {
+            $this->_adminResurrectUser();
         } elseif (isset($_POST['username'])) {
             $this->_changeUsername();
         } elseif (isset($_POST['email'])) {
@@ -59,6 +65,22 @@ class EditUserManager
         return $this->_response;
     }
 
+    private function _adminToggleUserRights()
+    {
+        $uid = $_POST['admin'];
+        $user = $this->_model->fetchUser($uid);
+        if ($this->_user->rights > $user->rights) {
+            $newRights = ($user->rights) ? 0 : 1;
+            if ($this->_model->updateUserRights($uid, $newRights)) {
+                $this->_response['success'] = sprintf($this->_l10n['user_rights_changed'], $user->username);
+            } else {
+                $this->_response['error'] = $this->_l10n['user_rights_not_changed'];
+            }
+        } else {
+            $this->_response['error'] = $this->_l10n['not_allowed_to_change_user_rights'];
+        }
+    }
+
     private function _adminDeleteUser()
     {
         $uid = $_POST['remove'];
@@ -71,6 +93,36 @@ class EditUserManager
             }
         } else {
             $this->_response['error'] = $this->_l10n['not_allowed_to_delete_user'];
+        }
+    }
+
+    private function _adminEraseUser()
+    {
+        $uid = $_POST['erase'];
+        $user = $this->_model->fetchUser($uid, true);
+        if ($this->_user->rights > $user->rights) {
+            if ($this->_model->deleteUser($uid)) {
+                $this->_response['success'] = sprintf($this->_l10n['user_erased'], $user->username);
+            } else {
+                $this->_response['error'] = $this->_l10n['user_not_deleted'];
+            }
+        } else {
+            $this->_response['error'] = $this->_l10n['not_allowed_to_delete_user'];
+        }
+    }
+
+    private function _adminResurrectUser()
+    {
+        $uid = $_POST['resurrect'];
+        $user = $this->_model->fetchUser($uid, true);
+        if ($this->_user->rights > $user->rights) {
+            if ($this->_model->updateUnDeleteUser($uid)) {
+                $this->_response['success'] = sprintf($this->_l10n['user_resurrected'], $user->username);
+            } else {
+                $this->_response['error'] = $this->_l10n['user_not_resurrected'];
+            }
+        } else {
+            $this->_response['error'] = $this->_l10n['not_allowed_to_resurrect_user'];
         }
     }
 

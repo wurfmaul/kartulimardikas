@@ -17,6 +17,17 @@ $l10n['administrator'] = "Administrator";
 $l10n['view_profile'] = "View profile";
 $l10n['confirm_delete_user'] = "You are about to delete this account and all of the defined algorithms. Are you sure?";
 $l10n['not_allowed_to_delete_user'] = "You are not allowed to delete this user because you don't have sufficient privileges.";
+$l10n['erase_user'] = "Remove account permanently";
+$l10n['confirm_erase_user'] = "You are about to delete this account permanently. This cannot be undone. Are you sure?";
+$l10n['user_to_admin'] = "Toggle administrator status";
+$l10n['resurrect_user'] = "Un-delete this user and all the removed algorithms.";
+$l10n['user_erased'] = "User '%s' has been permanently removed.";
+$l10n['user_rights_changed'] = "User rights of '%s' have been changed.";
+$l10n['user_rights_not_changed'] = "User rights could not be changed.";
+$l10n['not_allowed_to_change_user_rights'] = "You are not allowed to change this user's rights!";
+$l10n['user_resurrected'] = "User '%s' has been restored.";
+$l10n['user_not_resurrected'] = "User could not be restored.";
+$l10n['not_allowed_to_resurrect_user'] = "You are not allowed to restore this user.";
 
 // GENERAL
 $l10n['close'] = "Close";

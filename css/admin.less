@@ -8,8 +8,24 @@
   a {
     cursor: pointer;
   }
-  .deleted {
+  .admin {
+    font-weight: bold;
+  }
+  .send-mail{
+    float:right;
+  }
+  tr:not(.deleted) {
+    .deleted-only {
+      display: none;
+    }
+  }
+  tr.deleted {
     color: #808080;
-    display: none;
+    .username {
+      text-decoration: line-through;
+    }
+    .active-only {
+      display: none;
+    }
   }
 }

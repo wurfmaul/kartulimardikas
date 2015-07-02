@@ -63,6 +63,25 @@ class DataModel
     }
 
     /**
+     * @param int $uid The user id
+     * @return int The number of affected rows.
+     */
+    public function deleteUser($uid) {
+        # delete user permanently
+        $stmt = $this->_sql->prepare("DELETE FROM user WHERE uid = ?");
+        $stmt->bind_param("i", $uid);
+        $stmt->execute();
+        $rows = $stmt->affected_rows;
+        # delete related algorithms permanently
+        $stmt = $this->_sql->prepare("DELETE FROM algorithm WHERE uid = ?");
+        $stmt->bind_param("i", $uid);
+        $stmt->execute();
+        $rows += $stmt->affected_rows;
+        $stmt->close();
+        return $rows;
+    }
+
+    /**
      * @param int $aid The algorithm's id.
      * @return stdClass All the properties of the specified algorithms.
      */
@@ -270,14 +289,17 @@ class DataModel
 
     /**
      * @param int $uid The user id.
+     * @param bool $deleted Whether the deleted users should be fetched too.
      * @return stdClass The user's properties.
      */
-    public function fetchUser($uid)
+    public function fetchUser($uid, $deleted = false)
     {
+        $filterDeleted = $deleted ? "" : "AND date_deletion IS NULL";
+
         $stmt = $this->_sql->prepare("
             SELECT * FROM user
             WHERE uid = ?
-            AND date_deletion IS NULL
+            $filterDeleted
         ");
         $stmt->bind_param("i", $uid);
         $stmt->execute();
@@ -322,13 +344,19 @@ class DataModel
         return $result->fetch_object();
     }
 
+    /**
+     * @return array A list of all registered users together with the algorithm count.
+     */
     public function fetchUsers()
     {
         $stmt = $this->_sql->prepare("
-            SELECT u.*, COUNT(aid) AS count
+            SELECT u.*, (
+              SELECT COUNT(*) FROM algorithm
+              WHERE (date_deletion IS NULL OR date_deletion = u.date_deletion)
+              AND uid=u.uid
+            ) AS count
             FROM user u
-            LEFT JOIN algorithm USING (uid)
-            GROUP BY uid
+            ORDER BY username
         ");
         $stmt->execute();
         $result = $stmt->get_result();
@@ -460,10 +488,10 @@ class DataModel
         $password = $this->_sql->real_escape_string($password);
 
         $stmt = $this->_sql->prepare("
-            INSERT INTO user (username, email, password)
-            VALUES (?, ?, ?)
+            INSERT INTO user (username, email, password, language)
+            VALUES (?, ?, ?, ?)
         ");
-        $stmt->bind_param('sss', $username, $email, $password);
+        $stmt->bind_param('ssss', $username, $email, $password, DEFAULT_LANG);
         $stmt->execute();
         $uid = $stmt->insert_id;
         $stmt->close();
@@ -576,15 +604,55 @@ class DataModel
      */
     public function updateDeleteUser($uid)
     {
+        # set the user to deleted
         $stmt = $this->_sql->prepare("
-            UPDATE user u, algorithm a
-            SET u.date_deletion=NOW(), a.date_deletion=NOW()
-            WHERE (u.uid=? AND u.date_deletion IS NULL)
-            OR (a.uid=? AND a.date_deletion IS NULL)
+            UPDATE user
+            SET date_deletion=NOW()
+            WHERE uid=?
+            AND date_deletion IS NULL
+        ");
+        $stmt->bind_param("i", $uid);
+        $stmt->execute();
+        $rows = $stmt->affected_rows;
+        # set the related algorithms to deleted too
+        $stmt = $this->_sql->prepare("
+            UPDATE algorithm
+            SET date_deletion=(SELECT date_deletion FROM user WHERE uid=?)
+            WHERE uid=?
+            AND date_deletion IS NULL
+        ");
+        $stmt->bind_param("ii", $uid, $uid);
+        $stmt->execute();
+        $rows += $stmt->affected_rows;
+        $stmt->close();
+        return $rows;
+    }
+
+    /**
+     * @param int $uid The user id.
+     * @return int The number of affected rows.
+     */
+    public function updateUnDeleteUser($uid)
+    {
+        # resurrect the algorithms that have been deleted with the user
+        $stmt = $this->_sql->prepare("
+            UPDATE algorithm
+            SET date_deletion=NULL
+            WHERE uid=?
+            AND date_deletion = (SELECT date_deletion FROM user WHERE uid=?)
         ");
         $stmt->bind_param("ii", $uid, $uid);
         $stmt->execute();
         $rows = $stmt->affected_rows;
+        # resurrect the user itself
+        $stmt = $this->_sql->prepare("
+            UPDATE user
+            SET date_deletion=NULL
+            WHERE uid=?
+        ");
+        $stmt->bind_param("i", $uid);
+        $stmt->execute();
+        $rows += $stmt->affected_rows;
         $stmt->close();
         return $rows;
     }
@@ -677,6 +745,25 @@ class DataModel
             WHERE uid=?
         ");
         $stmt->bind_param("i", $uid);
+        $stmt->execute();
+        $rows = $stmt->affected_rows;
+        $stmt->close();
+        return $rows;
+    }
+
+    /**
+     * @param int $uid The user id.
+     * @param int $rights User = 0, Admin = 1, Super-Admin = 2
+     * @return int The number of affected rows.
+     */
+    public function updateUserRights($uid, $rights)
+    {
+        $stmt = $this->_sql->prepare("
+            UPDATE user
+            SET rights=?
+            WHERE uid=?
+        ");
+        $stmt->bind_param("ii", $rights, $uid);
         $stmt->execute();
         $rows = $stmt->affected_rows;
         $stmt->close();
