@@ -18,11 +18,10 @@ $__model = new DataModel();
 $__action = isset($_GET['action']) ? $_GET['action'] : DEFAULT_PAGE;
 if (!file_exists(BASEDIR . "partials/$__action.phtml"))
     $__action = DEFAULT_PAGE;
+define('ACTION', $__action);
 
 // SIGN IN
-if ((isset($_POST['signInBtn']) || isset($_POST['registerBtn'])) &&
-    isset($_POST['username']) && isset($_POST['password'])
-) {
+if ((isset($_POST['signInBtn']) || isset($_POST['registerBtn'])) && isset($_POST['username'], $_POST['password'])) {
     $username = $_POST['username'];
     if (signIn($username, $_POST['password'])) {
         $successMsg = sprintf($l10n['signed_in'], $username);
@@ -33,13 +32,15 @@ if ((isset($_POST['signInBtn']) || isset($_POST['registerBtn'])) &&
     } else {
         $errorMsg = $l10n['credentials_invalid'];
     }
-
 // SIGN OUT
 } elseif (isset($_POST['signOutBtn'])) {
     signOut();
     $successMsg = $l10n['signed_out'];
 }
+/** @var int $__uid Currently signed in user or false if not signed in. */
+$__uid = isSignedIn();
 
+// REDIRECT MESSAGES
 if (isset($_POST['successMsg'])) {
     $successMsg = $_POST['successMsg'];
 }
@@ -47,13 +48,13 @@ if (isset($_POST['errorMsg'])) {
     $errorMsg = $_POST['errorMsg'];
 }
 
+// ALGORITHM SETTINGS
 /**
- * @var int $__uid Currently signed in user or false if not signed in.
  * @var int $__aid Current algorithm id or false if no algorithm selected.
  * @var bool $__owner True if the signed in user is the owner of the current algorithm.
  * @var bool $__public True if the algorithm is defined public.
+ * @var stdClass|bool $__algorithm Contains the currently loaded algorithm or false.
  */
-$__uid = isSignedIn();
 if (isset($_GET['aid']) && $__algorithm = $__model->fetchAlgorithm($__aid = $_GET['aid'])) {
     $__owner = $__algorithm->uid === $__uid;
     $__public = !is_null($__algorithm->date_publish);
@@ -65,17 +66,14 @@ if (isset($_GET['aid']) && $__algorithm = $__model->fetchAlgorithm($__aid = $_GE
     $__algorithm = false;
 }
 
-// make action permanent for this session
-define('ACTION', $__action);
-
 // define where the user should be taken after signing out
 $signOutAction = "";
-if ($__aid && $__algorithm) {
-    // if the algorithm is private -> redirect to home action
+if ($__algorithm) {
     if (!$__public) {
+        // if the algorithm is private -> redirect to home action
         $signOutAction = url();
-        // if the algorithm is public -> redirect to view action
     } elseif ($__action === 'edit' || $__action === 'settings') {
+        // if the algorithm is public -> redirect to view action
         $signOutAction = url(['action' => 'view', 'aid' => $__aid]);
     }
 }
@@ -175,13 +173,11 @@ if ($__aid && $__algorithm) {
         <noscript>
             <!-- MESSAGE BOX FOR DISABLED JAVASCRIPT -->
             <div class="alert alert-danger alert-dismissible">
-                <button type="button" class="close" data-dismiss="alert">
-                    <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
-                </button>
                 <strong><?= $l10n['enable_js'] ?></strong><br/>
                 <?= $l10n['no_script_warning'] ?>
                 <ul>
-                    <li><a href="http://www.enable-javascript.com/<?= LANG ?>/" target="_blank"><?= $l10n['enable_js'] ?></a></li>
+                    <li><a href="http://www.enable-javascript.com/<?= LANG ?>/"
+                           target="_blank"><?= $l10n['enable_js'] ?></a></li>
                 </ul>
             </div>
         </noscript>
@@ -259,7 +255,7 @@ if ($__aid && $__algorithm) {
                         <?php foreach (Language::getInstance()->availableLanguages as $code => $name): ?>
                             <li<?php if ($code === LANG): ?> class="disabled"<?php endif ?>>
                                 <a role="menuitem" tabindex="-1"
-                                   href="<?= url(['lang' => $code], true) ?>"><?= $name ?></a>
+                                   href="<?= url(['lang' => $code], true, true, false) ?>"><?= $name ?></a>
                             </li>
                         <?php endforeach ?>
                     </ul>

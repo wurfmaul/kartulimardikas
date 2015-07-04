@@ -7,9 +7,11 @@
  * @param array $parameters Associative array holding parameters as keys.
  * @param bool $replace The old parameters, in order to replace
  *  parts. If null, nothing is replaced.
+ * @param bool $encode Whether special characters (&) should be encoded.
+ * @param bool $keepSection Whether the section parameter should be removed.
  * @return string The newly computed relative url.
  */
-function url($parameters = [], $replace = false, $encode = true)
+function url($parameters = [], $replace = false, $encode = true, $keepSection = true)
 {
     $_url = "index.php";
     $_amp = $encode ? '&amp;' : '&';
@@ -17,6 +19,9 @@ function url($parameters = [], $replace = false, $encode = true)
     if ($replace) {
         // Run through all the old parameters
         foreach ($_GET as $key => $value) {
+            if ($keepSection || $key === 'section') {
+                continue; # ignore section
+            }
             $_url .= ($_index++ === 0) ? '?' : $_amp;
             // Check if there is something to replace...
             if (array_key_exists($key, $parameters)) {

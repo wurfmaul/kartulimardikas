@@ -2,13 +2,22 @@
 
 class Language
 {
+    /** @var array $availableLanguages Holds all the available, selectable languages. */
     public $availableLanguages;
+    /** @var string $lang Holds the currently loaded language code. */
     protected $lang;
 
+    /**
+     * Is set to private in order to avoid another instance.
+     */
     private function __construct()
     {
     }
 
+    /**
+     * Returns the singleton object of this class.
+     * @return Language
+     */
     public static function getInstance()
     {
         static $inst = null;
@@ -33,7 +42,7 @@ class Language
         }
         // prepare and load language file
         global $l10n;
-        require_once BASEDIR . 'config/lang/l10n.' . $lang . '.php';
+        require_once BASEDIR . "config/lang/l10n.$lang.php";
         $this->lang = $lang;
         return $lang;
     }
