@@ -87,7 +87,7 @@ $_tab = isset($_GET['tab']) && array_key_exists($_GET['tab'], $_tabs) ? $_GET['t
             </tr>
             </thead>
             <tbody>
-            <? foreach ($users as $user): ?>
+            <?php foreach ($users as $user): ?>
                 <?php require(BASEDIR . 'partials/partials/item_user.phtml') ?>
             <?php endforeach ?>
             </tbody>

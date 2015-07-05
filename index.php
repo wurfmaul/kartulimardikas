@@ -43,6 +43,15 @@ if ((isset($_POST['signInBtn']) || isset($_POST['registerBtn'])) && isset($_POST
 $__uid = isSignedIn();
 $__rights = $__uid ? $__model->fetchUser($__uid)->rights : 0;
 
+// DEAL WITH NEW ALGORITHMS
+if (ACTION === 'new' && $__uid) {
+    // create a new algorithm
+    $aid = $__model->insertAlgorithm($__uid);
+    // redirect to the edit-page
+    header("Location:" . url(['action' => 'edit', 'aid' => $aid], false, false));
+    die();
+}
+
 // REDIRECT MESSAGES
 if (isset($_POST['successMsg'])) {
     $successMsg = $_POST['successMsg'];
@@ -138,16 +147,16 @@ if ($__algorithm) {
                             <span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li<?php if (isset($_GET['tab']) && $_GET['tab'] === 'overview'): ?> class="active"<?php endif ?>>
+                            <li<?php if (ACTION === 'index' && isset($_GET['tab']) && $_GET['tab'] === 'overview'): ?> class="active"<?php endif ?>>
                                 <a href="<?= url(['action' => 'index', 'tab' => 'overview']) ?>"><?= $l10n['overview'] ?></a>
                             </li>
-                            <li<?php if (isset($_GET['tab']) && $_GET['tab'] === 'users'): ?> class="active"<?php endif ?>>
+                            <li<?php if (ACTION === 'index' && isset($_GET['tab']) && $_GET['tab'] === 'users'): ?> class="active"<?php endif ?>>
                                 <a href="<?= url(['action' => 'index', 'tab' => 'users']) ?>"><?= $l10n['users'] ?></a>
                             </li>
-                            <li<?php if (isset($_GET['tab']) && $_GET['tab'] === 'algorithms'): ?> class="active"<?php endif ?>>
+                            <li<?php if (ACTION === 'index' && isset($_GET['tab']) && $_GET['tab'] === 'algorithms'): ?> class="active"<?php endif ?>>
                                 <a href="<?= url(['action' => 'index', 'tab' => 'algorithms']) ?>"><?= $l10n['algorithms'] ?></a>
                             </li>
-                            <li<?php if (isset($_GET['tab']) && $_GET['tab'] === 'tags'): ?> class="active"<?php endif ?>>
+                            <li<?php if (ACTION === 'index' && isset($_GET['tab']) && $_GET['tab'] === 'tags'): ?> class="active"<?php endif ?>>
                                 <a href="<?= url(['action' => 'index', 'tab' => 'tags']) ?>"><?= $l10n['tags'] ?></a>
                             </li>
                         </ul>
@@ -160,10 +169,10 @@ if ($__algorithm) {
                                 <span class="caret"></span>
                             </a>
                             <ul class="dropdown-menu">
-                                <li<?php if (isset($_GET['tab']) && $_GET['tab'] === 'users'): ?> class="active"<?php endif ?>>
+                                <li<?php if (ACTION === 'admin' && isset($_GET['tab']) && $_GET['tab'] === 'users'): ?> class="active"<?php endif ?>>
                                     <a href="<?= url(['action' => 'admin', 'tab' => 'users']) ?>"><?= $l10n['users'] ?></a>
                                 </li>
-                                <li<?php if (isset($_GET['tab']) && $_GET['tab'] === 'algorithms'): ?> class="active"<?php endif ?>>
+                                <li<?php if (ACTION === 'admin' && isset($_GET['tab']) && $_GET['tab'] === 'algorithms'): ?> class="active"<?php endif ?>>
                                     <a href="<?= url(['action' => 'admin', 'tab' => 'algorithms']) ?>"><?= $l10n['algorithms'] ?></a>
                                 </li>
                             </ul>

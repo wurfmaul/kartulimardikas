@@ -1,15 +1,6 @@
 <?php
 if (!defined('BASEDIR')) die('You cannot call this script directly !');
 global $l10n;
-
-// create a new algorithm and redirect to edit-page if a user is signed in
-if ($__uid) {
-    // create a new algorithm
-    $aid = $__model->insertAlgorithm($__uid);
-    // redirect to the edit-page
-    header("Location:" . url(['action' => 'edit', 'aid' => $aid], false, false));
-    die();
-}
 ?>
 <!-- HEADER -->
 <div class="page-header">
