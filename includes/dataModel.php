@@ -66,7 +66,8 @@ class DataModel
      * @param int $uid The user id
      * @return int The number of affected rows.
      */
-    public function deleteUser($uid) {
+    public function deleteUser($uid)
+    {
         # delete user permanently
         $stmt = $this->_sql->prepare("DELETE FROM user WHERE uid = ?");
         $stmt->bind_param("i", $uid);
@@ -99,8 +100,13 @@ class DataModel
         return $result->fetch_object();
     }
 
-    public function fetchAlgorithms()
+    /**
+     * @param bool $fetchDeleted Whether deleted algorithms should be fetched.
+     * @return array A list of all defined algorithms.
+     */
+    public function fetchAlgorithms($fetchDeleted = false)
     {
+        $filterDeleted = $fetchDeleted ? '' : 'WHERE a.date_deletion IS NULL';
         $stmt = $this->_sql->prepare("
             SELECT
               a.*,
@@ -110,6 +116,7 @@ class DataModel
             FROM algorithm a
             JOIN user u USING (uid)
             LEFT JOIN tags t USING (aid)
+            $filterDeleted
             GROUP BY aid
         ");
         $stmt->execute();
@@ -364,10 +371,12 @@ class DataModel
     }
 
     /**
+     * @param bool $fetchDeleted Whether deleted users should be fetched.
      * @return array A list of all registered users together with the algorithm count.
      */
-    public function fetchUsers()
+    public function fetchUsers($fetchDeleted = false)
     {
+        $filterDeleted = $fetchDeleted ? '' : 'WHERE u.date_deletion IS NULL';
         $stmt = $this->_sql->prepare("
             SELECT u.*, (
               SELECT COUNT(*) FROM algorithm
@@ -376,6 +385,7 @@ class DataModel
               AND uid=u.uid
             ) AS count
             FROM user u
+            $filterDeleted
             ORDER BY username
         ");
         $stmt->execute();

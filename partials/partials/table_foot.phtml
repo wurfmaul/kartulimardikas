@@ -1,0 +1,28 @@
+<?php
+/**
+ * Used for sortable, filterable tables
+ */
+global $colCount, $l10n;
+?>
+<tfoot>
+<tr>
+    <th colspan="<?= $colCount ?>" class="ts-pager form-inline">
+        <button class="btn btn-default first"><i
+                class="icon-step-backward glyphicon glyphicon-step-backward"></i></button>
+        <button class="btn btn-default prev"><i class="icon-arrow-left glyphicon glyphicon-backward"></i>
+        </button>
+        <span class="pagedisplay"></span>
+        <button class="btn btn-default next"><i class="icon-arrow-right glyphicon glyphicon-forward"></i>
+        </button>
+        <button class="btn btn-default last"><i
+                class="icon-step-forward glyphicon glyphicon-step-forward"></i></button>
+        <select class="pagesize input-mini form-control" title="<?= $l10n['page_size'] ?>">
+            <option selected="selected" value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+        </select>
+        <select class="pagenum input-mini form-control" title="<?= $l10n['page_number'] ?>"></select>
+    </th>
+</tr>
+</tfoot>

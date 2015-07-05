@@ -38,7 +38,8 @@ if ((isset($_POST['signInBtn']) || isset($_POST['registerBtn'])) && isset($_POST
     $successMsg = $l10n['signed_out'];
 }
 /** @var int $__uid Currently signed in user or false if not signed in.
- *  @var int $__rights The user rights of the currently signed in user (user => 0, admin => 1, super-admin => 2). */
+ * @var int $__rights The user rights of the currently signed in user (user => 0, admin => 1, super-admin => 2).
+ */
 $__uid = isSignedIn();
 $__rights = $__uid ? $__model->fetchUser($__uid)->rights : 0;
 
@@ -101,7 +102,7 @@ if ($__algorithm) {
 
     <?php if (ACTION === 'edit' || ACTION === 'view'): ?>
         <link href="<?= JQUERYUI_CSS_PATH ?>" rel="stylesheet"/>
-    <?php elseif (ACTION === 'admin'): ?>
+    <?php elseif (ACTION === 'admin' || ACTION === 'index'): ?>
         <link href="<?= TABLESORTER_CSS_PATH ?>" rel="stylesheet"/>
         <link href="<?= TABLESORTER_PAGER_CSS_PATH ?>" rel="stylesheet"/>
     <?php endif ?>
@@ -130,12 +131,31 @@ if ($__algorithm) {
             </div>
             <div class="collapse navbar-collapse" id="navbar">
                 <ul class="nav navbar-nav">
-                    <li<?php if (ACTION === 'index'): ?> class="active"<?php endif ?>>
-                        <a href="<?= url(['action' => 'index']) ?>"><?= $l10n['index'] ?></a>
+                    <li class="dropdown <?= (ACTION === 'index') ? 'active' : '' ?>">
+                        <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true"
+                           aria-expanded="false">
+                            <?= $l10n['index'] ?>
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li<?php if (isset($_GET['tab']) && $_GET['tab'] === 'overview'): ?> class="active"<?php endif ?>>
+                                <a href="<?= url(['action' => 'index', 'tab' => 'overview']) ?>"><?= $l10n['overview'] ?></a>
+                            </li>
+                            <li<?php if (isset($_GET['tab']) && $_GET['tab'] === 'users'): ?> class="active"<?php endif ?>>
+                                <a href="<?= url(['action' => 'index', 'tab' => 'users']) ?>"><?= $l10n['users'] ?></a>
+                            </li>
+                            <li<?php if (isset($_GET['tab']) && $_GET['tab'] === 'algorithms'): ?> class="active"<?php endif ?>>
+                                <a href="<?= url(['action' => 'index', 'tab' => 'algorithms']) ?>"><?= $l10n['algorithms'] ?></a>
+                            </li>
+                            <li<?php if (isset($_GET['tab']) && $_GET['tab'] === 'tags'): ?> class="active"<?php endif ?>>
+                                <a href="<?= url(['action' => 'index', 'tab' => 'tags']) ?>"><?= $l10n['tags'] ?></a>
+                            </li>
+                        </ul>
                     </li>
                     <?php if ($__rights > 0): ?>
                         <li class="dropdown <?= (ACTION === 'admin') ? 'active' : '' ?>">
-                            <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                            <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true"
+                               aria-expanded="false">
                                 <?= $l10n['administration'] ?>
                                 <span class="caret"></span>
                             </a>
@@ -283,7 +303,7 @@ if ($__algorithm) {
 <script type="text/javascript" src="<?= BOOTSTRAP_JS_PATH ?>"></script>
 <?php if (ACTION === 'edit' || ACTION === 'view'): ?>
     <script type="text/javascript" src="<?= JQUERYUI_JS_PATH ?>"></script>
-<?php elseif (ACTION === 'admin'): ?>
+<?php elseif (ACTION === 'admin' || ACTION === 'index'): ?>
     <script type="text/javascript" src="<?= TABLESORTER_JS_PATH ?>"></script>
     <script type="text/javascript" src="<?= TABLESORTER_WIDGETS_JS_PATH ?>"></script>
     <script type="text/javascript" src="<?= TABLESORTER_PAGER_JS_PATH ?>"></script>
@@ -291,16 +311,16 @@ if ($__algorithm) {
 
 <?php if (DEBUG_MODE): ?>
     <script type="text/javascript" src="js/common.js"></script>
-<?php if (ACTION === 'edit' || ACTION === 'view'): ?>
-    <script type="text/javascript" src="js/section.js"></script>
-    <script type="text/javascript" src="js/autocomplete.js"></script>
-    <script type="text/javascript" src="js/algorithm.js"></script>
-<?php elseif (ACTION === 'admin'): ?>
-    <script type="text/javascript" src="js/table.js"></script>
-<?php endif ?>
-<?php if (file_exists('js/' . ACTION . '.js')): ?>
-    <script type="text/javascript" src="js/<?= ACTION ?>.js"></script>
-<?php endif ?>
+    <?php if (ACTION === 'edit' || ACTION === 'view'): ?>
+        <script type="text/javascript" src="js/section.js"></script>
+        <script type="text/javascript" src="js/autocomplete.js"></script>
+        <script type="text/javascript" src="js/algorithm.js"></script>
+    <?php elseif (ACTION === 'admin' || ACTION === 'index'): ?>
+        <script type="text/javascript" src="js/table.js"></script>
+    <?php endif ?>
+    <?php if (file_exists('js/' . ACTION . '.js')): ?>
+        <script type="text/javascript" src="js/<?= ACTION ?>.js"></script>
+    <?php endif ?>
 <?php elseif (file_exists('js/' . ACTION . '.min.js')): ?>
     <script type="text/javascript" src="js/<?= ACTION ?>.min.js"></script>
 <?php endif ?>

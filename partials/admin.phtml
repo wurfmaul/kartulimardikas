@@ -5,7 +5,7 @@ $_tabs = [
     'users' => 'users',
     'algorithms' => 'algorithms'
 ];
-$_tab = isset($_GET['tab']) && array_key_exists($_GET['tab'], $_tabs) ? $_GET['tab'] : $_tabs[0];
+$_tab = isset($_GET['tab']) && array_key_exists($_GET['tab'], $_tabs) ? $_GET['tab'] : 'users';
 ?>
     <!-- NAVIGATION MENU FOR ADMINISTRATION -->
     <ul class="nav nav-tabs">
@@ -72,13 +72,13 @@ $_tab = isset($_GET['tab']) && array_key_exists($_GET['tab'], $_tabs) ? $_GET['t
                         class="fa fa-globe"></span></th>
                 <th class="filter-select filter-exact"><?= $l10n['status'] ?></th>
                 <th title="<?= $l10n['number_of_algorithms'] ?>"><?= $l10n['algorithms'] ?></th>
-                <th><?= $l10n['registration_date'] ?></th>
-                <th><?= $l10n['sign-in_date'] ?></th>
+                <th><?= $l10n['registration'] ?></th>
+                <th><?= $l10n['last_sign-in'] ?></th>
                 <th class="filter-false"><?= $l10n['actions'] ?></th>
             </tr>
             </thead>
             <tbody>
-            <?php foreach ($__model->fetchUsers() as $member): ?>
+            <?php foreach ($__model->fetchUsers(true) as $member): ?>
                 <tr<?php if ($member['date_deletion']): ?> class="deleted"<?php endif ?>
                     data-uid="<?= $member['uid'] ?>">
                     <td class="username <?= ($member['rights'] >= 1) ? 'admin' : '' ?>">
@@ -117,28 +117,7 @@ $_tab = isset($_GET['tab']) && array_key_exists($_GET['tab'], $_tabs) ? $_GET['t
                 </tr>
             <?php endforeach ?>
             </tbody>
-            <tfoot>
-            <tr>
-                <th colspan="7" class="ts-pager form-inline">
-                    <button class="btn btn-default first"><i
-                            class="icon-step-backward glyphicon glyphicon-step-backward"></i></button>
-                    <button class="btn btn-default prev"><i class="icon-arrow-left glyphicon glyphicon-backward"></i>
-                    </button>
-                    <span class="pagedisplay"></span>
-                    <button class="btn btn-default next"><i class="icon-arrow-right glyphicon glyphicon-forward"></i>
-                    </button>
-                    <button class="btn btn-default last"><i
-                            class="icon-step-forward glyphicon glyphicon-step-forward"></i></button>
-                    <select class="pagesize input-mini form-control" title="<?= $l10n['page_size'] ?>">
-                        <option selected="selected" value="10">10</option>
-                        <option value="25">25</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                    </select>
-                    <select class="pagenum input-mini form-control" title="<?= $l10n['page_number'] ?>"></select>
-                </th>
-            </tr>
-            </tfoot>
+            <?php $colCount = 7; require(BASEDIR . 'partials/partials/table_foot.phtml') ?>
         </table>
     <?php else: ?>
         <div class="btn-group">
@@ -171,7 +150,7 @@ $_tab = isset($_GET['tab']) && array_key_exists($_GET['tab'], $_tabs) ? $_GET['t
             </tr>
             </thead>
             <tbody>
-            <?php foreach ($__model->fetchAlgorithms() as $aid => $algorithm): ?>
+            <?php foreach ($__model->fetchAlgorithms(true) as $aid => $algorithm): ?>
                 <tr<?php if ($algorithm['date_deletion']): ?> class="deleted"<?php endif ?>
                     data-aid="<?= $algorithm['aid'] ?>">
                     <td>
@@ -215,28 +194,7 @@ $_tab = isset($_GET['tab']) && array_key_exists($_GET['tab'], $_tabs) ? $_GET['t
                 </tr>
             <?php endforeach ?>
             </tbody>
-            <tfoot>
-            <tr>
-                <th colspan="7" class="ts-pager form-inline">
-                    <button class="btn btn-default first"><i
-                            class="icon-step-backward glyphicon glyphicon-step-backward"></i></button>
-                    <button class="btn btn-default prev"><i class="icon-arrow-left glyphicon glyphicon-backward"></i>
-                    </button>
-                    <span class="pagedisplay"></span>
-                    <button class="btn btn-default next"><i class="icon-arrow-right glyphicon glyphicon-forward"></i>
-                    </button>
-                    <button class="btn btn-default last"><i
-                            class="icon-step-forward glyphicon glyphicon-step-forward"></i></button>
-                    <select class="pagesize input-mini form-control" title="<?= $l10n['page_size'] ?>">
-                        <option selected="selected" value="10">10</option>
-                        <option value="25">25</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                    </select>
-                    <select class="pagenum input-mini form-control" title="<?= $l10n['page_number'] ?>"></select>
-                </th>
-            </tr>
-            </tfoot>
+            <?php $colCount = 7; require(BASEDIR . 'partials/partials/table_foot.phtml') ?>
         </table>
     <?php endif ?>
 <?php else: ?>

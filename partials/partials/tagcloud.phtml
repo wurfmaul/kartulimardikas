@@ -6,6 +6,6 @@
     elseif ($tag['total'] < 0.8) $class = 'large';
     else $class = 'largest';
     ?>
-    <a href="<?= url(['action' => 'index', 'list' => 'tag', 'tag' => $tag['tag']]) ?>"><span
+    <a href="<?= url(['action' => 'index', 'tab' => 'tags', 'tag' => $tag['tag']]) ?>"><span
             class="badge <?= $class ?>"><?= $tag['tag'] ?></span></a>
 <?php endforeach ?>

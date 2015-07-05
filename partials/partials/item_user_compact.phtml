@@ -1,0 +1,19 @@
+<?php
+/**
+ * Used by index.phtml
+ * The surrounding file has to guarantee the existence of the following variables:
+ * - $user: array containing user information
+ * - $l10n: array used for translation
+ */
+$linkUser = url(['action' => 'user', 'uid' => $user['uid']]);
+?>
+<tr>
+    <td>
+        <span class="name">
+            <a href="<?= $linkUser ?>"><?= $user['username'] ?></a>
+        </span>
+        <span class="properties">
+            (<?= sprintf($l10n['user_created_note'], $user['algorithm_count']) ?>)
+        </span>
+    </td>
+</tr>

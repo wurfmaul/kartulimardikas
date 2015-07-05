@@ -29,7 +29,7 @@ if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
             <small><?= $description ?></small>
         </h1>
         <?php foreach ($tags as $tag): ?>
-            <a href="<?= url(['action' => 'index', 'list' => 'tag', 'tag' => $tag]) ?>">
+            <a href="<?= url(['action' => 'index', 'tab' => 'tags', 'tag' => $tag]) ?>">
                 <span class="badge"><?= $tag ?></span>
             </a>
         <?php endforeach ?>

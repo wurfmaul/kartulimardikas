@@ -5,15 +5,9 @@
  * - $user: array containing user information
  * - $l10n: array used for translation
  */
-$linkUser = url(['action' => 'user', 'uid' => $user['uid']]);
 ?>
 <tr>
-    <td>
-        <span class="name">
-            <a href="<?= $linkUser ?>"><?= $user['username'] ?></a>
-        </span>
-        <span class="properties">
-            (<?= sprintf($l10n['user_created_note'], $user['algorithm_count']) ?>)
-        </span>
-    </td>
+    <td><a href="<?= url(['action' => 'user', 'uid' => $user['uid']]) ?>"><?= $user['username'] ?></a></td>
+    <td><?= $user['count'] ?></td>
+    <td><?= $user['date_registration'] ?></td>
 </tr>
