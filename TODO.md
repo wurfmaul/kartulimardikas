@@ -8,12 +8,12 @@ Open
 * [ ] Edit: BUG in WebKit-browsers: Combo boxes do not work properly!
 * [ ] Edit: Combo boxes' behavior when different variables with same starting letter
 * [ ] Edit: Data type character
-* [ ] User: Administration for deleting and resurrecting users/algorithms
 * [ ] User: Verify email/Lost password
 * [ ] View: Step back (history)
 
 Done
 ----
+* [x] User: Administration for deleting and resurrecting users/algorithms
 * [x] Edit: Data type boolean
 * [x] Edit: Variable definition: hide size-field if not necessary.
 * [x] View: Cursor also in source code

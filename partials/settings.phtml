@@ -1,11 +1,7 @@
 <?php
 if (!defined('BASEDIR')) die('You cannot call this script directly !');
 global $l10n;
-
-if ($__aid && $__uid && $__owner) {
-    // use algorithm header
-    require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
-}
+require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
 ?>
     <!-- HEADER -->
     <div class="page-header">
@@ -16,7 +12,7 @@ if ($__aid && $__uid && $__owner) {
     </div>
     <!-- HEADER END -->
 
-<?php if ($__aid && $__uid && $__owner): ?>
+<?php if ($__aid && $__uid && ($__owner || $__rights > 0)): ?>
     <!-- ERROR MESSAGE -->
     <div id="editAlert" class="alert alert-danger alert-dismissible" style="display:none">
         <button id="editAlertClose" type="button" class="close">

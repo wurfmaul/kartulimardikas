@@ -99,6 +99,25 @@ class DataModel
         return $result->fetch_object();
     }
 
+    public function fetchAlgorithms()
+    {
+        $stmt = $this->_sql->prepare("
+            SELECT
+              a.*,
+              u.username AS owner,
+              u.date_deletion AS owner_deleted,
+              GROUP_CONCAT(t.tag SEPARATOR ', ') AS tags
+            FROM algorithm a
+            JOIN user u USING (uid)
+            LEFT JOIN tags t USING (aid)
+            GROUP BY aid
+        ");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
     /**
      * @param string $tag Name of the tag.
      * @return array List of algorithms that are tagged with the specified tag.
@@ -353,6 +372,7 @@ class DataModel
             SELECT u.*, (
               SELECT COUNT(*) FROM algorithm
               WHERE (date_deletion IS NULL OR date_deletion = u.date_deletion)
+              AND date_publish IS NOT NULL
               AND uid=u.uid
             ) AS count
             FROM user u
@@ -507,6 +527,23 @@ class DataModel
         $stmt = $this->_sql->prepare("
             UPDATE algorithm
             SET date_deletion=NOW()
+            WHERE aid=?");
+        $stmt->bind_param("i", $aid);
+        $stmt->execute();
+        $rows = $stmt->affected_rows;
+        $stmt->close();
+        return $rows;
+    }
+
+    /**
+     * @param int $aid The algorithm id.
+     * @return int The number of affected rows.
+     */
+    public function updateUnDeleteAlgorithm($aid)
+    {
+        $stmt = $this->_sql->prepare("
+            UPDATE algorithm
+            SET date_deletion=NULL
             WHERE aid=?");
         $stmt->bind_param("i", $aid);
         $stmt->execute();

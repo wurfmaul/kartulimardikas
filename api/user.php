@@ -88,6 +88,7 @@ class EditUserManager
         if ($this->_user->rights > $user->rights) {
             if ($this->_model->updateDeleteUser($uid)) {
                 $this->_response['success'] = sprintf($this->_l10n['user_deleted'], $user->username);
+                $this->_response['status'] = $this->_l10n['deleted'];
             } else {
                 $this->_response['error'] = $this->_l10n['user_not_deleted'];
             }
@@ -118,6 +119,7 @@ class EditUserManager
         if ($this->_user->rights > $user->rights) {
             if ($this->_model->updateUnDeleteUser($uid)) {
                 $this->_response['success'] = sprintf($this->_l10n['user_resurrected'], $user->username);
+                $this->_response['status'] = $this->_l10n['active'];
             } else {
                 $this->_response['error'] = $this->_l10n['user_not_resurrected'];
             }

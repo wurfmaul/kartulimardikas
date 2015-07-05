@@ -1,18 +1,10 @@
-.users {
+.table {
+  margin: 10px auto;
   th, td {
     text-align: center;
   }
   th:first-child, td:first-child {
     text-align: left;
-  }
-  a {
-    cursor: pointer;
-  }
-  .admin {
-    font-weight: bold;
-  }
-  .send-mail{
-    float:right;
   }
   tr:not(.deleted) {
     .deleted-only {
@@ -21,11 +13,35 @@
   }
   tr.deleted {
     color: #808080;
-    .username {
-      text-decoration: line-through;
-    }
     .active-only {
       display: none;
+    }
+    .name {
+      text-decoration: line-through;
+    }
+  }
+
+  a {
+    cursor: pointer;
+  }
+  span.deleted {
+    text-decoration: line-through;
+  }
+
+  &#table-users {
+    td:not(.admin) {
+      .label-admin {
+        display: none;
+      }
+    }
+    .send-mail{
+      float:right;
+    }
+  }
+
+  &#table-algorithms {
+    .tags {
+      max-width: 250px;
     }
   }
 }

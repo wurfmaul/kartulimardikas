@@ -4,14 +4,29 @@
         <!-- NAVIGATION MENU FOR ALGORITHMS -->
         <ul class="nav nav-tabs">
             <li role="presentation"<?php if (ACTION == 'view'): ?> class="active"<?php endif ?>>
-                <a href="<?= url(['action' => 'view', 'aid' => $__aid]) ?>"><?= $l10n['view'] ?></a>
+                <a href="<?= url(['action' => 'view', 'aid' => $__aid]) ?>">
+                    <?= $l10n['view'] ?>
+                    <?php if (!$__public && !$__owner): ?>
+                        <span class="fa fa-key"></span>
+                    <?php endif ?>
+                </a>
             </li>
-            <?php if ($__owner): ?>
+            <?php if ($__owner || $__rights > 0): ?>
                 <li role="presentation"<?php if (ACTION == 'edit'): ?> class="active"<?php endif ?>>
-                    <a href="<?= url(['action' => 'edit', 'aid' => $__aid]) ?>"><?= $l10n['edit'] ?></a>
+                    <a href="<?= url(['action' => 'edit', 'aid' => $__aid]) ?>">
+                        <?= $l10n['edit'] ?>
+                        <?php if (!$__owner): ?>
+                            <span class="fa fa-key"></span>
+                        <?php endif ?>
+                    </a>
                 </li>
                 <li role="presentation"<?php if (ACTION == 'settings'): ?> class="active"<?php endif ?>>
-                    <a href="<?= url(['action' => 'settings', 'aid' => $__aid]) ?>"><?= $l10n['settings'] ?></a>
+                    <a href="<?= url(['action' => 'settings', 'aid' => $__aid]) ?>">
+                        <?= $l10n['settings'] ?>
+                        <?php if (!$__owner): ?>
+                            <span class="fa fa-key"></span>
+                        <?php endif ?>
+                    </a>
                 </li>
             <?php else: ?>
                 <li role="presentation" class="disabled">

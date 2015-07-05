@@ -52,11 +52,13 @@ class EditAlgorithmManager
 
     public function process()
     {
-        // check ownership
-        if ($this->_algorithm->uid !== $this->_uid) {
-            $this->_response['error'] = $this->_l10n['need_to_be_owner'];
-        } else {
+        // check administration rights or ownership
+        $_admin = $this->_model->fetchUser($this->_uid)->rights > 0;
+        if ($_admin || $this->_algorithm->uid === $this->_uid) {
             switch (trim($_GET['area'])) {
+                case 'admin':
+                    $this->_processAdmin();
+                    break;
                 case 'info':
                     $this->_processInfo();
                     break;
@@ -80,10 +82,37 @@ class EditAlgorithmManager
                     $this->_processDeletion();
                     break;
             }
+        } else {
+            $this->_response['error'] = $this->_l10n['need_to_be_owner'];
         }
 
         $this->_model->close();
         return $this->_response;
+    }
+
+    private function _processAdmin()
+    {
+        switch($_POST['action']) {
+            case 'remove':
+                $this->_processDeletion();
+                $this->_response['status'] = $this->_l10n['deleted'];
+                break;
+            case 'erase':
+                $this->_model->deleteAlgorithm($this->_aid);
+                $this->_response['success'] = $this->_l10n['algorithm_deleted'];
+                break;
+            case 'resurrect':
+                $this->_model->updateUnDeleteAlgorithm($this->_aid);
+                $this->_response['success'] = $this->_l10n['algorithm_resurrected'];
+                $this->_response['status'] = $this->_l10n['active'];
+                break;
+        }
+    }
+
+    private function _processDeletion()
+    {
+        $this->_model->updateDeleteAlgorithm($this->_aid);
+        $this->_response['success'] = $this->_l10n['algorithm_deleted'];
     }
 
     private function _processInfo()
@@ -265,12 +294,6 @@ class EditAlgorithmManager
         } else {
             die("Post parameter 'tree' not set properly!");
         }
-    }
-
-    private function _processDeletion()
-    {
-        $this->_model->updateDeleteAlgorithm($this->_aid);
-        $this->_response['success'] = $this->_l10n['algorithm_deleted'];
     }
 }
 

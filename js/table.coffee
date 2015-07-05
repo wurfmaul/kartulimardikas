@@ -1,0 +1,35 @@
+$ ->
+  # initialize sortable table
+  $.tablesorter.themes.bootstrap =
+    table        : 'table table-bordered table-striped table-hover'
+    caption      : 'caption',
+    header       : 'bootstrap-header',
+    sortNone     : '',
+    sortAsc      : '',
+    sortDesc     : '',
+    active       : '',
+    hover        : '',
+    icons        : '',
+    iconSortNone : 'bootstrap-icon-unsorted',
+    iconSortAsc  : 'glyphicon glyphicon-chevron-up',
+    iconSortDesc : 'glyphicon glyphicon-chevron-down',
+    filterRow    : '',
+    footerRow    : '',
+    footerCells  : '',
+    even         : '',
+    odd          : ''
+  $('.table-sortable').tablesorter(
+    theme : "bootstrap"
+    widthFixed: true
+    headerTemplate : '{content} {icon}'
+    widgets : [ "uitheme", "filter", "zebra" ]
+    widgetOptions :
+      zebra : ["even", "odd"]
+      filter_reset : ".reset"
+      filter_cssFilter: "form-control"
+  ).tablesorterPager(
+    container: $(".ts-pager")
+    cssGoto  : ".pagenum"
+    removeRows: false
+    output: '{startRow}-{endRow} ({filteredRows})'
+  )

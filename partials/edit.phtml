@@ -1,8 +1,18 @@
 <?php
 if (!defined('BASEDIR')) die('You cannot call this script directly !');
 global $l10n;
+require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
+?>
+<!-- HEADER -->
+<div class="page-header">
+    <h1>
+        <?= $l10n['edit_algo'] ?>
+        <span id="saveSuccess" class="label label-success" style="display: none"></span>
+    </h1>
+</div>
 
-if ($__aid && $__uid && $__owner) {
+<!-- CONTENT -->
+<?php if ($__aid && $__uid && ($__owner || $__rights > 0)):
     // prepare algorithm meta data
     $name = htmlspecialchars_decode($__algorithm->name);
     $description = htmlspecialchars_decode($__algorithm->description);
@@ -25,21 +35,7 @@ if ($__aid && $__uid && $__owner) {
     // prepare tree
     require_once BASEDIR . "includes/algorithm.php";
     $tree = new Tree(json_decode($__algorithm->tree));
-
-    // use algorithm header
-    require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
-}
-?>
-<!-- HEADER -->
-<div class="page-header">
-    <h1>
-        <?= $l10n['edit_algo'] ?>
-        <span id="saveSuccess" class="label label-success" style="display: none"></span>
-    </h1>
-</div>
-
-<!-- CONTENT -->
-<?php if ($__aid && $__uid && $__owner): ?>
+    ?>
     <div class="row">
         <!-- ERROR MESSAGE -->
         <div id="editAlert" class="alert alert-danger alert-dismissible" style="display:none">
@@ -191,7 +187,7 @@ if ($__aid && $__uid && $__owner) {
                                                        placeholder="<?= $l10n['value'] ?>" type="text">
                                             </div>
                                             <div class="form-group size-group"
-                                                <?php if (substr($var->type,0,5) !== 'array'): ?> style="display: none;"<?php endif ?>>
+                                                <?php if (substr($var->type, 0, 5) !== 'array'): ?> style="display: none;"<?php endif ?>>
                                                 <label class="sr-only"><?= $l10n['array_size'] ?></label>
                                                 <select class="form-control input-sm size">
                                                     <optgroup label="<?= $l10n['size'] ?>">

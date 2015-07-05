@@ -1,9 +1,10 @@
 <?php
 if (!defined('BASEDIR')) die('You cannot call this script directly !');
 global $l10n;
+require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
 
 // if algorithm is defined
-if ($__aid && $__algorithm && ($__public || $__owner)):
+if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
     // prepare algorithm meta-data
     $name = $__algorithm->name;
     $description = $__algorithm->description;
@@ -21,9 +22,6 @@ if ($__aid && $__algorithm && ($__public || $__owner)):
     // prepare tree
     require_once BASEDIR . "includes/algorithm.php";
     $tree = new Tree(json_decode($__algorithm->tree));
-
-    // use algorithm header
-    require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
     ?>
     <!-- HEADER -->
     <div class="page-header">

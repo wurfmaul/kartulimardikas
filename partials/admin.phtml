@@ -1,20 +1,35 @@
 <?php
 if (!defined('BASEDIR')) die('You cannot call this script directly !');
 global $l10n;
-
-if ($__uid) {
-    $user = $__model->fetchUser($__uid);
-    $rights = $user->rights;
-} else {
-    $rights = 0;
-}
+$_tabs = [
+    'users' => 'users',
+    'algorithms' => 'algorithms'
+];
+$_tab = isset($_GET['tab']) && array_key_exists($_GET['tab'], $_tabs) ? $_GET['tab'] : $_tabs[0];
 ?>
+    <!-- NAVIGATION MENU FOR ADMINISTRATION -->
+    <ul class="nav nav-tabs">
+        <li role="presentation"<?php if ($_tab === 'users'): ?> class="active"<?php endif ?>>
+            <a href="<?= url(['action' => 'admin', 'tab' => 'users']) ?>">
+                <?= $l10n['users'] ?>
+                <span class="fa fa-key"></span>
+            </a>
+        </li>
+        <li role="presentation"<?php if ($_tab === 'algorithms'): ?> class="active"<?php endif ?>>
+            <a href="<?= url(['action' => 'admin', 'tab' => 'algorithms']) ?>">
+                <?= $l10n['algorithms'] ?>
+                <span class="fa fa-key"></span>
+            </a>
+        </li>
+    </ul>
     <!-- HEADER -->
     <div class="page-header">
-        <h1><?= $l10n['administration'] ?></h1>
+        <h1><?= $l10n['administration'] ?>
+            <small><?= $l10n[$_tabs[$_tab]] ?></small>
+        </h1>
     </div>
     <!-- CONTENT -->
-<?php if ($rights): ?>
+<?php if ($__rights > 0): ?>
     <div id="adminSuccess" class="alert alert-success alert-dismissible" style="display:none">
         <button id="adminSuccessClose" type="button" class="close">
             <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
@@ -31,57 +46,199 @@ if ($__uid) {
 
         <div id="adminAlertText"></div>
     </div>
-    <div class="row">
-        <!-- LEFT COLUMN -->
-        <div class="col-md-6">
-            <table class="users">
-                <thead>
-                    <tr>
-                        <th><?= $l10n['username'] ?></th>
-                        <th title="<?= $l10n['number_of_algorithms'] ?>">#</th>
-                        <th title="<?= $l10n['language'] ?>"><span class="fa fa-globe"></span></th>
-                        <th title="<?= $l10n['registration_date'] ?>"><span class="fa fa-user-plus"></th>
-                        <th title="<?= $l10n['sign-in_date'] ?>"><span class="fa fa-sign-in"></span></th>
-                        <th><?= $l10n['actions'] ?></th>
-                    </tr>
-                </thead>
-                <tbody>
-                <?php foreach ($__model->fetchUsers() as $member): ?>
-                    <tr <?php if($member['date_deletion']): ?>class="deleted"<?php endif ?>>
-                        <td class="username <?= ($member['rights'] >= 1) ? 'admin' : '' ?>">
-                            <?= $member['username'] ?>
-                            <div class="send-mail">
-                                <a href="mailto:<?= $member['email'] ?>"><span class="glyphicon glyphicon-envelope"></span></a>
-                            </div>
-                        </td>
-                        <td><?= $member['count'] ?></td>
-                        <td title="<?= $AVAILABLE_LANG[$member['language']] ?>">
-                            <?= $member['language'] ?>
-                        </td>
-                        <td><?= (new DateTime($member['date_registration']))->format('Y-m-d') ?></td>
-                        <td><?= (new DateTime($member['date_lastsignin']))->format('Y-m-d') ?></td>
-                        <td class="active-only">
-                            <a href="<?= url(['action' => 'user', 'uid' => $member['uid']]) ?>" title="<?= $l10n['view_profile'] ?></th>"><span class="fa fa-user"></span></a>
-                            <?php if ($member['uid'] !== $__uid): ?>
-                                <a class="delete-user" data-uid="<?= $member['uid'] ?>" data-warning="<?= $l10n['confirm_delete_user'] ?>" title="<?= $l10n['delete_user'] ?>"><span class="fa fa-trash"></span></a>
-                                <?php if ($rights === 2): ?>
-                                    <a class="adminify-user" data-uid="<?= $member['uid'] ?>" title="<?= $l10n['user_to_admin'] ?>"><span class="fa fa-key"></span></a>
-                                <?php endif ?>
-                            <?php else: ?>
-                                <span class="fa fa-trash text-muted"></span>
-                                <span class="fa fa-key text-muted"></span>
-                            <?php endif ?>
-                        </td>
-                        <td class="deleted-only">
-                            <a class="un-delete-user" data-uid="<?= $member['uid'] ?>" title="<?= $l10n['resurrect_user'] ?>"><span class="fa fa-heart"></span></a>
-                            <a class="erase-user" data-uid="<?= $member['uid'] ?>" data-warning="<?= $l10n['confirm_erase_user'] ?>" title="<?= $l10n['erase_user'] ?>"><span class="fa fa-minus-circle text-danger"></span></a>
-                        </td>
-                    </tr>
-                <?php endforeach ?>
-                </tbody>
-            </table>
+    <?php if ($_tab === 'users'): ?>
+        <div class="btn-group">
+            <button class="filter btn btn-primary" data-target="#table-users" data-column="3"
+                    data-filter="<?= (new DateTime())->format('Y-m-d') ?>">
+                <span class="glyphicon glyphicon-filter"></span>
+                <?= $l10n['registered_today'] ?>
+            </button>
+            <button class="filter btn btn-primary" data-target="#table-users" data-column="2"
+                    data-filter="<?= $l10n['active'] ?>">
+                <span class="glyphicon glyphicon-filter"></span>
+                <?= $l10n['active_users'] ?>
+            </button>
+            <button class="reset btn btn-default" data-column="0" data-filter="">
+                <span class="glyphicon glyphicon-refresh"></span>
+                <?= $l10n['reset_filter'] ?>
+            </button>
         </div>
-    </div>
+
+        <table id="table-users" class="table table-sortable">
+            <thead>
+            <tr>
+                <th><?= $l10n['username'] ?></th>
+                <th title="<?= $l10n['language'] ?>" class="filter-select filter-exact"><span
+                        class="fa fa-globe"></span></th>
+                <th class="filter-select filter-exact"><?= $l10n['status'] ?></th>
+                <th title="<?= $l10n['number_of_algorithms'] ?>"><?= $l10n['algorithms'] ?></th>
+                <th><?= $l10n['registration_date'] ?></th>
+                <th><?= $l10n['sign-in_date'] ?></th>
+                <th class="filter-false"><?= $l10n['actions'] ?></th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($__model->fetchUsers() as $member): ?>
+                <tr<?php if ($member['date_deletion']): ?> class="deleted"<?php endif ?>
+                    data-uid="<?= $member['uid'] ?>">
+                    <td class="username <?= ($member['rights'] >= 1) ? 'admin' : '' ?>">
+                        <span class="name"><?= $member['username'] ?></span>
+                        <span class="label label-info label-admin" title="<?= $l10n['administrator'] ?>"><span
+                                class="fa fa-key"></span></span>
+                        <div class="send-mail">
+                            <a href="mailto:<?= $member['email'] ?>"><span class="glyphicon glyphicon-envelope"></span></a>
+                        </div>
+                    </td>
+                    <td title="<?= $AVAILABLE_LANG[$member['language']] ?>"><?= $member['language'] ?></td>
+                    <td class="status"><?= $l10n[$member['date_deletion'] ? 'deleted' : 'active'] ?></td>
+                    <td><?= $member['count'] ?></td>
+                    <td><?= (new DateTime($member['date_registration']))->format('Y-m-d') ?></td>
+                    <td><?= (new DateTime($member['date_lastsignin']))->format('Y-m-d') ?></td>
+                    <td class="active-only">
+                        <a href="<?= url(['action' => 'user', 'uid' => $member['uid']]) ?>"
+                           title="<?= $l10n['view_profile'] ?></th>"><span class="fa fa-user"></span></a>
+                        <?php if ($member['uid'] !== $__uid): ?>
+                            <a class="delete-user" title="<?= $l10n['delete_user'] ?>"><span class="fa fa-trash"></span></a>
+                            <?php if ($__rights === 2): ?>
+                                <a class="adminify-user" title="<?= $l10n['user_to_admin'] ?>"><span
+                                        class="fa fa-key"></span></a>
+                            <?php endif ?>
+                        <?php else: ?>
+                            <span class="fa fa-trash text-muted"></span>
+                            <span class="fa fa-key text-muted"></span>
+                        <?php endif ?>
+                    </td>
+                    <td class="deleted-only">
+                        <a class="un-delete-user" title="<?= $l10n['resurrect_user'] ?>"><span
+                                class="fa fa-heartbeat"></span></a>
+                        <a class="erase-user" data-warning="<?= $l10n['confirm_erase_user'] ?>"
+                           title="<?= $l10n['erase_user'] ?>"><span class="fa fa-minus-circle text-danger"></span></a>
+                    </td>
+                </tr>
+            <?php endforeach ?>
+            </tbody>
+            <tfoot>
+            <tr>
+                <th colspan="7" class="ts-pager form-inline">
+                    <button class="btn btn-default first"><i
+                            class="icon-step-backward glyphicon glyphicon-step-backward"></i></button>
+                    <button class="btn btn-default prev"><i class="icon-arrow-left glyphicon glyphicon-backward"></i>
+                    </button>
+                    <span class="pagedisplay"></span>
+                    <button class="btn btn-default next"><i class="icon-arrow-right glyphicon glyphicon-forward"></i>
+                    </button>
+                    <button class="btn btn-default last"><i
+                            class="icon-step-forward glyphicon glyphicon-step-forward"></i></button>
+                    <select class="pagesize input-mini form-control" title="<?= $l10n['page_size'] ?>">
+                        <option selected="selected" value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                    <select class="pagenum input-mini form-control" title="<?= $l10n['page_number'] ?>"></select>
+                </th>
+            </tr>
+            </tfoot>
+        </table>
+    <?php else: ?>
+        <div class="btn-group">
+            <button class="filter btn btn-primary" data-target="#table-algorithms" data-column="4"
+                    data-filter="<?= (new DateTime())->format('Y-m-d') ?>">
+                <span class="glyphicon glyphicon-filter"></span>
+                <?= $l10n['created_today'] ?>
+            </button>
+            <button class="filter btn btn-primary" data-target="#table-algorithms" data-column="1"
+                    data-filter="<?= $l10n['deleted'] ?>">
+                <span class="glyphicon glyphicon-filter"></span>
+                <?= $l10n['deleted_algorithms'] ?>
+            </button>
+            <button class="reset btn btn-default" data-column="0" data-filter="">
+                <span class="glyphicon glyphicon-refresh"></span>
+                <?= $l10n['reset_filter'] ?>
+            </button>
+        </div>
+
+        <table id="table-algorithms" class="table table-sortable">
+            <thead>
+            <tr>
+                <th><?= $l10n['algorithm'] ?></th>
+                <th class="filter-select filter-exact"><?= $l10n['status'] ?></th>
+                <th><?= $l10n['tags'] ?></th>
+                <th><?= $l10n['owner'] ?></th>
+                <th><?= $l10n['creation'] ?></th>
+                <th><?= $l10n['last_edit'] ?></th>
+                <th class="filter-false"><?= $l10n['actions'] ?></th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($__model->fetchAlgorithms() as $aid => $algorithm): ?>
+                <tr<?php if ($algorithm['date_deletion']): ?> class="deleted"<?php endif ?>
+                    data-aid="<?= $algorithm['aid'] ?>">
+                    <td>
+                        <span
+                            class="name"><?= $algorithm['name'] ? $algorithm['name'] : $l10n['untitled_algorithm'] ?></span>
+                        <?php if (!$algorithm['date_publish']): ?>
+                            <span class="label label-info"><?= $l10n['private'] ?></span>
+                        <?php endif ?>
+                    </td>
+                    <td class="status"><?= $l10n[$algorithm['date_deletion'] ? 'deleted' : 'active'] ?></td>
+                    <td class="tags"><?= $algorithm['tags'] ?></td>
+                    <td>
+                        <?php if ($algorithm['owner_deleted']): ?>
+                            <span class="deleted"><?= $algorithm['owner'] ?></span>
+                        <?php else: ?>
+                            <a href="<?= url(['action' => 'user', 'uid' => $algorithm['uid']]) ?>"
+                               title="<?= $l10n['view_profile'] ?></th>"><?= $algorithm['owner'] ?></a>
+                        <?php endif ?>
+                    </td>
+                    <td><?= (new DateTime($algorithm['date_creation']))->format('Y-m-d') ?></td>
+                    <td><?= (new DateTime($algorithm['date_lastedit']))->format('Y-m-d') ?></td>
+                    <td class="active-only">
+                        <a href="<?= url(['action' => 'view', 'aid' => $algorithm['aid']]) ?>"
+                           title="<?= $l10n['view_algorithm'] ?>"><span
+                                class="fa fa-eye"></span></a>
+                        <a href="<?= url(['action' => 'edit', 'aid' => $algorithm['aid']]) ?>"
+                           title="<?= $l10n['edit_algorithm'] ?>"><span
+                                class="fa fa-pencil"></span></a>
+                        <a href="<?= url(['action' => 'settings', 'aid' => $algorithm['aid']]) ?>"
+                           title="<?= $l10n['change_algorithm_settings'] ?>"><span
+                                class="fa fa-cog"></span></a>
+                        <a class="delete-algorithm" title="<?= $l10n['delete_algorithm'] ?>"><span
+                                class="fa fa-trash"></span></a>
+                    </td>
+                    <td class="deleted-only">
+                        <a class="un-delete-algorithm" title="<?= $l10n['resurrect_algorithm'] ?>"><span
+                                class="fa fa-heartbeat"></span></a>
+                        <a class="erase-algorithm" data-warning="<?= $l10n['confirm_erase_algorithm'] ?>"
+                           title="<?= $l10n['erase_algorithm'] ?>"><span class="fa fa-minus-circle text-danger"></span></a>
+                    </td>
+                </tr>
+            <?php endforeach ?>
+            </tbody>
+            <tfoot>
+            <tr>
+                <th colspan="7" class="ts-pager form-inline">
+                    <button class="btn btn-default first"><i
+                            class="icon-step-backward glyphicon glyphicon-step-backward"></i></button>
+                    <button class="btn btn-default prev"><i class="icon-arrow-left glyphicon glyphicon-backward"></i>
+                    </button>
+                    <span class="pagedisplay"></span>
+                    <button class="btn btn-default next"><i class="icon-arrow-right glyphicon glyphicon-forward"></i>
+                    </button>
+                    <button class="btn btn-default last"><i
+                            class="icon-step-forward glyphicon glyphicon-step-forward"></i></button>
+                    <select class="pagesize input-mini form-control" title="<?= $l10n['page_size'] ?>">
+                        <option selected="selected" value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                    <select class="pagenum input-mini form-control" title="<?= $l10n['page_number'] ?>"></select>
+                </th>
+            </tr>
+            </tfoot>
+        </table>
+    <?php endif ?>
 <?php else: ?>
     <div class="alert alert-danger" role="alert">
         <strong><?= $l10n['error'] ?></strong><br/>
