@@ -516,12 +516,13 @@ class DataModel
     public function insertUser($username, $email, $password)
     {
         $password = $this->_sql->real_escape_string($password);
+        $language = DEFAULT_LANG;
 
         $stmt = $this->_sql->prepare("
             INSERT INTO user (username, email, password, language)
             VALUES (?, ?, ?, ?)
         ");
-        $stmt->bind_param('ssss', $username, $email, $password, DEFAULT_LANG);
+        $stmt->bind_param('ssss', $username, $email, $password, $language);
         $stmt->execute();
         $uid = $stmt->insert_id;
         $stmt->close();
