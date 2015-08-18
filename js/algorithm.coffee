@@ -166,8 +166,8 @@ class Node
       return {kind: 'const', type: 'bool', value: boolVal is 'true'}
 
     # check for const (char) TODO: data-type char
-#    if (/^'[A-Za-z]'$/.test(value))
-#      return {kind: 'const', type: 'char', value: value}
+    # if (/^'[A-Za-z]'$/.test(value))
+    #   return {kind: 'const', type: 'char', value: value}
 
     # check for array ([])
     open = value.indexOf('[')

@@ -135,7 +135,7 @@ class Player
     # errorCodes is defined by view.phtml
     msg = errorCodes[error.message]
     if (msg?)
-      # Insert all the parts into the message
+      # Insert all the parameters into the message
       $.each(error.parts, (index, elem) ->
         msg = msg.replace(new RegExp('%' + (index + 1), 'g'), elem)
       )
@@ -290,20 +290,33 @@ $ ->
   $('.toggle-comment').click -> toggleComment($(this))
 
   # MEMORY SECTION
-  $('.var-value').dblclick(->
-    varRow = $(this).closest('.variable')
-    varRow.find('.value-show').hide()
-    varRow.find('.value-edit').show().focus()
+  $('.value-container').click(->
+    value = $(this).hide().find('.value').text()
+    if (offset = $(this).data('offset'))? # list
+      input = $(this).siblings('.value-edit.offset_' + offset)
+    else # value
+      input = $(this).siblings('.value-edit')
+    input.val(value).show().focus()
   )
-  $('.value-edit').blur(->
-    varRow = $(this).closest('.variable')
-    newVal = varRow.find('.value-edit').hide().val()
-    varRow.find('.value-show').show()
-
-    if (/^[0-9]+$/.test(newVal))
-      # single value
-    else if (/^[0-9]+((\s*,\s*)?[0-9])+$/.test(newVal))
-      # list values
-      varRow.data('value', newVal)
-      console.log('new value: ' + newVal)
+  $('.value-edit').keyup((event) ->
+    switch (event.which)
+      when 13 # enter key
+        newVal = $(this).val()
+        if (/^[0-9]+$/.test(newVal))
+          if (offset = $(this).data('offset'))? # list
+            vid = $(this).closest('.variable').data('vid')
+            index = $(this).data('offset')
+            player.memory.arraySet(vid, index, newVal)
+            player.stats.writeArrayVar(vid, index, newVal)
+          else # single value
+            vid = $(this).closest('.variable').data('vid')
+            player.memory.set(vid, newVal)
+            player.stats.writeVar(vid, newVal)
+        else
+          alert(window.l10n['invalid_value'].replace('%1', newVal))
+        $(this).blur()
+      when 27 # esc key
+        $(this).blur()
+  ).blur(->
+    $(this).hide().siblings('.value-container').show()
   )

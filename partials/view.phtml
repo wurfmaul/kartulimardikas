@@ -70,24 +70,16 @@ if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
                                     <tr>
                                         <td colspan="3" style="width: 100%;">
                                             <div class="btn-group">
-                                                <button type="button" class="btn btn-default"
-                                                        title="<?= $l10n['back_to_start'] ?>"
-                                                        id="btn-reset">
+                                                <button type="button" class="btn btn-default" title="<?= $l10n['back_to_start'] ?>" id="btn-reset">
                                                     <span class="glyphicon glyphicon-fast-backward"></span>
                                                 </button>
-                                                <button type="button" class="btn btn-default"
-                                                        title="<?= $l10n['play'] ?>"
-                                                        id="btn-play">
+                                                <button type="button" class="btn btn-default" title="<?= $l10n['play'] ?>" id="btn-play">
                                                     <span class="glyphicon glyphicon-play" id="img-play"></span>
                                                 </button>
-                                                <button type="button" class="btn btn-default"
-                                                        title="<?= $l10n['step_forward'] ?>"
-                                                        id="btn-step">
+                                                <button type="button" class="btn btn-default" title="<?= $l10n['step_forward'] ?>" id="btn-step">
                                                     <span class="glyphicon glyphicon-step-forward"></span>
                                                 </button>
-                                                <button type="button" class="btn btn-default"
-                                                        title="<?= $l10n['forward_to_end'] ?>"
-                                                        id="btn-finish">
+                                                <button type="button" class="btn btn-default" title="<?= $l10n['forward_to_end'] ?>" id="btn-finish">
                                                     <span class="glyphicon glyphicon-fast-forward"></span>
                                                 </button>
                                             </div>
@@ -107,13 +99,11 @@ if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
                                         <td colspan="2" style="width: 100%">
                                             <div id="step-control">
                                                 <div class="btn-group btn-group-sm" data-toggle="buttons">
-                                                    <label id="stop-before-btn" class="btn btn-default"
-                                                           data-break="before" title="<?= $l10n['break_before'] ?>">
+                                                    <label id="stop-before-btn" class="btn btn-default" data-break="before" title="<?= $l10n['break_before'] ?>">
                                                         <input id="stop-before" type="checkbox" autocomplete="off">
                                                         <span class="icon icon-stop-before"></span>
                                                     </label>
-                                                    <label id="stop-after-btn" class="btn btn-default"
-                                                           data-break="after" title="<?= $l10n['break_after'] ?>">
+                                                    <label id="stop-after-btn" class="btn btn-default" data-break="after" title="<?= $l10n['break_after'] ?>">
                                                         <input id="stop-after" type="checkbox" autocomplete="off">
                                                         <span class="icon icon-stop-after"></span>
                                                     </label>
@@ -151,8 +141,7 @@ if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
                             <?php if (is_null($__algorithm->tree)): ?>
                                 <?= $l10n['no_algorithm'] ?>
                             <?php else: ?>
-                                <ul id="node_<?= $tree->getRoot() ?>" class="insertStepsHere"
-                                    data-node-id="<?= $tree->getRoot() ?>">
+                                <ul id="node_<?= $tree->getRoot() ?>" class="insertStepsHere" data-node-id="<?= $tree->getRoot() ?>">
                                     <?php $tree->printHtml(['vars' => $vars, 'mode' => 'view']) ?>
                                 </ul>
                             <?php endif ?>
@@ -164,8 +153,7 @@ if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
                 <div class="panel panel-default">
                     <div class="panel-heading" data-target="#sourcecode">
                         <h4 class="panel-title">
-                        <span
-                            class="glyphicon glyphicon-chevron-down"></span>
+                        <span class="glyphicon glyphicon-chevron-down"></span>
                             <?= $l10n['source_code'] ?>
                         </h4>
                     </div>
@@ -219,37 +207,34 @@ if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
                                     </thead>
                                     <tbody>
                                     <?php foreach ($vars as $vid => $var): ?>
-                                        <tr id="var-<?= $vid ?>"
+                                        <tr id="var-<?= $vid ?>" class="variable"
                                             data-vid="<?= $vid ?>"
                                             data-name="<?= $var->name ?>"
                                             data-value="<?= $var->value ?>"
-                                            data-type="<?= $var->type ?>"
-                                            class="variable">
+                                            data-type="<?= $var->type ?>">
                                             <td>
                                                 <code class="name"><?= $var->name ?></code>
                                             </td>
                                             <td class="var-value">
-                                                <div class="btn-group value-show">
-                                                    <?php if (substr($var->type, 0, 6) === "array-"): // deal with "array-{int}" ?>
+                                                <?php if (substr($var->type, 0, 6) === "array-"): // deal with "array-{int}" ?>
+                                                    <div class="btn-group">
                                                         <?php foreach (explode(',', $var->value) as $offset => $value): ?>
-                                                            <button
-                                                                class="btn btn-default value-container offset_<?= $offset ?>"
-                                                                disabled="disabled">
+                                                            <button class="btn btn-default value-container offset_<?= $offset ?>" data-offset="<?= $offset ?>">
                                                                 <span class="value"><?= $value ?></span>
                                                                 <span class="glyphicon glyphicon-pencil write"></span>
                                                                 <span class="glyphicon glyphicon-eye-open read"></span>
                                                             </button>
+                                                            <input class="btn btn-default value-edit offset_<?= $offset ?>" value="<?= $value ?>" data-offset="<?= $offset ?>"/>
                                                         <?php endforeach ?>
-                                                    <?php else: // deal with "elem-{?,value}" ?>
-                                                        <button class="btn btn-default value-container"
-                                                                disabled="disabled">
-                                                            <span class="value"><?= $var->value ?></span>
-                                                            <span class="glyphicon glyphicon-pencil write"></span>
-                                                            <span class="glyphicon glyphicon-eye-open read"></span>
-                                                        </button>
-                                                    <?php endif ?>
-                                                </div>
-                                                <input class="form-control value-edit" value="<?= $var->value ?>"/>
+                                                    </div>
+                                                <?php else: // deal with "elem-{?,value}" ?>
+                                                    <button class="btn btn-default value-container">
+                                                        <span class="value"><?= $var->value ?></span>
+                                                        <span class="glyphicon glyphicon-pencil write"></span>
+                                                        <span class="glyphicon glyphicon-eye-open read"></span>
+                                                    </button>
+                                                    <input class="btn btn-default value-edit" value="<?= $var->value ?>"/>
+                                                <?php endif ?>
                                             </td>
                                         </tr>
                                     <?php endforeach ?>
@@ -285,8 +270,7 @@ if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
                                     <td><?= $l10n['accesses'] ?></td>
                                     <td>
                                         <div class="btn-group">
-                                            <input type="button" class="btn btn-default" disabled="disabled" value="0"
-                                                   id="stats-accesses"/>
+                                            <input type="button" class="btn btn-default" disabled="disabled" value="0" id="stats-accesses"/>
                                         </div>
                                     </td>
                                 </tr>
@@ -294,8 +278,7 @@ if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
                                     <td><?= $l10n['assignments'] ?></td>
                                     <td>
                                         <div class="btn-group">
-                                            <input type="button" class="btn btn-default" disabled="disabled" value="0"
-                                                   id="stats-assignments"/>
+                                            <input type="button" class="btn btn-default" disabled="disabled" value="0" id="stats-assignments"/>
                                         </div>
                                     </td>
                                 </tr>
@@ -303,8 +286,7 @@ if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
                                     <td><?= $l10n['comparisons'] ?></td>
                                     <td>
                                         <div class="btn-group">
-                                            <input type="button" class="btn btn-default" disabled="disabled" value="0"
-                                                   id="stats-comparisons"/>
+                                            <input type="button" class="btn btn-default" disabled="disabled" value="0" id="stats-comparisons"/>
                                         </div>
                                     </td>
                                 </tr>
@@ -312,8 +294,7 @@ if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
                                     <td><?= $l10n['arithmetic'] ?><br/><?= $l10n['logic'] ?></td>
                                     <td>
                                         <div class="btn-group">
-                                            <input type="button" class="btn btn-default" disabled="disabled" value="0"
-                                                   id="stats-arithmeticLogic"/>
+                                            <input type="button" class="btn btn-default" disabled="disabled" value="0" id="stats-arithmeticLogic"/>
                                         </div>
                                     </td>
                                 </tr>
@@ -352,5 +333,8 @@ if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
         <?php foreach ($l10n['runtime_errors'] as $key => $value): ?>
         '<?= $key ?>': "<?= $value ?>",
         <?php endforeach ?>
-    }
+    };
+    window.l10n = {
+        'invalid_value': "<?= $l10n['invalid_value'] ?>",
+    };
 </script>

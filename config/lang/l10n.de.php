@@ -183,6 +183,7 @@ $l10n['no_params_to_define'] = "Es gibt keine Parameter.";
 $l10n['input'] = "Eingang";
 $l10n['output'] = "Rückgabewert";
 $l10n['set_speed'] = "Animationsgeschwindigkeit anpassen";
+$l10n['invalid_value'] = "Der Wert '%1' ist ungültig und kann hier nicht verwendet werden!";
 $l10n['slow'] = "Langsam";
 $l10n['fast'] = "Schnell";
 $l10n['set_breakpoints'] = "Ablaufpausen anpassen";
