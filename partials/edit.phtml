@@ -116,27 +116,36 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                                 <tbody id="insertVarsHere">
                                 <?php foreach ($vars as $vid => $var):
                                     $rowVisible = ($vid === 'prototype') ? 'style="display:none"' : '';
+                                    $viewMode = $editMode = "";
                                     switch($var->type) {
                                         case "elem-int":
                                             if ($var->value === 'R') {
                                                 $viewMode = sprintf($l10n['var_randomized'], $var->name);
+                                                $editMode = $l10n['random'];
                                             } elseif ($var->value === '?') {
                                                 $viewMode = sprintf($l10n['var_uninitialized'], $var->name);
+                                                $editMode = $l10n['uninitialized'];
                                             } elseif ($var->value === 'P') {
                                                 $viewMode = sprintf($l10n['var_parameter'], $var->name);
+                                                $editMode = $l10n['parameter'];
                                             } else {
                                                 $viewMode = sprintf($l10n['var_defined'], $var->name, $var->value);
+                                                $editMode = $var->value;
                                             }
                                             break;
                                         case "array-int":
                                             if ($var->value === 'R') {
                                                 $viewMode = sprintf($l10n['array_randomized'], $var->name);
+                                                $editMode = $l10n['random'];
                                             } elseif ($var->value === '?') {
                                                 $viewMode = sprintf($l10n['array_uninitialized'], $var->name);
+                                                $editMode = $l10n['uninitialized'];
                                             } elseif ($var->value === 'P') {
                                                 $viewMode = sprintf($l10n['var_parameter'], $var->name);
+                                                $editMode = $l10n['parameter'];
                                             } else {
                                                 $viewMode = sprintf($l10n['var_defined'], $var->name, $var->value);
+                                                $editMode = $var->value;
                                             }
                                             break;
                                     }
@@ -197,7 +206,7 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                                             </div>
                                             <div class="form-group value-group">
                                                 <label class="sr-only" for="value"><?= $l10n['init_value'] ?></label>
-                                                <input class="form-control input-sm value" value="<?= $var->value ?>" placeholder="<?= $l10n['value'] ?>" type="text">
+                                                <input class="form-control input-sm value" value="<?= $editMode ?>" placeholder="<?= $l10n['value'] ?>" type="text">
                                             </div>
                                             <div class="form-group size-group" <?php if (substr($var->type, 0, 5) !== 'array'): ?> style="display: none;"<?php endif ?>>
                                                 <label class="sr-only"><?= $l10n['array_size'] ?></label>
