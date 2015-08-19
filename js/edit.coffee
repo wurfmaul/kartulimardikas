@@ -2,7 +2,7 @@ window.VARSITE = $("#insertVarsHere") # Specifies the site, where variables are 
 
 class Api
   @editInfo: ->
-    aid = window.defaults.aid
+    aid = window.current.aid
     name = $('#in-name').val()
     desc = $('#in-desc').val()
     long = $('#in-long').val()
@@ -13,7 +13,7 @@ class Api
         name: name
         desc: desc
         long: long
-        lang: window.defaults.lang
+        lang: window.current.lang
       dataType: 'json'
       success: (data) => # if response arrived...
         if data['error']?
@@ -30,14 +30,14 @@ class Api
     )
 
   @editTags: ->
-    aid = window.defaults.aid
+    aid = window.current.aid
     tags = $('#in-tags').val()
     $.ajax("api/tag.php",
       type: 'POST'
       data:
         aid: aid
         tags: tags
-        lang: window.defaults.lang
+        lang: window.current.lang
       dataType: 'json'
       success: (data) => # if response arrived...
         $('#in-tags').val(data['tags'])
@@ -54,7 +54,7 @@ class Api
 
   @editVariable: (vid) ->
     varRow = $('#var-' + vid)
-    aid = window.defaults.aid
+    aid = window.current.aid
     name = varRow.find('.name').val()
     type = varRow.find('.type').val()
     value = varRow.find('.value').val()
@@ -68,7 +68,7 @@ class Api
         type: type
         value: value
         size: size
-        lang: window.defaults.lang
+        lang: window.current.lang
       dataType: 'json'
       success: (data) => # if response arrived...
         msg = data['error'] ? ""
@@ -90,18 +90,19 @@ class Api
           varRow.find('.edit').hide()
           varRow.find('.view .cell').text(data['viewMode'])
           varRow.find('.view').show()
+          initVarInput($('.insertStepsHere').find('.combobox'))
       error: (jqXHR, textStatus, errorThrown) => # if request failed
         @_printError("Request Error: " + errorThrown)
     )
 
   @removeVariable: (vid) ->
-    aid = window.defaults.aid
+    aid = window.current.aid
     $.ajax("api/algorithm.php?area=var&action=remove",
       type: 'POST'
       data:
         aid: aid
         vid: vid
-        lang: window.defaults.lang
+        lang: window.current.lang
       dataType: 'json'
       success: (data) => # if response arrived...
         # print response
@@ -115,13 +116,13 @@ class Api
     )
 
   @editScript: (tree) ->
-    aid = window.defaults.aid
+    aid = window.current.aid
     $.ajax("api/algorithm.php?area=script",
       type: 'POST'
       data:
         aid: aid
         tree: tree
-        lang: window.defaults.lang
+        lang: window.current.lang
       dataType: 'json'
       success: (data) => # if response arrived...
         if data['error']? then @_printError(data['error'])
@@ -284,7 +285,8 @@ typeWatch = (->
   timer = 0
   return (callback, ms) ->
     clearTimeout (timer)
-    timer = setTimeout(callback, ms))()
+    timer = setTimeout(callback, ms)
+)()
 
 refreshPreview = ->
   Api.parseMarkdown($("#in-long"), $('#description-preview'))

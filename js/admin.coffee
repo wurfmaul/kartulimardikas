@@ -4,7 +4,7 @@ class Api
       type: 'POST'
       data:
         remove: uid
-        lang: window.defaults.lang
+        lang: window.current.lang
       dataType: 'json'
       success: (data, textStatus, jqXHR) =>
         msg = data['error'] ? ""
@@ -20,7 +20,7 @@ class Api
       type: 'POST'
       data:
         erase: uid
-        lang: window.defaults.lang
+        lang: window.current.lang
       dataType: 'json'
       success: (data, textStatus, jqXHR) =>
         msg = data['error'] ? ""
@@ -36,7 +36,7 @@ class Api
       type: 'POST'
       data:
         resurrect: uid
-        lang: window.defaults.lang
+        lang: window.current.lang
       dataType: 'json'
       success: (data, textStatus, jqXHR) =>
         msg = data['error'] ? ""
@@ -52,7 +52,7 @@ class Api
       type: 'POST'
       data:
         admin: uid
-        lang: window.defaults.lang
+        lang: window.current.lang
       dataType: 'json'
       success: (data, textStatus, jqXHR) =>
         msg = data['error'] ? ""
@@ -69,7 +69,7 @@ class Api
       data:
         aid: aid
         action: 'remove'
-        lang: window.defaults.lang
+        lang: window.current.lang
       dataType: 'json'
       success: (data, textStatus, jqXHR) =>
         msg = data['error'] ? ""
@@ -86,7 +86,7 @@ class Api
       data:
         aid: aid
         action: 'erase'
-        lang: window.defaults.lang
+        lang: window.current.lang
       dataType: 'json'
       success: (data, textStatus, jqXHR) =>
         msg = data['error'] ? ""
@@ -103,7 +103,7 @@ class Api
       data:
         aid: aid
         action: 'resurrect'
-        lang: window.defaults.lang
+        lang: window.current.lang
       dataType: 'json'
       success: (data, textStatus, jqXHR) =>
         msg = data['error'] ? ""

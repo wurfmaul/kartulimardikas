@@ -31,8 +31,7 @@ class Section
     sectionNumber = @panelsToSectionNumber()
     # change the browser's url to new section number
     @updateUrl(
-      action: window.defaults.action
-      aid: window.defaults.aid
+      params: window.current.parameters
       section: sectionNumber
     )
     # store the new section number to the browser's local storage
@@ -80,21 +79,21 @@ class Section
     Extract the correct section number
   ###
   @computeSectionNumber = ->
-    if ((section = window.defaults.section)?)
+    if ((section = window.current.section)?)
       # first priority: section is set by parameter
       section
-    else if (localStorage and (section = localStorage.getItem('section_' + window.defaults.action))?)
+    else if (localStorage and (section = localStorage.getItem('section_' + window.current.action))?)
       # second priority: value in the browser's local storage
       section
     else
       # third priority: default value
-      window.defaults.sectionDefault
+      window.default.section
 
   ###
     Stores a section number into the browser's local storage.
   ###
   @storeSectionNumber = (sectionNumber) ->
-    localStorage.setItem('section_' + window.defaults.action, sectionNumber)
+    localStorage.setItem('section_' + window.current.action, sectionNumber)
 
 # perform collapsing according to section number
 Section.init()

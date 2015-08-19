@@ -6,7 +6,7 @@ register = ->
       email: $('#in-email').val()
       password1: $('#in-password1').val()
       password2: $('#in-password2').val()
-      lang: window.defaults.lang
+      lang: window.current.lang
     dataType: 'json'
     success: (data, textStatus, jqXHR) ->
       msg = data['error'] ? ""

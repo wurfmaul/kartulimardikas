@@ -65,32 +65,28 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                                 <label for="in-name" class="control-label col-sm-3"><?= $l10n['algo_name'] ?></label>
 
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="in-name"
-                                           placeholder="<?= $l10n['algo_name'] ?>" value="<?= $name ?>">
+                                    <input type="text" class="form-control" id="in-name" placeholder="<?= $l10n['algo_name'] ?>" value="<?= $name ?>">
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label for="in-desc" class="control-label col-sm-3"><?= $l10n['description'] ?></label>
 
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="in-desc"
-                                           placeholder="<?= $l10n['description'] ?>" value="<?= $description ?>">
+                                    <input type="text" class="form-control" id="in-desc" placeholder="<?= $l10n['description'] ?>" value="<?= $description ?>">
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label for="in-tags" class="control-label col-sm-3"><?= $l10n['tags'] ?></label>
 
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="in-tags"
-                                           placeholder="<?= $l10n['tags'] ?>" value="<?= $tags ?>">
+                                    <input type="text" class="form-control" id="in-tags" placeholder="<?= $l10n['tags'] ?>" value="<?= $tags ?>">
                                 </div>
                             </div>
                             <div class="description-group">
                                 <label for="in-long"><?= $l10n['long_description'] ?></label>
                                 <textarea class="form-control" id="in-long" rows="3"><?= $long_description ?></textarea>
                             </div>
-                            <div class="panel panel-default"
-                                 <?php if ($long_preview === ""): ?>style="display: none;"<?php endif ?>>
+                            <div class="panel panel-default" <?php if ($long_preview === ""): ?>style="display: none;"<?php endif ?>>
                                 <div id="description-preview" class="panel-body"><?= $long_preview ?></div>
                                 <div class="panel-footer panel-footer-sm">
                                     <?= $l10n['preview'] ?>
@@ -99,8 +95,7 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                             </div>
                             <div class="footnote">
                                 <?= $l10n['use_markdown'] ?>
-                                <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet"
-                                   target="_blank"><span class="glyphicon glyphicon-info-sign"></span></a>
+                                <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_blank"><span class="glyphicon glyphicon-info-sign"></span></a>
                             </div>
                         </div>
                     </div>
@@ -121,6 +116,30 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                                 <tbody id="insertVarsHere">
                                 <?php foreach ($vars as $vid => $var):
                                     $rowVisible = ($vid === 'prototype') ? 'style="display:none"' : '';
+                                    switch($var->type) {
+                                        case "elem-int":
+                                            if ($var->value === 'R') {
+                                                $viewMode = sprintf($l10n['var_randomized'], $var->name);
+                                            } elseif ($var->value === '?') {
+                                                $viewMode = sprintf($l10n['var_uninitialized'], $var->name);
+                                            } elseif ($var->value === 'P') {
+                                                $viewMode = sprintf($l10n['var_parameter'], $var->name);
+                                            } else {
+                                                $viewMode = sprintf($l10n['var_defined'], $var->name, $var->value);
+                                            }
+                                            break;
+                                        case "array-int":
+                                            if ($var->value === 'R') {
+                                                $viewMode = sprintf($l10n['array_randomized'], $var->name);
+                                            } elseif ($var->value === '?') {
+                                                $viewMode = sprintf($l10n['array_uninitialized'], $var->name);
+                                            } elseif ($var->value === 'P') {
+                                                $viewMode = sprintf($l10n['var_parameter'], $var->name);
+                                            } else {
+                                                $viewMode = sprintf($l10n['var_defined'], $var->name, $var->value);
+                                            }
+                                            break;
+                                    }
                                     ?>
                                     <tr id="var-<?= $vid ?>" class="varRow" <?= $rowVisible ?>
                                         data-vid="<?= $vid ?>"
@@ -132,20 +151,19 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                                         <!-- Variable in view mode -->
                                         <td class="view">
                                             <div class="content">
-                                                <code class="cell"><?= $var->name ?> = <?= $var->value ?></code>
+                                                <code class="cell">
+                                                    <?= $viewMode ?>
+                                                </code>
                                             </div>
                                             <div class="tools">
-                                                <button type="button" class="btn btn-default btn-sm btn-var-count"
-                                                        title="<?= $l10n['usage_count'] ?>"># <code
-                                                        class="counter">0</code>
+                                                <button type="button" class="btn btn-default btn-sm btn-var-count" title="<?= $l10n['usage_count'] ?>">
+                                                    # <code class="counter">0</code>
                                                 </button>
                                                 <div class="btn-group btn-group-sm">
-                                                    <button type="button" class="btn btn-default btn-var-edit"
-                                                            title="<?= $l10n['edit_var'] ?>">
+                                                    <button type="button" class="btn btn-default btn-var-edit" title="<?= $l10n['edit_var'] ?>">
                                                         <span class="glyphicon glyphicon-pencil"></span>
                                                     </button>
-                                                    <button type="button" class="btn btn-default btn-var-remove"
-                                                            title="<?= $l10n['remove_var'] ?>">
+                                                    <button type="button" class="btn btn-default btn-var-remove" title="<?= $l10n['remove_var'] ?>">
                                                         <span class="glyphicon glyphicon-trash"></span>
                                                     </button>
                                                 </div>
@@ -156,8 +174,7 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                                         <td class="edit" style="display: none">
                                             <div class="form-group name-group">
                                                 <label class="sr-only"><?= $l10n['var_name'] ?></label>
-                                                <input class="form-control input-sm name" value="<?= $var->name ?>"
-                                                       placeholder="<?= $l10n['name'] ?>" type="text">
+                                                <input class="form-control input-sm name" value="<?= $var->name ?>" placeholder="<?= $l10n['name'] ?>" type="text">
                                             </div>
                                             <div class="form-group equals-group ">
                                                 <label class="sr-only"></label>
@@ -167,45 +184,37 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                                                 <label class="sr-only"><?= $l10n['data_type'] ?></label>
                                                 <select class="form-control input-sm type">
                                                     <optgroup label="<?= $l10n['element'] ?>">
-                                                        <option value="elem-int"
-                                                                <?php if ($var->type === 'elem-int'): ?>selected="selected"<?php endif ?>>
+                                                        <option value="elem-int" <?php if ($var->type === 'elem-int'): ?>selected="selected"<?php endif ?>>
                                                             <?= $l10n['int'] ?>
                                                         </option>
                                                     </optgroup>
                                                     <optgroup label="<?= $l10n['array'] ?>">
-                                                        <option value="array-int" data-target=".size"
-                                                                <?php if ($var->type === 'array-int'): ?>selected="selected"<?php endif ?>>
+                                                        <option value="array-int" data-target=".size" <?php if ($var->type === 'array-int'): ?>selected="selected"<?php endif ?>>
                                                             <?= $l10n['array_int'] ?>
                                                         </option>
                                                     </optgroup>
                                                 </select>
                                             </div>
-                                            <div class="form-group value-group" data-random="<?= $l10n['random'] ?>"
-                                                 data-uninit="<?= $l10n['uninitialized'] ?>">
+                                            <div class="form-group value-group">
                                                 <label class="sr-only" for="value"><?= $l10n['init_value'] ?></label>
-                                                <input class="form-control input-sm value" value="<?= $var->value ?>"
-                                                       placeholder="<?= $l10n['value'] ?>" type="text">
+                                                <input class="form-control input-sm value" value="<?= $var->value ?>" placeholder="<?= $l10n['value'] ?>" type="text">
                                             </div>
-                                            <div class="form-group size-group"
-                                                <?php if (substr($var->type, 0, 5) !== 'array'): ?> style="display: none;"<?php endif ?>>
+                                            <div class="form-group size-group" <?php if (substr($var->type, 0, 5) !== 'array'): ?> style="display: none;"<?php endif ?>>
                                                 <label class="sr-only"><?= $l10n['array_size'] ?></label>
                                                 <select class="form-control input-sm size">
                                                     <optgroup label="<?= $l10n['size'] ?>">
                                                         <?php for ($i = ARRAY_MIN_SIZE; $i <= ARRAY_MAX_SIZE; $i++): ?>
-                                                            <option
-                                                                <?php if ($var->size == $i): ?>selected="selected"<?php endif ?>><?= $i ?></option>
+                                                            <option <?php if ($var->size == $i): ?>selected="selected"<?php endif ?>><?= $i ?></option>
                                                         <?php endfor ?>
                                                     </optgroup>
                                                 </select>
                                             </div>
                                             <div class="tools">
                                                 <div class="btn-group btn-group-sm">
-                                                    <button type="button" class="btn btn-default btn-var-check"
-                                                            title="<?= $l10n['check_var'] ?>">
+                                                    <button type="button" class="btn btn-default btn-var-check" title="<?= $l10n['check_var'] ?>">
                                                         <span class="glyphicon glyphicon-ok"></span>
                                                     </button>
-                                                    <button type="button" class="btn btn-default btn-var-cancel"
-                                                            title="<?= $l10n['discard_changes'] ?>">
+                                                    <button type="button" class="btn btn-default btn-var-cancel" title="<?= $l10n['discard_changes'] ?>">
                                                         <span class="glyphicon glyphicon-remove"></span>
                                                     </button>
                                                 </div>
@@ -244,14 +253,14 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
 
                             <div id="node-btn-group" class="btn-group btn-group-sm" role="group"
                                  aria-label="<?= $l10n['create_a_node'] ?>">
-                                <button id="btn-add-assign" type="button" class="btn btn-default"
-                                        data-node="node_assign"><?= $l10n['assign_node_title'] ?>
+                                <button id="btn-add-assign" type="button" class="btn btn-default" data-node="node_assign">
+                                    <?= $l10n['assign_node_title'] ?>
                                 </button>
-                                <button id="btn-add-comment" type="button" class="btn btn-default"
-                                        data-node="node_comment"><?= $l10n['comment_node_title'] ?>
+                                <button id="btn-add-comment" type="button" class="btn btn-default" data-node="node_comment">
+                                    <?= $l10n['comment_node_title'] ?>
                                 </button>
-                                <button id="btn-add-compare" type="button" class="btn btn-default"
-                                        data-node="node_compare"><?= $l10n['compare_node_title'] ?>
+                                <button id="btn-add-compare" type="button" class="btn btn-default" data-node="node_compare">
+                                    <?= $l10n['compare_node_title'] ?>
                                 </button>
                                 <button id="btn-add-if" type="button" class="btn btn-default" data-node="node_if">
                                     <?= $l10n['if_node_title'] ?>
@@ -259,17 +268,17 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                                 <button id="btn-add-inc" type="button" class="btn btn-default" data-node="node_inc">
                                     <?= $l10n['inc_node_title'] ?>
                                 </button>
-                                <button id="btn-add-return" type="button" class="btn btn-default"
-                                        data-node="node_return"><?= $l10n['return_node_title'] ?>
+                                <button id="btn-add-return" type="button" class="btn btn-default" data-node="node_return">
+                                    <?= $l10n['return_node_title'] ?>
                                 </button>
-                                <button id="btn-add-swap" type="button" class="btn btn-default"
-                                        data-node="node_swap"><?= $l10n['swap_node_title'] ?>
+                                <button id="btn-add-swap" type="button" class="btn btn-default" data-node="node_swap">
+                                    <?= $l10n['swap_node_title'] ?>
                                 </button>
                                 <button id="btn-add-value" type="button" class="btn btn-default" data-node="node_value">
                                     <?= $l10n['value_node_title'] ?>
                                 </button>
-                                <button id="btn-add-while" type="button" class="btn btn-default"
-                                        data-node="node_while"><?= $l10n['while_node_title'] ?>
+                                <button id="btn-add-while" type="button" class="btn btn-default" data-node="node_while">
+                                    <?= $l10n['while_node_title'] ?>
                                 </button>
                             </div>
 
@@ -303,7 +312,15 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
     </div>
     <script type="text/javascript">
         // hand default values over to js
-        window.defaults.sectionDefault = <?= SECTIONS_EDIT ?>;
+        window.defaults = {
+            'section': "<?= SECTIONS_EDIT ?>"
+        };
+        // hand translations over to js
+        window.initializations = [
+            "<?= $l10n['random'] ?>",
+            "<?= $l10n['uninitialized'] ?>",
+            "<?= $l10n['parameter'] ?>"
+        ];
     </script>
 <?php else: ?>
     <div class="alert alert-danger" role="alert">

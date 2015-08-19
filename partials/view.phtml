@@ -5,7 +5,7 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
 
 // if algorithm is defined
 if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
-    // prepare algorithm meta-data
+// prepare algorithm meta-data
     $name = $__algorithm->name;
     $description = $__algorithm->description;
     if ($long_description = $__algorithm->long_description) {
@@ -16,10 +16,13 @@ if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
     }
     $tags = $__algorithm->tags;
 
-    // prepare variables
+// prepare variables
     $vars = json_decode($__algorithm->variables);
 
-    // prepare tree
+// prepare parameters
+    $params = (isset($_GET['p']) and is_array($_GET['p'])) ? $_GET['p'] : false;
+
+// prepare tree
     require_once BASEDIR . "includes/algorithm.php";
     $tree = new Tree(json_decode($__algorithm->tree));
     ?>
@@ -153,7 +156,7 @@ if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
                 <div class="panel panel-default">
                     <div class="panel-heading" data-target="#sourcecode">
                         <h4 class="panel-title">
-                        <span class="glyphicon glyphicon-chevron-down"></span>
+                            <span class="glyphicon glyphicon-chevron-down"></span>
                             <?= $l10n['source_code'] ?>
                         </h4>
                     </div>
@@ -206,34 +209,65 @@ if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    <?php foreach ($vars as $vid => $var): ?>
+                                    <?php foreach ($vars as $vid => $var):
+                                        switch ($var->type) {
+                                            // compute int elements
+                                            case 'elem-int':
+                                                if ($var->value === 'R') {
+                                                    $value = rand(0, 100); // TODO: max-number or range definable
+                                                } elseif ($var->value === '?') {
+                                                    $value = '?';
+                                                } elseif ($var->value === 'P') {
+                                                    $value = $params ? $params[$var->name] : 'P';
+                                                } else {
+                                                    $value = $var->value;
+                                                }
+                                                break;
+                                            // compute int arrays
+                                            case 'array-int':
+                                                if ($var->value === 'R') {
+                                                    $newValue = array();
+                                                    for ($i = 0; $i < $var->size; $i++)
+                                                        $newValue[] = rand(0, 100);
+                                                    $value = implode(',', $newValue);
+                                                } elseif ($var->value === '?') {
+                                                    $newValue = array();
+                                                    for ($i = 0; $i < $var->size; $i++)
+                                                        $newValue[] = '?';
+                                                    $value = implode(',', $newValue);
+                                                } elseif ($var->value === 'P') {
+                                                    $value = $params ? $params[$var->name] : 'P';
+                                                } else {
+                                                    $value = $var->value;
+                                                }
+                                                break;
+                                        }
+                                        ?>
                                         <tr id="var-<?= $vid ?>" class="variable"
                                             data-vid="<?= $vid ?>"
                                             data-name="<?= $var->name ?>"
-                                            data-value="<?= $var->value ?>"
+                                            data-value="<?= $value ?>"
                                             data-type="<?= $var->type ?>">
                                             <td>
                                                 <code class="name"><?= $var->name ?></code>
                                             </td>
                                             <td class="var-value">
                                                 <?php if (substr($var->type, 0, 6) === "array-"): // deal with "array-{int}" ?>
-                                                    <div class="btn-group">
-                                                        <?php foreach (explode(',', $var->value) as $offset => $value): ?>
-                                                            <button class="btn btn-default value-container offset_<?= $offset ?>" data-offset="<?= $offset ?>">
-                                                                <span class="value"><?= $value ?></span>
-                                                                <span class="glyphicon glyphicon-pencil write"></span>
-                                                                <span class="glyphicon glyphicon-eye-open read"></span>
-                                                            </button>
-                                                            <input class="btn btn-default value-edit offset_<?= $offset ?>" value="<?= $value ?>" data-offset="<?= $offset ?>"/>
-                                                        <?php endforeach ?>
-                                                    </div>
+                                                    <?php foreach (explode(',', $value) as $offset => $val): ?>
+                                                        <button class="btn btn-default value-container offset_<?= $offset ?>" data-offset="<?= $offset ?>">
+                                                            <span class="value"><?= $val ?></span>
+                                                            <span class="glyphicon glyphicon-pencil write"></span>
+                                                            <span class="glyphicon glyphicon-eye-open read"></span>
+                                                        </button>
+                                                        <input class="btn btn-default value-edit offset_<?= $offset ?>" data-offset="<?= $offset ?>"/>
+                                                    <?php endforeach ?>
                                                 <?php else: // deal with "elem-{?,value}" ?>
                                                     <button class="btn btn-default value-container">
-                                                        <span class="value"><?= $var->value ?></span>
+                                                        <span class="value"><?= $value ?></span>
                                                         <span class="glyphicon glyphicon-pencil write"></span>
                                                         <span class="glyphicon glyphicon-eye-open read"></span>
                                                     </button>
-                                                    <input class="btn btn-default value-edit" value="<?= $var->value ?>"/>
+                                                    <input class="btn btn-default value-edit"/>
                                                 <?php endif ?>
                                             </td>
                                         </tr>
@@ -258,44 +292,37 @@ if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
                     </div>
                     <div id="statistics" class="panel-collapse">
                         <div class="panel-body">
-                            <table class="table table-hover table-bordered">
+                            <table class="table table-hover table-bordered statistics">
                                 <thead>
                                 <tr>
                                     <th><?= $l10n['operations'] ?></th>
-                                    <th><?= $l10n['count'] ?></th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 <tr>
-                                    <td><?= $l10n['accesses'] ?></td>
                                     <td>
-                                        <div class="btn-group">
-                                            <input type="button" class="btn btn-default" disabled="disabled" value="0" id="stats-accesses"/>
-                                        </div>
+                                        <label for="stats-accesses"><?= $l10n['accesses'] ?></label>
+                                        <input class="btn btn-default statistic" readonly="readonly" value="0" id="stats-accesses"/>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><?= $l10n['assignments'] ?></td>
                                     <td>
-                                        <div class="btn-group">
-                                            <input type="button" class="btn btn-default" disabled="disabled" value="0" id="stats-assignments"/>
-                                        </div>
+                                        <label for="stats-assignments"><?= $l10n['assignments'] ?></label>
+                                        <input class="btn btn-default statistic" readonly="readonly" value="0" id="stats-assignments"/>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><?= $l10n['comparisons'] ?></td>
                                     <td>
-                                        <div class="btn-group">
-                                            <input type="button" class="btn btn-default" disabled="disabled" value="0" id="stats-comparisons"/>
-                                        </div>
+                                        <label for="stats-comparisons"><?= $l10n['comparisons'] ?></label>
+                                        <input class="btn btn-default statistic" readonly="readonly" value="0" id="stats-comparisons"/>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><?= $l10n['arithmetic'] ?><br/><?= $l10n['logic'] ?></td>
                                     <td>
-                                        <div class="btn-group">
-                                            <input type="button" class="btn btn-default" disabled="disabled" value="0" id="stats-arithmeticLogic"/>
-                                        </div>
+                                        <label for="stats-arithmeticLogic">
+                                            <?= $l10n['arithmetic'] ?> (<code>+ &minus; &times; / %</code>)<br/>
+                                            <?= $l10n['logic'] ?> (<code>& |</code>)</label>
+                                        <input class="btn btn-default statistic" readonly="readonly" value="0" id="stats-arithmeticLogic"/>
                                     </td>
                                 </tr>
                                 </tbody>
@@ -308,7 +335,8 @@ if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
         <!-- RIGHT COLUMN END -->
     </div>
     <!-- CONTENT END -->
-<?php else: // no valid aid ?>
+<?php else: // no valid aid
+    ?>
     <div class="alert alert-danger" role="alert">
         <strong><?= $l10n['error'] ?></strong><br/>
 
@@ -323,12 +351,13 @@ if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
     </div>
 <?php endif ?>
 <script type="text/javascript">
-    // hand default values over to js
-    window.defaults.sectionDefault = <?= SECTIONS_VIEW ?>;
-    window.defaults.maxSteps = <?= MAX_STEPS ?>;
-    window.defaults.speed = <?= SPEED ?>;
-    window.defaults.breaks = '<?= DEFAULT_BREAKPOINT ?>';
-    // hand error messages over to js
+    // hand default values, error codes and translations over to js
+    window.defaults = {
+        'section': "<?= SECTIONS_VIEW ?>",
+        'maxSteps': "<?= MAX_STEPS ?>",
+        'speed': "<?= SPEED ?>",
+        'breaks': "<?= DEFAULT_BREAKPOINT ?>"
+    };
     window.errorCodes = {
         <?php foreach ($l10n['runtime_errors'] as $key => $value): ?>
         '<?= $key ?>': "<?= $value ?>",

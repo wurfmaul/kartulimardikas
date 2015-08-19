@@ -117,9 +117,10 @@ if ($__algorithm) {
     <?php endif ?>
 
     <script type="text/javascript">
-        window.defaults = {
+        window.current = {
             'action': '<?= ACTION ?>',
             'section': <?= isset($_GET['section']) ? $_GET['section'] : 'null' ?>,
+            'parameters': '<?= json_encode($_GET) ?>',
             'lang': '<?= LANG ?>'
         };
     </script>
@@ -297,8 +298,7 @@ if ($__algorithm) {
                     <ul class="dropdown-menu" role="menu">
                         <?php foreach (Language::getInstance()->availableLanguages as $code => $name): ?>
                             <li<?php if ($code === LANG): ?> class="disabled"<?php endif ?>>
-                                <a role="menuitem" tabindex="-1"
-                                   href="<?= url(['lang' => $code], true, true, false) ?>"><?= $name ?></a>
+                                <a role="menuitem" tabindex="-1" href="<?= url(['lang' => $code], $_GET, true, false) ?>"><?= $name ?></a>
                             </li>
                         <?php endforeach ?>
                     </ul>

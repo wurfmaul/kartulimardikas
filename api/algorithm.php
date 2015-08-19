@@ -143,6 +143,7 @@ class EditAlgorithmManager
         $type = trim($_POST['type']);
         $value = trim($_POST['value']);
         $size = intval($_POST['size']);
+        $viewMode = "";
 
         // get variables from database
         $vars = $this->_model->fetchAlgorithm($this->_aid)->variables;
@@ -168,40 +169,42 @@ class EditAlgorithmManager
         // check for correct initialization
         $RANDOM_VALUE = $this->_l10n['random'];
         $UNINIT_VALUE = $this->_l10n['uninitialized'];
+        $PARAM_VALUE = $this->_l10n['parameter'];
         switch ($type) {
-
             // deal with int elements
             case self::INT_TYPE:
                 if ($value === $RANDOM_VALUE) {
-                    $value = rand(0, 100); // TODO: max-number or range definable
+//                    $value = rand(0, 100); // TODO: max-number or range definable
+                    $value = 'R';
+                    $viewMode = sprintf($this->_l10n['var_randomized'], $name);
                 } elseif ($value === $UNINIT_VALUE) {
                     $value = '?';
+                    $viewMode = sprintf($this->_l10n['var_uninitialized'], $name);
+                } elseif ($value === $PARAM_VALUE) {
+                    $value = 'P';
+                    $viewMode = sprintf($this->_l10n['var_parameter'], $name);
                 } elseif ($value !== "") {
                     $value = intval($value);
+                    $viewMode = sprintf($this->_l10n['var_defined'], $name, $value);
                 } else {
                     $this->_response['error-value'] = $this->_l10n['empty_value'] . BR;
                     unset($value);
                 }
                 break;
-
             // deal with int arrays
             case self::INT_ARRAY_TYPE:
                 if ($value === $RANDOM_VALUE) {
                     $this->_checkArraySize($size);
-                    if ($size) {
-                        $newValue = array();
-                        for ($i = 0; $i < $size; $i++)
-                            $newValue[] = rand(0, $size);
-                        $value = implode(',', $newValue);
-                    }
+                    $value = 'R';
+                    $viewMode = sprintf($this->_l10n['array_randomized'], $name);
                 } elseif ($value === $UNINIT_VALUE) {
                     $this->_checkArraySize($size);
-                    if ($size) {
-                        $newValue = array();
-                        for ($i = 0; $i < $size; $i++)
-                            $newValue[] = '?';
-                        $value = implode(',', $newValue);
-                    }
+                    $value = '?';
+                    $viewMode = sprintf($this->_l10n['array_uninitialized'], $name);
+                } elseif ($value === $PARAM_VALUE) {
+                    $this->_checkArraySize($size);
+                    $value = 'P';
+                    $viewMode = sprintf($this->_l10n['var_parameter'], $name);
                 } elseif (!empty($value)) {
                     $newValue = array();
                     $size = 0;
@@ -211,6 +214,7 @@ class EditAlgorithmManager
                     }
                     $value = implode(',', $newValue);
                     $this->_checkArraySize($size);
+                    $viewMode = sprintf($this->_l10n['var_defined'], $name, $value);
                 } else {
                     $this->_response['error-value'] = $this->_l10n['empty_value'] . BR;
                     $value = false;
@@ -235,7 +239,7 @@ class EditAlgorithmManager
                 'value' => $value,
                 'size' => $size
             );
-            $this->_response['viewMode'] = sprintf("%s = %s", $name, $value);
+            $this->_response['viewMode'] = $viewMode;
 
             // save changes to database
             $this->_model->updateAlgorithmVariables($this->_aid, json_encode($vars));

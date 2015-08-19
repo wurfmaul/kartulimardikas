@@ -67,6 +67,7 @@
 .variables {
   .value-container {
     position: relative;
+    margin-right: -5px;
     .read, .write {
       font-size: x-small;
       display: none;
@@ -77,13 +78,16 @@
     }
     &.highlight-read .read {
       display: inline-block;
+      z-index: 1;
     }
     &.highlight-write .write {
       display: inline-block;
+      z-index: 1;
     }
   }
   .value-edit {
     display: none;
+    margin-right: -5px;
     padding: 6px 1px;
     width: 42px;
   }
@@ -116,6 +120,13 @@
     &.cursor-down {
       background: darkgray url("../img/cursor-down.png") no-repeat;
     }
+  }
+}
+
+.statistics {
+  .statistic {
+    max-width: 100px;
+    float: right;
   }
 }
 

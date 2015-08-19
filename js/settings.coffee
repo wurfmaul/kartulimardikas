@@ -3,9 +3,9 @@ class Api
     $.ajax "api/algorithm.php?area=settings",
       type: 'POST'
       data:
-        aid: window.defaults.aid
+        aid: window.current.aid
         status: status
-        lang: window.defaults.lang
+        lang: window.current.lang
       dataType: 'json'
       success: (data) =>
         if data['error']? then @_printError(data['error'])
@@ -19,8 +19,8 @@ class Api
     $.ajax "api/algorithm.php?area=delete",
       type: 'POST'
       data:
-        aid: window.defaults.aid
-        lang: window.defaults.lang
+        aid: window.current.aid
+        lang: window.current.lang
       dataType: 'json'
       success: (data) =>
         if data['error']? then @_printError(data['error'])

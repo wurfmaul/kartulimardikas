@@ -90,7 +90,7 @@ window.initValueInput = (elem) ->
   input.autocomplete(
     delay: 0
     minLength: 0
-    source: [elem.data('random'), elem.data('uninit')]
+    source: window.initializations
   ).click(->
     # open search with basic options
     $(this).autocomplete("search", "")

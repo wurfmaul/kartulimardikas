@@ -6,7 +6,7 @@
  *
  * @param array $parameters Associative array holding parameters as keys.
  * @param bool $replace The old parameters, in order to replace
- *  parts. If null, nothing is replaced.
+ *  parts. If false, nothing is replaced.
  * @param bool $encode Whether special characters (&) should be encoded.
  * @param bool $keepSection Whether the section parameter should be removed.
  * @return string The newly computed relative url.
@@ -18,8 +18,8 @@ function url($parameters = [], $replace = false, $encode = true, $keepSection = 
     $_index = 0;
     if ($replace) {
         // Run through all the old parameters
-        foreach ($_GET as $key => $value) {
-            if ($keepSection || $key === 'section') {
+        foreach ($replace as $key => $value) {
+            if ($keepSection && $key === 'section') {
                 continue; # ignore section
             }
             $_url .= ($_index++ === 0) ? '?' : $_amp;
@@ -29,7 +29,13 @@ function url($parameters = [], $replace = false, $encode = true, $keepSection = 
                 $value = $parameters[$key];
                 unset($parameters[$key]);
             }
-            $_url .= $key . '=' . $value;
+            if (is_object($value)) {
+                foreach ($value as $_key => $_value) {
+                    $_url .= $key . "[" . $_key . "]=" . $_value;
+                }
+            } else {
+                $_url .= "$key=$value";
+            }
         }
     }
     foreach ($parameters as $key => $value) {

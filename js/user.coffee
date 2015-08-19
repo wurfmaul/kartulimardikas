@@ -27,7 +27,7 @@ change = (params, callback) ->
       $('#userAlert').show('slow')
 
 $ ->
-  lang = window.defaults.lang
+  lang = window.current.lang
   $('#usernameBtn').click ->
     username = $('#in-username').val()
     change({username: username, lang: lang}, (msg) ->
