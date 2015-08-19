@@ -301,19 +301,18 @@ $ ->
   $('.value-edit').keyup((event) ->
     switch (event.which)
       when 13 # enter key
-        newVal = $(this).val()
-        if (/^[0-9]+$/.test(newVal))
+        if (newVal = DataType.parse($(this).val()))
           if (offset = $(this).data('offset'))? # list
             vid = $(this).closest('.variable').data('vid')
             index = $(this).data('offset')
-            player.memory.arraySet(vid, index, newVal)
-            player.stats.writeArrayVar(vid, index, newVal)
+            player.memory.arraySet(vid, index, newVal.value)
+            player.stats.writeArrayVar(vid, index, newVal.value)
           else # single value
             vid = $(this).closest('.variable').data('vid')
-            player.memory.set(vid, newVal)
-            player.stats.writeVar(vid, newVal)
+            player.memory.set(vid, newVal.value)
+            player.stats.writeVar(vid, newVal.value)
         else
-          alert(window.l10n['invalid_value'].replace('%1', newVal))
+          alert(window.l10n['invalid_value'].replace('%1', $(this).val()))
         $(this).blur()
       when 27 # esc key
         $(this).blur()

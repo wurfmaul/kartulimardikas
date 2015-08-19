@@ -155,19 +155,9 @@ class Node
 
   @parseValue: (value, memory) ->
     value = $.trim(value)
-    # check for const (int)
-    intVal = parseInt(value)
-    if (intVal + "" is value)
-      return {kind: 'const', type: 'int', value: intVal}
-
-    # check for const (bool)
-    boolVal = value.toLowerCase()
-    if (boolVal is 'true' or boolVal is 'false')
-      return {kind: 'const', type: 'bool', value: boolVal is 'true'}
-
-    # check for const (char) TODO: data-type char
-    # if (/^'[A-Za-z]'$/.test(value))
-    #   return {kind: 'const', type: 'char', value: value}
+    # check for constants
+    if (constant = DataType.parse(value))
+      return {kind: 'const', type: constant.type, value: constant.value}
 
     # check for array ([])
     open = value.indexOf('[')
@@ -759,6 +749,24 @@ class window.Memory
       @memory[index].value = elem.value
       @memory[index].count = 0
     )
+
+class window.DataType
+  @parse: (value) ->
+    # check for number
+    intVal = parseInt(value)
+    if (intVal + "" is value)
+      return {type: 'int', value: intVal}
+
+    # check for boolean
+    boolVal = value.toLowerCase()
+    if (boolVal is 'true' or boolVal is 'false')
+      return {type: 'bool', value: boolVal is 'true'}
+
+    # check for character TODO: data-type char
+    # if (/^'[A-Za-z]'$/.test(value))
+    #   return {kind: 'const', type: 'char', value: value}
+
+    false
 
 class window.ExecutionError extends Error
   constructor: (@message, @parts) ->
