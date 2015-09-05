@@ -1126,7 +1126,7 @@ class Value
         if (isset($value->kind)) $this->kind = $value->kind;
         if (isset($value->type)) $this->type = $value->type;
         if (isset($value->value)) $this->value = $value->value;
-        if (isset($value->vid)) $this->vid = $value->vid;
+        if (isset($value->vid)) $this->vid = intval($value->vid);
         if (isset($value->index)) $this->index = new Value($value->index);
         if (isset($value->prop)) $this->prop = $value->prop;
         if (isset($value->left)) $this->left = new Value($value->left);
@@ -1145,16 +1145,16 @@ class Value
                 return $this->value;
             case self::INDEX_KIND:
                 return sprintf("%s[%s]",
-                    $vars[$this->vid]->name,
+                    $vars[$this->vid]['name'],
                     $this->index->parse($params)
                 );
             case self::PROP_KIND:
                 return sprintf("%s.%s",
-                    $vars[$this->vid]->name,
+                    $vars[$this->vid]['name'],
                     $this->prop
                 );
             case self::VAR_KIND:
-                return $vars[$this->vid]->name;
+                return $vars[$this->vid]['name'];
             case self::COMP_KIND:
                 $left = $this->left->parse($params);
                 $right = $this->right->parse($params);

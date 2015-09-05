@@ -29,8 +29,8 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
     }
 
     // prepare variables and add prototype row to variables
-    $vars = (array) json_decode($__algorithm->variables);
-    $vars['prototype'] = (object)['name' => '', 'type' => '', 'value' => '', 'size' => 2];
+    $vars = json_decode($__algorithm->variables, true);
+    $vars['prototype'] = ['name' => '', 'type' => '', 'value' => '', 'size' => 2];
 
     // prepare tree
     require_once BASEDIR . "includes/algorithm.php";
@@ -115,6 +115,7 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                             <table class="table table-condensed table-bordered table-hover variables">
                                 <tbody id="insertVarsHere">
                                 <?php foreach ($vars as $vid => $var):
+                                    $var = (object) $var;
                                     $rowVisible = ($vid === 'prototype') ? 'style="display:none"' : '';
                                     $viewMode = $editMode = null;
                                     $viewLabel = $var->name;
