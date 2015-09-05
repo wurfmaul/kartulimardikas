@@ -8,7 +8,7 @@ register = ->
       password2: $('#in-password2').val()
       lang: window.current.lang
     dataType: 'json'
-    success: (data, textStatus, jqXHR) ->
+    success: (data) ->
       msg = data['error'] ? ""
 
       # check for errors
@@ -24,7 +24,7 @@ register = ->
         $('#registerAlert').show('slow')
       else
         $('#registerForm').submit()
-    error: (jqXHR, textStatus, errorThrown) ->
+    error: (jqXHR, textStatus) ->
       $('#registerAlertText').html "AJAX Error: #{textStatus}"
       $('#registerAlert').show('slow')
 

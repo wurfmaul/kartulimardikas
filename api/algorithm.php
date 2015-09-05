@@ -167,7 +167,6 @@ class EditAlgorithmManager
         $RANDOM_VALUE = $this->_l10n['random'];
         $UNINIT_VALUE = $this->_l10n['uninitialized'];
         $PARAM_VALUE = $this->_l10n['parameter'];
-
         $viewLabel = $name;
         $viewMode = null;
         switch ($type) {
@@ -229,6 +228,8 @@ class EditAlgorithmManager
         if ($name) $this->_response['name'] = $name;
         if (isset($value)) $this->_response['value'] = $value;
         if ($size) $this->_response['size'] = $size;
+        $this->_response['viewMode'] = $viewMode;
+        $this->_response['viewLabel'] = $viewLabel;
 
         // if every field has been filled:
         if ($type && $name && isset($value) && $size) {
@@ -238,11 +239,9 @@ class EditAlgorithmManager
                 'value' => $value,
                 'size' => $size
             );
-            $this->_response['viewMode'] = $viewMode;
-            $this->_response['viewLabel'] = $viewLabel;
 
             // save changes to database
-            $this->_model->updateAlgorithmVariables($this->_aid, json_encode($vars));
+            $this->_model->updateAlgorithmVariables($this->_aid, json_encode($vars, JSON_FORCE_OBJECT));
 
             // generate final response
             $this->_response['success'] = $this->_l10n['saved_to_db'];

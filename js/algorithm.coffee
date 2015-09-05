@@ -708,8 +708,8 @@ class window.Tree
 
 class window.Memory
   constructor: (@table) ->
-    @memory = []
-    @original = []
+    @memory = new Object()
+    @original = new Object()
     @table.children().not('#var-prototype').each((index, element) =>
       vid = $(element).data('vid')
       name = $(element).data('name')
