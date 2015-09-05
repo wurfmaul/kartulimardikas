@@ -29,7 +29,7 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
     }
 
     // prepare variables and add prototype row to variables
-    $vars = json_decode($__algorithm->variables);
+    $vars = (array) json_decode($__algorithm->variables);
     $vars['prototype'] = (object)['name' => '', 'type' => '', 'value' => '', 'size' => 2];
 
     // prepare tree
@@ -116,35 +116,36 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                                 <tbody id="insertVarsHere">
                                 <?php foreach ($vars as $vid => $var):
                                     $rowVisible = ($vid === 'prototype') ? 'style="display:none"' : '';
-                                    $viewMode = $editMode = "";
+                                    $viewMode = $editMode = null;
+                                    $viewLabel = $var->name;
                                     switch($var->type) {
                                         case "elem-int":
                                             if ($var->value === 'R') {
-                                                $viewMode = sprintf($l10n['var_randomized'], $var->name);
+                                                $viewMode = $l10n['var_randomized'];
                                                 $editMode = $l10n['random'];
                                             } elseif ($var->value === '?') {
-                                                $viewMode = sprintf($l10n['var_uninitialized'], $var->name);
+                                                $viewMode = $l10n['var_uninitialized'];
                                                 $editMode = $l10n['uninitialized'];
                                             } elseif ($var->value === 'P') {
-                                                $viewMode = sprintf($l10n['var_parameter'], $var->name);
+                                                $viewMode = $l10n['var_parameter'];
                                                 $editMode = $l10n['parameter'];
                                             } else {
-                                                $viewMode = sprintf($l10n['var_defined'], $var->name, $var->value);
+                                                $viewLabel = sprintf($l10n['var_defined'], $var->name, $var->value);
                                                 $editMode = $var->value;
                                             }
                                             break;
                                         case "array-int":
                                             if ($var->value === 'R') {
-                                                $viewMode = sprintf($l10n['array_randomized'], $var->name);
+                                                $viewMode = $l10n['array_randomized'];
                                                 $editMode = $l10n['random'];
                                             } elseif ($var->value === '?') {
-                                                $viewMode = sprintf($l10n['array_uninitialized'], $var->name);
+                                                $viewMode = $l10n['array_uninitialized'];
                                                 $editMode = $l10n['uninitialized'];
                                             } elseif ($var->value === 'P') {
-                                                $viewMode = sprintf($l10n['var_parameter'], $var->name);
+                                                $viewMode = $l10n['var_parameter'];
                                                 $editMode = $l10n['parameter'];
                                             } else {
-                                                $viewMode = sprintf($l10n['var_defined'], $var->name, $var->value);
+                                                $viewLabel = sprintf($l10n['var_defined'], $var->name, $var->value);
                                                 $editMode = $var->value;
                                             }
                                             break;
@@ -160,9 +161,10 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                                         <!-- Variable in view mode -->
                                         <td class="view">
                                             <div class="content">
-                                                <code class="cell">
-                                                    <?= $viewMode ?>
-                                                </code>
+                                                <code class="cell"><?= $viewLabel ?></code>
+                                                <span class="details">
+                                                    <?php if (!is_null($viewMode)): ?>(<?= $viewMode ?>)<?php endif ?>
+                                                </span>
                                             </div>
                                             <div class="tools">
                                                 <button type="button" class="btn btn-default btn-sm btn-var-count" title="<?= $l10n['usage_count'] ?>">
@@ -256,39 +258,70 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                         </h4>
                     </div>
                     <div id="stepPanel" class="panel-collapse">
-                        <div class="panel-body algorithm" style="text-align: center">
-                            <ul class="insertStepsHere" class="sortable"
-                                data-node-id="0"><?php $tree->printHtml(['vars' => $vars, 'mode' => 'edit']) ?></ul>
-
-                            <div id="node-btn-group" class="btn-group btn-group-sm" role="group"
-                                 aria-label="<?= $l10n['create_a_node'] ?>">
-                                <button id="btn-add-assign" type="button" class="btn btn-default" data-node="node_assign">
-                                    <?= $l10n['assign_node_title'] ?>
-                                </button>
-                                <button id="btn-add-comment" type="button" class="btn btn-default" data-node="node_comment">
-                                    <?= $l10n['comment_node_title'] ?>
-                                </button>
-                                <button id="btn-add-compare" type="button" class="btn btn-default" data-node="node_compare">
-                                    <?= $l10n['compare_node_title'] ?>
-                                </button>
-                                <button id="btn-add-if" type="button" class="btn btn-default" data-node="node_if">
-                                    <?= $l10n['if_node_title'] ?>
-                                </button>
-                                <button id="btn-add-inc" type="button" class="btn btn-default" data-node="node_inc">
-                                    <?= $l10n['inc_node_title'] ?>
-                                </button>
-                                <button id="btn-add-return" type="button" class="btn btn-default" data-node="node_return">
-                                    <?= $l10n['return_node_title'] ?>
-                                </button>
-                                <button id="btn-add-swap" type="button" class="btn btn-default" data-node="node_swap">
-                                    <?= $l10n['swap_node_title'] ?>
-                                </button>
-                                <button id="btn-add-value" type="button" class="btn btn-default" data-node="node_value">
-                                    <?= $l10n['value_node_title'] ?>
-                                </button>
-                                <button id="btn-add-while" type="button" class="btn btn-default" data-node="node_while">
-                                    <?= $l10n['while_node_title'] ?>
-                                </button>
+                        <div class="panel-body algorithm">
+                            <ul class="insertStepsHere" class="sortable" data-node-id="0"><?php $tree->printHtml(['vars' => $vars, 'mode' => 'edit']) ?></ul>
+                        </div>
+                        <div class="panel-body buttons">
+                            <div id="node-btn-group" class="btn-group" role="group" aria-label="<?= $l10n['create_a_node'] ?>">
+                                <div id="allnodes-group" class="btn-group" role="group">
+                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <span class="glyphicon glyphicon-plus"></span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="btn-add-assign" data-node="node_assign"><?= $l10n['assign_node_title'] ?></a></li>
+                                        <li><a class="btn-add-comment" data-node="node_comment"><?= $l10n['comment_node_title'] ?></a></li>
+                                        <li><a class="btn-add-compare" data-node="node_compare"><?= $l10n['compare_node_title'] ?></a></li>
+                                        <li><a class="btn-add-function" data-node="node_function"><?= $l10n['function_node_title'] ?></a></li>
+                                        <li><a class="btn-add-if" data-node="node_if"><?= $l10n['if_node_title'] ?></a></li>
+                                        <li><a class="btn-add-inc" data-node="node_inc"><?= $l10n['inc_node_title'] ?></a></li>
+                                        <li><a class="btn-add-return" data-node="node_return"><?= $l10n['return_node_title'] ?></a></li>
+                                        <li><a class="btn-add-swap" data-node="node_swap"><?= $l10n['swap_node_title'] ?></a></li>
+                                        <li><a class="btn-add-value" data-node="node_value"><?= $l10n['value_node_title'] ?></a></li>
+                                        <li><a class="btn-add-while" data-node="node_while"><?= $l10n['while_node_title'] ?></a></li>
+                                    </ul>
+                                </div>
+                                <div id="annotations-group" class="btn-group" role="group">
+                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Annotations
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="btn-add-comment" data-node="node_comment"><?= $l10n['comment_node_title'] ?></a></li>
+                                    </ul>
+                                </div>
+                                <div id="operations-group" class="btn-group" role="group">
+                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Operations
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="btn-add-assign" data-node="node_assign"><?= $l10n['assign_node_title'] ?></a></li>
+                                        <li><a class="btn-add-compare" data-node="node_compare"><?= $l10n['compare_node_title'] ?></a></li>
+                                        <li><a class="btn-add-function" data-node="node_function"><?= $l10n['function_node_title'] ?></a></li>
+                                        <li><a class="btn-add-inc" data-node="node_inc"><?= $l10n['inc_node_title'] ?></a></li>
+                                        <li><a class="btn-add-return" data-node="node_return"><?= $l10n['return_node_title'] ?></a></li>
+                                        <li><a class="btn-add-swap" data-node="node_swap"><?= $l10n['swap_node_title'] ?></a></li>
+                                    </ul>
+                                </div>
+                                <div id="structure-group" class="btn-group" role="group">
+                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Structure
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="btn-add-if" data-node="node_if"><?= $l10n['if_node_title'] ?></a></li>
+                                        <li><a class="btn-add-while" data-node="node_while"><?= $l10n['while_node_title'] ?></a></li>
+                                    </ul>
+                                </div>
+                                <div id="value-group" class="btn-group" role="group">
+                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Values
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="btn-add-value" data-node="node_value"><?= $l10n['value_node_title'] ?></a></li>
+                                    </ul>
+                                </div>
                             </div>
 
                             <ul style="display: none">
@@ -303,9 +336,10 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                                 Node::printPrototype(Node::ASSIGN_NODE, $params);
                                 Node::printPrototype(Node::COMMENT_NODE, $params);
                                 Node::printPrototype(Node::COMPARE_NODE, $params);
-                                Node::printPrototype(Node::RETURN_NODE, $params);
+                                Node::printPrototype(Node::FUNCTION_NODE, $params);
                                 Node::printPrototype(Node::IF_NODE, $params);
                                 Node::printPrototype(Node::INC_NODE, $params);
+                                Node::printPrototype(Node::RETURN_NODE, $params);
                                 Node::printPrototype(Node::SWAP_NODE, $params);
                                 Node::printPrototype(Node::VALUE_NODE, $params);
                                 Node::printPrototype(Node::WHILE_NODE, $params);

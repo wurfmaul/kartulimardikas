@@ -1,14 +1,9 @@
 @import "mixins";
 
-@assign-node-color: #ffb181;
-@comment-node-color: #808080;
-@compare-node-color: #fff465;
-@return-node-color: #a6e0ff;
-@if-node-color: #b2e792;
-@inc-node-color: #b75946;
-@swap-node-color: #82ffd2;
-@value-node-color: #d3d3d3;
-@while-node-color: #d5a2da;
+@annotations-color: #808080;
+@operations-color: #ffb181;
+@structure-color: #b2e792;
+@values-color: #d5a2da;
 
 .prepare-color(@c) {
   @color: screen(@c, #cccccc);
@@ -25,7 +20,6 @@
     .node {
       @border: 1px solid gray;
       @radius: 5px;
-
       list-style-type: none;
 
       table {
@@ -98,31 +92,34 @@
       }
 
       &.assign-node {
-        .nodeStyle(@assign-node-color);
+        .nodeStyle(@operations-color);
       }
       &.comment-node {
-        .nodeStyle(@comment-node-color);
+        .nodeStyle(@annotations-color);
       }
       &.compare-node {
-        .nodeStyle(@compare-node-color);
+        .nodeStyle(@operations-color);
       }
-      &.return-node {
-        .nodeStyle(@return-node-color);
+      &.function-node {
+        .nodeStyle(@operations-color);
       }
       &.if-node {
-        .nodeStyle(@if-node-color);
+        .nodeStyle(@structure-color);
       }
       &.inc-node {
-        .nodeStyle(@inc-node-color);
+        .nodeStyle(@operations-color);
+      }
+      &.return-node {
+        .nodeStyle(@operations-color);
       }
       &.swap-node {
-        .nodeStyle(@swap-node-color);
+        .nodeStyle(@operations-color);
       }
       &.value-node {
-        .nodeStyle(@value-node-color);
+        .nodeStyle(@values-color);
       }
       &.while-node {
-        .nodeStyle(@while-node-color);
+        .nodeStyle(@structure-color);
       }
     }
   }

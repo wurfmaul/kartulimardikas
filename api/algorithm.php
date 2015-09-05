@@ -143,16 +143,13 @@ class EditAlgorithmManager
         $type = trim($_POST['type']);
         $value = trim($_POST['value']);
         $size = intval($_POST['size']);
-        $viewMode = "";
 
         // get variables from database
         $vars = $this->_model->fetchAlgorithm($this->_aid)->variables;
         $vars = (is_null($vars)) ? array() : json_decode($vars, true);
 
-        // check for correct name and duplicates
+        // check if name is specified
         $name = htmlspecialchars($name);
-
-        // check if name is not specified
         if (strlen($name) === 0) {
             $this->_response['error-name'] = $this->_l10n['empty_name'] . BR;
             $name = false;
@@ -170,22 +167,24 @@ class EditAlgorithmManager
         $RANDOM_VALUE = $this->_l10n['random'];
         $UNINIT_VALUE = $this->_l10n['uninitialized'];
         $PARAM_VALUE = $this->_l10n['parameter'];
+
+        $viewLabel = $name;
+        $viewMode = null;
         switch ($type) {
             // deal with int elements
             case self::INT_TYPE:
                 if ($value === $RANDOM_VALUE) {
-//                    $value = rand(0, 100); // TODO: max-number or range definable
                     $value = 'R';
-                    $viewMode = sprintf($this->_l10n['var_randomized'], $name);
+                    $viewMode = $this->_l10n['var_randomized'];
                 } elseif ($value === $UNINIT_VALUE) {
                     $value = '?';
-                    $viewMode = sprintf($this->_l10n['var_uninitialized'], $name);
+                    $viewMode = $this->_l10n['var_uninitialized'];
                 } elseif ($value === $PARAM_VALUE) {
                     $value = 'P';
-                    $viewMode = sprintf($this->_l10n['var_parameter'], $name);
+                    $viewMode = $this->_l10n['var_parameter'];
                 } elseif ($value !== "") {
                     $value = intval($value);
-                    $viewMode = sprintf($this->_l10n['var_defined'], $name, $value);
+                    $viewLabel = sprintf($this->_l10n['var_defined'], $name, $value);
                 } else {
                     $this->_response['error-value'] = $this->_l10n['empty_value'] . BR;
                     unset($value);
@@ -196,15 +195,15 @@ class EditAlgorithmManager
                 if ($value === $RANDOM_VALUE) {
                     $this->_checkArraySize($size);
                     $value = 'R';
-                    $viewMode = sprintf($this->_l10n['array_randomized'], $name);
+                    $viewMode = $this->_l10n['array_randomized'];
                 } elseif ($value === $UNINIT_VALUE) {
                     $this->_checkArraySize($size);
                     $value = '?';
-                    $viewMode = sprintf($this->_l10n['array_uninitialized'], $name);
+                    $viewMode = $this->_l10n['array_uninitialized'];
                 } elseif ($value === $PARAM_VALUE) {
                     $this->_checkArraySize($size);
                     $value = 'P';
-                    $viewMode = sprintf($this->_l10n['var_parameter'], $name);
+                    $viewMode = $this->_l10n['var_parameter'];
                 } elseif (!empty($value)) {
                     $newValue = array();
                     $size = 0;
@@ -214,7 +213,7 @@ class EditAlgorithmManager
                     }
                     $value = implode(',', $newValue);
                     $this->_checkArraySize($size);
-                    $viewMode = sprintf($this->_l10n['var_defined'], $name, $value);
+                    $viewLabel = sprintf($this->_l10n['var_defined'], $name, $value);
                 } else {
                     $this->_response['error-value'] = $this->_l10n['empty_value'] . BR;
                     $value = false;
@@ -240,6 +239,7 @@ class EditAlgorithmManager
                 'size' => $size
             );
             $this->_response['viewMode'] = $viewMode;
+            $this->_response['viewLabel'] = $viewLabel;
 
             // save changes to database
             $this->_model->updateAlgorithmVariables($this->_aid, json_encode($vars));

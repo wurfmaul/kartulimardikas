@@ -68,6 +68,10 @@
     }
   }
 
+  .buttons {
+    text-align: center;
+  }
+
   .handle {
     cursor: move;
   }
@@ -86,36 +90,26 @@
   }
 
   #node-btn-group {
-    padding-top: 10px;
+    a {
+      cursor: pointer;
+    }
+
     .btnStyle(@color) {
-      background-color: lighten(@color, 10%);
+      button {
+        background-color: lighten(@color, 10%);
+      }
     }
-    #btn-add-assign {
-      .btnStyle(@assign-node-color);
+    #annotations-group {
+      .btnStyle(@annotations-color);
     }
-    #btn-add-comment {
-      .btnStyle(@comment-node-color);
+    #operations-group {
+      .btnStyle(@operations-color);
     }
-    #btn-add-compare {
-      .btnStyle(@compare-node-color);
+    #structure-group {
+      .btnStyle(@structure-color);
     }
-    #btn-add-return {
-      .btnStyle(@return-node-color);
-    }
-    #btn-add-if {
-      .btnStyle(@if-node-color);
-    }
-    #btn-add-inc {
-      .btnStyle(@inc-node-color);
-    }
-    #btn-add-swap {
-      .btnStyle(@swap-node-color);
-    }
-    #btn-add-value {
-      .btnStyle(@value-node-color);
-    }
-    #btn-add-while {
-      .btnStyle(@while-node-color);
+    #value-group {
+      .btnStyle(@values-color);
     }
   }
 }

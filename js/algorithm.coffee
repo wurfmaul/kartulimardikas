@@ -427,6 +427,27 @@ class CompareNode extends Node
     nid = tree.length
     new @(nid, left, right, operator)
 
+class FunctionNode extends Node
+  constructor: (@nid, @parameters) ->
+
+  execute: (player, node) ->
+    console.log('execute function')
+
+  toJSON: ->
+    {
+    nid: @nid
+    node: 'function'
+    params: @parameters
+    }
+
+  @parse: (node, tree, memory) =>
+    # parse from-node
+    params = BlockNode.parse(@findSubNode(node, '.function-params'), tree, memory)
+    tree.push params
+    # create the node
+    nid = tree.length
+    new @(nid, params.nid)
+
 class IfNode extends Node
   constructor: (@nid, @condition, @ifBody, @elseBody, @op) ->
 

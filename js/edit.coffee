@@ -88,7 +88,8 @@ class Api
           @_printSuccess(data['success'])
           # change from edit mode to view mode
           varRow.find('.edit').hide()
-          varRow.find('.view .cell').text(data['viewMode'])
+          varRow.find('.view .cell').text(data['viewLabel'])
+          varRow.find('.view .details').text('(' + data['viewMode'] + ')') if (data['viewMode']?)
           varRow.find('.view').show()
           initVarInput($('.insertStepsHere').find('.combobox'))
       error: (jqXHR, textStatus, errorThrown) => # if request failed
@@ -316,7 +317,7 @@ $ ->
   stepForm.updateActionHandlers(SCRIPTSITE)
   stepForm.updateSortable()
   # handlers for new-node buttons
-  $('#node-btn-group').children('button').click ->
+  $('#node-btn-group a').click ->
     stepForm.addNode($(this).data('node'))
   # handlers for expanding/collapsing comments
   $('.toggle-comment').click(->

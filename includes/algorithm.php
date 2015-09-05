@@ -300,6 +300,85 @@ class CompareNode extends Node
     <?php }
 }
 
+class FunctionNode extends Node
+{
+    /** @var BlockNode */
+    protected $actPars;
+
+    public function __construct($nid, $params)
+    {
+        $this->nodeId = $nid;
+        $this->actPars = $params;
+    }
+
+    public static function parse($node, $tree)
+    {
+        $params = isset($node->params) ? parent::parse($tree[$node->params], $tree) : null;
+        return new self($node->nid, $params);
+    }
+
+    public function getSource($params)
+    {
+        return $this->wrapLine(
+            sprintf("%s (%s)",
+                "[FUNCTION_NAME]",
+                trim($this->actPars->getSource($params))
+            )
+        );
+    }
+
+    public function printHtml(&$params)
+    {
+        $actParsNid =  isset($this->actPars) ? $this->actPars->nodeId : null;
+        ?>
+        <!-- FUNCTION NODE -->
+        <li id="node_<?= $this->nodeId ?>" class="node assign-node" data-node-type="assign"
+            data-node-id="<?= $this->nodeId ?>">
+            <table>
+                <tr>
+                    <td class="handle node-box top bottom left">
+                        <span class="cursor-icon"></span>
+                    </td>
+                    <td class="node-box top right bottom full-width">
+                        <?php if ($params['mode'] === 'edit'): ?>
+                            <label>
+                                <?= TreeHelper::l10n('function_node_title') ?>
+                                <div class="ui-widget combobox-container">
+                                    <input class="function-name combobox" value=""/>
+                                </div>
+                                (
+                                <input class="" value="" />
+                                )
+                            </label>
+                            <span class="invalid-flag label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
+                            <button type="button" class="close node-remove" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        <?php else: ?>
+                            <label>
+                                ()
+                                <div style="display: none;">
+                                    <input class="assign-to" value=""/>
+                                </div>
+                            </label>
+                        <?php endif ?>
+                    </td>
+                </tr>
+                <tr style="display: none;">
+                    <td class="handle node-box left right bottom">
+                        <span class="cursor-icon"></span>
+                    </td>
+                    <td>
+                        <ul class="assign-from sortable" data-node-id="<?= $actParsNid ?>">
+                            <?php self::printNode($this->actPars, $params) ?>
+                        </ul>
+                    </td>
+                </tr>
+            </table>
+        </li>
+    <?php }
+}
+
 class IfNode extends Node
 {
     /** @var BlockNode */
@@ -819,9 +898,10 @@ abstract class Node
     const BLOCK_NODE = "block";
     const COMMENT_NODE = "comment";
     const COMPARE_NODE = "compare";
-    const RETURN_NODE = "return";
+    const FUNCTION_NODE = "function";
     const IF_NODE = "if";
     const INC_NODE = "inc";
+    const RETURN_NODE = "return";
     const SWAP_NODE = "swap";
     const VALUE_NODE = "value";
     const WHILE_NODE = "while";
@@ -923,14 +1003,17 @@ abstract class Node
             case self::COMPARE_NODE:
                 $node = new CompareNode($type, null, null, null);
                 break;
-            case self::RETURN_NODE:
-                $node = new ReturnNode($type, null);
+            case self::FUNCTION_NODE:
+                $node = new FunctionNode($type, null);
                 break;
             case self::IF_NODE:
                 $node = new IfNode($type, null, null, null, null);
                 break;
             case self::INC_NODE:
                 $node = new IncNode($type, null, null);
+                break;
+            case self::RETURN_NODE:
+                $node = new ReturnNode($type, null);
                 break;
             case self::SWAP_NODE:
                 $node = new SwapNode($type, null, null, null);
