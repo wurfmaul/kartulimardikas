@@ -53,7 +53,7 @@ class DataModel
                 $values .= ",";
             }
         }
-        $stmt = $this->_sql->prepare("DELETE FROM tags WHERE aid = ? AND tag IN ($values)");
+        $stmt = $this->_sql->prepare("DELETE FROM tag WHERE aid = ? AND tag IN ($values)");
         // work-around because $stmt->bind_param($bind_types, $bind_vars) does not work.
         call_user_func_array([$stmt, "bind_param"], $bind_vars);
         $stmt->execute();
@@ -73,11 +73,6 @@ class DataModel
         $stmt->bind_param("i", $uid);
         $stmt->execute();
         $rows = $stmt->affected_rows;
-        # delete related algorithms permanently
-        $stmt = $this->_sql->prepare("DELETE FROM algorithm WHERE uid = ?");
-        $stmt->bind_param("i", $uid);
-        $stmt->execute();
-        $rows += $stmt->affected_rows;
         $stmt->close();
         return $rows;
     }
@@ -101,22 +96,23 @@ class DataModel
     }
 
     /**
-     * @param bool $fetchDeleted Whether deleted algorithms should be fetched.
+     * @param bool $fetchAll Whether deleted and private algorithms should be fetched.
      * @return array A list of all defined algorithms.
      */
-    public function fetchAlgorithms($fetchDeleted = false)
+    public function fetchAlgorithms($fetchAll = false)
     {
-        $filterDeleted = $fetchDeleted ? '' : 'WHERE a.date_deletion IS NULL';
+        $filter = $fetchAll ? '' : 'WHERE a.date_deletion IS NULL AND a.date_publish IS NOT NULL';
         $stmt = $this->_sql->prepare("
             SELECT
               a.*,
+              IFNULL(LENGTH(a.variables),0) + IFNULL(LENGTH(a.tree),0) AS size,
               u.username AS owner,
               u.date_deletion AS owner_deleted,
               GROUP_CONCAT(t.tag SEPARATOR ', ') AS tags
             FROM algorithm a
             JOIN user u USING (uid)
-            LEFT JOIN tags t USING (aid)
-            $filterDeleted
+            LEFT JOIN tag t USING (aid)
+            $filter
             GROUP BY aid
         ");
         $stmt->execute();
@@ -136,7 +132,7 @@ class DataModel
               aid, name, description, long_description, date_publish,
               TIMESTAMPDIFF(MINUTE, date_creation, NOW()) AS age,
               u.uid, u.username
-            FROM tags
+            FROM tag
             LEFT JOIN algorithm a USING (aid)
             LEFT JOIN user u USING (uid)
             WHERE tag = ?
@@ -255,7 +251,7 @@ class DataModel
      */
     public function fetchAllTags()
     {
-        $stmt = $this->_sql->prepare("SELECT DISTINCT tag FROM tags");
+        $stmt = $this->_sql->prepare("SELECT DISTINCT tag FROM tag");
         $stmt->execute();
         $result = $stmt->get_result();
         $stmt->close();
@@ -278,7 +274,7 @@ class DataModel
     public function fetchTags($aid)
     {
         $stmt = $this->_sql->prepare("
-            SELECT tag FROM tags
+            SELECT tag FROM tag
             WHERE aid = ?
         ");
         $stmt->bind_param("i", $aid);
@@ -299,8 +295,8 @@ class DataModel
                 SELECT
                   tag,
                   COUNT(aid) AS count,
-                  COUNT(aid) / (SELECT COUNT(aid) FROM tags) AS total
-                FROM tags
+                  COUNT(aid) / (SELECT COUNT(aid) FROM tag) AS total
+                FROM tag
                 GROUP BY tag
                 ORDER BY count DESC
                 LIMIT ?) AS grouped
@@ -496,7 +492,7 @@ class DataModel
             }
         }
         $stmt = $this->_sql->prepare("
-            INSERT INTO tags (tag, aid)
+            INSERT INTO tag (tag, aid)
             VALUES $values
         ");
         // work-around because $stmt->bind_param($bind_types, $bind_vars) does not work.
@@ -535,10 +531,12 @@ class DataModel
      */
     public function updateDeleteAlgorithm($aid)
     {
+        # mark algorithm and related tags deleted
         $stmt = $this->_sql->prepare("
-            UPDATE algorithm
-            SET date_deletion=NOW()
-            WHERE aid=?");
+            UPDATE algorithm a, tag t
+            SET a.date_deletion=NOW(), t.deleted=TRUE
+            WHERE t.aid = a.aid
+            AND a.aid = ?");
         $stmt->bind_param("i", $aid);
         $stmt->execute();
         $rows = $stmt->affected_rows;
@@ -552,10 +550,12 @@ class DataModel
      */
     public function updateUnDeleteAlgorithm($aid)
     {
+        # mark algorithm not deleted
         $stmt = $this->_sql->prepare("
-            UPDATE algorithm
-            SET date_deletion=NULL
-            WHERE aid=?");
+            UPDATE algorithm a, tag t
+            SET a.date_deletion=NULL, t.deleted=FALSE
+            WHERE t.aid = a.aid
+            AND aid=?");
         $stmt->bind_param("i", $aid);
         $stmt->execute();
         $rows = $stmt->affected_rows;
@@ -652,26 +652,17 @@ class DataModel
      */
     public function updateDeleteUser($uid)
     {
-        # set the user to deleted
+        # set the user and the related algorithms to deleted
         $stmt = $this->_sql->prepare("
-            UPDATE user
-            SET date_deletion=NOW()
-            WHERE uid=?
-            AND date_deletion IS NULL
+            UPDATE user u, algorithm a
+            SET u.date_deletion=@now:=NOW(), a.date_deletion=@now
+            WHERE u.uid = a.uid
+            AND u.uid=?
+            AND u.date_deletion IS NULL
         ");
         $stmt->bind_param("i", $uid);
         $stmt->execute();
         $rows = $stmt->affected_rows;
-        # set the related algorithms to deleted too
-        $stmt = $this->_sql->prepare("
-            UPDATE algorithm
-            SET date_deletion=(SELECT date_deletion FROM user WHERE uid=?)
-            WHERE uid=?
-            AND date_deletion IS NULL
-        ");
-        $stmt->bind_param("ii", $uid, $uid);
-        $stmt->execute();
-        $rows += $stmt->affected_rows;
         $stmt->close();
         return $rows;
     }
@@ -682,25 +673,17 @@ class DataModel
      */
     public function updateUnDeleteUser($uid)
     {
-        # resurrect the algorithms that have been deleted with the user
+        # resurrect the user and the related algorithms
         $stmt = $this->_sql->prepare("
-            UPDATE algorithm
-            SET date_deletion=NULL
-            WHERE uid=?
-            AND date_deletion = (SELECT date_deletion FROM user WHERE uid=?)
-        ");
-        $stmt->bind_param("ii", $uid, $uid);
-        $stmt->execute();
-        $rows = $stmt->affected_rows;
-        # resurrect the user itself
-        $stmt = $this->_sql->prepare("
-            UPDATE user
-            SET date_deletion=NULL
-            WHERE uid=?
+            UPDATE algorithm a, user u
+            SET a.date_deletion=NULL, u.date_deletion=NULL
+            WHERE a.uid = u.uid
+            AND a.date_deletion = u.date_deletion
+            AND a.uid=?
         ");
         $stmt->bind_param("i", $uid);
         $stmt->execute();
-        $rows += $stmt->affected_rows;
+        $rows = $stmt->affected_rows;
         $stmt->close();
         return $rows;
     }

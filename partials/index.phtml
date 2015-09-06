@@ -54,6 +54,7 @@ $_tab = isset($_GET['tab']) && array_key_exists($_GET['tab'], $_tabs) ? $_GET['t
                 <th><?= $l10n['owner'] ?></th>
                 <th><?= $l10n['creation'] ?></th>
                 <th><?= $l10n['last_edit'] ?></th>
+                <th><?= $l10n['size'] ?></th>
             </tr>
             </thead>
             <tbody>
@@ -61,7 +62,7 @@ $_tab = isset($_GET['tab']) && array_key_exists($_GET['tab'], $_tabs) ? $_GET['t
                 <?php require(BASEDIR . 'partials/partials/item_algorithm.phtml') ?>
             <?php endforeach ?>
             </tbody>
-            <?php $colCount = 5;
+            <?php $colCount = 6;
             require(BASEDIR . 'partials/partials/table_foot.phtml') ?>
         <?php else: ?>
             <tr>

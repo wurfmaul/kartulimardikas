@@ -26,4 +26,5 @@
     </td>
     <td><?= $algorithm['date_creation'] ?></td>
     <td><?= $algorithm['date_lastedit'] ?></td>
+    <td><?= ($size = $algorithm['size'] ? $size : 0) > 1024 ? $size / 1024 . ' KiB' : $size . ' B' ?></td>
 </tr>

@@ -47,7 +47,7 @@ $l10n['creation'] = "Creation";
 $l10n['last_edit'] = "Last edit";
 $l10n['view_algorithm'] = "View algorithm";
 $l10n['edit_algorithm'] = "Edit algorithm";
-$l10n['change_algorithm_settings'] = "Change algorithm settings";
+$l10n['change_algorithm'] = "Change algorithm settings";
 $l10n['algorithm_resurrected'] = "Algorithm has been restored.";
 
 // GENERAL

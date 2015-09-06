@@ -48,13 +48,11 @@ $_tab = isset($_GET['tab']) && array_key_exists($_GET['tab'], $_tabs) ? $_GET['t
     </div>
     <?php if ($_tab === 'users'): ?>
         <div class="btn-group">
-            <button class="filter btn btn-primary" data-target="#table-users" data-column="3"
-                    data-filter="<?= (new DateTime())->format('Y-m-d') ?>">
+            <button class="filter btn btn-primary" data-target="#table-users" data-column="3" data-filter="<?= (new DateTime())->format('Y-m-d') ?>">
                 <span class="glyphicon glyphicon-filter"></span>
                 <?= $l10n['registered_today'] ?>
             </button>
-            <button class="filter btn btn-primary" data-target="#table-users" data-column="2"
-                    data-filter="<?= $l10n['active'] ?>">
+            <button class="filter btn btn-primary" data-target="#table-users" data-column="2" data-filter="<?= $l10n['active'] ?>">
                 <span class="glyphicon glyphicon-filter"></span>
                 <?= $l10n['active_users'] ?>
             </button>
@@ -68,8 +66,7 @@ $_tab = isset($_GET['tab']) && array_key_exists($_GET['tab'], $_tabs) ? $_GET['t
             <thead>
             <tr>
                 <th><?= $l10n['username'] ?></th>
-                <th title="<?= $l10n['language'] ?>" class="filter-select filter-exact"><span
-                        class="fa fa-globe"></span></th>
+                <th title="<?= $l10n['language'] ?>" class="filter-select filter-exact"><span class="fa fa-globe"></span></th>
                 <th class="filter-select filter-exact"><?= $l10n['status'] ?></th>
                 <th title="<?= $l10n['number_of_algorithms'] ?>"><?= $l10n['algorithms'] ?></th>
                 <th><?= $l10n['registration'] ?></th>
@@ -79,12 +76,10 @@ $_tab = isset($_GET['tab']) && array_key_exists($_GET['tab'], $_tabs) ? $_GET['t
             </thead>
             <tbody>
             <?php foreach ($__model->fetchUsers(true) as $member): ?>
-                <tr<?php if ($member['date_deletion']): ?> class="deleted"<?php endif ?>
-                    data-uid="<?= $member['uid'] ?>">
+                <tr<?php if ($member['date_deletion']): ?> class="deleted"<?php endif ?> data-uid="<?= $member['uid'] ?>">
                     <td class="username <?= ($member['rights'] >= 1) ? 'admin' : '' ?>">
                         <span class="name"><?= $member['username'] ?></span>
-                        <span class="label label-info label-admin" title="<?= $l10n['administrator'] ?>"><span
-                                class="fa fa-key"></span></span>
+                        <span class="label label-info label-admin" title="<?= $l10n['administrator'] ?>"><span class="fa fa-key"></span></span>
                         <div class="send-mail">
                             <a href="mailto:<?= $member['email'] ?>"><span class="glyphicon glyphicon-envelope"></span></a>
                         </div>
@@ -95,13 +90,11 @@ $_tab = isset($_GET['tab']) && array_key_exists($_GET['tab'], $_tabs) ? $_GET['t
                     <td><?= (new DateTime($member['date_registration']))->format('Y-m-d') ?></td>
                     <td><?= (new DateTime($member['date_lastsignin']))->format('Y-m-d') ?></td>
                     <td class="active-only">
-                        <a href="<?= url(['action' => 'user', 'uid' => $member['uid']]) ?>"
-                           title="<?= $l10n['view_profile'] ?></th>"><span class="fa fa-user"></span></a>
+                        <a href="<?= url(['action' => 'user', 'uid' => $member['uid']]) ?>" title="<?= $l10n['view_profile'] ?>"><span class="fa fa-user"></span></a>
                         <?php if ($member['uid'] !== $__uid): ?>
                             <a class="delete-user" title="<?= $l10n['delete_user'] ?>"><span class="fa fa-trash"></span></a>
                             <?php if ($__rights === 2): ?>
-                                <a class="adminify-user" title="<?= $l10n['user_to_admin'] ?>"><span
-                                        class="fa fa-key"></span></a>
+                                <a class="adminify-user" title="<?= $l10n['user_to_admin'] ?>"><span class="fa fa-key"></span></a>
                             <?php endif ?>
                         <?php else: ?>
                             <span class="fa fa-trash text-muted"></span>
@@ -109,8 +102,7 @@ $_tab = isset($_GET['tab']) && array_key_exists($_GET['tab'], $_tabs) ? $_GET['t
                         <?php endif ?>
                     </td>
                     <td class="deleted-only">
-                        <a class="un-delete-user" title="<?= $l10n['resurrect_user'] ?>"><span
-                                class="fa fa-heartbeat"></span></a>
+                        <a class="un-delete-user" title="<?= $l10n['resurrect_user'] ?>"><span class="fa fa-heartbeat"></span></a>
                         <a class="erase-user" data-warning="<?= $l10n['confirm_erase_user'] ?>"
                            title="<?= $l10n['erase_user'] ?>"><span class="fa fa-minus-circle text-danger"></span></a>
                     </td>
@@ -121,13 +113,11 @@ $_tab = isset($_GET['tab']) && array_key_exists($_GET['tab'], $_tabs) ? $_GET['t
         </table>
     <?php else: ?>
         <div class="btn-group">
-            <button class="filter btn btn-primary" data-target="#table-algorithms" data-column="4"
-                    data-filter="<?= (new DateTime())->format('Y-m-d') ?>">
+            <button class="filter btn btn-primary" data-target="#table-algorithms" data-column="4" data-filter="<?= (new DateTime())->format('Y-m-d') ?>">
                 <span class="glyphicon glyphicon-filter"></span>
                 <?= $l10n['created_today'] ?>
             </button>
-            <button class="filter btn btn-primary" data-target="#table-algorithms" data-column="1"
-                    data-filter="<?= $l10n['deleted'] ?>">
+            <button class="filter btn btn-primary" data-target="#table-algorithms" data-column="1" data-filter="<?= $l10n['deleted'] ?>">
                 <span class="glyphicon glyphicon-filter"></span>
                 <?= $l10n['deleted_algorithms'] ?>
             </button>
@@ -146,16 +136,15 @@ $_tab = isset($_GET['tab']) && array_key_exists($_GET['tab'], $_tabs) ? $_GET['t
                 <th><?= $l10n['owner'] ?></th>
                 <th><?= $l10n['creation'] ?></th>
                 <th><?= $l10n['last_edit'] ?></th>
+                <th><?= $l10n['size'] ?></th>
                 <th class="filter-false"><?= $l10n['actions'] ?></th>
             </tr>
             </thead>
             <tbody>
             <?php foreach ($__model->fetchAlgorithms(true) as $aid => $algorithm): ?>
-                <tr<?php if ($algorithm['date_deletion']): ?> class="deleted"<?php endif ?>
-                    data-aid="<?= $algorithm['aid'] ?>">
+                <tr<?php if ($algorithm['date_deletion']): ?> class="deleted"<?php endif ?> data-aid="<?= $algorithm['aid'] ?>">
                     <td>
-                        <span
-                            class="name"><?= $algorithm['name'] ? $algorithm['name'] : $l10n['untitled_algorithm'] ?></span>
+                        <span class="name"><?= $algorithm['name'] ? $algorithm['name'] : $l10n['untitled_algorithm'] ?></span>
                         <?php if (!$algorithm['date_publish']): ?>
                             <span class="label label-info"><?= $l10n['private'] ?></span>
                         <?php endif ?>
@@ -166,35 +155,29 @@ $_tab = isset($_GET['tab']) && array_key_exists($_GET['tab'], $_tabs) ? $_GET['t
                         <?php if ($algorithm['owner_deleted']): ?>
                             <span class="deleted"><?= $algorithm['owner'] ?></span>
                         <?php else: ?>
-                            <a href="<?= url(['action' => 'user', 'uid' => $algorithm['uid']]) ?>"
-                               title="<?= $l10n['view_profile'] ?></th>"><?= $algorithm['owner'] ?></a>
+                            <a href="<?= url(['action' => 'user', 'uid' => $algorithm['uid']]) ?>" title="<?= $l10n['view_profile'] ?></th>"><?= $algorithm['owner'] ?></a>
                         <?php endif ?>
                     </td>
                     <td><?= (new DateTime($algorithm['date_creation']))->format('Y-m-d') ?></td>
                     <td><?= (new DateTime($algorithm['date_lastedit']))->format('Y-m-d') ?></td>
+                    <td class="size">
+                        <?= ($size = $algorithm['size']) > 1024 ? $size / 1024 . ' KiB' : $size . ' B' ?>
+                    </td>
                     <td class="active-only">
-                        <a href="<?= url(['action' => 'view', 'aid' => $algorithm['aid']]) ?>"
-                           title="<?= $l10n['view_algorithm'] ?>"><span
-                                class="fa fa-eye"></span></a>
-                        <a href="<?= url(['action' => 'edit', 'aid' => $algorithm['aid']]) ?>"
-                           title="<?= $l10n['edit_algorithm'] ?>"><span
-                                class="fa fa-pencil"></span></a>
-                        <a href="<?= url(['action' => 'settings', 'aid' => $algorithm['aid']]) ?>"
-                           title="<?= $l10n['change_algorithm_settings'] ?>"><span
-                                class="fa fa-cog"></span></a>
-                        <a class="delete-algorithm" title="<?= $l10n['delete_algorithm'] ?>"><span
-                                class="fa fa-trash"></span></a>
+                        <a href="<?= url(['action' => 'view', 'aid' => $algorithm['aid']]) ?>" title="<?= $l10n['view_algorithm'] ?>"><span class="fa fa-eye"></span></a>
+                        <a href="<?= url(['action' => 'edit', 'aid' => $algorithm['aid']]) ?>" title="<?= $l10n['edit_algorithm'] ?>"><span class="fa fa-pencil"></span></a>
+                        <a href="<?= url(['action' => 'settings', 'aid' => $algorithm['aid']]) ?>" title="<?= $l10n['change_algorithm'] ?>"><span class="fa fa-cog"></span></a>
+                        <a class="delete-algorithm" title="<?= $l10n['delete_algorithm'] ?>"><span class="fa fa-trash"></span></a>
                     </td>
                     <td class="deleted-only">
-                        <a class="un-delete-algorithm" title="<?= $l10n['resurrect_algorithm'] ?>"><span
-                                class="fa fa-heartbeat"></span></a>
-                        <a class="erase-algorithm" data-warning="<?= $l10n['confirm_erase_algorithm'] ?>"
-                           title="<?= $l10n['erase_algorithm'] ?>"><span class="fa fa-minus-circle text-danger"></span></a>
+                        <a class="un-delete-algorithm" title="<?= $l10n['resurrect_algorithm'] ?>"><span class="fa fa-heartbeat"></span></a>
+                        <a class="erase-algorithm" data-warning="<?= $l10n['confirm_erase_algorithm'] ?>" title="<?= $l10n['erase_algorithm'] ?>"><span
+                                class="fa fa-minus-circle text-danger"></span></a>
                     </td>
                 </tr>
             <?php endforeach ?>
             </tbody>
-            <?php $colCount = 7; require(BASEDIR . 'partials/partials/table_foot.phtml') ?>
+            <?php $colCount = 8; require(BASEDIR . 'partials/partials/table_foot.phtml') ?>
         </table>
     <?php endif ?>
 <?php else: ?>
