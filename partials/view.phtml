@@ -43,11 +43,11 @@ if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
     <div class="row">
 
         <!-- ERROR MESSAGE -->
-        <div id="viewAlert" class="alert alert-danger" style="display:none">
+        <div id="alert" class="alert alert-danger" role="alert" style="display:none">
             <strong><?= $l10n['runtime_error'] ?></strong><br/>
             <?= $l10n['message_runtime_error'] ?>
             <ul>
-                <li id="viewAlertText"></li>
+                <li id="alertText"></li>
             </ul>
         </div>
         <!-- ERROR MESSAGE END -->
@@ -336,8 +336,7 @@ if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
         <!-- RIGHT COLUMN END -->
     </div>
     <!-- CONTENT END -->
-<?php else: // no valid aid
-    ?>
+<?php else: // no valid aid ?>
     <div class="alert alert-danger" role="alert">
         <strong><?= $l10n['error'] ?></strong><br/>
 

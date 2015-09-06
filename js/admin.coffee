@@ -115,14 +115,14 @@ class Api
         @_printError("AJAX Error: #{textStatus}")
 
   @_printSuccess: (msg) ->
-    $('#adminSuccessText').html msg
-    $('#adminSuccess').show('slow')
-    $('#adminAlert').hide('slow')
+    $('#successText').html msg
+    $('#success').show('slow')
+    $('#alert').hide('slow')
 
   @_printError: (msg) ->
-    $('#adminAlertText').html msg
-    $('#adminAlert').show('slow')
-    $('#adminSuccess').hide('slow')
+    $('#alertText').html msg
+    $('#alert').show('slow')
+    $('#success').hide('slow')
 
 $ ->
   $('.filter').click(->
@@ -188,6 +188,3 @@ $ ->
       row.find('.status').text(status)
     )
   )
-
-  $('#adminSuccessClose').click(-> $('#adminSuccess').hide('slow'))
-  $('#adminAlertClose').click(-> $('#adminAlert').hide('slow'))

@@ -30,21 +30,15 @@ $_tab = isset($_GET['tab']) && array_key_exists($_GET['tab'], $_tabs) ? $_GET['t
     </div>
     <!-- CONTENT -->
 <?php if ($__rights > 0): ?>
-    <div id="adminSuccess" class="alert alert-success alert-dismissible" style="display:none">
-        <button id="adminSuccessClose" type="button" class="close">
-            <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
-        </button>
+    <div id="success" class="alert alert-success alert-dismissible" style="display:none">
+        <button type="button" class="close" aria-label="<?= $l10n['close'] ?>"><span aria-hidden="true">&times;</span></button>
         <strong><?= $l10n['success'] ?></strong>
-
-        <div id="adminSuccessText"></div>
+        <div id="successText"></div>
     </div>
-    <div id="adminAlert" class="alert alert-danger alert-dismissible" style="display:none">
-        <button id="adminAlertClose" type="button" class="close">
-            <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
-        </button>
+    <div id="alert" class="alert alert-danger alert-dismissible" style="display:none">
+        <button type="button" class="close" aria-label="<?= $l10n['close'] ?>"><span aria-hidden="true">&times;</span></button>
         <strong><?= $l10n['error'] ?></strong>
-
-        <div id="adminAlertText"></div>
+        <div id="alertText"></div>
     </div>
     <?php if ($_tab === 'users'): ?>
         <div class="btn-group">

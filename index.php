@@ -216,21 +216,18 @@ if ($__algorithm) {
     <div class="container">
         <noscript>
             <!-- MESSAGE BOX FOR DISABLED JAVASCRIPT -->
-            <div class="alert alert-danger alert-dismissible">
+            <div class="alert alert-danger" role="alert">
                 <strong><?= $l10n['enable_js'] ?></strong><br/>
                 <?= $l10n['no_script_warning'] ?>
                 <ul>
-                    <li><a href="http://www.enable-javascript.com/<?= LANG ?>/"
-                           target="_blank"><?= $l10n['enable_js'] ?></a></li>
+                    <li><a href="http://www.enable-javascript.com/<?= LANG ?>/" target="_blank"><?= $l10n['enable_js'] ?></a></li>
                 </ul>
             </div>
         </noscript>
         <?php if (($_browser = BrowserChecker::isUnsupported())): ?>
             <!-- MESSAGE BOX FOR UNSUPPORTED BROWSER -->
-            <div class="alert alert-danger alert-dismissible">
-                <button type="button" class="close" data-dismiss="alert">
-                    <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
-                </button>
+            <div class="alert alert-danger alert-dismissible" role="alert">
+                <button type="button" class="close" aria-label="<?= $l10n['close'] ?>"><span aria-hidden="true">&times;</span></button>
                 <strong><?= $l10n['unsupported_browser'] ?></strong>: <?= $_browser ?><br/>
                 <?= $l10n['unsupported_browser_warning'] ?>
                 <ul>
@@ -240,19 +237,15 @@ if ($__algorithm) {
         <?php endif ?>
         <?php if (isset($errorMsg)): ?>
             <!-- MESSAGE BOX FOR ERRORS -->
-            <div id="generalAlert" class="alert alert-danger alert-dismissible">
-                <button id="generalAlertClose" type="button" class="close">
-                    <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
-                </button>
+            <div id="generalAlert" class="alert alert-danger alert-dismissible" role="alert">
+                <button type="button" class="close" aria-label="<?= $l10n['close'] ?>"><span aria-hidden="true">&times;</span></button>
                 <strong><?= $l10n['error'] ?></strong> <?= $errorMsg ?>
             </div>
         <?php endif ?>
         <?php if (isset($successMsg)): ?>
             <!-- MESSAGE BOX FOR SUCCESSES -->
-            <div id="generalSuccess" class="alert alert-success alert-dismissible">
-                <button id="generalSuccessClose" type="button" class="close">
-                    <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
-                </button>
+            <div id="generalSuccess" class="alert alert-success alert-dismissible" role="alert">
+                <button type="button" class="close" aria-label="<?= $l10n['close'] ?>"><span aria-hidden="true">&times;</span></button>
                 <strong><?= $l10n['success'] ?></strong>
                 <?php if (isset($registerMsg)): ?>
                     <ul>

@@ -31,11 +31,11 @@ class Api
         @_printError("Storage Error: " + errorThrown)
 
   @_printError: (msg) ->
-    $('#editAlertText').html(msg)
-    $('#editAlert').show('slow')
+    $('#alertText').html(msg)
+    $('#alert').show('slow')
 
   @_printSuccess: (msg) ->
-    $('#editAlert').hide('slow')
+    $('#alert').hide('slow')
     $('#saveSuccess:hidden').text(msg).show('slow', -> $(this).fadeOut(3000))
 
 $ ->

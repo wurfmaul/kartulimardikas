@@ -133,8 +133,8 @@ class DataModel
               TIMESTAMPDIFF(MINUTE, date_creation, NOW()) AS age,
               u.uid, u.username
             FROM tag
-            LEFT JOIN algorithm a USING (aid)
-            LEFT JOIN user u USING (uid)
+            JOIN algorithm_public a USING (aid)
+            JOIN user u USING (uid)
             WHERE tag = ?
         ");
         $stmt->bind_param("s", $tag);
@@ -173,6 +173,25 @@ class DataModel
     }
 
     /**
+     * @param int $uid The user's id.
+     * @param string $name The algorithm's name.
+     * @return array The matching algorithm.
+     */
+    public function fetchAlgorithmsOfUserByName($uid, $name) {
+        $stmt = $this->_sql->prepare("
+            SELECT aid, name, description, long_description, date_publish
+            FROM algorithm_public
+            WHERE uid = ?
+            AND name = ?
+        ");
+        $stmt->bind_param("is", $uid, $name);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return $result->fetch_object();
+    }
+
+    /**
      * @param int $amount Number of algorithms to fetch.
      * @return array List of latest algorithms.
      */
@@ -183,10 +202,8 @@ class DataModel
               aid, name, description, long_description,
               TIMESTAMPDIFF(MINUTE, date_creation, NOW()) AS age,
               uid, username
-            FROM algorithm a
+            FROM algorithm_public a
             JOIN user u USING(uid)
-            WHERE date_publish IS NOT NULL
-            AND a.date_deletion IS NULL
             ORDER BY date_creation DESC
             LIMIT ?
         ");
@@ -208,10 +225,8 @@ class DataModel
               aid, name, description, long_description,
               TIMESTAMPDIFF(MINUTE, date_lastedit, NOW()) AS age,
               uid, username
-            FROM algorithm a
+            FROM algorithm_public a
             JOIN user u USING(uid)
-            WHERE date_publish IS NOT NULL
-            AND a.date_deletion IS NULL
             ORDER BY date_lastedit DESC
             LIMIT ?
         ");
@@ -292,14 +307,15 @@ class DataModel
     {
         $stmt = $this->_sql->prepare("
             SELECT * FROM (
-                SELECT
-                  tag,
-                  COUNT(aid) AS count,
-                  COUNT(aid) / (SELECT COUNT(aid) FROM tag) AS total
-                FROM tag
-                GROUP BY tag
-                ORDER BY count DESC
-                LIMIT ?) AS grouped
+              SELECT
+                tag,
+                COUNT(t.aid) AS count,
+                COUNT(t.aid) / (SELECT COUNT(aid) FROM tag JOIN algorithm_public USING(aid)) AS total
+              FROM tag t
+              JOIN algorithm_public a USING(aid)
+              GROUP BY tag
+              ORDER BY count DESC
+              LIMIT ?) AS grouped
             ORDER BY tag
         ");
         $stmt->bind_param("i", $amount);
@@ -401,9 +417,7 @@ class DataModel
               u.uid, u.username, u.date_registration,
               COUNT(aid) AS algorithm_count
             FROM user u
-            LEFT JOIN algorithm a
-            ON a.uid = u.uid
-            AND date_publish IS NOT NULL
+            LEFT JOIN algorithm_public a USING(uid)
             WHERE u.date_deletion IS NULL
             GROUP BY uid
             ORDER BY algorithm_count DESC
@@ -531,12 +545,10 @@ class DataModel
      */
     public function updateDeleteAlgorithm($aid)
     {
-        # mark algorithm and related tags deleted
         $stmt = $this->_sql->prepare("
-            UPDATE algorithm a, tag t
-            SET a.date_deletion=NOW(), t.deleted=TRUE
-            WHERE t.aid = a.aid
-            AND a.aid = ?");
+            UPDATE algorithm
+            SET date_deletion=NOW()
+            WHERE aid=?");
         $stmt->bind_param("i", $aid);
         $stmt->execute();
         $rows = $stmt->affected_rows;
@@ -550,12 +562,10 @@ class DataModel
      */
     public function updateUnDeleteAlgorithm($aid)
     {
-        # mark algorithm not deleted
         $stmt = $this->_sql->prepare("
-            UPDATE algorithm a, tag t
-            SET a.date_deletion=NULL, t.deleted=FALSE
-            WHERE t.aid = a.aid
-            AND aid=?");
+            UPDATE algorithm
+            SET date_deletion=NULL
+            WHERE aid=?");
         $stmt->bind_param("i", $aid);
         $stmt->execute();
         $rows = $stmt->affected_rows;
@@ -652,17 +662,26 @@ class DataModel
      */
     public function updateDeleteUser($uid)
     {
-        # set the user and the related algorithms to deleted
+        # set the user to deleted
         $stmt = $this->_sql->prepare("
-            UPDATE user u, algorithm a
-            SET u.date_deletion=@now:=NOW(), a.date_deletion=@now
-            WHERE u.uid = a.uid
-            AND u.uid=?
-            AND u.date_deletion IS NULL
+            UPDATE user
+            SET date_deletion=NOW()
+            WHERE uid=?
+            AND date_deletion IS NULL
         ");
         $stmt->bind_param("i", $uid);
         $stmt->execute();
         $rows = $stmt->affected_rows;
+        # set the related algorithms to deleted too
+        $stmt = $this->_sql->prepare("
+            UPDATE algorithm
+            SET date_deletion=(SELECT date_deletion FROM user WHERE uid=?)
+            WHERE uid=?
+            AND date_deletion IS NULL
+        ");
+        $stmt->bind_param("ii", $uid, $uid);
+        $stmt->execute();
+        $rows += $stmt->affected_rows;
         $stmt->close();
         return $rows;
     }
@@ -673,17 +692,25 @@ class DataModel
      */
     public function updateUnDeleteUser($uid)
     {
-        # resurrect the user and the related algorithms
+        # resurrect the algorithms that have been deleted with the user
         $stmt = $this->_sql->prepare("
-            UPDATE algorithm a, user u
-            SET a.date_deletion=NULL, u.date_deletion=NULL
-            WHERE a.uid = u.uid
-            AND a.date_deletion = u.date_deletion
-            AND a.uid=?
+            UPDATE algorithm
+            SET date_deletion=NULL
+            WHERE uid=?
+            AND date_deletion = (SELECT date_deletion FROM user WHERE uid=?)
+        ");
+        $stmt->bind_param("ii", $uid, $uid);
+        $stmt->execute();
+        $rows = $stmt->affected_rows;
+        # resurrect the user itself
+        $stmt = $this->_sql->prepare("
+            UPDATE user
+            SET date_deletion=NULL
+            WHERE uid=?
         ");
         $stmt->bind_param("i", $uid);
         $stmt->execute();
-        $rows = $stmt->affected_rows;
+        $rows += $stmt->affected_rows;
         $stmt->close();
         return $rows;
     }

@@ -5,5 +5,4 @@
  https://gnu.org/licenses/gpl-3.0.txt
 ###
 $ ->
-  $('#generalAlertClose').click -> $('#generalAlert').hide('slow')
-  $('#generalSuccessClose').click -> $('#generalSuccess').hide('slow')
+  $('.close').click -> $(this).parent('.alert').hide('slow')

@@ -292,10 +292,23 @@ class EditAlgorithmManager
     private function _processSettings()
     {
         if (isset($_POST['status'])) {
-            $this->_model->updateAlgorithmVisibility($this->_aid, $_POST['status']);
-            $this->_response['success'] = $this->_l10n['saved_to_db'];
+            switch($status = $_POST['status']) {
+                /** @noinspection PhpMissingBreakStatementInspection */
+                case 'public':
+                    // forbid name duplicates
+                    if (!is_null($this->_model->fetchAlgorithmsOfUserByName($this->_uid, $this->_algorithm->name))) {
+                        $this->_response['error'] = $this->_l10n['public_name_duplicate'];
+                        break;
+                    }
+                case 'private':
+                    $this->_model->updateAlgorithmVisibility($this->_aid, $status);
+                    $this->_response['success'] = $this->_l10n['saved_to_db'];
+                    break;
+                default:
+                    $this->_response['error'] = sprintf($this->_l10n['unknown_status'], $status);
+            }
         } else {
-            die("Post parameter 'tree' not set properly!");
+            die("Post parameter 'status' not set properly!");
         }
     }
 }

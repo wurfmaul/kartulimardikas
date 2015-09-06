@@ -34,7 +34,11 @@ CREATE TABLE IF NOT EXISTS `algorithm` (
 CREATE TABLE IF NOT EXISTS `tag` (
   `tag` varchar(64) COLLATE utf8_bin NOT NULL COMMENT 'The tag''s name',
   `aid` int(8) NOT NULL COMMENT 'The algorithm''s id',
-  `deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Whether the tag is marked as deleted',
   PRIMARY KEY (`tag`,`aid`),
   CONSTRAINT FOREIGN KEY (`aid`) REFERENCES `algorithm`(`aid`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+CREATE VIEW `algorithm_public` AS
+  SELECT * FROM `algorithm`
+  WHERE `date_deletion` IS NULL
+  AND `date_publish` IS NOT NULL;

@@ -147,11 +147,11 @@ class Api
     )
 
   @_printError: (msg) ->
-    $('#editAlertText').html(msg)
-    $('#editAlert').show('slow')
+    $('#alertText').html(msg)
+    $('#alert').show('slow')
 
   @_printSuccess: (msg) ->
-    $('#editAlert').hide('slow')
+    $('#alert').hide('slow')
     $('#saveSuccess:hidden').text(msg).show('slow', -> $(this).fadeOut(3000))
 
 class VariableForm
@@ -190,7 +190,7 @@ class VariableForm
     )
 
   performCancel: (vid) ->
-    $('#editAlert').hide('slow')
+    $('#alert').hide('slow')
     varRow = $('#var-' + vid)
     name = varRow.data('name')
     if (name? and name isnt "")
@@ -293,9 +293,6 @@ refreshPreview = ->
   Api.parseMarkdown($("#in-long"), $('#description-preview'))
 
 $ ->
-  # GENERAL
-  $('#editAlertClose').click -> $('#editAlert').hide('slow')
-
   # INFORMATION SECTION
   initTagInput($('#in-tags'))
   $('#in-name, #in-desc, #in-long').blur -> Api.editInfo()

@@ -13,17 +13,13 @@ global $l10n;
     <div class="row">
         <!-- LEFT COLUMN -->
         <div class="col-md-6">
-            <div id="registerAlert" class="alert alert-danger alert-dismissible" style="display:none">
-                <button id="registerAlertClose" type="button" class="close">
-                    <span aria-hidden="true">&times;</span><span class="sr-only"><?= $l10n['close'] ?></span>
-                </button>
+            <div id="alert" class="alert alert-danger alert-dismissible" role="alert" style="display:none">
+                <button type="button" class="close" aria-label="<?= $l10n['close'] ?>"><span aria-hidden="true">&times;</span></button>
                 <strong><?= $l10n['error'] ?></strong>
-
-                <div id="registerAlertText"></div>
+                <div id="alertText"></div>
             </div>
 
-            <form id="registerForm" class="form-horizontal" role="form" method="post" name="register"
-                  action="<?= url() ?>">
+            <form id="registerForm" class="form-horizontal" role="form" method="post" name="register" action="<?= url() ?>">
                 <div id="username-group" class="form-group">
                     <label for="in-username" class="control-label col-sm-3"><?= $l10n['username'] ?></label>
 
