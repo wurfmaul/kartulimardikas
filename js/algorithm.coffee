@@ -123,6 +123,7 @@ class Node
       when 'assign' then AssignNode.parse(node, tree, memory)
       when 'comment' then CommentNode.parse(node, tree, memory)
       when 'compare' then CompareNode.parse(node, tree, memory)
+      when 'function' then FunctionNode.parse(node, tree, memory)
       when 'if' then IfNode.parse(node, tree, memory)
       when 'inc' then IncNode.parse(node, tree, memory)
       when 'return' then ReturnNode.parse(node, tree, memory)
@@ -428,7 +429,7 @@ class CompareNode extends Node
     new @(nid, left, right, operator)
 
 class FunctionNode extends Node
-  constructor: (@nid, @parameters) ->
+  constructor: (@nid, @callee, @parameters) ->
 
   execute: (player, node) ->
     console.log('execute function')
@@ -437,16 +438,19 @@ class FunctionNode extends Node
     {
     nid: @nid
     node: 'function'
+    callee: @callee
     params: @parameters
     }
 
   @parse: (node, tree, memory) =>
-    # parse from-node
+    # get callee
+    callee = node.data('callee-id')
+    # parse parameters
     params = BlockNode.parse(@findSubNode(node, '.function-params'), tree, memory)
     tree.push params
     # create the node
     nid = tree.length
-    new @(nid, params.nid)
+    new @(nid, callee, params.nid)
 
 class IfNode extends Node
   constructor: (@nid, @condition, @ifBody, @elseBody, @op) ->

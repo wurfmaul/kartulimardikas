@@ -257,6 +257,7 @@ class StepForm
   updateActionHandlers: (parent) ->
     # update action handlers
     initVarInput(parent.find('.combobox'))
+    initFuncInput(parent.find('.combobox-functions'))
     parent.find('input, textarea').off('blur').blur => @saveChanges() # save when leaving inputs
     parent.find('select').off('change').change => @saveChanges() # save when changing selects
     parent.find('.node-remove').off('click').click (event) =>
@@ -269,8 +270,22 @@ class StepForm
       connectWith: ".sortable"
       placeholder: "sortable-highlight"
       update: update
+    dropParams =
+      hoverClass: "ui-state-hover",
+      over: (event, ui) ->
+        console.log('over')
+        $(this).find('.show-on-hover').show('slow')
+        $(this).find('.hide-on-hover').hide('slow')
+      out: (event, ui) ->
+        console.log('out')
+#        $(this).find('.show-on-hover').hide('slow')
+#        $(this).find('.hide-on-hover').show('slow')
+      drop: (event,ui) ->
+        console.log('drop')
+        $(this).find('.show-on-hover, .hide-on-hover').removeClass('show-on-hover hide-on-hover')
     SCRIPTSITE.sortable(sortParams)
     SCRIPTSITE.find('.sortable').sortable(sortParams)
+    SCRIPTSITE.find('.droppable').droppable(dropParams)
 
 updateVisibility = (variable) ->
   # show/hide input fields according to the init selection

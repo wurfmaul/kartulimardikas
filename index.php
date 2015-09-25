@@ -301,6 +301,7 @@ if ($__algorithm) {
     </div>
 </nav>
 
+<!-- LIBRARIES -->
 <script type="text/javascript" src="<?= JQUERY_PATH ?>"></script>
 <script type="text/javascript" src="<?= BOOTSTRAP_JS_PATH ?>"></script>
 <?php if (ACTION === 'edit' || ACTION === 'view'): ?>
@@ -310,22 +311,25 @@ if ($__algorithm) {
     <script type="text/javascript" src="<?= TABLESORTER_WIDGETS_JS_PATH ?>"></script>
     <script type="text/javascript" src="<?= TABLESORTER_PAGER_JS_PATH ?>"></script>
 <?php endif ?>
+<!-- LIBRARIES END -->
 
+<!-- SCRIPTS -->
 <?php if (DEBUG_MODE): ?>
     <script type="text/javascript" src="js/common.js"></script>
-    <?php if (ACTION === 'edit' || ACTION === 'view'): ?>
-        <script type="text/javascript" src="js/section.js"></script>
-        <script type="text/javascript" src="js/autocomplete.js"></script>
-        <script type="text/javascript" src="js/algorithm.js"></script>
-    <?php elseif (ACTION === 'admin' || ACTION === 'index'): ?>
-        <script type="text/javascript" src="js/table.js"></script>
-    <?php endif ?>
-    <?php if (file_exists('js/' . ACTION . '.js')): ?>
-        <script type="text/javascript" src="js/<?= ACTION ?>.js"></script>
-    <?php endif ?>
+<?php if (ACTION === 'edit' || ACTION === 'view'): ?>
+    <script type="text/javascript" src="js/section.js"></script>
+    <script type="text/javascript" src="js/autocomplete.js"></script>
+    <script type="text/javascript" src="js/algorithm.js"></script>
+<?php elseif (ACTION === 'admin' || ACTION === 'index'): ?>
+    <script type="text/javascript" src="js/table.js"></script>
+<?php endif ?>
+<?php if (file_exists('js/' . ACTION . '.js')): ?>
+    <script type="text/javascript" src="js/<?= ACTION ?>.js"></script>
+<?php endif ?>
 <?php elseif (file_exists('js/' . ACTION . '.min.js')): ?>
     <script type="text/javascript" src="js/<?= ACTION ?>.min.js"></script>
 <?php endif ?>
+<!-- SCRIPTS END -->
 
 </body>
 </html>

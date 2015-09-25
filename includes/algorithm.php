@@ -4,7 +4,7 @@ class AssignNode extends Node
 {
     /** @var Value */
     protected $to;
-    /** @var BlockNode */
+    /** @var BlockNode|Value */
     protected $from;
 
     public function __construct($nid, $to, $from)
@@ -34,14 +34,21 @@ class AssignNode extends Node
     public function printHtml(&$params)
     {
         $toValue = $this->to->parse($params);
-        $fromNid = isset($this->from) ? $this->from->nodeId : null;
+
+        if ($this->from instanceof Value) {
+            $fromValue = $this->from->parse($params);
+            $fromNid = null;
+        } else {
+            $fromValue = "";
+            $fromNid = isset($this->from) ? $this->from->nodeId : null;
+        }
         ?>
         <!-- ASSIGN NODE -->
-        <li id="node_<?= $this->nodeId ?>" class="node assign-node" data-node-type="assign"
+        <li id="node_<?= $this->nodeId ?>" class="node assign-node droppable" data-node-type="assign"
             data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr>
-                    <td class="handle node-box top left">
+                    <td class="handle node-box top bottom left">
                         <span class="cursor-icon"></span>
                     </td>
                     <td class="node-box top right bottom full-width">
@@ -52,6 +59,9 @@ class AssignNode extends Node
                                     <input class="assign-to combobox" value="<?= $toValue ?>"/>
                                 </div>
                                 :=
+                                <div class="ui-widget combobox-container hide-on-hover">
+                                    <input class="assign-from-value combobox" value="<?= $fromValue ?>"/>
+                                </div>
                             </label>
                             <span class="invalid-flag label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
                             <button type="button" class="close node-remove" aria-label="Close">
@@ -59,7 +69,7 @@ class AssignNode extends Node
                             </button>
                         <?php else: ?>
                             <label>
-                                <?= $toValue ?> :=
+                                <?= $toValue ?> := <?= $fromValue ?>
                                 <div style="display: none;">
                                     <input class="assign-to" value="<?= $toValue ?>"/>
                                 </div>
@@ -67,12 +77,12 @@ class AssignNode extends Node
                         <?php endif ?>
                     </td>
                 </tr>
-                <tr>
+                <tr style="display:none" class="show-on-hover">
                     <td class="handle node-box left right bottom">
                         <span class="cursor-icon"></span>
                     </td>
                     <td>
-                        <ul class="assign-from sortable" data-node-id="<?= $fromNid ?>">
+                        <ul class="assign-from-node sortable" data-node-id="<?= $fromNid ?>">
                             <?php self::printNode($this->from, $params) ?>
                         </ul>
                     </td>
@@ -302,19 +312,23 @@ class CompareNode extends Node
 
 class FunctionNode extends Node
 {
+    /** @var int */
+    protected $calleeId;
     /** @var BlockNode */
     protected $actPars;
 
-    public function __construct($nid, $params)
+    public function __construct($nid, $callee, $params)
     {
         $this->nodeId = $nid;
+        $this->calleeId = $callee;
         $this->actPars = $params;
     }
 
     public static function parse($node, $tree)
     {
         $params = isset($node->params) ? parent::parse($tree[$node->params], $tree) : null;
-        return new self($node->nid, $params);
+        $callee = isset($node->callee) ? $node->callee : -1;
+        return new self($node->nid, $callee, $params);
     }
 
     public function getSource($params)
@@ -330,10 +344,17 @@ class FunctionNode extends Node
     public function printHtml(&$params)
     {
         $actParsNid =  isset($this->actPars) ? $this->actPars->nodeId : null;
+        $name = "";
+        if ($this->calleeId > 0) {
+            require_once('includes/dataModel.php');
+            $_model = new DataModel();
+            $name = $_model->fetchAlgorithm($this->calleeId)->name;
+            $_model->close();
+        }
         ?>
         <!-- FUNCTION NODE -->
-        <li id="node_<?= $this->nodeId ?>" class="node assign-node" data-node-type="assign"
-            data-node-id="<?= $this->nodeId ?>">
+        <li id="node_<?= $this->nodeId ?>" class="node function-node" data-node-type="function"
+            data-node-id="<?= $this->nodeId ?>" data-callee-id="<?= $this->calleeId ?>">
             <table>
                 <tr>
                     <td class="handle node-box top bottom left">
@@ -344,7 +365,7 @@ class FunctionNode extends Node
                             <label>
                                 <?= TreeHelper::l10n('function_node_title') ?>
                                 <div class="ui-widget combobox-container">
-                                    <input class="function-name combobox" value=""/>
+                                    <input class="function-name combobox-functions" value="<?= $name ?>"/>
                                 </div>
                                 (
                                 <input class="" value="" />
@@ -356,15 +377,17 @@ class FunctionNode extends Node
                             </button>
                         <?php else: ?>
                             <label>
+                                <?= TreeHelper::l10n('function_node_title') ?>
+                                <?= $name ?>
                                 ()
                                 <div style="display: none;">
-                                    <input class="assign-to" value=""/>
+                                    <input class="" value=""/>
                                 </div>
                             </label>
                         <?php endif ?>
                     </td>
                 </tr>
-                <tr style="display: none;">
+                <tr <?php if (is_null($actParsNid)): ?>style="display: none;"<?php endif ?>>
                     <td class="handle node-box left right bottom">
                         <span class="cursor-icon"></span>
                     </td>
@@ -937,12 +960,14 @@ abstract class Node
                 return CommentNode::parse($node, $tree);
             case self::COMPARE_NODE:
                 return CompareNode::parse($node, $tree);
-            case self::RETURN_NODE:
-                return ReturnNode::parse($node, $tree);
+            case self::FUNCTION_NODE:
+                return FunctionNode::parse($node, $tree);
             case self::IF_NODE:
                 return IfNode::parse($node, $tree);
             case self::INC_NODE:
                 return IncNode::parse($node, $tree);
+            case self::RETURN_NODE:
+                return ReturnNode::parse($node, $tree);
             case self::SWAP_NODE:
                 return SwapNode::parse($node, $tree);
             case self::VALUE_NODE:

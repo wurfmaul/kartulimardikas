@@ -469,6 +469,27 @@ class DataModel
     }
 
     /**
+     * @param string $name The search term for the algorithm's name.
+     * @return mixed List of all the algorithms starting with the given search term.
+     */
+    public function findAlgorithm($name)
+    {
+        $query = "$name%";
+        $stmt = $this->_sql->prepare("
+            SELECT DISTINCT a.*, u.username FROM algorithm_public a
+            JOIN user u USING (uid)
+            WHERE a.aid LIKE ?
+            OR a.name LIKE ?
+            ORDER BY uid ASC
+        ");
+        $stmt->bind_param('ss', $query, $query);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    /**
      * @param int $uid The user id.
      * @return int The new algorithm's id.
      */

@@ -4,6 +4,9 @@ split = (val) ->
 extractLast = (term) ->
   split(term).pop()
 
+###
+  Prepare combo boxes for tags.
+###
 window.initTagInput = (elem) ->
   availableTags = [];
   $(elem).autocomplete(
@@ -36,11 +39,38 @@ window.initTagInput = (elem) ->
       false
   );
 
+###
+  Prepare combo boxes for function search
+###
+window.initFuncInput = (elem) ->
+  if (elem.autocomplete("instance")?)
+    elem.autocomplete("destroy")
+  elem.autocomplete(
+    delay: 0
+    minLength: 1
+    source: (request, response) ->
+      $.getJSON( "api/list.php?query=" + request.term, {
+        term: extractLast( request.term )
+      }, response );
+    select: (event, ui) ->
+      $(this).val(ui.item.name)
+      $(this).closest('.function-node').data('callee-id', ui.item.value)
+      false
+  ).focusout(->
+    # collapse search, when losing focus
+    $(this).autocomplete("close")
+  )
+
+###
+  Prepare combo boxes for variable selection
+###
 window.initVarInput = (elem) ->
+  # get all available variables
   vars = []
   $('.varRow').not('#var-prototype').each(->
     vars.push($(this).data('name'))
   )
+  # the three options for variables: variable, array or property selection
   properties = ["", "[*]", ".length"]
   if (elem.autocomplete("instance")?)
     elem.autocomplete("destroy")
@@ -81,6 +111,9 @@ window.initVarInput = (elem) ->
     $(this).autocomplete("close")
   )
 
+###
+  Prepare combo boxes for variable initialization
+###
 window.initValueInput = (elem) ->
   input = elem.find('.value')
   # destroy old instance of auto-completion

@@ -22,41 +22,31 @@ global $l10n;
             <form id="registerForm" class="form-horizontal" role="form" method="post" name="register" action="<?= url() ?>">
                 <div id="username-group" class="form-group">
                     <label for="in-username" class="control-label col-sm-3"><?= $l10n['username'] ?></label>
-
                     <div class="col-sm-9">
-                        <input type="text" class="form-control" id="in-username" name="username"
-                               <?php if (isset($username)): ?>value="<?= $username ?>"<?php endif ?>
-                               placeholder="<?= $l10n['username'] ?>"/>
+                        <input type="text" class="form-control" id="in-username" name="username" placeholder="<?= $l10n['username'] ?>"
+                               <?php if (isset($username)): ?>value="<?= $username ?>"<?php endif ?>/>
                     </div>
                 </div>
                 <div id="email-group" class="form-group">
                     <label for="in-email" class="control-label col-sm-3"><?= $l10n['email_address'] ?></label>
-
                     <div class="col-sm-9">
-                        <input type="email" class="form-control" id="in-email" name="email"
-                               <?php if (isset($email)): ?>value="<?= $email ?>"<?php endif ?>
-                               placeholder="<?= $l10n['email_address'] ?>">
+                        <input type="email" class="form-control" id="in-email" name="email" placeholder="<?= $l10n['email_address'] ?>"
+                               <?php if (isset($email)): ?>value="<?= $email ?>"<?php endif ?>/>
                     </div>
                 </div>
                 <div id="password1-group" class="form-group">
                     <label for="in-password1" class="control-label col-sm-3"><?= $l10n['password'] ?></label>
-
                     <div class="col-sm-9">
-                        <input type="password" class="form-control" id="in-password1" name="password"
-                               placeholder="<?= $l10n['password'] ?>">
+                        <input type="password" class="form-control" id="in-password1" name="password" placeholder="<?= $l10n['password'] ?>">
                     </div>
                 </div>
                 <div id="password2-group" class="form-group">
                     <label for="in-password2" class="control-label col-sm-3"></label>
-
                     <div class="col-sm-9">
-                        <input type="password" class="form-control" id="in-password2" name="password2"
-                               placeholder="<?= $l10n['password_again'] ?>">
+                        <input type="password" class="form-control" id="in-password2" name="password2" placeholder="<?= $l10n['password_again'] ?>">
                     </div>
                 </div>
-                <a id="registerBtn" class="btn btn-primary btn-lg" data-url="<?= url(['action' => 'index']) ?>">
-                    <?= $l10n['register'] ?>
-                </a>
+                <a id="registerBtn" class="btn btn-primary btn-lg" data-url="<?= url(['action' => 'index']) ?>"><?= $l10n['register'] ?></a>
                 <input name="registerBtn" style="display: none;"/>
             </form>
         </div>
