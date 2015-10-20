@@ -1,11 +1,10 @@
 <?php
-if (!defined('BASEDIR')) die('You cannot call this script directly !');
 global $l10n;
 require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
 
 // if algorithm is defined
 if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
-// prepare algorithm meta-data
+    // prepare algorithm meta-data
     $name = $__algorithm->name;
     $description = $__algorithm->description;
     if ($long_description = $__algorithm->long_description) {
@@ -16,326 +15,341 @@ if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
     }
     $tags = $__algorithm->tags;
 
-// prepare variables
+    // prepare variables
     $vars = json_decode($__algorithm->variables, true);
 
-// prepare parameters
+    // prepare parameters
     $params = (isset($_GET['p']) and is_array($_GET['p'])) ? $_GET['p'] : false;
 
-// prepare tree
+    // prepare tree
     require_once BASEDIR . "includes/algorithm.php";
     $tree = new Tree(json_decode($__algorithm->tree));
     ?>
+    <?php if (!EMBEDDED): ?>
     <!-- HEADER -->
     <div class="page-header">
-        <h1><?= $name ?>
-            <small><?= $description ?></small>
-        </h1>
-        <?php foreach ($tags as $tag): ?>
-            <a href="<?= url(['action' => 'index', 'tab' => 'tags', 'tag' => $tag]) ?>">
-                <span class="badge"><?= $tag ?></span>
-            </a>
-        <?php endforeach ?>
+        <h1><?= $l10n['view_algorithm'] ?></h1>
     </div>
     <!-- HEADER END -->
+    <ul id="scopes-head" class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active"><a data-target="#scope-0" aria-controls="scope-0" role="tab" data-toggle="tab"><?= $name ?></a></li>
+    </ul>
 
-    <!-- CONTENT -->
-    <div class="row">
+    <div id="scopes-body" class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="scope-0">
+    <?php endif // !EMBEDDED ?>
 
-        <!-- ERROR MESSAGE -->
-        <div id="alert" class="alert alert-danger" role="alert" style="display:none">
-            <strong><?= $l10n['runtime_error'] ?></strong><br/>
-            <?= $l10n['message_runtime_error'] ?>
-            <ul>
-                <li id="alertText"></li>
-            </ul>
-        </div>
-        <!-- ERROR MESSAGE END -->
+            <!-- CONTENT -->
+            <div class="row">
 
-        <!-- LEFT COLUMN -->
-        <div class="col-md-6">
+                <!-- ERROR MESSAGE -->
+                <div id="alert" class="alert alert-danger" role="alert" style="display:none">
+                    <strong><?= $l10n['runtime_error'] ?></strong><br/>
+                    <?= $l10n['message_runtime_error'] ?>
+                    <ul>
+                        <li id="alertText"></li>
+                    </ul>
+                </div>
+                <!-- ERROR MESSAGE END -->
 
-            <!-- ALGORITHM AREA -->
-            <div class="panel-group" id="accordion-left">
+                <!-- LEFT COLUMN -->
+                <div class="col-md-6">
 
-                <!-- TAB - CONTROLS -->
-                <div class="panel panel-default">
-                    <div class="panel-heading" data-target="#controls">
-                        <h4 class="panel-title">
-                            <span class="glyphicon glyphicon-chevron-down"></span>
-                            <?= $l10n['controls'] ?>
-                        </h4>
-                    </div>
-                    <div id="controls" class="panel-collapse">
-                        <div class="panel-body controls">
-                            <div class="col-lg-5 col-md-6 col-sm-4">
-                                <table>
-                                    <tr>
-                                        <td colspan="3" style="width: 100%;">
-                                            <div class="btn-group">
-                                                <button type="button" class="btn btn-default" title="<?= $l10n['back_to_start'] ?>" id="btn-reset">
-                                                    <span class="glyphicon glyphicon-fast-backward"></span>
-                                                </button>
-                                                <button type="button" class="btn btn-default" title="<?= $l10n['play'] ?>" id="btn-play">
-                                                    <span class="glyphicon glyphicon-play" id="img-play"></span>
-                                                </button>
-                                                <button type="button" class="btn btn-default" title="<?= $l10n['step_forward'] ?>" id="btn-step">
-                                                    <span class="glyphicon glyphicon-step-forward"></span>
-                                                </button>
-                                                <button type="button" class="btn btn-default" title="<?= $l10n['forward_to_end'] ?>" id="btn-finish">
-                                                    <span class="glyphicon glyphicon-fast-forward"></span>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td title="<?= $l10n['slow'] ?>"><span class="fa fa-bicycle"></span></td>
-                                        <td style="width:100%" title="<?= $l10n['set_speed'] ?>">
-                                            <div id="speed-control">
-                                                <div id="speed-slider"></div>
-                                            </div>
-                                        </td>
-                                        <td title="<?= $l10n['fast'] ?>"><span class="fa fa-rocket"></span></td>
-                                    </tr>
-                                    <tr>
-                                        <td title="<?= $l10n['set_breakpoints'] ?>"><span class="fa fa-eye"></span></td>
-                                        <td colspan="2" style="width: 100%">
-                                            <div id="step-control">
-                                                <div class="btn-group btn-group-sm" data-toggle="buttons">
-                                                    <label id="stop-before-btn" class="btn btn-default" data-break="before" title="<?= $l10n['break_before'] ?>">
-                                                        <input id="stop-before" type="checkbox" autocomplete="off">
-                                                        <span class="icon icon-stop-before"></span>
-                                                    </label>
-                                                    <label id="stop-after-btn" class="btn btn-default" data-break="after" title="<?= $l10n['break_after'] ?>">
-                                                        <input id="stop-after" type="checkbox" autocomplete="off">
-                                                        <span class="icon icon-stop-after"></span>
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </table>
+                    <!-- ALGORITHM AREA -->
+                    <div class="panel-group" id="accordion-left">
+
+                        <!-- TAB - CONTROLS -->
+                        <div class="panel panel-default">
+                            <div class="panel-heading" data-target="#controls">
+                                <h4 class="panel-title">
+                                    <span class="glyphicon glyphicon-chevron-down"></span>
+                                    <?= $l10n['controls'] ?>
+                                </h4>
                             </div>
-                            <div class="col-lg-7 col-md-6 col-sm-8">
-                                <div class="panel panel-default">
-                                    <div class="panel-body">
-                                        <label for="returnValue" class="sr-only">Return value</label>
-                                        <input id="returnValue" class="form-control input-sm" readonly="readonly">
+                            <div id="controls" class="panel-collapse">
+                                <div class="panel-body controls">
+                                    <div class="col-lg-5 col-md-6 col-sm-4">
+                                        <table>
+                                            <tr>
+                                                <td colspan="3" style="width: 100%;">
+                                                    <div class="btn-group">
+                                                        <button type="button" class="btn btn-default" title="<?= $l10n['back_to_start'] ?>" id="btn-reset">
+                                                            <span class="glyphicon glyphicon-fast-backward"></span>
+                                                        </button>
+                                                        <button type="button" class="btn btn-default" title="<?= $l10n['play'] ?>" id="btn-play">
+                                                            <span class="glyphicon glyphicon-play" id="img-play"></span>
+                                                        </button>
+                                                        <button type="button" class="btn btn-default" title="<?= $l10n['step_forward'] ?>" id="btn-step">
+                                                            <span class="glyphicon glyphicon-step-forward"></span>
+                                                        </button>
+                                                        <button type="button" class="btn btn-default" title="<?= $l10n['forward_to_end'] ?>" id="btn-finish">
+                                                            <span class="glyphicon glyphicon-fast-forward"></span>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td title="<?= $l10n['slow'] ?>"><span class="fa fa-bicycle"></span></td>
+                                                <td style="width:100%" title="<?= $l10n['set_speed'] ?>">
+                                                    <div id="speed-control">
+                                                        <div id="speed-slider"></div>
+                                                    </div>
+                                                </td>
+                                                <td title="<?= $l10n['fast'] ?>"><span class="fa fa-rocket"></span></td>
+                                            </tr>
+                                            <tr>
+                                                <td title="<?= $l10n['set_breakpoints'] ?>"><span class="fa fa-eye"></span></td>
+                                                <td colspan="2" style="width: 100%">
+                                                    <div id="step-control">
+                                                        <div class="btn-group btn-group-sm" data-toggle="buttons">
+                                                            <label id="stop-before-btn" class="btn btn-default" data-break="before" title="<?= $l10n['break_before'] ?>">
+                                                                <input id="stop-before" type="checkbox" autocomplete="off">
+                                                                <span class="icon icon-stop-before"></span>
+                                                            </label>
+                                                            <label id="stop-after-btn" class="btn btn-default" data-break="after" title="<?= $l10n['break_after'] ?>">
+                                                                <input id="stop-after" type="checkbox" autocomplete="off">
+                                                                <span class="icon icon-stop-after"></span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
                                     </div>
-                                    <div id="output-footer" class="panel-footer panel-footer-sm">
-                                        <?= $l10n['output'] ?>
+                                    <div class="col-lg-7 col-md-6 col-sm-8">
+                                        <div class="panel panel-default">
+                                            <div class="panel-body">
+                                                <label for="returnValue" class="sr-only">Return value</label>
+                                                <input id="returnValue" class="form-control input-sm" readonly="readonly">
+                                            </div>
+                                            <div id="output-footer" class="panel-footer panel-footer-sm">
+                                                <?= $l10n['output'] ?>
+                                            </div>
+                                        </div>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB - PSEUDOCODE -->
+                        <div class="panel panel-default">
+                            <div class="panel-heading" data-target="#pseudocode">
+                                <h4 class="panel-title">
+                                    <span class="glyphicon glyphicon-chevron-down"></span>
+                                    <?= $name ? $name : $l10n['untitled_algorithm'] ?>
+                                </h4>
+                            </div>
+                            <div id="pseudocode" class="panel-collapse">
+                                <div class="panel-body algorithm">
+                                    <?php if (is_null($__algorithm->tree)): ?>
+                                        <?= $l10n['no_algorithm'] ?>
+                                    <?php else: ?>
+                                        <ul id="node_<?= $tree->getRoot() ?>" class="insertStepsHere" data-node-id="<?= $tree->getRoot() ?>">
+                                            <?php $tree->printHtml(['vars' => $vars, 'mode' => 'view']) ?>
+                                        </ul>
+                                    <?php endif ?>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB - SOURCE CODE -->
+                        <div class="panel panel-default">
+                            <div class="panel-heading" data-target="#sourcecode">
+                                <h4 class="panel-title">
+                                    <span class="glyphicon glyphicon-chevron-down"></span>
+                                    <?= $l10n['source_code'] ?>
+                                </h4>
+                            </div>
+                            <div id="sourcecode" class="panel-collapse">
+                                <div class="panel-body source">
+                                    <?php if (is_null($__algorithm->tree)): ?>
+                                        <?= $l10n['no_algorithm'] ?>
+                                    <?php else: ?>
+                                        <div class="code"><?php $tree->printSource(['vars' => $vars]) ?></div>
+                                    <?php endif ?>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                <!-- LEFT COLUMN END -->
 
-                <!-- TAB - PSEUDOCODE -->
-                <div class="panel panel-default">
-                    <div class="panel-heading" data-target="#pseudocode">
-                        <h4 class="panel-title">
-                            <span class="glyphicon glyphicon-chevron-down"></span>
-                            <?= $name ? $name : $l10n['untitled_algorithm'] ?>
-                        </h4>
-                    </div>
-                    <div id="pseudocode" class="panel-collapse">
-                        <div class="panel-body algorithm">
-                            <?php if (is_null($__algorithm->tree)): ?>
-                                <?= $l10n['no_algorithm'] ?>
-                            <?php else: ?>
-                                <ul id="node_<?= $tree->getRoot() ?>" class="insertStepsHere" data-node-id="<?= $tree->getRoot() ?>">
-                                    <?php $tree->printHtml(['vars' => $vars, 'mode' => 'view']) ?>
-                                </ul>
-                            <?php endif ?>
+                <!-- RIGHT COLUMN -->
+                <div class="col-md-6">
+                    <div class="panel-group" id="accordion-right">
+                        <!-- TAB - DESCRIPTION -->
+                        <div class="panel panel-default">
+                            <div class="panel-heading" data-target="#description">
+                                <h4 class="panel-title">
+                                    <span class="glyphicon glyphicon-chevron-down"></span>
+                                    <?= $l10n['description'] ?>
+                                </h4>
+                            </div>
+                            <div id="description" class="panel-collapse">
+                                <div class="panel-body">
+                                    <?php if ($tags): ?>
+                                    <?php foreach ($tags as $tag): ?>
+                                        <a href="<?= url(['action' => 'index', 'tab' => 'tags', 'tag' => $tag]) ?>">
+                                            <span class="badge"><?= $tag ?></span>
+                                        </a>
+                                    <?php endforeach ?>
+                                        <br />
+                                    <?php endif ?>
+                                    <?= $long_description ?>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
 
-                <!-- TAB - SOURCE CODE -->
-                <div class="panel panel-default">
-                    <div class="panel-heading" data-target="#sourcecode">
-                        <h4 class="panel-title">
-                            <span class="glyphicon glyphicon-chevron-down"></span>
-                            <?= $l10n['source_code'] ?>
-                        </h4>
-                    </div>
-                    <div id="sourcecode" class="panel-collapse">
-                        <div class="panel-body source">
-                            <?php if (is_null($__algorithm->tree)): ?>
-                                <?= $l10n['no_algorithm'] ?>
-                            <?php else: ?>
-                                <div class="code"><?php $tree->printSource(['vars' => $vars]) ?></div>
-                            <?php endif ?>
+                        <!-- TAB - MEMORY -->
+                        <div class="panel panel-default">
+                            <div class="panel-heading" data-target="#memory">
+                                <h4 class="panel-title">
+                                    <span class="glyphicon glyphicon-chevron-down"></span>
+                                    <?= $l10n['memory'] ?>
+                                </h4>
+                            </div>
+                            <div id="memory" class="panel-collapse">
+                                <div class="panel-body">
+                                    <?php if (sizeof($vars)): ?>
+                                        <table class="table table-hover table-bordered variables">
+                                            <thead>
+                                            <tr>
+                                                <th style="border-top: none;"><?= $l10n['variable'] ?></th>
+                                                <th style="border-top: none;"><?= $l10n['contents'] ?></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <?php foreach ($vars as $vid => $var):
+                                                $var = (object) $var;
+                                                switch ($var->type) {
+                                                    // compute int elements
+                                                    case 'elem-int':
+                                                        if ($var->value === 'R') {
+                                                            $value = rand(0, 100); // TODO: max-number or range definable
+                                                        } elseif ($var->value === '?') {
+                                                            $value = '?';
+                                                        } elseif ($var->value === 'P') {
+                                                            $value = $params ? $params[$var->name] : 'P';
+                                                        } else {
+                                                            $value = $var->value;
+                                                        }
+                                                        break;
+                                                    // compute int arrays
+                                                    case 'array-int':
+                                                        if ($var->value === 'R') {
+                                                            $newValue = array();
+                                                            for ($i = 0; $i < $var->size; $i++)
+                                                                $newValue[] = rand(0, 100);
+                                                            $value = implode(',', $newValue);
+                                                        } elseif ($var->value === '?') {
+                                                            $newValue = array();
+                                                            for ($i = 0; $i < $var->size; $i++)
+                                                                $newValue[] = '?';
+                                                            $value = implode(',', $newValue);
+                                                        } elseif ($var->value === 'P') {
+                                                            $value = $params ? $params[$var->name] : 'P';
+                                                        } else {
+                                                            $value = $var->value;
+                                                        }
+                                                        break;
+                                                }
+                                                ?>
+                                                <tr id="var-<?= $vid ?>" class="variable"
+                                                    data-vid="<?= $vid ?>"
+                                                    data-name="<?= $var->name ?>"
+                                                    data-value="<?= $value ?>"
+                                                    data-type="<?= $var->type ?>">
+                                                    <td>
+                                                        <code class="name"><?= $var->name ?></code>
+                                                    </td>
+                                                    <td class="var-value">
+                                                        <?php if (substr($var->type, 0, 6) === "array-"): // deal with "array-{int}" ?>
+                                                            <?php foreach (explode(',', $value) as $offset => $val): ?>
+                                                                <button class="btn btn-default value-container offset_<?= $offset ?>" data-offset="<?= $offset ?>">
+                                                                    <span class="value"><?= $val ?></span>
+                                                                    <span class="glyphicon glyphicon-pencil write"></span>
+                                                                    <span class="glyphicon glyphicon-eye-open read"></span>
+                                                                </button>
+                                                                <input class="btn btn-default value-edit offset_<?= $offset ?>" data-offset="<?= $offset ?>"/>
+                                                            <?php endforeach ?>
+                                                        <?php else: // deal with "elem-{?,value}" ?>
+                                                            <button class="btn btn-default value-container">
+                                                                <span class="value"><?= $value ?></span>
+                                                                <span class="glyphicon glyphicon-pencil write"></span>
+                                                                <span class="glyphicon glyphicon-eye-open read"></span>
+                                                            </button>
+                                                            <input class="btn btn-default value-edit"/>
+                                                        <?php endif ?>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach ?>
+                                            </tbody>
+                                        </table>
+                                    <?php else: ?>
+                                        <?= $l10n['no_vars'] ?>
+                                    <?php endif ?>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- LEFT COLUMN END -->
 
-        <!-- RIGHT COLUMN -->
-        <div class="col-md-6">
-            <div class="panel-group" id="accordion-right">
-                <!-- TAB - DESCRIPTION -->
-                <div class="panel panel-default">
-                    <div class="panel-heading" data-target="#description">
-                        <h4 class="panel-title">
-                            <span class="glyphicon glyphicon-chevron-down"></span>
-                            <?= $l10n['description'] ?>
-                        </h4>
-                    </div>
-                    <div id="description" class="panel-collapse">
-                        <div class="panel-body"><?= $long_description ?></div>
-                    </div>
-                </div>
-
-                <!-- TAB - MEMORY -->
-                <div class="panel panel-default">
-                    <div class="panel-heading" data-target="#memory">
-                        <h4 class="panel-title">
-                            <span class="glyphicon glyphicon-chevron-down"></span>
-                            <?= $l10n['memory'] ?>
-                        </h4>
-                    </div>
-                    <div id="memory" class="panel-collapse">
-                        <div class="panel-body">
-                            <?php if (sizeof($vars)): ?>
-                                <table class="table table-hover table-bordered variables">
-                                    <thead>
-                                    <tr>
-                                        <th style="border-top: none;"><?= $l10n['variable'] ?></th>
-                                        <th style="border-top: none;"><?= $l10n['contents'] ?></th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <?php foreach ($vars as $vid => $var):
-                                        $var = (object) $var;
-                                        switch ($var->type) {
-                                            // compute int elements
-                                            case 'elem-int':
-                                                if ($var->value === 'R') {
-                                                    $value = rand(0, 100); // TODO: max-number or range definable
-                                                } elseif ($var->value === '?') {
-                                                    $value = '?';
-                                                } elseif ($var->value === 'P') {
-                                                    $value = $params ? $params[$var->name] : 'P';
-                                                } else {
-                                                    $value = $var->value;
-                                                }
-                                                break;
-                                            // compute int arrays
-                                            case 'array-int':
-                                                if ($var->value === 'R') {
-                                                    $newValue = array();
-                                                    for ($i = 0; $i < $var->size; $i++)
-                                                        $newValue[] = rand(0, 100);
-                                                    $value = implode(',', $newValue);
-                                                } elseif ($var->value === '?') {
-                                                    $newValue = array();
-                                                    for ($i = 0; $i < $var->size; $i++)
-                                                        $newValue[] = '?';
-                                                    $value = implode(',', $newValue);
-                                                } elseif ($var->value === 'P') {
-                                                    $value = $params ? $params[$var->name] : 'P';
-                                                } else {
-                                                    $value = $var->value;
-                                                }
-                                                break;
-                                        }
-                                        ?>
-                                        <tr id="var-<?= $vid ?>" class="variable"
-                                            data-vid="<?= $vid ?>"
-                                            data-name="<?= $var->name ?>"
-                                            data-value="<?= $value ?>"
-                                            data-type="<?= $var->type ?>">
+                        <!-- TAB - STATISTICS -->
+                        <div class="panel panel-default">
+                            <div class="panel-heading" data-target="#statistics">
+                                <h4 class="panel-title">
+                                <span
+                                    class="glyphicon glyphicon-chevron-down"></span>
+                                    <?= $l10n['statistics'] ?>
+                                </h4>
+                            </div>
+                            <div id="statistics" class="panel-collapse">
+                                <div class="panel-body">
+                                    <table class="table table-hover table-bordered statistics">
+                                        <thead>
+                                        <tr>
+                                            <th><?= $l10n['operations'] ?></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
                                             <td>
-                                                <code class="name"><?= $var->name ?></code>
-                                            </td>
-                                            <td class="var-value">
-                                                <?php if (substr($var->type, 0, 6) === "array-"): // deal with "array-{int}" ?>
-                                                    <?php foreach (explode(',', $value) as $offset => $val): ?>
-                                                        <button class="btn btn-default value-container offset_<?= $offset ?>" data-offset="<?= $offset ?>">
-                                                            <span class="value"><?= $val ?></span>
-                                                            <span class="glyphicon glyphicon-pencil write"></span>
-                                                            <span class="glyphicon glyphicon-eye-open read"></span>
-                                                        </button>
-                                                        <input class="btn btn-default value-edit offset_<?= $offset ?>" data-offset="<?= $offset ?>"/>
-                                                    <?php endforeach ?>
-                                                <?php else: // deal with "elem-{?,value}" ?>
-                                                    <button class="btn btn-default value-container">
-                                                        <span class="value"><?= $value ?></span>
-                                                        <span class="glyphicon glyphicon-pencil write"></span>
-                                                        <span class="glyphicon glyphicon-eye-open read"></span>
-                                                    </button>
-                                                    <input class="btn btn-default value-edit"/>
-                                                <?php endif ?>
+                                                <label for="stats-accesses"><?= $l10n['accesses'] ?></label>
+                                                <input class="btn btn-default statistic" readonly="readonly" value="0" id="stats-accesses"/>
                                             </td>
                                         </tr>
-                                    <?php endforeach ?>
-                                    </tbody>
-                                </table>
-                            <?php else: ?>
-                                <?= $l10n['no_vars'] ?>
-                            <?php endif ?>
+                                        <tr>
+                                            <td>
+                                                <label for="stats-assignments"><?= $l10n['assignments'] ?></label>
+                                                <input class="btn btn-default statistic" readonly="readonly" value="0" id="stats-assignments"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label for="stats-comparisons"><?= $l10n['comparisons'] ?></label>
+                                                <input class="btn btn-default statistic" readonly="readonly" value="0" id="stats-comparisons"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label for="stats-arithmeticLogic">
+                                                    <?= $l10n['arithmetic'] ?> (<code>+ &minus; &times; / %</code>)<br/>
+                                                    <?= $l10n['logic'] ?> (<code>& |</code>)</label>
+                                                <input class="btn btn-default statistic" readonly="readonly" value="0" id="stats-arithmeticLogic"/>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- TAB - STATISTICS -->
-                <div class="panel panel-default">
-                    <div class="panel-heading" data-target="#statistics">
-                        <h4 class="panel-title">
-                        <span
-                            class="glyphicon glyphicon-chevron-down"></span>
-                            <?= $l10n['statistics'] ?>
-                        </h4>
-                    </div>
-                    <div id="statistics" class="panel-collapse">
-                        <div class="panel-body">
-                            <table class="table table-hover table-bordered statistics">
-                                <thead>
-                                <tr>
-                                    <th><?= $l10n['operations'] ?></th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr>
-                                    <td>
-                                        <label for="stats-accesses"><?= $l10n['accesses'] ?></label>
-                                        <input class="btn btn-default statistic" readonly="readonly" value="0" id="stats-accesses"/>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <label for="stats-assignments"><?= $l10n['assignments'] ?></label>
-                                        <input class="btn btn-default statistic" readonly="readonly" value="0" id="stats-assignments"/>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <label for="stats-comparisons"><?= $l10n['comparisons'] ?></label>
-                                        <input class="btn btn-default statistic" readonly="readonly" value="0" id="stats-comparisons"/>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <label for="stats-arithmeticLogic">
-                                            <?= $l10n['arithmetic'] ?> (<code>+ &minus; &times; / %</code>)<br/>
-                                            <?= $l10n['logic'] ?> (<code>& |</code>)</label>
-                                        <input class="btn btn-default statistic" readonly="readonly" value="0" id="stats-arithmeticLogic"/>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+                <!-- RIGHT COLUMN END -->
             </div>
+            <!-- CONTENT END -->
+    <?php if (!EMBEDDED): ?>
         </div>
-        <!-- RIGHT COLUMN END -->
     </div>
-    <!-- CONTENT END -->
+    <?php endif // !EMBEDDED ?>
 <?php else: // no valid aid ?>
     <div class="alert alert-danger" role="alert">
         <strong><?= $l10n['error'] ?></strong><br/>

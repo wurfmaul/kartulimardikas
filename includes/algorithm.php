@@ -4,7 +4,7 @@ class AssignNode extends Node
 {
     /** @var Value */
     protected $to;
-    /** @var BlockNode|Value */
+    /** @var BlockNode */
     protected $from;
 
     public function __construct($nid, $to, $from)
@@ -34,21 +34,14 @@ class AssignNode extends Node
     public function printHtml(&$params)
     {
         $toValue = $this->to->parse($params);
-
-        if ($this->from instanceof Value) {
-            $fromValue = $this->from->parse($params);
-            $fromNid = null;
-        } else {
-            $fromValue = "";
-            $fromNid = isset($this->from) ? $this->from->nodeId : null;
-        }
+        $fromNid = isset($this->from) ? $this->from->nodeId : null;
         ?>
         <!-- ASSIGN NODE -->
-        <li id="node_<?= $this->nodeId ?>" class="node assign-node droppable" data-node-type="assign"
+        <li id="node_<?= $this->nodeId ?>" class="node assign-node" data-node-type="assign"
             data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr>
-                    <td class="handle node-box top bottom left">
+                    <td class="handle node-box top left">
                         <span class="cursor-icon"></span>
                     </td>
                     <td class="node-box top right bottom full-width">
@@ -59,9 +52,6 @@ class AssignNode extends Node
                                     <input class="assign-to combobox" value="<?= $toValue ?>"/>
                                 </div>
                                 :=
-                                <div class="ui-widget combobox-container hide-on-hover">
-                                    <input class="assign-from-value combobox" value="<?= $fromValue ?>"/>
-                                </div>
                             </label>
                             <span class="invalid-flag label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
                             <button type="button" class="close node-remove" aria-label="Close">
@@ -69,7 +59,7 @@ class AssignNode extends Node
                             </button>
                         <?php else: ?>
                             <label>
-                                <?= $toValue ?> := <?= $fromValue ?>
+                                <?= $toValue ?> :=
                                 <div style="display: none;">
                                     <input class="assign-to" value="<?= $toValue ?>"/>
                                 </div>
@@ -77,12 +67,12 @@ class AssignNode extends Node
                         <?php endif ?>
                     </td>
                 </tr>
-                <tr style="display:none" class="show-on-hover">
+                <tr>
                     <td class="handle node-box left right bottom">
                         <span class="cursor-icon"></span>
                     </td>
                     <td>
-                        <ul class="assign-from-node sortable" data-node-id="<?= $fromNid ?>">
+                        <ul class="assign-from sortable" data-node-id="<?= $fromNid ?>">
                             <?php self::printNode($this->from, $params) ?>
                         </ul>
                     </td>
@@ -312,8 +302,10 @@ class CompareNode extends Node
 
 class FunctionNode extends Node
 {
-    /** @var int */
+    /** @var int Node ID of the callee. */
     protected $calleeId;
+    /** @var string Name of the callee. */
+    protected $calleeName;
     /** @var BlockNode */
     protected $actPars;
 
@@ -322,6 +314,13 @@ class FunctionNode extends Node
         $this->nodeId = $nid;
         $this->calleeId = $callee;
         $this->actPars = $params;
+
+        if ($this->calleeId > 0) {
+            require_once(BASEDIR . 'includes/dataModel.php');
+            $_model = new DataModel();
+            $this->calleeName = $_model->fetchAlgorithm($this->calleeId)->name;
+            $_model->close();
+        }
     }
 
     public static function parse($node, $tree)
@@ -334,8 +333,8 @@ class FunctionNode extends Node
     public function getSource($params)
     {
         return $this->wrapLine(
-            sprintf("%s (%s)",
-                "[FUNCTION_NAME]",
+            sprintf("%s(%s)",
+                $this->calleeName,
                 trim($this->actPars->getSource($params))
             )
         );
@@ -344,13 +343,6 @@ class FunctionNode extends Node
     public function printHtml(&$params)
     {
         $actParsNid =  isset($this->actPars) ? $this->actPars->nodeId : null;
-        $name = "";
-        if ($this->calleeId > 0) {
-            require_once('includes/dataModel.php');
-            $_model = new DataModel();
-            $name = $_model->fetchAlgorithm($this->calleeId)->name;
-            $_model->close();
-        }
         ?>
         <!-- FUNCTION NODE -->
         <li id="node_<?= $this->nodeId ?>" class="node function-node" data-node-type="function"
@@ -378,16 +370,15 @@ class FunctionNode extends Node
                         <?php else: ?>
                             <label>
                                 <?= TreeHelper::l10n('function_node_title') ?>
-                                <?= $name ?>
-                                ()
+                                <?= $this->calleeName ?>()
                                 <div style="display: none;">
-                                    <input class="" value=""/>
+                                    <input class="name" value="<?= $this->calleeName ?>"/>
                                 </div>
                             </label>
                         <?php endif ?>
                     </td>
                 </tr>
-                <tr <?php if (is_null($actParsNid)): ?>style="display: none;"<?php endif ?>>
+                <tr <?php if (is_null($actParsNid) || $actParsNid == '0'): ?>style="display: none;"<?php endif ?>>
                     <td class="handle node-box left right bottom">
                         <span class="cursor-icon"></span>
                     </td>

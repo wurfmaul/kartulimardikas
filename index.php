@@ -1,16 +1,20 @@
 <?php
 // setup environment
 define('BASEDIR', __DIR__ . '/');
+define('EMBEDDED', isset($_GET['embedded']) && $_GET['embedded']);
 
-// deal with authentication
 require_once BASEDIR . 'includes/authentication.php';
-secure_session_start();
+if (!EMBEDDED) {
+    // deal with authentication
+    secure_session_start();
+}
 
-// load configuration, helpers, authentication
+// load configuration, helpers
 require_once BASEDIR . 'includes/settings.php';
 require_once BASEDIR . 'includes/dataModel.php';
 require_once BASEDIR . 'includes/urlHelper.php';
 require_once BASEDIR . 'includes/browserchecker.php';
+
 global $l10n;
 $__model = new DataModel();
 
@@ -20,44 +24,50 @@ if (!file_exists(BASEDIR . "partials/$__action.phtml"))
     $__action = DEFAULT_PAGE;
 define('ACTION', $__action);
 
-// SIGN IN
-if ((isset($_POST['signInBtn']) || isset($_POST['registerBtn'])) && isset($_POST['username'], $_POST['password'])) {
-    $username = $_POST['username'];
-    if (signIn($username, $_POST['password'])) {
-        $successMsg = sprintf($l10n['signed_in'], $username);
-        // if the user has just been created
-        if (isset($_POST['registerBtn'])) {
-            $registerMsg = sprintf($l10n['user_created'], $username);
+if (!EMBEDDED) {
+    // SIGN IN
+    if ((isset($_POST['signInBtn']) || isset($_POST['registerBtn'])) && isset($_POST['username'], $_POST['password'])) {
+        $username = $_POST['username'];
+        if (signIn($username, $_POST['password'])) {
+            $successMsg = sprintf($l10n['signed_in'], $username);
+            // if the user has just been created
+            if (isset($_POST['registerBtn'])) {
+                $registerMsg = sprintf($l10n['user_created'], $username);
+            }
+        } else {
+            $errorMsg = $l10n['credentials_invalid'];
         }
-    } else {
-        $errorMsg = $l10n['credentials_invalid'];
+    // SIGN OUT
+    } elseif (isset($_POST['signOutBtn'])) {
+        signOut();
+        $successMsg = $l10n['signed_out'];
     }
-// SIGN OUT
-} elseif (isset($_POST['signOutBtn'])) {
-    signOut();
-    $successMsg = $l10n['signed_out'];
-}
-/** @var int $__uid Currently signed in user or false if not signed in.
- * @var int $__rights The user rights of the currently signed in user (user => 0, admin => 1, super-admin => 2).
- */
-$__uid = isSignedIn();
-$__rights = $__uid ? $__model->fetchUser($__uid)->rights : 0;
-
-// DEAL WITH NEW ALGORITHMS
-if (ACTION === 'new' && $__uid) {
-    // create a new algorithm
-    $aid = $__model->insertAlgorithm($__uid);
-    // redirect to the edit-page
-    header("Location:" . url(['action' => 'edit', 'aid' => $aid], false, false));
-    die();
 }
 
-// REDIRECT MESSAGES
-if (isset($_POST['successMsg'])) {
-    $successMsg = $_POST['successMsg'];
-}
-if (isset($_POST['errorMsg'])) {
-    $errorMsg = $_POST['errorMsg'];
+    /**
+     * @var int $__uid Currently signed in user or false if not signed in.
+     * @var int $__rights The user rights of the currently signed in user (user => 0, admin => 1, super-admin => 2).
+     */
+    $__uid = isSignedIn();
+    $__rights = $__uid ? $__model->fetchUser($__uid)->rights : 0;
+
+if (!EMBEDDED) {
+    // DEAL WITH NEW ALGORITHMS
+    if (ACTION === 'new' && $__uid) {
+        // create a new algorithm
+        $aid = $__model->insertAlgorithm($__uid);
+        // redirect to the edit-page
+        header("Location:" . url(['action' => 'edit', 'aid' => $aid], false, false));
+        die();
+    }
+
+    // REDIRECT MESSAGES
+    if (isset($_POST['successMsg'])) {
+        $successMsg = $_POST['successMsg'];
+    }
+    if (isset($_POST['errorMsg'])) {
+        $errorMsg = $_POST['errorMsg'];
+    }
 }
 
 // ALGORITHM SETTINGS
@@ -78,15 +88,17 @@ if (isset($_GET['aid']) && $__algorithm = $__model->fetchAlgorithm($__aid = $_GE
     $__algorithm = false;
 }
 
-// define where the user should be taken after signing out
-$signOutAction = "";
-if ($__algorithm) {
-    if (!$__public) {
-        // if the algorithm is private -> redirect to home action
-        $signOutAction = url();
-    } elseif ($__action === 'edit' || $__action === 'settings') {
-        // if the algorithm is public -> redirect to view action
-        $signOutAction = url(['action' => 'view', 'aid' => $__aid]);
+if (!EMBEDDED) {
+    // define where the user should be taken after signing out
+    $signOutAction = "";
+    if ($__algorithm) {
+        if (!$__public) {
+            // if the algorithm is private -> redirect to home action
+            $signOutAction = url();
+        } elseif ($__action === 'edit' || $__action === 'settings') {
+            // if the algorithm is public -> redirect to view action
+            $signOutAction = url(['action' => 'view', 'aid' => $__aid]);
+        }
     }
 }
 ?><!DOCTYPE html>
@@ -126,6 +138,7 @@ if ($__algorithm) {
     </script>
 </head>
 <body>
+<?php if (!EMBEDDED): ?>
 <div class="content-wrapper">
     <!-- NAVIGATION BAR TOP -->
     <nav class="navbar navbar-default" role="navigation">
@@ -258,14 +271,16 @@ if ($__algorithm) {
             </div>
         <?php endif ?>
 
+        <?php endif // !EMBEDDED ?>
+
         <!-- PAGE CONTENT BEGIN -->
         <?php require_once BASEDIR . 'partials/' . ACTION . '.phtml' ?>
         <!-- PAGE CONTENT END -->
 
+<?php if (!EMBEDDED): ?>
         <div class="footer-placeholder"></div>
     </div>
 </div>
-
 <nav class="footer navbar navbar-default">
     <div class="container-fluid">
         <div class="navbar-footer">
@@ -300,12 +315,14 @@ if ($__algorithm) {
         </div>
     </div>
 </nav>
+<?php endif // !EMBEDDED ?>
 
 <!-- LIBRARIES -->
 <script type="text/javascript" src="<?= JQUERY_PATH ?>"></script>
 <script type="text/javascript" src="<?= BOOTSTRAP_JS_PATH ?>"></script>
 <?php if (ACTION === 'edit' || ACTION === 'view'): ?>
     <script type="text/javascript" src="<?= JQUERYUI_JS_PATH ?>"></script>
+    <script type="text/javascript" src="<?= EMBEDDED ? IFRAME_RESIZER_FRAME_PATH : IFRAME_RESIZER_HOST_PATH ?>"></script>
 <?php elseif (ACTION === 'admin' || ACTION === 'index'): ?>
     <script type="text/javascript" src="<?= TABLESORTER_JS_PATH ?>"></script>
     <script type="text/javascript" src="<?= TABLESORTER_WIDGETS_JS_PATH ?>"></script>

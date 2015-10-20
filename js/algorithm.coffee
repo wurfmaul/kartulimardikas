@@ -269,11 +269,11 @@ class AssignNode extends Node
 
   execute: (player, node) ->
     # get new value
-    value = player.tree.get(@from).execute(player, 0).value
+    node = player.tree.get(@from).execute(player, 0)
     # write new value
-    @writeVar(@to, value, player)
+    @writeVar(@to, node.value, player)
     # return value
-    value: value
+    node
 
   toJSON: ->
     {
@@ -432,7 +432,31 @@ class FunctionNode extends Node
   constructor: (@nid, @callee, @parameters) ->
 
   execute: (player, node) ->
-    console.log('execute function')
+    scope = ++player.scope
+    # get name of called function
+    name = $('#node_' + @nid).find('.name').val()
+    # prepare new tab
+    $('#scopes-head').append(
+      $('<li/>').attr('role', 'presentation').append(
+        $('<a/>').data('target', '#scope-' + scope).attr('aria-controls', 'scope-' + scope).attr('role', 'tab').attr('data-toggle', 'tab').text(name)
+      )
+    )
+    $('#scopes-body').append(
+      $('<div/>').attr('role', 'tabpanel').addClass('tab-pane').attr('id', 'scope-' + scope).append(
+        $('<iframe/>').attr('src', 'index.php?action=view&embedded=1&aid=' + @callee).attr('id', 'frame-' + scope)
+      )
+    )
+    # prepare the iframe
+    $('#frame-' + scope).iFrameResize()
+    $('#scope-1').tab('show')
+
+    # execute the callee
+    document.continue = @continue
+
+    { next: @nid }
+
+  continue: ->
+    console.log('continued')
 
   toJSON: ->
     {

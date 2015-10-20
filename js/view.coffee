@@ -4,6 +4,7 @@ class Player
     @stats = new Stats(@memory)
     @speed = @loadSpeed()
     @breaks = @loadBreaks()
+    @scope = 0
     @reset()
 
   reset: ->
@@ -12,7 +13,11 @@ class Player
     # reset components
     @tree.reset()
     @stats.reset()
-    # delete return value
+    # reset scopes
+    @scope = 0
+    $('#scopes-head').children(':not(:first)').remove()
+    $('#scopes-body').children(':not(:first)').remove()
+    # clear return value
     $('#returnValue').val('')
     # find first node to execute
     @curNode = null
@@ -31,9 +36,7 @@ class Player
       # clear timer
       @timer = clearInterval(@timer);
       # set button icon to play
-      $('#img-play')
-      .removeClass('glyphicon-pause')
-      .addClass('glyphicon-play')
+      $('#img-play').removeClass('glyphicon-pause').addClass('glyphicon-play')
     else # play
       # set an interval and perform step after step
       maxSteps = window.defaults.maxSteps
@@ -45,9 +48,7 @@ class Player
         else @handleError(new ExecutionError('too_many_steps', [maxSteps]))
       , @speed)
       # set button icon to pause
-      $('#img-play')
-      .removeClass('glyphicon-play')
-      .addClass('glyphicon-pause')
+      $('#img-play').removeClass('glyphicon-play').addClass('glyphicon-pause')
 
   step: ->
     @clearHighlight()
@@ -84,7 +85,6 @@ class Player
       @unsetCursor()
       @setControls([1, 1, 0, 0, 0])
       false
-
 
   finish: ->
     maxSteps = window.defaults.maxSteps

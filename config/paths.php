@@ -5,6 +5,7 @@ $_jqueryUiVersion = '1.11.4';
 $_bootstrapVersion = '3.3.5';
 $_fontAwesomeVersion = '4.3.0';
 $_tableSorterVersion = '2.22.3';
+$_iframeResizerVersion = '3.3.1';
 
 if (LIBRARY_MODE == 'LOCAL') {
     define('JQUERY_PATH', "lib/jquery/$_jqueryVersion/jquery.min.js");
@@ -18,6 +19,8 @@ if (LIBRARY_MODE == 'LOCAL') {
     define('TABLESORTER_WIDGETS_JS_PATH', "lib/tablesorter/$_tableSorterVersion/js/jquery.tablesorter.widgets.min.js");
     define('TABLESORTER_PAGER_JS_PATH', "lib/tablesorter/$_tableSorterVersion/js/extras/jquery.tablesorter.pager.min.js");
     define('TABLESORTER_PAGER_CSS_PATH', "lib/tablesorter/$_tableSorterVersion/css/jquery.tablesorter.pager.min.css");
+    define('IFRAME_RESIZER_FRAME_PATH', "lib/iframe-resizer/$_iframeResizerVersion/iframeResizer.contentWindow.min.js");
+    define('IFRAME_RESIZER_HOST_PATH', "lib/iframe-resizer/$_iframeResizerVersion/iframeResizer.min.js");
 } elseif (LIBRARY_MODE == 'DEBUG') {
     define('JQUERY_PATH', "lib/jquery/$_jqueryVersion/jquery.js");
     define('JQUERYUI_JS_PATH', "lib/jquery-ui/$_jqueryUiVersion/jquery-ui.js");
@@ -30,6 +33,8 @@ if (LIBRARY_MODE == 'LOCAL') {
     define('TABLESORTER_WIDGETS_JS_PATH', "lib/tablesorter/$_tableSorterVersion/js/jquery.tablesorter.widgets.js");
     define('TABLESORTER_PAGER_JS_PATH', "lib/tablesorter/$_tableSorterVersion/js/extras/jquery.tablesorter.pager.min.js");
     define('TABLESORTER_PAGER_CSS_PATH', "lib/tablesorter/$_tableSorterVersion/css/jquery.tablesorter.pager.min.css");
+    define('IFRAME_RESIZER_FRAME_PATH', "lib/iframe-resizer/$_iframeResizerVersion/iframeResizer.contentWindow.js");
+    define('IFRAME_RESIZER_HOST_PATH', "lib/iframe-resizer/$_iframeResizerVersion/iframeResizer.js");
 } else { // CDN
     define('JQUERY_PATH', "https://code.jquery.com/jquery-$_jqueryVersion.min.js");
     define('JQUERYUI_JS_PATH', "https://code.jquery.com/ui/$_jqueryUiVersion/jquery-ui.min.js");
@@ -42,4 +47,6 @@ if (LIBRARY_MODE == 'LOCAL') {
     define('TABLESORTER_WIDGETS_JS_PATH', "https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/$_tableSorterVersion/js/jquery.tablesorter.widgets.min.js");
     define('TABLESORTER_PAGER_JS_PATH', "https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/$_tableSorterVersion/js/extras/jquery.tablesorter.pager.min.js");
     define('TABLESORTER_PAGER_CSS_PATH', "https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/$_tableSorterVersion/css/jquery.tablesorter.pager.min.css");
+    define('IFRAME_RESIZER_FRAME_PATH', "https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/$_iframeResizerVersion/iframeResizer.contentWindow.min.js");
+    define('IFRAME_RESIZER_HOST_PATH', "https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/$_iframeResizerVersion/iframeResizer.min.js");
 }
