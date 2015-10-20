@@ -307,7 +307,7 @@ class BlockNode extends Node
         break
     # use the value if there is one
     if (curNode?.value?) then value = curNode.value
-    else value = null
+    else value = false
     # compute next node
     if (curNode?.next?)
       {next: curNode.next, value: value}
@@ -379,6 +379,7 @@ class CommentNode extends Node
   constructor: (@nid, @comment) ->
 
   execute: (player, node) ->
+    {value: false}
 
   mark: (player, node) ->
     -1 # never let this node be marked
@@ -464,14 +465,16 @@ class IfNode extends Node
       if (size is 1) then condRetVal = cond.execute(player, node)
       else if (size > 1) then condRetVal = cond.executeAll(player, node, @op)
       else throw new ExecutionError('no_condition', [])
+      # compute condition (only 0 and false are interpreted as false)
+      value = condRetVal.value + 0 isnt 0
       # define the next step
-      if condRetVal.next > -1 then next: condRetVal.next
-      else if condRetVal.value then next: @ifBody
-      else next: @elseBody
+      if condRetVal.next > -1 then { next: condRetVal.next, value: value }
+      else if value then { next: @ifBody, value: value }
+      else { next: @elseBody, value: value }
     else if (node <= @ifBody)
-      next: player.tree.get(@ifBody).execute(player, node).next
+      player.tree.get(@ifBody).execute(player, node)
     else
-      next: player.tree.get(@elseBody).execute(player, node).next
+      player.tree.get(@elseBody).execute(player, node)
 
   mark: (player, node) ->
     # mark condition if the IfNode should be marked
@@ -582,7 +585,7 @@ class SwapNode extends Node
     # write values
     @writeVar(@left, rightVal, player)
     @writeVar(@right, leftVal, player)
-    {}
+    {value: leftVal isnt rightVal}
 
   toJSON: ->
     {
