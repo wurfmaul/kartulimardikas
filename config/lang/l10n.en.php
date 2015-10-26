@@ -206,6 +206,7 @@ $l10n['runtime_errors'] = [
     'no_array_for_index' => "The variable '%1' is no array, therefore it cannot be accessed via an index!",
     'divide_by_zero' => "Division cannot have zero as denominator!",
     'no_condition' => "There were no conditions specified.",
+    'function_load' => "Could not load function '%1'!",
 ];
 
 // EDIT

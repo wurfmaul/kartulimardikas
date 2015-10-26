@@ -44,30 +44,28 @@ if (!EMBEDDED) {
     }
 }
 
-    /**
-     * @var int $__uid Currently signed in user or false if not signed in.
-     * @var int $__rights The user rights of the currently signed in user (user => 0, admin => 1, super-admin => 2).
-     */
-    $__uid = isSignedIn();
-    $__rights = $__uid ? $__model->fetchUser($__uid)->rights : 0;
+/**
+ * @var int $__uid Currently signed in user or false if not signed in.
+ * @var int $__rights The user rights of the currently signed in user (user => 0, admin => 1, super-admin => 2).
+ */
+$__uid = isSignedIn();
+$__rights = $__uid ? $__model->fetchUser($__uid)->rights : 0;
 
-if (!EMBEDDED) {
-    // DEAL WITH NEW ALGORITHMS
-    if (ACTION === 'new' && $__uid) {
-        // create a new algorithm
-        $aid = $__model->insertAlgorithm($__uid);
-        // redirect to the edit-page
-        header("Location:" . url(['action' => 'edit', 'aid' => $aid], false, false));
-        die();
-    }
+// DEAL WITH NEW ALGORITHMS
+if (ACTION === 'new' && $__uid) {
+    // create a new algorithm
+    $aid = $__model->insertAlgorithm($__uid);
+    // redirect to the edit-page
+    header("Location:" . url(['action' => 'edit', 'aid' => $aid], false, false));
+    die();
+}
 
-    // REDIRECT MESSAGES
-    if (isset($_POST['successMsg'])) {
-        $successMsg = $_POST['successMsg'];
-    }
-    if (isset($_POST['errorMsg'])) {
-        $errorMsg = $_POST['errorMsg'];
-    }
+// REDIRECT MESSAGES
+if (isset($_POST['successMsg'])) {
+    $successMsg = $_POST['successMsg'];
+}
+if (isset($_POST['errorMsg'])) {
+    $errorMsg = $_POST['errorMsg'];
 }
 
 // ALGORITHM SETTINGS
@@ -88,17 +86,15 @@ if (isset($_GET['aid']) && $__algorithm = $__model->fetchAlgorithm($__aid = $_GE
     $__algorithm = false;
 }
 
-if (!EMBEDDED) {
-    // define where the user should be taken after signing out
-    $signOutAction = "";
-    if ($__algorithm) {
-        if (!$__public) {
-            // if the algorithm is private -> redirect to home action
-            $signOutAction = url();
-        } elseif ($__action === 'edit' || $__action === 'settings') {
-            // if the algorithm is public -> redirect to view action
-            $signOutAction = url(['action' => 'view', 'aid' => $__aid]);
-        }
+// define where the user should be taken after signing out
+$signOutAction = "";
+if ($__algorithm) {
+    if (!$__public) {
+        // if the algorithm is private -> redirect to home action
+        $signOutAction = url();
+    } elseif ($__action === 'edit' || $__action === 'settings') {
+        // if the algorithm is public -> redirect to view action
+        $signOutAction = url(['action' => 'view', 'aid' => $__aid]);
     }
 }
 ?><!DOCTYPE html>
@@ -138,7 +134,6 @@ if (!EMBEDDED) {
     </script>
 </head>
 <body>
-<?php if (!EMBEDDED): ?>
 <div class="content-wrapper">
     <!-- NAVIGATION BAR TOP -->
     <nav class="navbar navbar-default" role="navigation">
@@ -271,13 +266,10 @@ if (!EMBEDDED) {
             </div>
         <?php endif ?>
 
-        <?php endif // !EMBEDDED ?>
-
         <!-- PAGE CONTENT BEGIN -->
         <?php require_once BASEDIR . 'partials/' . ACTION . '.phtml' ?>
         <!-- PAGE CONTENT END -->
 
-<?php if (!EMBEDDED): ?>
         <div class="footer-placeholder"></div>
     </div>
 </div>
@@ -315,14 +307,12 @@ if (!EMBEDDED) {
         </div>
     </div>
 </nav>
-<?php endif // !EMBEDDED ?>
 
 <!-- LIBRARIES -->
 <script type="text/javascript" src="<?= JQUERY_PATH ?>"></script>
 <script type="text/javascript" src="<?= BOOTSTRAP_JS_PATH ?>"></script>
 <?php if (ACTION === 'edit' || ACTION === 'view'): ?>
     <script type="text/javascript" src="<?= JQUERYUI_JS_PATH ?>"></script>
-    <script type="text/javascript" src="<?= EMBEDDED ? IFRAME_RESIZER_FRAME_PATH : IFRAME_RESIZER_HOST_PATH ?>"></script>
 <?php elseif (ACTION === 'admin' || ACTION === 'index'): ?>
     <script type="text/javascript" src="<?= TABLESORTER_JS_PATH ?>"></script>
     <script type="text/javascript" src="<?= TABLESORTER_WIDGETS_JS_PATH ?>"></script>

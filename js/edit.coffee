@@ -1,4 +1,5 @@
-window.VARSITE = $("#insertVarsHere") # Specifies the site, where variables are to place.
+SCRIPTSITE = $(".insertStepsHere") # Specifies the site, where blocks are to place.
+VARSITE = $("#insertVarsHere") # Specifies the site, where variables are to place.
 
 class Api
   @editInfo: ->
@@ -179,7 +180,7 @@ class VariableForm
     $('.varRow').not('#var-prototype').each(->
       # update the variable counter
       vid = $(this).data('vid')
-      tree = new Tree()
+      tree = new Tree(0)
       count = tree.memory.get(vid).count
       $(this).find('.counter').text(count)
       # (de)activate remove-button according to counter

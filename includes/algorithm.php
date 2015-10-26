@@ -28,7 +28,7 @@ class AssignNode extends Node
                 $this->to->parse($params),
                 trim($this->from->getSource($params))
             )
-        );
+        , $params);
     }
 
     public function printHtml(&$params)
@@ -37,8 +37,7 @@ class AssignNode extends Node
         $fromNid = isset($this->from) ? $this->from->nodeId : null;
         ?>
         <!-- ASSIGN NODE -->
-        <li id="node_<?= $this->nodeId ?>" class="node assign-node" data-node-type="assign"
-            data-node-id="<?= $this->nodeId ?>">
+        <li class="node assign-node node_<?= $this->nodeId ?>" data-node-type="assign" data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr>
                     <td class="handle node-box top left">
@@ -165,8 +164,7 @@ class CommentNode extends Node
     public function printHtml(&$params)
     { ?>
         <!-- COMMENT NODE -->
-        <li id="node_<?= $this->nodeId ?>" class="node comment-node" data-node-type="comment"
-            data-node-id="<?= $this->nodeId ?>">
+        <li class="node comment-node node_<?= $this->nodeId ?>" data-node-type="comment" data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr>
                     <td class="handle node-box top bottom left">
@@ -240,7 +238,7 @@ class CompareNode extends Node
                 $this->ops[$this->op],
                 $this->right->parse($params)
             )
-        );
+        , $params);
     }
 
     public function printHtml(&$params)
@@ -250,8 +248,7 @@ class CompareNode extends Node
         $selected_op = $this->isPrototype ? 'lt' : $this->op;
         ?>
         <!-- COMPARE NODE -->
-        <li id="node_<?= $this->nodeId ?>" class="node compare-node" data-node-type="compare"
-            data-node-id="<?= $this->nodeId ?>">
+        <li class="node compare-node node_<?= $this->nodeId ?>" data-node-type="compare" data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr>
                     <td class="handle node-box top bottom left">
@@ -309,11 +306,11 @@ class FunctionNode extends Node
     /** @var BlockNode */
     protected $actPars;
 
-    public function __construct($nid, $callee, $params)
+    public function __construct($nid, $callee, $actPars)
     {
         $this->nodeId = $nid;
         $this->calleeId = $callee;
-        $this->actPars = $params;
+        $this->actPars = $actPars;
 
         if ($this->calleeId > 0) {
             require_once(BASEDIR . 'includes/dataModel.php');
@@ -325,9 +322,9 @@ class FunctionNode extends Node
 
     public static function parse($node, $tree)
     {
-        $params = isset($node->params) ? parent::parse($tree[$node->params], $tree) : null;
+        $actPars = isset($node->params) ? parent::parse($tree[$node->params], $tree) : null;
         $callee = isset($node->callee) ? $node->callee : -1;
-        return new self($node->nid, $callee, $params);
+        return new self($node->nid, $callee, $actPars);
     }
 
     public function getSource($params)
@@ -337,16 +334,16 @@ class FunctionNode extends Node
                 $this->calleeName,
                 trim($this->actPars->getSource($params))
             )
-        );
+        , $params);
     }
 
     public function printHtml(&$params)
     {
         $actParsNid =  isset($this->actPars) ? $this->actPars->nodeId : null;
+        $name = '';
         ?>
         <!-- FUNCTION NODE -->
-        <li id="node_<?= $this->nodeId ?>" class="node function-node" data-node-type="function"
-            data-node-id="<?= $this->nodeId ?>" data-callee-id="<?= $this->calleeId ?>">
+        <li class="node function-node node_<?= $this->nodeId ?>" data-node-type="function" data-node-id="<?= $this->nodeId ?>" data-callee-id="<?= $this->calleeId ?>">
             <table>
                 <tr>
                     <td class="handle node-box top bottom left">
@@ -378,7 +375,8 @@ class FunctionNode extends Node
                         <?php endif ?>
                     </td>
                 </tr>
-                <tr <?php if (is_null($actParsNid) || $actParsNid == '0'): ?>style="display: none;"<?php endif ?>>
+                <?php if (is_null($actParsNid) || $actParsNid == '0'): ?>
+                <tr style="display: none;">
                     <td class="handle node-box left right bottom">
                         <span class="cursor-icon"></span>
                     </td>
@@ -388,6 +386,7 @@ class FunctionNode extends Node
                         </ul>
                     </td>
                 </tr>
+                <?php endif ?>
             </table>
         </li>
     <?php }
@@ -448,7 +447,7 @@ class IfNode extends Node
         $selected_op = $this->isPrototype ? 'all' : $this->op;
         ?>
         <!-- IF NODE -->
-        <li id="node_<?= $this->nodeId ?>" class="node if-node" data-node-type="if" data-node-id="<?= $this->nodeId ?>">
+        <li class="node if-node node_<?= $this->nodeId ?>" data-node-type="if" data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr>
                     <td class="handle node-box top left">
@@ -544,7 +543,7 @@ class IncNode extends Node
 
     public function getSource($params)
     {
-        return $this->wrapLine($this->var->parse($params) . "++");
+        return $this->wrapLine($this->var->parse($params) . "++", $params);
     }
 
     public function printHtml(&$params)
@@ -553,8 +552,7 @@ class IncNode extends Node
         $selected_op = $this->isPrototype ? 'inc' : $this->op;
         ?>
         <!-- INC NODE -->
-        <li id="node_<?= $this->nodeId ?>" class="node inc-node" data-node-type="inc"
-            data-node-id="<?= $this->nodeId ?>">
+        <li class="node inc-node node_<?= $this->nodeId ?>" data-node-type="inc" data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr>
                     <td class="handle node-box top bottom left">
@@ -615,7 +613,7 @@ class ReturnNode extends Node
 
     public function getSource($params)
     {
-        return $this->wrapLine("return " . $this->value->parse($params));
+        return $this->wrapLine("return " . $this->value->parse($params), $params);
     }
 
     public function printHtml(&$params)
@@ -623,8 +621,7 @@ class ReturnNode extends Node
         $varValue = $this->value->parse($params);
         ?>
         <!-- RETURN NODE -->
-        <li id="node_<?= $this->nodeId ?>" class="node return-node" data-node-type="return"
-            data-node-id="<?= $this->nodeId ?>">
+        <li class="node return-node node_<?= $this->nodeId ?>" data-node-type="return" data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr>
                     <td class="handle node-box top left bottom">
@@ -687,7 +684,7 @@ class SwapNode extends Node
                 '&hArr;',
                 $this->right->parse($params)
             )
-        );
+        , $params);
     }
 
     public function printHtml(&$params)
@@ -696,8 +693,7 @@ class SwapNode extends Node
         $rightVal = $this->right->parse($params);
         ?>
         <!-- SWAP NODE -->
-        <li id="node_<?= $this->nodeId ?>" class="node swap-node" data-node-type="swap"
-            data-node-id="<?= $this->nodeId ?>">
+        <li class="node swap-node node_<?= $this->nodeId ?>" data-node-type="swap" data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr>
                     <td class="handle node-box top bottom left">
@@ -754,7 +750,7 @@ class ValueNode extends Node
 
     public function getSource($params)
     {
-        return $this->wrapLine($this->value->parse($params));
+        return $this->wrapLine($this->value->parse($params), $params);
     }
 
     public function printHtml(&$params)
@@ -762,8 +758,7 @@ class ValueNode extends Node
         $varValue = $this->value->parse($params);
         ?>
         <!-- VALUE NODE -->
-        <li id="node_<?= $this->nodeId ?>" class="node value-node" data-node-type="value"
-            data-node-id="<?= $this->nodeId ?>">
+        <li class="node value-node node_<?= $this->nodeId ?>" data-node-type="value" data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr>
                     <td class="handle node-box top left bottom">
@@ -843,8 +838,7 @@ class WhileNode extends Node
         $selected_op = $this->isPrototype ? 'all' : $this->op;
         ?>
         <!-- WHILE NODE -->
-        <li id="node_<?= $this->nodeId ?>" class="node while-node" data-node-type="while"
-            data-node-id="<?= $this->nodeId ?>">
+        <li class="node while-node node_<?= $this->nodeId ?>" data-node-type="while" data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr>
                     <td class="handle node-box top left">
@@ -1020,7 +1014,7 @@ abstract class Node
                 $node = new CompareNode($type, null, null, null);
                 break;
             case self::FUNCTION_NODE:
-                $node = new FunctionNode($type, null);
+                $node = new FunctionNode($type, null, null);
                 break;
             case self::IF_NODE:
                 $node = new IfNode($type, null, null, null, null);
@@ -1060,9 +1054,15 @@ abstract class Node
      */
     public abstract function getSource($params);
 
-    public function wrapLine($line)
+    /**
+     * Wraps a source code line in surrounding HTML tag.
+     *
+     * @param string $line The plain source code line of the Node.
+     * @return string HTML code of wrapped source code line.
+     */
+    public final function wrapLine($line)
     {
-        return "<span id=\"source-node-$this->nodeId\">$line</span>";
+        return "<span class=\"source-node-$this->nodeId\">$line</span>";
     }
 }
 

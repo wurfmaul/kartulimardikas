@@ -1,4 +1,3 @@
-window.SCRIPTSITE = $(".insertStepsHere") # Specifies the site, where variables are to place.
 SHORT_CIRCUIT = true # Short-circuit evaluation
 
 class Node
@@ -270,8 +269,9 @@ class AssignNode extends Node
   execute: (player, node) ->
     # get new value
     node = player.tree.get(@from).execute(player, 0)
-    # write new value
-    @writeVar(@to, node.value, player)
+    if (!node.scope?)
+      # write new value
+      @writeVar(@to, node.value, player)
     # return value
     node
 
@@ -309,14 +309,16 @@ class BlockNode extends Node
     if (curNode?.value?) then value = curNode.value
     else value = null
     # compute next node
-    if (curNode?.next?)
-      {next: curNode.next, value: value}
+    if (curNode?.scope?) # check for function call
+      { scope: curNode.scope, node: curNode.node }
+    else if (curNode?.next?)
+      { next: curNode.next, value: value }
     else if (curNode is -1) # return node was executed
-      {next: -1, value: value}
+      { next: -1, value: value }
     else if (@nodes.length > i + 1) # if curNode is done, take next from nodes
-      {next: @nodes[i + 1], value: value}
+      { next: @nodes[i + 1], value: value }
     else
-      {value: value}
+      { value: value }
 
   executeAll: (player, node, combine) ->
     value = combine is 'all'
@@ -432,31 +434,49 @@ class FunctionNode extends Node
   constructor: (@nid, @callee, @parameters) ->
 
   execute: (player, node) ->
-    scope = ++player.scope
+    scope = player.scope
+    curNode = $('#scope-' + scope + ' .node_' + @nid)
+    if (curNode.data('return-value')?)
+      # return value has already been computed
+      value = curNode.data('return-value')
+      # remove value once executed
+      curNode.removeData('return-value')
+      return { value: value }
+    # otherwise call function
+    newScope = player.scope + 1
     # get name of called function
-    name = $('#node_' + @nid).find('.name').val()
-    # prepare new tab
+    name = curNode.find('.name').val()
+    # prepare new scope
     $('#scopes-head').append(
       $('<li/>').attr('role', 'presentation').append(
-        $('<a/>').data('target', '#scope-' + scope).attr('aria-controls', 'scope-' + scope).attr('role', 'tab').attr('data-toggle', 'tab').text(name)
+        $('<a/>').data('target', '#scope-' + newScope).addClass('scope-' + newScope).attr('aria-controls', 'scope-' + newScope).attr('role', 'tab').attr('data-toggle', 'tab').append(
+          $('<i/>').addClass('fa fa-spinner fa-pulse')
+        )
       )
     )
     $('#scopes-body').append(
-      $('<div/>').attr('role', 'tabpanel').addClass('tab-pane').attr('id', 'scope-' + scope).append(
-        $('<iframe/>').attr('src', 'index.php?action=view&embedded=1&aid=' + @callee).attr('id', 'frame-' + scope)
-      )
+      $('<div/>').attr('role', 'tabpanel').addClass('tab-pane').attr('id', 'scope-' + newScope)
     )
-    # prepare the iframe
-    $('#frame-' + scope).iFrameResize()
-    $('#scope-1').tab('show')
-
-    # execute the callee
-    document.continue = @continue
-
-    { next: @nid }
-
-  continue: ->
-    console.log('continued')
+    $.ajax("api/scope.php",
+      type: 'POST'
+      data:
+        aid: @callee
+        scope: newScope
+        lang: window.current.lang
+      dataType: 'json'
+      async: false
+    ).done((data) =>
+      # attach scope
+      $('#scope-' + newScope).append(data['algorithm'])
+      # change tab header
+      $('#scopes-head li:last-child a').text(name)
+    ).fail(->
+      $('#scope-' + newScope).remove()
+      $('#scopes-head li:last-child').remove()
+      player.handleError(new ExecutionError('function_load', [name]))
+      return false
+    )
+    { scope: newScope, node: @nid }
 
   toJSON: ->
     {
@@ -580,7 +600,7 @@ class ReturnNode extends Node
 
   execute: (player, node) ->
     value = @executeValue(@value, player)
-    $('#returnValue').val(value).focus()
+    $('#scope-' + player.scope + ' .return-value').val(value).focus()
     -1 # no further steps
 
   toJSON: ->
@@ -705,8 +725,8 @@ class WhileNode extends Node
     new @(nid, condition.nid, body.nid, op.val())
 
 class window.Tree
-  constructor: ->
-    @memory = new Memory($('.variables>tbody'))
+  constructor: (@scope) ->
+    @memory = new Memory($('#scope-' + @scope + ' .variables>tbody'))
     @reset()
 
   execute: (player, node) ->
@@ -718,10 +738,10 @@ class window.Tree
   get: (nid) ->
     @nodes[nid]
 
-  reset: () ->
+  reset: ->
     @memory.reset()
     @nodes = []
-    rootNode = BlockNode.parse(SCRIPTSITE, @nodes, @memory)
+    rootNode = BlockNode.parse($('#scope-' + @scope + ' .node_root'), @nodes, @memory)
     @root = @nodes.length
     @nodes.push rootNode
 
@@ -732,7 +752,7 @@ class window.Tree
     json
 
   @toJSON: ->
-    new @().toJSON()
+    new @(0).toJSON()
 
 class window.Memory
   constructor: (@table) ->

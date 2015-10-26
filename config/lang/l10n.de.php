@@ -205,6 +205,7 @@ $l10n['runtime_errors'] = [
     'no_array_for_index' => "Die Variable '%1' ist keine Liste, daher kann nicht mit einem Index darauf zugegriffen werden!",
     'divide_by_zero' => "Divisionen dürfen nicht 0 als Nenner haben!",
     'no_condition' => "Es wurden keine Bedingungen angegeben.",
+    'function_load' => "Konnte Funktion '%1' nicht laden!",
 ];
 
 // EDIT
