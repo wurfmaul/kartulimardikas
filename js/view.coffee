@@ -61,7 +61,7 @@ class Player
         if (curNode.scope?)
           # signal for a function call
           @curNode = curNode.node
-          @callFunction(curNode.scope)
+          @callFunction(curNode.scope, curNode.params)
           return
 
         if (curNode.next? and curNode.next >= 0) then @nextCandidate = curNode.next
@@ -101,11 +101,20 @@ class Player
       return if !@step()
     @handleError(new ExecutionError('too_many_steps', [maxSteps]))
 
-  callFunction: (scope) ->
+  callFunction: (scope, params) ->
     # deactivate navigation in outer scope
     @setControls([0,0,0,0])
     # switch to inner scope
     init(scope)
+    # load the parameters
+    player = players[scope]
+    $('#scope-' + scope).find('.variables .parameter').each(->
+      vid = $(this).data('vid')
+      value = params.shift().value
+      player.memory.set(vid, value)
+      player.stats.writeVar(vid, value)
+    )
+    # show inner scope
     $('#scopes-head .scope-' + scope).tab('show')
 
   returnFunction: (scope, value) ->

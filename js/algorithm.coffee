@@ -310,7 +310,7 @@ class BlockNode extends Node
     else value = null
     # compute next node
     if (curNode?.scope?) # check for function call
-      { scope: curNode.scope, node: curNode.node }
+      curNode
     else if (curNode?.next?)
       { next: curNode.next, value: value }
     else if (curNode is -1) # return node was executed
@@ -444,17 +444,15 @@ class FunctionNode extends Node
       return { value: value }
 
     # otherwise call function
+    @callFunction(player, curNode)
+
+  callFunction: (player, node) ->
     newScope = player.scope + 1
-    # get name of called function
-    name = curNode.find('.name').val()
     # prepare new scope
-    $('#scopes-head').append(
-      $('<li/>').attr('role', 'presentation').append(
-        $('<a/>').data('target', '#scope-' + newScope).addClass('scope-' + newScope).attr('aria-controls', 'scope-' + newScope).attr('role', 'tab').attr('data-toggle', 'tab').append(
-          $('<i/>').addClass('fa fa-spinner fa-pulse')
-        )
-      )
-    )
+    head = $('<a/>').data('target', '#scope-' + newScope).addClass('scope-' + newScope)
+    head.attr('aria-controls', 'scope-' + newScope).attr('role', 'tab').attr('data-toggle', 'tab')
+    head.append($('<i/>').addClass('fa fa-spinner fa-pulse'))
+    $('#scopes-head').append($('<li/>').attr('role', 'presentation').append(head))
     $('#scopes-body').append(
       $('<div/>').attr('role', 'tabpanel').addClass('tab-pane').attr('id', 'scope-' + newScope)
     )
@@ -466,18 +464,20 @@ class FunctionNode extends Node
         lang: window.current.lang
       dataType: 'json'
       async: false
-    ).done((data) =>
+    ).done((data) ->
       # attach scope
       $('#scope-' + newScope).append(data['algorithm'])
       # change tab header
-      $('#scopes-head li:last-child a').text(name)
+      head.text(data['name'])
     ).fail(->
       $('#scope-' + newScope).remove()
-      $('#scopes-head li:last-child').remove()
+      head.parent().remove()
       player.handleError(new ExecutionError('function_load', [name]))
       return false
     )
-    { scope: newScope, node: @nid }
+    # compute active parameters
+    params = @paramsLine
+    { scope: newScope, node: @nid, params: params }
 
   toJSON: ->
     {
@@ -491,14 +491,20 @@ class FunctionNode extends Node
   @parse: (node, tree, memory) =>
     # get callee
     callee = node.data('callee-id')
-    # parse parameters
-    paramsLine = ''
-    if (@findSubNode(node, '.act-pars-line').val() isnt '')
-      paramsLine = @parseAndCheckValue('.act-pars-line', node, memory)
+    # parse parameters from input field
+    paramsLine = []
+    paramsRaw = @findSubNode(node, '.act-pars-line').val()
+    paramsLineError = false
+    if (paramsRaw isnt '')
+      for par in paramsRaw.split(';')
+        par = @parseValue(par, node, memory)
+        if (!par?) then paramsLineError = true
+        else paramsLine.push(par)
+    # parse parameters from sub-nodes
     params = BlockNode.parse(@findSubNode(node, '.act-pars'), tree, memory)
     tree.push(params)
     # validation
-    @validate(node, callee > 0)
+    @validate(node, callee > 0 and !paramsLineError)
     # create the node
     nid = tree.length
     new @(nid, callee, paramsLine, params.nid)

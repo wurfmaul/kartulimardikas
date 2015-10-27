@@ -24,6 +24,7 @@ class ScopeAPI extends AbstractAPI
             $algorithm = ob_get_clean();
             // send algorithm
             $this->response['aid'] = $aid;
+            $this->response['name'] = $__algorithm->name;
             $this->response['algorithm'] = $algorithm;
             $this->sendResponse();
         }

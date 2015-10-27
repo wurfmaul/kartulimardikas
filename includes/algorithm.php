@@ -305,7 +305,7 @@ class FunctionNode extends Node
     protected $calleeName;
     /** @var BlockNode */
     protected $actPars;
-    /** @var string */
+    /** @var array */
     protected $actParsLine;
 
     public function __construct($nid, $callee, $actParsLine, $actPars)
@@ -345,7 +345,14 @@ class FunctionNode extends Node
     public function printHtml(&$params)
     {
         $actParsNid = isset($this->actPars) ? $this->actPars->nodeId : null;
-        $actParsLine = empty($this->actParsLine) ? '' : $this->actParsLine->value;
+        $actParsLine = "";
+        if (!empty($this->actParsLine)) {
+            foreach($this->actParsLine as $i => $par) {
+                $actParsLine .= $par->value . "; ";
+            }
+            $actParsLine = substr($actParsLine, 0, sizeof($actParsLine)-3);
+        }
+
         ?>
         <!-- FUNCTION NODE -->
         <li class="node function-node node_<?= $this->nodeId ?>" data-node-type="function" data-node-id="<?= $this->nodeId ?>" data-callee-id="<?= $this->calleeId ?>">

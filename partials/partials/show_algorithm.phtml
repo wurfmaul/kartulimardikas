@@ -222,7 +222,7 @@ $tree = new Tree(json_decode($__algorithm->tree));
                                         break;
                                 }
                                 ?>
-                                <tr class="variable var-<?= $vid ?>"
+                                <tr class="variable var-<?= $vid ?><?php if ($var->value === 'P'): ?> parameter<?php endif ?>"
                                     data-vid="<?= $vid ?>"
                                     data-name="<?= $var->name ?>"
                                     data-value="<?= $value ?>"
