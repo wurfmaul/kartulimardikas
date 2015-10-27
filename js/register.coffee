@@ -20,16 +20,14 @@ register = ->
           $('#' + token + '-group').removeClass('has-error');
 
       if (msg isnt "")
-        $('#registerAlertText').html msg
-        $('#registerAlert').show('slow')
+        $('#alertText').html msg
+        $('#alert').show('slow')
       else
         $('#registerForm').submit()
     error: (jqXHR, textStatus) ->
-      $('#registerAlertText').html "AJAX Error: #{textStatus}"
-      $('#registerAlert').show('slow')
+      $('#alertText').html "AJAX Error: #{textStatus}"
+      $('#alert').show('slow')
 
 $ ->
-  $('#registerBtn').click -> register()
-
-  $('#registerAlertClose').click ->
-    $('#registerAlert').hide('slow')
+  $('#registerBtn').click(-> register())
+  $('#registerForm input').keypress((event) -> register() if (event.which is 13))

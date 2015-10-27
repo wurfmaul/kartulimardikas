@@ -222,10 +222,7 @@ class StepForm
 
   addNode: (prototypeId) ->
     # create new node from prototype
-    node = $('#' + prototypeId)
-    .clone(true, true)
-    .removeAttr('id')
-    .appendTo(SCRIPTSITE)
+    node = $('.prototypes .' + prototypeId).clone().appendTo(SCRIPTSITE)
     # update the variable counter
     @varForm.updateVarCount()
     # remove sortable completely
@@ -237,6 +234,7 @@ class StepForm
     @updateSortable()
     # make sure, the action handlers (click...) work for the new element
     @updateActionHandlers(node)
+    node
 
   removeNode: (node) ->
     node.hide('slow', =>
