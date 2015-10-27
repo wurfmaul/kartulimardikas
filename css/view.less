@@ -1,5 +1,9 @@
 @import "algorithm";
 
+#scopes-head {
+  margin-bottom: 1em;
+}
+
 .algorithm {
   .cursor > table > tbody > tr {
     > .handle > .cursor-icon {
@@ -38,20 +42,20 @@
 
 .controls {
   text-align: center;
-  #returnValue {
+  .return-value {
     text-align: center;
     font-weight: bold;
   }
-  #speed-control {
+  .speed-control {
     margin: 10px auto;
   }
-  #speed-slider {
+  .speed-slider {
     margin: auto 10px;
     .ui-slider-handle {
       margin-left: -9px;
     }
   }
-  #step-control {
+  .step-control {
     .icon {
       padding: 2px 10px;
     }
@@ -124,6 +128,10 @@
 }
 
 .statistics {
+  .lbl-stats {
+    width: 100%;
+  }
+
   .statistic {
     max-width: 100px;
     float: right;

@@ -1,18 +1,18 @@
-window.VARSITE = $("#insertVarsHere") # Specifies the site, where variables are to place.
+SCRIPTSITE = $(".node_root") # Specifies the site, where blocks are to place.
+VARSITE = $("#insertVarsHere") # Specifies the site, where variables are to place.
 
 class Api
   @editInfo: ->
-    aid = window.current.aid
     name = $('#in-name').val()
     desc = $('#in-desc').val()
     long = $('#in-long').val()
     $.ajax("api/algorithm.php?area=info",
       type: 'POST'
       data:
-        aid: aid
         name: name
         desc: desc
         long: long
+        aid: window.current.aid
         lang: window.current.lang
       dataType: 'json'
       success: (data) => # if response arrived...
@@ -30,13 +30,12 @@ class Api
     )
 
   @editTags: ->
-    aid = window.current.aid
     tags = $('#in-tags').val()
     $.ajax("api/tag.php",
       type: 'POST'
       data:
-        aid: aid
         tags: tags
+        aid: window.current.aid
         lang: window.current.lang
       dataType: 'json'
       success: (data) => # if response arrived...
@@ -54,7 +53,6 @@ class Api
 
   @editVariable: (vid) ->
     varRow = $('#var-' + vid)
-    aid = window.current.aid
     name = varRow.find('.name').val()
     type = varRow.find('.type').val()
     value = varRow.find('.value').val()
@@ -62,12 +60,12 @@ class Api
     $.ajax("api/algorithm.php?area=var&action=edit",
       type: 'POST'
       data:
-        aid: aid
         vid: vid
         name: name
         type: type
         value: value
         size: size
+        aid: window.current.aid
         lang: window.current.lang
       dataType: 'json'
       success: (data) => # if response arrived...
@@ -97,12 +95,11 @@ class Api
     )
 
   @removeVariable: (vid) ->
-    aid = window.current.aid
     $.ajax("api/algorithm.php?area=var&action=remove",
       type: 'POST'
       data:
-        aid: aid
         vid: vid
+        aid: window.current.aid
         lang: window.current.lang
       dataType: 'json'
       success: (data) => # if response arrived...
@@ -117,12 +114,11 @@ class Api
     )
 
   @editScript: (tree) ->
-    aid = window.current.aid
     $.ajax("api/algorithm.php?area=script",
       type: 'POST'
       data:
-        aid: aid
         tree: tree
+        aid: window.current.aid
         lang: window.current.lang
       dataType: 'json'
       success: (data) => # if response arrived...
@@ -179,7 +175,7 @@ class VariableForm
     $('.varRow').not('#var-prototype').each(->
       # update the variable counter
       vid = $(this).data('vid')
-      tree = new Tree()
+      tree = new Tree(0)
       count = tree.memory.get(vid).count
       $(this).find('.counter').text(count)
       # (de)activate remove-button according to counter
@@ -221,21 +217,13 @@ class StepForm
 
   addNode: (prototypeId) ->
     # create new node from prototype
-    node = $('#' + prototypeId)
-    .clone(true, true)
-    .removeAttr('id')
-    .appendTo(SCRIPTSITE)
+    node = $('.prototypes .' + prototypeId).clone().appendTo(SCRIPTSITE)
     # update the variable counter
     @varForm.updateVarCount()
-    # remove sortable completely
-    $('.sortable').each(->
-      if ($(this).sortable("instance")?)
-        $(this).sortable("destroy")
-    )
-    # and reinitialize it
-    @updateSortable()
     # make sure, the action handlers (click...) work for the new element
+    @updateSortable()
     @updateActionHandlers(node)
+    node
 
   removeNode: (node) ->
     node.hide('slow', =>
@@ -249,10 +237,11 @@ class StepForm
     tree = Tree.toJSON()
     # search for invalid-flags
     if (SCRIPTSITE.find('.invalid').length)
-      console.error('Not saved due to parsing errors!')
+      false
     else
       @varForm.updateVarCount()
       Api.editScript(tree)
+      true
 
   updateActionHandlers: (parent) ->
     # update action handlers
@@ -266,26 +255,20 @@ class StepForm
   updateSortable: ->
     update = =>
       @saveChanges()
+      true
     sortParams =
       connectWith: ".sortable"
       placeholder: "sortable-highlight"
       update: update
-    dropParams =
-      hoverClass: "ui-state-hover",
-      over: (event, ui) ->
-        console.log('over')
-        $(this).find('.show-on-hover').show('slow')
-        $(this).find('.hide-on-hover').hide('slow')
-      out: (event, ui) ->
-        console.log('out')
-#        $(this).find('.show-on-hover').hide('slow')
-#        $(this).find('.hide-on-hover').show('slow')
-      drop: (event,ui) ->
-        console.log('drop')
-        $(this).find('.show-on-hover, .hide-on-hover').removeClass('show-on-hover hide-on-hover')
+
+    # remove sortable completely
+    SCRIPTSITE.find('.sortable').each(->
+      if ($(this).sortable("instance")?)
+        $(this).sortable("destroy")
+    )
+    # and reinitialize it
     SCRIPTSITE.sortable(sortParams)
     SCRIPTSITE.find('.sortable').sortable(sortParams)
-    SCRIPTSITE.find('.droppable').droppable(dropParams)
 
 updateVisibility = (variable) ->
   # show/hide input fields according to the init selection
@@ -337,4 +320,4 @@ $ ->
     $(this).toggleClass('fa-plus-square fa-minus-square')
   )
   # parse once in order to validate the tree
-  Tree.toJSON()
+  Tree.toJSON(0)

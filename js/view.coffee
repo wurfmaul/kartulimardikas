@@ -1,7 +1,8 @@
 class Player
-  constructor: (@tree) ->
+  constructor: (@tree, @scope) ->
+    @curScope = $('#scope-' + @scope)
     @memory = @tree.memory
-    @stats = new Stats(@memory)
+    @stats = new Stats(@memory, @scope)
     @speed = @loadSpeed()
     @breaks = @loadBreaks()
     @reset()
@@ -12,8 +13,11 @@ class Player
     # reset components
     @tree.reset()
     @stats.reset()
-    # delete return value
-    $('#returnValue').val('')
+    # reset scopes
+    $('#scopes-head').children(':gt(' + @scope + ')').remove()
+    $('#scopes-body').children(':gt(' + @scope + ')').remove()
+    # clear return value
+    @curScope.find('.return-value').val('')
     # find first node to execute
     @curNode = null
     @nextNode = @tree.mark(@, @tree.root)
@@ -21,19 +25,17 @@ class Player
     @cursorState = 0
     # reset highlighting and cursor
     @clearHighlight()
-    if (@nextNode >= 0) then @setControls([0, 0, 1, 1, 1])
-    else @setControls([0, 0, 0, 0, 0])
+    if (@nextNode >= 0) then @setControls([0, 1, 1, 1])
+    else @setControls([0, 0, 0, 0])
     # hide errors
-    $('#viewAlert').hide('slow')
+    $('#alert').hide('slow')
 
   play: ->
     if @timer? # if currently playing => pause
       # clear timer
       @timer = clearInterval(@timer);
       # set button icon to play
-      $('#img-play')
-      .removeClass('glyphicon-pause')
-      .addClass('glyphicon-play')
+      @curScope.find('.img-play').removeClass('glyphicon-pause').addClass('glyphicon-play')
     else # play
       # set an interval and perform step after step
       maxSteps = window.defaults.maxSteps
@@ -45,9 +47,7 @@ class Player
         else @handleError(new ExecutionError('too_many_steps', [maxSteps]))
       , @speed)
       # set button icon to pause
-      $('#img-play')
-      .removeClass('glyphicon-play')
-      .addClass('glyphicon-pause')
+      @curScope.find('.img-play').removeClass('glyphicon-play').addClass('glyphicon-pause')
 
   step: ->
     @clearHighlight()
@@ -58,15 +58,21 @@ class Player
         # execute current step
         curNode = @tree.execute(@, @curNode)
         # set potential next node
+        if (curNode.scope?)
+          # signal for a function call
+          @curNode = curNode.node
+          @callFunction(curNode.scope, curNode.params)
+          return
+
         if (curNode.next? and curNode.next >= 0) then @nextCandidate = curNode.next
         else @nextCandidate = null
       catch runtimeError
         @handleError(runtimeError)
-        @setControls([1, 1, 0, 0, 0])
+        @setControls([1, 0, 0, 0])
         return false
 
       # if algorithm is stopped AFTER statement, update cursor and wait for next step
-      if ($('#stop-after').is(':checked'))
+      if (@curScope.find('.stop-after').is(':checked'))
         @cursorState = 1
         @setCursor(@curNode, @cursorState)
         return true
@@ -75,22 +81,53 @@ class Player
     if (@nextCandidate?)
       @cursorState = 0
       @nextNode = @tree.mark(@, @nextCandidate)
-      @setControls([1, 1, 1, 1, 1])
+      @setControls([1, 1, 1, 1])
       # if algorithm is stopped before next execution, return true. Execute otherwise.
-      if ($('#stop-before').is(':checked')) then true
+      if (@curScope.find('.stop-before').is(':checked')) then true
       else @step()
     else
       @play() if @timer?
       @unsetCursor()
-      @setControls([1, 1, 0, 0, 0])
+      @setControls([1, 0, 0, 0])
+      # check for outer scopes
+      if (@scope > 0)
+        value = @curScope.find('.return-value').val()
+        window.players[@scope-1].returnFunction(@scope, value)
       false
-
 
   finish: ->
     maxSteps = window.defaults.maxSteps
     for i in [0..maxSteps]
       return if !@step()
     @handleError(new ExecutionError('too_many_steps', [maxSteps]))
+
+  callFunction: (scope, params) ->
+    # deactivate navigation in outer scope
+    @setControls([0,0,0,0])
+    # switch to inner scope
+    init(scope)
+    # load the parameters
+    player = players[scope]
+    $('#scope-' + scope).find('.variables .parameter').each(->
+      vid = $(this).data('vid')
+      value = params.shift().value
+      player.memory.set(vid, value)
+      player.stats.writeVar(vid, value)
+    )
+    # show inner scope
+    $('#scopes-head .scope-' + scope).tab('show')
+
+  returnFunction: (scope, value) ->
+    # switch back to outer scope
+    $('#scopes-head .scope-' + @scope).tab('show')
+    # remove other scope
+    $('#scopes-head .scope-' + scope).parent().remove()
+    $('#scope-' + scope).remove()
+    # use returned value
+    @curScope.find('.node_' + @curNode).data('return-value', value)
+    # reactivate navigation in outer scope
+    @step()
+    @setControls([1,1,1,1])
 
   changeSpeed: (value) ->
     @speed = value
@@ -123,11 +160,11 @@ class Player
     @changeBreaks(breaks)
     # change the ui
     if (breaks is 'before' or breaks is 'both')
-      $('#stop-before').prop('checked', true)
-      $('#stop-before-btn').addClass('active')
+      @curScope.find('.stop-before').prop('checked', true)
+      @curScope.find('.stop-before-btn').addClass('active')
     if (breaks is 'after' or breaks is 'both')
-      $('#stop-after').prop('checked', true)
-      $('#stop-after-btn').addClass('active')
+      @curScope.find('.stop-after').prop('checked', true)
+      @curScope.find('.stop-after-btn').addClass('active')
     # return status
     breaks
 
@@ -142,18 +179,18 @@ class Player
     else
       msg = errorCodes['undefined']
       console.error(error)
-    $('#viewAlertText').html(msg)
-    $('#viewAlert').show('slow')
+    $('#alertText').html(msg)
+    $('#alert').show('slow')
 
   clearHighlight: ->
-    $('.highlight-write').removeClass('highlight-write')
-    $('.highlight-read').removeClass('highlight-read')
+    @curScope.find('.highlight-write').removeClass('highlight-write')
+    @curScope.find('.highlight-read').removeClass('highlight-read')
 
   setControls: (settings) ->
-    buttons = [$('#btn-reset'), $('#btn-back'), $('#btn-play'), $('#btn-step'), $('#btn-finish')]
-    for i in [0..4]
-      if (settings[i] is 0) then buttons[i].attr('disabled', 'disabled')
-      else buttons[i].removeAttr('disabled')
+    buttons = @curScope.find('.controls button')
+    for i in [0..buttons.length]
+      if (settings[i] is 0) then $(buttons[i]).attr('disabled', 'disabled')
+      else $(buttons[i]).removeAttr('disabled')
 
   ###
     node = node_id of the node the cursor should be attached to
@@ -165,22 +202,23 @@ class Player
       when 1 then newClass = 'cursor-down'
     @unsetCursor()
     # set cursor in algorithm
-    $('#node_' + node).addClass('cursor ' + newClass)
+    @curScope.find('.node_' + node).addClass('cursor ' + newClass)
     # set cursor in source code
-    $('#source-node-' + node).closest('.line').addClass('source-cursor ' + newClass)
+    @curScope.find('.source-node-' + node).closest('.line').addClass('source-cursor ' + newClass)
 
   unsetCursor: ->
     # remove cursor from algorithm
-    $('.cursor').removeClass('cursor cursor-up cursor-down')
+    @curScope.find('.cursor').removeClass('cursor cursor-up cursor-down')
     # remove cursor from source code
-    $('.source-cursor').removeClass('source-cursor cursor-up cursor-down')
+    @curScope.find('.source-cursor').removeClass('source-cursor cursor-up cursor-down')
 
 class Stats
-  constructor: (@memory) ->
+  constructor: (@memory, @scope) ->
+    @curScope = $('#scope-' + @scope)
     @stats = ['accesses', 'assignments', 'comparisons', 'arithmeticLogic']
 
   inc: (element) ->
-    elem = $('#stats-' + element)
+    elem = @curScope.find('.stats-' + element)
     value = parseInt(elem.val()) + 1
     elem.val(value).addClass('highlight-write')
 
@@ -193,11 +231,11 @@ class Stats
   incArithmeticLogicOps: -> @inc(@stats[3])
 
   readVar: (vid) ->
-    $('#var-' + vid).find('.value-container').addClass('highlight-read')
+    @curScope.find('.var-' + vid + ' .value-container').addClass('highlight-read')
     @incAccessOps()
 
   readArrayVar: (vid, index) ->
-    $('#var-' + vid).find('.offset_' + index).addClass('highlight-read')
+    @curScope.find('.var-' + vid + ' .offset_' + index).addClass('highlight-read')
     @incAccessOps()
 
   writeGeneric: (container, value) ->
@@ -206,17 +244,17 @@ class Stats
     @incAssignOps()
 
   writeVar: (vid, value) ->
-    container = $('#var-' + vid).find('.value-container')
+    container = @curScope.find('.var-' + vid + ' .value-container')
     @writeGeneric(container, value)
 
   writeArrayVar: (vid, index, value) ->
-    container = $('#var-' + vid).find('.offset_' + index)
+    container = @curScope.find('.var-' + vid + ' .offset_' + index)
     @writeGeneric(container, value)
 
   reset: ->
     # reset variables
-    $.each(@memory.memory, (index, elem) ->
-      row = $('#var-' + index)
+    $.each(@memory.memory, (index, elem) =>
+      row = @curScope.find('.var-' + index)
       if (elem.array)
         values = elem.value.split(',')
         $.each(values, (i, n) ->
@@ -226,17 +264,18 @@ class Stats
         row.find('.value').text(elem.value)
     )
     # reset statistics
-    $.each(@stats, (index, elem) ->
-      $('#stats-' + elem).val(0)
+    $.each(@stats, (index, elem) =>
+      @curScope.find('.stats-' + elem).val(0)
     )
 
 ###
   Deal with the breakpoint buttons and compute a valid state ('none' forbidden)
 ###
 toggleBreakpoints = (button, player) ->
+  curScope = $('#scope-' + player.scope)
   # compute status before clicking
-  statusBefore = $('#stop-before-btn').hasClass('active')
-  statusAfter = $('#stop-after-btn').hasClass('active')
+  statusBefore = curScope.find('.stop-before-btn').hasClass('active')
+  statusAfter = curScope.find('.stop-after-btn').hasClass('active')
   # compute status after clicking
   if (button.data('break') is 'before') then statusBefore = !statusBefore
   if (button.data('break') is 'after') then statusAfter = !statusAfter
@@ -269,28 +308,31 @@ toggleComment = (element) ->
     container.toggleClass('collapsed')
   )
 
-$ ->
-  tree = new Tree()
-  player = new Player(tree)
+init = (scope) ->
+  # INITIALIZE SCOPE
+  curScope = $('#scope-' + scope)
+  tree = new Tree(scope)
+  player = new Player(tree, scope)
+  window.players[scope] = player # add scope to list of scopes
 
   # CONTROLS SECTION
-  $('#btn-reset').click -> player.reset()
-  $('#btn-play').click -> player.play()
-  $('#btn-step').click -> player.step()
-  $('#btn-finish').click -> player.finish()
-  $('#speed-slider').slider(
+  curScope.find('.btn-reset').click -> player.reset()
+  curScope.find('.btn-play').click -> player.play()
+  curScope.find('.btn-step').click -> player.step()
+  curScope.find('.btn-finish').click -> player.finish()
+  curScope.find('.speed-slider').slider(
     value: parseInt(1000 / player.speed),
     min: 1,
     max: 20,
     change: (event, ui) -> player.changeSpeed(1000 / ui.value)
   )
-  $('#stop-before-btn, #stop-after-btn').click -> toggleBreakpoints($(this), player)
+  curScope.find('.stop-before-btn, .stop-after-btn').click -> toggleBreakpoints($(this), player)
 
   # ALGORITHM SECTION
-  $('.toggle-comment').click -> toggleComment($(this))
+  curScope.find('.toggle-comment').click -> toggleComment($(this))
 
   # MEMORY SECTION
-  $('.value-container').click(->
+  curScope.find('.value-container').click(->
     value = $(this).hide().find('.value').text()
     if (offset = $(this).data('offset'))? # list
       input = $(this).siblings('.value-edit.offset_' + offset)
@@ -298,7 +340,7 @@ $ ->
       input = $(this).siblings('.value-edit')
     input.val(value).show().focus()
   )
-  $('.value-edit').keyup((event) ->
+  curScope.find('.value-edit').keyup((event) ->
     switch (event.which)
       when 13 # enter key
         if (newVal = DataType.parse($(this).val()))
@@ -319,3 +361,9 @@ $ ->
   ).blur(->
     $(this).hide().siblings('.value-container').show()
   )
+
+$ ->
+  # prepare list of scopes
+  window.players = {}
+  # initialize outer scope
+  init(0)

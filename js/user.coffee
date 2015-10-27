@@ -1,5 +1,5 @@
 change = (params, callback) ->
-  $.ajax "api/user.php",
+  $.ajax("api/user.php",
     type: 'POST'
     data: params
     dataType: 'json'
@@ -14,45 +14,54 @@ change = (params, callback) ->
           $('#' + token + '-group').removeClass('has-error');
 
       if (msg isnt "")
-        $('#userAlertText').html msg
-        $('#userAlert').show('slow')
-        $('#userSuccess').hide('slow')
+        $('#alertText').html msg
+        $('#alert').show('slow')
+        $('#success').hide('slow')
       else
-        $('#userSuccessText').html data['success']
-        $('#userSuccess').show('slow')
-        $('#userAlert').hide('slow')
+        $('#successText').html data['success']
+        $('#success').show('slow')
+        $('#alert').hide('slow')
         callback(data['success'])
     error: (jqXHR, textStatus, errorThrown) ->
-      $('#userAlertText').html "AJAX Error: #{textStatus}"
-      $('#userAlert').show('slow')
+      $('#alertText').html "AJAX Error: #{textStatus}"
+      $('#alert').show('slow')
+  )
+
+renameMe = ->
+  username = $('#in-username').val()
+  change({username: username, lang: window.current.lang}, (msg) ->
+    $('#usernameMsg').val(msg)
+    $('#usernameForm').submit()
+  )
+  username
+
+deleteMe = ->
+  password = $('#delete-password').val()
+  change({password: password}, (msg) ->
+    $('#deleteMsg').val(msg)
+    $('#deleteForm').submit()
+  ) if (confirm($('#deleteBtn').data('warning')))
+
+changeEmail = ->
+  email = $('#in-email').val()
+  change({email: email, lang: window.current.lang}, ->)
+  email
+
+changePassword = ->
+  password1 = $('#in-password1').val()
+  password2 = $('#in-password2').val()
+  change({password1: password1, password2: password2, lang: window.current.lang}, (msg) ->
+    $('#passwordMsg').val(msg)
+    $('#passwordForm').submit()
+  )
 
 $ ->
-  lang = window.current.lang
-  $('#usernameBtn').click ->
-    username = $('#in-username').val()
-    change({username: username, lang: lang}, (msg) ->
-      $('#usernameMsg').val(msg)
-      $('#usernameForm').submit()
-    )
-  $('#emailBtn').click ->
-    email = $('#in-email').val()
-    change({email: email, lang: lang}, ->)
-  $('#passwordBtn').click ->
-    password1 = $('#in-password1').val()
-    password2 = $('#in-password2').val()
-    change({password1: password1, password2: password2, lang: lang}, (msg) ->
-      $('#passwordMsg').val(msg)
-      $('#passwordForm').submit()
-    )
-  $('#deleteBtn').click ->
-    password = $('#delete-password').val()
-    change({password: password}, (msg) ->
-      $('#deleteMsg').val(msg)
-      $('#deleteForm').submit()
-    ) if (confirm($(this).data('warning')))
+  $('#usernameBtn').click -> renameMe()
+  $('#emailBtn').click -> changeEmail()
+  $('#passwordBtn').click -> changePassword()
+  $('#deleteBtn').click -> deleteMe()
 
-  $('#userAlertClose').click ->
-    $('#userAlert').hide('slow')
-
-  $('#userSuccessClose').click ->
-    $('#userSuccess').hide('slow')
+  $('#in-username').keypress((event) -> renameMe() if (event.which is 13))
+  $('#in-email').keypress((event) -> changeEmail() if (event.which is 13))
+  $('#in-password1, #in-password2').keypress((event) -> changePassword() if (event.which is 13))
+  $('#delete-password').keypress((event) -> deleteMe() if (event.which is 13))

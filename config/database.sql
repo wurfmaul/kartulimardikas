@@ -42,3 +42,6 @@ CREATE VIEW `algorithm_public` AS
   SELECT * FROM `algorithm`
   WHERE `date_deletion` IS NULL
   AND `date_publish` IS NOT NULL;
+
+INSERT INTO `user` (`uid`, `username`, `email`, `password`, `language`, `rights`, `date_registration`, `date_lastsignin`, `date_deletion`) VALUES
+  (1, 'admin', 'admin@domain.org', '$2y$10$fJHBSe6cHlE56h2v7qmWauwmznkNji1eZYxXkZh.z6rnXJ/f.4Ov2', 'en', 2, CURRENT_TIMESTAMP, NULL, NULL);

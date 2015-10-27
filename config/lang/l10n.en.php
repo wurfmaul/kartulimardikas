@@ -206,6 +206,7 @@ $l10n['runtime_errors'] = [
     'no_array_for_index' => "The variable '%1' is no array, therefore it cannot be accessed via an index!",
     'divide_by_zero' => "Division cannot have zero as denominator!",
     'no_condition' => "There were no conditions specified.",
+    'function_load' => "Could not load function '%1'!",
 ];
 
 // EDIT
@@ -292,10 +293,10 @@ $l10n['algorithms'] = "Algorithms";
 $l10n['account_settings'] = "Account settings";
 $l10n['change'] = "Change";
 $l10n['delete_user_message'] = "Please enter your password and click on the button below in order to delete your account. This action cannot be undone!";
-$l10n['delete_all_algorithms'] = "All the algorithms you shared will be erased too!";
+$l10n['delete_all_algorithms'] = "All the algorithms you shared will be deleted too!";
 $l10n['not_able_to_contribute'] = "You will not be able to contribute any more!";
 $l10n['delete_user'] = "Delete this account";
-$l10n['delete_user_warning'] = "Do you really want to remove your account? This action cannot be undone!";
+$l10n['delete_user_warning'] = "Do you really want to remove your account?";
 $l10n['user_not_deleted'] = "User could not be deleted!";
 $l10n['user_deleted'] = "User '%s' has successfully been deleted!";
 $l10n['password_invalid'] = "Password does not seem to be valid!";

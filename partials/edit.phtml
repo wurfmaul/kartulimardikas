@@ -36,18 +36,18 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
     require_once BASEDIR . "includes/algorithm.php";
     $tree = new Tree(json_decode($__algorithm->tree));
     ?>
-    <div class="row">
-        <!-- ERROR MESSAGE -->
-        <div id="alert" class="alert alert-danger alert-dismissible" role="alert" style="display:none">
-            <button type="button" class="close" data-dismiss="alert" aria-label="<?= $l10n['close'] ?>"><span aria-hidden="true">&times;</span></button>
-            <strong><?= $l10n['error'] ?></strong>
-            <div id="alertText"></div>
-        </div>
-        <!-- ERROR MESSAGE END -->
+    <!-- ERROR MESSAGE -->
+    <div id="alert" class="alert alert-danger alert-dismissible" role="alert" style="display:none">
+        <button type="button" class="close" data-dismiss="alert" aria-label="<?= $l10n['close'] ?>"><span aria-hidden="true">&times;</span></button>
+        <strong><?= $l10n['error'] ?></strong>
+        <div id="alertText"></div>
+    </div>
+    <!-- ERROR MESSAGE END -->
 
+    <div id="scope-0" class="row">
         <!-- LEFT COLUMN -->
         <div class="col-md-6">
-            <div class="panel-group" id="accordion-left">
+            <div class="panel-group">
                 <!-- TAB - GENERAL INFORMATION -->
                 <div class="panel panel-default">
                     <div class="panel-heading" data-target="#infoPanel">
@@ -246,7 +246,7 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
 
         <!-- RIGHT COLUMN -->
         <div class="col-md-6">
-            <div class="panel-group" id="accordion-right">
+            <div class="panel-group">
                 <!-- TAB - STEPS -->
                 <div class="panel panel-default">
                     <div class="panel-heading" data-target="#stepPanel">
@@ -257,7 +257,9 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                     </div>
                     <div id="stepPanel" class="panel-collapse">
                         <div class="panel-body algorithm">
-                            <ul class="insertStepsHere" class="sortable" data-node-id="0"><?php $tree->printHtml(['vars' => $vars, 'mode' => 'edit']) ?></ul>
+                            <ul class="node_root sortable" data-node-id="<?= $tree->getRoot() ?>">
+                                <?php $tree->printHtml(['vars' => $vars, 'mode' => 'edit']) ?>
+                            </ul>
                         </div>
                         <div class="panel-body buttons">
                             <div id="node-btn-group" class="btn-group" role="group" aria-label="<?= $l10n['create_a_node'] ?>">
@@ -322,7 +324,7 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                                 </div>
                             </div>
 
-                            <ul style="display: none">
+                            <ul class="prototypes" style="display: none">
                                 <?php
                                 // prepare parameters for prototypes
                                 $params = [

@@ -1,4 +1,3 @@
-window.SCRIPTSITE = $(".insertStepsHere") # Specifies the site, where variables are to place.
 SHORT_CIRCUIT = true # Short-circuit evaluation
 
 class Node
@@ -269,11 +268,12 @@ class AssignNode extends Node
 
   execute: (player, node) ->
     # get new value
-    value = player.tree.get(@from).execute(player, 0).value
-    # write new value
-    @writeVar(@to, value, player)
+    node = player.tree.get(@from).execute(player, 0)
+    if (!node.scope?)
+      # write new value
+      @writeVar(@to, node.value, player)
     # return value
-    value: value
+    node
 
   toJSON: ->
     {
@@ -309,14 +309,16 @@ class BlockNode extends Node
     if (curNode?.value?) then value = curNode.value
     else value = false
     # compute next node
-    if (curNode?.next?)
-      {next: curNode.next, value: value}
+    if (curNode?.scope?) # check for function call
+      curNode
+    else if (curNode?.next?)
+      { next: curNode.next, value: value }
     else if (curNode is -1) # return node was executed
-      {next: -1, value: value}
+      { next: -1, value: value }
     else if (@nodes.length > i + 1) # if curNode is done, take next from nodes
-      {next: @nodes[i + 1], value: value}
+      { next: @nodes[i + 1], value: value }
     else
-      {value: value}
+      { value: value }
 
   executeAll: (player, node, combine) ->
     value = combine is 'all'
@@ -368,7 +370,7 @@ class BlockNode extends Node
     node.children('li.node').each((index, element) =>
       # parse child and add it to tree
       child = Node.parse($(element), tree, memory)
-      tree.push child
+      tree.push(child)
       # store each child-nid in block-node
       nodes[index] = child.nid
     )
@@ -430,28 +432,83 @@ class CompareNode extends Node
     new @(nid, left, right, operator)
 
 class FunctionNode extends Node
-  constructor: (@nid, @callee, @parameters) ->
+  constructor: (@nid, @callee, @paramsLine, @params) ->
 
   execute: (player, node) ->
-    console.log('execute function')
+    scope = player.scope
+    curNode = $('#scope-' + scope + ' .node_' + @nid)
+    if (curNode.data('return-value')?)
+      # return value has already been computed
+      value = curNode.data('return-value')
+      # remove value once executed
+      curNode.removeData('return-value')
+      return { value: value }
+
+    # otherwise call function
+    @callFunction(player, curNode)
+
+  callFunction: (player, node) ->
+    newScope = player.scope + 1
+    # prepare new scope
+    head = $('<a/>').data('target', '#scope-' + newScope).addClass('scope-' + newScope)
+    head.attr('aria-controls', 'scope-' + newScope).attr('role', 'tab').attr('data-toggle', 'tab')
+    head.append($('<i/>').addClass('fa fa-spinner fa-pulse'))
+    $('#scopes-head').append($('<li/>').attr('role', 'presentation').append(head))
+    $('#scopes-body').append(
+      $('<div/>').attr('role', 'tabpanel').addClass('tab-pane').attr('id', 'scope-' + newScope)
+    )
+    $.ajax("api/scope.php",
+      type: 'POST'
+      data:
+        aid: @callee
+        scope: newScope
+        lang: window.current.lang
+      dataType: 'json'
+      async: false
+    ).done((data) ->
+      # attach scope
+      $('#scope-' + newScope).append(data['algorithm'])
+      # change tab header
+      head.text(data['name'])
+    ).fail(->
+      $('#scope-' + newScope).remove()
+      head.parent().remove()
+      player.handleError(new ExecutionError('function_load', [name]))
+      return false
+    )
+    # compute active parameters
+    params = @paramsLine
+    { scope: newScope, node: @nid, params: params }
 
   toJSON: ->
     {
     nid: @nid
     node: 'function'
     callee: @callee
-    params: @parameters
+    paramsLine: @paramsLine
+    params: @params
     }
 
   @parse: (node, tree, memory) =>
     # get callee
     callee = node.data('callee-id')
-    # parse parameters
-    params = BlockNode.parse(@findSubNode(node, '.function-params'), tree, memory)
-    tree.push params
+    # parse parameters from input field
+    paramsLine = []
+    paramsRaw = @findSubNode(node, '.act-pars-line').val()
+    paramsLineError = false
+    if (paramsRaw isnt '')
+      for par in paramsRaw.split(';')
+        par = @parseValue(par, node, memory)
+        if (!par?) then paramsLineError = true
+        else paramsLine.push(par)
+    # parse parameters from sub-nodes
+    params = BlockNode.parse(@findSubNode(node, '.act-pars'), tree, memory)
+    tree.push(params)
+    # validation
+    @validate(node, callee > 0 and !paramsLineError)
     # create the node
     nid = tree.length
-    new @(nid, callee, params.nid)
+    new @(nid, callee, paramsLine, params.nid)
 
 class IfNode extends Node
   constructor: (@nid, @condition, @ifBody, @elseBody, @op) ->
@@ -548,7 +605,7 @@ class IncNode extends Node
     }
 
   @parse: (node, tree, memory) =>
-    variable = @parseAndCheckValue('.inc-var', node, memory)
+    variable = @parseAndCheckVar('.inc-var', node, memory)
     @validate(node, variable?)
     operator = @findSubNode(node, '.inc-operation').val()
     nid = tree.length
@@ -559,7 +616,7 @@ class ReturnNode extends Node
 
   execute: (player, node) ->
     value = @executeValue(@value, player)
-    $('#returnValue').val(value).focus()
+    $('#scope-' + player.scope + ' .return-value').val(value).focus()
     -1 # no further steps
 
   toJSON: ->
@@ -684,8 +741,8 @@ class WhileNode extends Node
     new @(nid, condition.nid, body.nid, op.val())
 
 class window.Tree
-  constructor: ->
-    @memory = new Memory($('.variables>tbody'))
+  constructor: (@scope) ->
+    @memory = new Memory($('#scope-' + @scope + ' .variables>tbody'))
     @reset()
 
   execute: (player, node) ->
@@ -697,10 +754,10 @@ class window.Tree
   get: (nid) ->
     @nodes[nid]
 
-  reset: () ->
+  reset: ->
     @memory.reset()
     @nodes = []
-    rootNode = BlockNode.parse(SCRIPTSITE, @nodes, @memory)
+    rootNode = BlockNode.parse($('#scope-' + @scope + ' .node_root'), @nodes, @memory)
     @root = @nodes.length
     @nodes.push rootNode
 
@@ -711,7 +768,7 @@ class window.Tree
     json
 
   @toJSON: ->
-    new @().toJSON()
+    new @(0).toJSON()
 
 class window.Memory
   constructor: (@table) ->

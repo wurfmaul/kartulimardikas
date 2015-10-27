@@ -1,16 +1,20 @@
 <?php
 // setup environment
 define('BASEDIR', __DIR__ . '/');
+define('EMBEDDED', isset($_GET['embedded']) && $_GET['embedded']);
 
-// deal with authentication
 require_once BASEDIR . 'includes/authentication.php';
-secure_session_start();
+if (!EMBEDDED) {
+    // deal with authentication
+    secure_session_start();
+}
 
-// load configuration, helpers, authentication
+// load configuration, helpers
 require_once BASEDIR . 'includes/settings.php';
 require_once BASEDIR . 'includes/dataModel.php';
 require_once BASEDIR . 'includes/urlHelper.php';
 require_once BASEDIR . 'includes/browserchecker.php';
+
 global $l10n;
 $__model = new DataModel();
 
@@ -20,24 +24,28 @@ if (!file_exists(BASEDIR . "partials/$__action.phtml"))
     $__action = DEFAULT_PAGE;
 define('ACTION', $__action);
 
-// SIGN IN
-if ((isset($_POST['signInBtn']) || isset($_POST['registerBtn'])) && isset($_POST['username'], $_POST['password'])) {
-    $username = $_POST['username'];
-    if (signIn($username, $_POST['password'])) {
-        $successMsg = sprintf($l10n['signed_in'], $username);
-        // if the user has just been created
-        if (isset($_POST['registerBtn'])) {
-            $registerMsg = sprintf($l10n['user_created'], $username);
+if (!EMBEDDED) {
+    // SIGN IN
+    if ((isset($_POST['signInBtn']) || isset($_POST['registerBtn'])) && isset($_POST['username'], $_POST['password'])) {
+        $username = $_POST['username'];
+        if (signIn($username, $_POST['password'])) {
+            $successMsg = sprintf($l10n['signed_in'], $username);
+            // if the user has just been created
+            if (isset($_POST['registerBtn'])) {
+                $registerMsg = sprintf($l10n['user_created'], $username);
+            }
+        } else {
+            $errorMsg = $l10n['credentials_invalid'];
         }
-    } else {
-        $errorMsg = $l10n['credentials_invalid'];
+    // SIGN OUT
+    } elseif (isset($_POST['signOutBtn'])) {
+        signOut();
+        $successMsg = $l10n['signed_out'];
     }
-// SIGN OUT
-} elseif (isset($_POST['signOutBtn'])) {
-    signOut();
-    $successMsg = $l10n['signed_out'];
 }
-/** @var int $__uid Currently signed in user or false if not signed in.
+
+/**
+ * @var int $__uid Currently signed in user or false if not signed in.
  * @var int $__rights The user rights of the currently signed in user (user => 0, admin => 1, super-admin => 2).
  */
 $__uid = isSignedIn();
@@ -265,7 +273,6 @@ if ($__algorithm) {
         <div class="footer-placeholder"></div>
     </div>
 </div>
-
 <nav class="footer navbar navbar-default">
     <div class="container-fluid">
         <div class="navbar-footer">

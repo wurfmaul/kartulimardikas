@@ -205,6 +205,7 @@ $l10n['runtime_errors'] = [
     'no_array_for_index' => "Die Variable '%1' ist keine Liste, daher kann nicht mit einem Index darauf zugegriffen werden!",
     'divide_by_zero' => "Divisionen dürfen nicht 0 als Nenner haben!",
     'no_condition' => "Es wurden keine Bedingungen angegeben.",
+    'function_load' => "Konnte Funktion '%1' nicht laden!",
 ];
 
 // EDIT
@@ -290,7 +291,7 @@ $l10n['modified_at'] = "bearbeitet %s";
 $l10n['algorithms'] = "Algorithmen";
 $l10n['account_settings'] = "Konto Einstellungen";
 $l10n['change'] = "Ändern";
-$l10n['delete_user_message'] = "Um dieses Konto zu löschen, gib bitte dein Passwort ein und klicke diesen Button. Dies kann nicht rückgängig gemacht werden!";
+$l10n['delete_user_message'] = "Um dieses Konto zu löschen, gib bitte dein Passwort ein und klicke diesen Button.";
 $l10n['delete_all_algorithms'] = "Alle Algorithmen, die von dir geteilt wurden, werden ebenfalls gelöscht!";
 $l10n['not_able_to_contribute'] = "Ohne Konto kannst du keine Algorithmen mehr erstellen.";
 $l10n['delete_user'] = "Konto löschen";
