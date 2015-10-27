@@ -3,8 +3,8 @@
 $_jqueryVersion = '2.1.4';
 $_jqueryUiVersion = '1.11.4';
 $_bootstrapVersion = '3.3.5';
-$_fontAwesomeVersion = '4.3.0';
-$_tableSorterVersion = '2.22.3';
+$_fontAwesomeVersion = '4.4.0';
+$_tableSorterVersion = '2.23.5';
 
 if (LIBRARY_MODE == 'LOCAL') {
     define('JQUERY_PATH', "lib/jquery/$_jqueryVersion/jquery.min.js");
