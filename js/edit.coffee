@@ -1,4 +1,4 @@
-SCRIPTSITE = $(".insertStepsHere") # Specifies the site, where blocks are to place.
+SCRIPTSITE = $(".node_root") # Specifies the site, where blocks are to place.
 VARSITE = $("#insertVarsHere") # Specifies the site, where variables are to place.
 
 class Api
@@ -247,7 +247,7 @@ class StepForm
 
   saveChanges: ->
     # parse the tree
-    tree = Tree.toJSON()
+    tree = Tree.toJSON(0)
     # search for invalid-flags
     if (SCRIPTSITE.find('.invalid').length)
       console.error('Not saved due to parsing errors!')
@@ -338,4 +338,4 @@ $ ->
     $(this).toggleClass('fa-plus-square fa-minus-square')
   )
   # parse once in order to validate the tree
-  Tree.toJSON()
+  Tree.toJSON(0)
