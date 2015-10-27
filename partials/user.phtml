@@ -36,11 +36,13 @@ if (isset($_GET['uid'])) {
     <div id="success" class="alert alert-success alert-dismissible" role="alert" style="display:none">
         <button type="button" class="close" aria-label="<?= $l10n['close'] ?>"><span aria-hidden="true">&times;</span></button>
         <strong><?= $l10n['success'] ?></strong>
+
         <div id="successText"></div>
     </div>
     <div id="alert" class="alert alert-danger alert-dismissible" role="alert" style="display:none">
         <button type="button" class="close" aria-label="<?= $l10n['close'] ?>"><span aria-hidden="true">&times;</span></button>
         <strong><?= $l10n['error'] ?></strong>
+
         <div id="alertText"></div>
     </div>
     <div class="row">
@@ -101,54 +103,43 @@ if (isset($_GET['uid'])) {
                             <label for="in-username" class="control-label col-sm-4"><?= $l10n['username'] ?></label>
 
                             <div class="col-sm-5">
-                                <input type="text" class="form-control" id="in-username" name="username"
-                                       value="<?= $user->username ?>"/>
+                                <input type="text" class="form-control" id="in-username" name="username" value="<?= $user->username ?>"/>
                             </div>
                             <div class="col-sm-3">
-                                <a id="usernameBtn" class="btn btn-primary">
-                                    <?= $l10n['change'] ?>
-                                </a>
+                                <a id="usernameBtn" class="btn btn-primary"><?= $l10n['change'] ?></a>
                             </div>
                         </div>
                     </form>
-                    <form class="form-horizontal" role="form">
+                    <div class="form-horizontal" role="form">
                         <div id="email-group" class="form-group">
                             <label for="in-email" class="control-label col-sm-4"><?= $l10n['email_address'] ?></label>
 
                             <div class="col-sm-5">
-                                <input type="email" class="form-control" id="in-email" name="email"
-                                       value="<?= $user->email ?>"/>
+                                <input type="email" class="form-control" id="in-email" name="email" value="<?= $user->email ?>"/>
                             </div>
                             <div class="col-sm-3">
-                                <a id="emailBtn" class="btn btn-primary">
-                                    <?= $l10n['change'] ?>
-                                </a>
+                                <a id="emailBtn" class="btn btn-primary"><?= $l10n['change'] ?></a>
                             </div>
                         </div>
-                    </form>
+                    </div>
                     <form id="passwordForm" class="form-horizontal" role="form" method="post"
                           action="<?= url(['action' => 'user', 'uid' => $__uid]) ?>">
                         <div id="password1-group" class="form-group">
                             <input id="passwordMsg" name="successMsg" style="display: none;"/>
-                            <label for="in-password1"
-                                   class="control-label col-sm-4"><?= $l10n['password'] ?></label>
+                            <label for="in-password1" class="control-label col-sm-4"><?= $l10n['password'] ?></label>
 
                             <div class="col-sm-5">
-                                <input type="password" class="form-control" id="in-password1" name="password1"
-                                       placeholder="<?= $l10n['password'] ?>">
+                                <input type="password" class="form-control" id="in-password1" name="password1" placeholder="<?= $l10n['password'] ?>">
                             </div>
                             <div class="col-sm-3">
-                                <a id="passwordBtn" class="btn btn-primary">
-                                    <?= $l10n['change'] ?>
-                                </a>
+                                <a id="passwordBtn" class="btn btn-primary"><?= $l10n['change'] ?></a>
                             </div>
                         </div>
                         <div id="password2-group" class="form-group">
                             <label for="in-password2" class="control-label col-sm-4"></label>
 
                             <div class="col-sm-5">
-                                <input type="password" class="form-control" id="in-password2" name="password2"
-                                       placeholder="<?= $l10n['password_again'] ?>">
+                                <input type="password" class="form-control" id="in-password2" name="password2" placeholder="<?= $l10n['password_again'] ?>">
                             </div>
                         </div>
                     </form>
@@ -167,16 +158,13 @@ if (isset($_GET['uid'])) {
                               action="<?= url(['action' => 'home']) ?>">
                             <div class="row">
                                 <input id="deleteMsg" name="successMsg" style="display: none;"/>
-                                <label for="deletePassword"
-                                       class="control-label sr-only"><?= $l10n['password'] ?></label>
+                                <label for="deletePassword" class="control-label sr-only"><?= $l10n['password'] ?></label>
 
                                 <div id="password-group" class="col-sm-8">
-                                    <input type="password" class="form-control" id="delete-password" name="password"
-                                           placeholder="<?= $l10n['password'] ?>">
+                                    <input type="password" class="form-control" id="delete-password" name="password" placeholder="<?= $l10n['password'] ?>">
                                 </div>
                                 <div class="col-sm-4">
-                                    <button id="deleteBtn" type="button" class="btn btn-danger" name="delete"
-                                            data-warning="<?= $l10n['delete_user_warning'] ?>">
+                                    <button id="deleteBtn" type="button" class="btn btn-danger" name="delete" data-warning="<?= $l10n['delete_user_warning'] ?>">
                                         <?= $l10n['delete_user'] ?>
                                     </button>
                                 </div>
