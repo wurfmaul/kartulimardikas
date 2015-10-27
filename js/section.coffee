@@ -87,7 +87,7 @@ class Section
       section
     else
       # third priority: default value
-      window.default.section
+      window.defaults.section
 
   ###
     Stores a section number into the browser's local storage.
