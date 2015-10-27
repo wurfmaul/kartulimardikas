@@ -28,7 +28,7 @@ class AssignNode extends Node
                 $this->to->parse($params),
                 trim($this->from->getSource($params))
             )
-        , $params);
+        );
     }
 
     public function printHtml(&$params)
@@ -238,7 +238,7 @@ class CompareNode extends Node
                 $this->ops[$this->op],
                 $this->right->parse($params)
             )
-        , $params);
+        );
     }
 
     public function printHtml(&$params)
@@ -306,12 +306,14 @@ class FunctionNode extends Node
     /** @var BlockNode */
     protected $actPars;
 
-    public function __construct($nid, $callee, $actPars)
+    public function __construct($nid, $callee, $actParsLine, $actPars)
     {
         $this->nodeId = $nid;
         $this->calleeId = $callee;
+        $this->actParsLine = $actParsLine;
         $this->actPars = $actPars;
 
+        // load callee information
         if ($this->calleeId > 0) {
             require_once(BASEDIR . 'includes/dataModel.php');
             $_model = new DataModel();
@@ -322,9 +324,10 @@ class FunctionNode extends Node
 
     public static function parse($node, $tree)
     {
+        $actParsLine = isset($node->paramsLine) ? $node->paramsLine : "";
         $actPars = isset($node->params) ? parent::parse($tree[$node->params], $tree) : null;
         $callee = isset($node->callee) ? $node->callee : -1;
-        return new self($node->nid, $callee, $actPars);
+        return new self($node->nid, $callee, $actParsLine, $actPars);
     }
 
     public function getSource($params)
@@ -334,13 +337,12 @@ class FunctionNode extends Node
                 $this->calleeName,
                 trim($this->actPars->getSource($params))
             )
-        , $params);
+        );
     }
 
     public function printHtml(&$params)
     {
-        $actParsNid =  isset($this->actPars) ? $this->actPars->nodeId : null;
-        $name = '';
+        $actParsNid = isset($this->actPars) ? $this->actPars->nodeId : null;
         ?>
         <!-- FUNCTION NODE -->
         <li class="node function-node node_<?= $this->nodeId ?>" data-node-type="function" data-node-id="<?= $this->nodeId ?>" data-callee-id="<?= $this->calleeId ?>">
@@ -354,10 +356,12 @@ class FunctionNode extends Node
                             <label>
                                 <?= TreeHelper::l10n('function_node_title') ?>
                                 <div class="ui-widget combobox-container">
-                                    <input class="function-name combobox-functions" value="<?= $name ?>"/>
+                                    <input class="function-name combobox-functions" value="<?= $this->calleeName ?>"/>
                                 </div>
                                 (
-                                <input class="" value="" />
+                                <div class="ui-widget combobox-container">
+                                    <input class="combobox act-pars-line" value="<?= $this->actParsLine ?>" />
+                                </div>
                                 )
                             </label>
                             <span class="invalid-flag label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
@@ -367,26 +371,25 @@ class FunctionNode extends Node
                         <?php else: ?>
                             <label>
                                 <?= TreeHelper::l10n('function_node_title') ?>
-                                <?= $this->calleeName ?>()
+                                <?= $this->calleeName ?>(<?= $this->actParsLine ?>)
                                 <div style="display: none;">
-                                    <input class="name" value="<?= $this->calleeName ?>"/>
+                                    <input class="function-name" value="<?= $this->calleeName ?>"/>
+                                    <input class="act-pars-line" value="<?= $this->actParsLine ?>" />
                                 </div>
                             </label>
                         <?php endif ?>
                     </td>
                 </tr>
-                <?php if (is_null($actParsNid) || $actParsNid == '0'): ?>
-                <tr style="display: none;">
+                <tr<?php if (is_null($actParsNid) || $actParsNid === '0'): ?> style="display: none;"<?php endif ?>>
                     <td class="handle node-box left right bottom">
                         <span class="cursor-icon"></span>
                     </td>
                     <td>
-                        <ul class="assign-from sortable" data-node-id="<?= $actParsNid ?>">
+                        <ul class="act-pars sortable" data-node-id="<?= $actParsNid ?>">
                             <?php self::printNode($this->actPars, $params) ?>
                         </ul>
                     </td>
                 </tr>
-                <?php endif ?>
             </table>
         </li>
     <?php }
@@ -543,7 +546,7 @@ class IncNode extends Node
 
     public function getSource($params)
     {
-        return $this->wrapLine($this->var->parse($params) . "++", $params);
+        return $this->wrapLine($this->var->parse($params) . "++");
     }
 
     public function printHtml(&$params)
@@ -613,7 +616,7 @@ class ReturnNode extends Node
 
     public function getSource($params)
     {
-        return $this->wrapLine("return " . $this->value->parse($params), $params);
+        return $this->wrapLine("return " . $this->value->parse($params));
     }
 
     public function printHtml(&$params)
@@ -684,7 +687,7 @@ class SwapNode extends Node
                 '&hArr;',
                 $this->right->parse($params)
             )
-        , $params);
+        );
     }
 
     public function printHtml(&$params)
@@ -750,7 +753,7 @@ class ValueNode extends Node
 
     public function getSource($params)
     {
-        return $this->wrapLine($this->value->parse($params), $params);
+        return $this->wrapLine($this->value->parse($params));
     }
 
     public function printHtml(&$params)
@@ -1014,7 +1017,7 @@ abstract class Node
                 $node = new CompareNode($type, null, null, null);
                 break;
             case self::FUNCTION_NODE:
-                $node = new FunctionNode($type, null, null);
+                $node = new FunctionNode($type, null, null, null);
                 break;
             case self::IF_NODE:
                 $node = new IfNode($type, null, null, null, null);

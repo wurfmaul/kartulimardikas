@@ -3,17 +3,16 @@ VARSITE = $("#insertVarsHere") # Specifies the site, where variables are to plac
 
 class Api
   @editInfo: ->
-    aid = window.current.aid
     name = $('#in-name').val()
     desc = $('#in-desc').val()
     long = $('#in-long').val()
     $.ajax("api/algorithm.php?area=info",
       type: 'POST'
       data:
-        aid: aid
         name: name
         desc: desc
         long: long
+        aid: window.current.aid
         lang: window.current.lang
       dataType: 'json'
       success: (data) => # if response arrived...
@@ -31,13 +30,12 @@ class Api
     )
 
   @editTags: ->
-    aid = window.current.aid
     tags = $('#in-tags').val()
     $.ajax("api/tag.php",
       type: 'POST'
       data:
-        aid: aid
         tags: tags
+        aid: window.current.aid
         lang: window.current.lang
       dataType: 'json'
       success: (data) => # if response arrived...
@@ -55,7 +53,6 @@ class Api
 
   @editVariable: (vid) ->
     varRow = $('#var-' + vid)
-    aid = window.current.aid
     name = varRow.find('.name').val()
     type = varRow.find('.type').val()
     value = varRow.find('.value').val()
@@ -63,12 +60,12 @@ class Api
     $.ajax("api/algorithm.php?area=var&action=edit",
       type: 'POST'
       data:
-        aid: aid
         vid: vid
         name: name
         type: type
         value: value
         size: size
+        aid: window.current.aid
         lang: window.current.lang
       dataType: 'json'
       success: (data) => # if response arrived...
@@ -98,12 +95,11 @@ class Api
     )
 
   @removeVariable: (vid) ->
-    aid = window.current.aid
     $.ajax("api/algorithm.php?area=var&action=remove",
       type: 'POST'
       data:
-        aid: aid
         vid: vid
+        aid: window.current.aid
         lang: window.current.lang
       dataType: 'json'
       success: (data) => # if response arrived...
@@ -118,12 +114,11 @@ class Api
     )
 
   @editScript: (tree) ->
-    aid = window.current.aid
     $.ajax("api/algorithm.php?area=script",
       type: 'POST'
       data:
-        aid: aid
         tree: tree
+        aid: window.current.aid
         lang: window.current.lang
       dataType: 'json'
       success: (data) => # if response arrived...
@@ -245,13 +240,14 @@ class StepForm
 
   saveChanges: ->
     # parse the tree
-    tree = Tree.toJSON(0)
+    tree = Tree.toJSON()
     # search for invalid-flags
     if (SCRIPTSITE.find('.invalid').length)
-      console.error('Not saved due to parsing errors!')
+      false
     else
       @varForm.updateVarCount()
       Api.editScript(tree)
+      true
 
   updateActionHandlers: (parent) ->
     # update action handlers

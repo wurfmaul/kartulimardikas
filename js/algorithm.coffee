@@ -370,7 +370,7 @@ class BlockNode extends Node
     node.children('li.node').each((index, element) =>
       # parse child and add it to tree
       child = Node.parse($(element), tree, memory)
-      tree.push child
+      tree.push(child)
       # store each child-nid in block-node
       nodes[index] = child.nid
     )
@@ -431,7 +431,7 @@ class CompareNode extends Node
     new @(nid, left, right, operator)
 
 class FunctionNode extends Node
-  constructor: (@nid, @callee, @parameters) ->
+  constructor: (@nid, @callee, @paramsLine, @params) ->
 
   execute: (player, node) ->
     scope = player.scope
@@ -442,6 +442,7 @@ class FunctionNode extends Node
       # remove value once executed
       curNode.removeData('return-value')
       return { value: value }
+
     # otherwise call function
     newScope = player.scope + 1
     # get name of called function
@@ -483,18 +484,22 @@ class FunctionNode extends Node
     nid: @nid
     node: 'function'
     callee: @callee
-    params: @parameters
+    paramsLine: @paramsLine
+    params: @params
     }
 
   @parse: (node, tree, memory) =>
     # get callee
     callee = node.data('callee-id')
     # parse parameters
-    params = BlockNode.parse(@findSubNode(node, '.function-params'), tree, memory)
-    tree.push params
+    paramsLine = @parseValue('.act-pars-line', node, memory)
+    params = BlockNode.parse(@findSubNode(node, '.act-pars'), tree, memory)
+    tree.push(params)
+    # validation
+    @validate(node, callee > 0)
     # create the node
     nid = tree.length
-    new @(nid, callee, params.nid)
+    new @(nid, callee, paramsLine, params)
 
 class IfNode extends Node
   constructor: (@nid, @condition, @ifBody, @elseBody, @op) ->
@@ -589,7 +594,7 @@ class IncNode extends Node
     }
 
   @parse: (node, tree, memory) =>
-    variable = @parseAndCheckValue('.inc-var', node, memory)
+    variable = @parseAndCheckVar('.inc-var', node, memory)
     @validate(node, variable?)
     operator = @findSubNode(node, '.inc-operation').val()
     nid = tree.length
