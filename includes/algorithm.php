@@ -305,6 +305,8 @@ class FunctionNode extends Node
     protected $calleeName;
     /** @var BlockNode */
     protected $actPars;
+    /** @var string */
+    protected $actParsLine;
 
     public function __construct($nid, $callee, $actParsLine, $actPars)
     {
@@ -343,6 +345,7 @@ class FunctionNode extends Node
     public function printHtml(&$params)
     {
         $actParsNid = isset($this->actPars) ? $this->actPars->nodeId : null;
+        $actParsLine = empty($this->actParsLine) ? '' : $this->actParsLine->value;
         ?>
         <!-- FUNCTION NODE -->
         <li class="node function-node node_<?= $this->nodeId ?>" data-node-type="function" data-node-id="<?= $this->nodeId ?>" data-callee-id="<?= $this->calleeId ?>">
@@ -360,7 +363,7 @@ class FunctionNode extends Node
                                 </div>
                                 (
                                 <div class="ui-widget combobox-container">
-                                    <input class="combobox act-pars-line" value="<?= $this->actParsLine ?>" />
+                                    <input class="combobox act-pars-line" value="<?= $actParsLine ?>" />
                                 </div>
                                 )
                             </label>
@@ -371,10 +374,10 @@ class FunctionNode extends Node
                         <?php else: ?>
                             <label>
                                 <?= TreeHelper::l10n('function_node_title') ?>
-                                <?= $this->calleeName ?>(<?= $this->actParsLine ?>)
+                                <?= $this->calleeName ?>(<?= $actParsLine ?>)
                                 <div style="display: none;">
                                     <input class="function-name" value="<?= $this->calleeName ?>"/>
-                                    <input class="act-pars-line" value="<?= $this->actParsLine ?>" />
+                                    <input class="act-pars-line" value="<?= $actParsLine ?>" />
                                 </div>
                             </label>
                         <?php endif ?>

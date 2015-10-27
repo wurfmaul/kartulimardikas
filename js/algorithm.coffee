@@ -492,14 +492,16 @@ class FunctionNode extends Node
     # get callee
     callee = node.data('callee-id')
     # parse parameters
-    paramsLine = @parseValue('.act-pars-line', node, memory)
+    paramsLine = ''
+    if (@findSubNode(node, '.act-pars-line').val() isnt '')
+      paramsLine = @parseAndCheckValue('.act-pars-line', node, memory)
     params = BlockNode.parse(@findSubNode(node, '.act-pars'), tree, memory)
     tree.push(params)
     # validation
     @validate(node, callee > 0)
     # create the node
     nid = tree.length
-    new @(nid, callee, paramsLine, params)
+    new @(nid, callee, paramsLine, params.nid)
 
 class IfNode extends Node
   constructor: (@nid, @condition, @ifBody, @elseBody, @op) ->

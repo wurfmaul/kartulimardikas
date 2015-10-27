@@ -220,14 +220,8 @@ class StepForm
     node = $('.prototypes .' + prototypeId).clone().appendTo(SCRIPTSITE)
     # update the variable counter
     @varForm.updateVarCount()
-    # remove sortable completely
-    $('.sortable').each(->
-      if ($(this).sortable("instance")?)
-        $(this).sortable("destroy")
-    )
-    # and reinitialize it
-    @updateSortable()
     # make sure, the action handlers (click...) work for the new element
+    @updateSortable()
     @updateActionHandlers(node)
     node
 
@@ -261,26 +255,20 @@ class StepForm
   updateSortable: ->
     update = =>
       @saveChanges()
+      true
     sortParams =
       connectWith: ".sortable"
       placeholder: "sortable-highlight"
       update: update
-    dropParams =
-      hoverClass: "ui-state-hover",
-      over: (event, ui) ->
-        console.log('over')
-        $(this).find('.show-on-hover').show('slow')
-        $(this).find('.hide-on-hover').hide('slow')
-      out: (event, ui) ->
-        console.log('out')
-#        $(this).find('.show-on-hover').hide('slow')
-#        $(this).find('.hide-on-hover').show('slow')
-      drop: (event,ui) ->
-        console.log('drop')
-        $(this).find('.show-on-hover, .hide-on-hover').removeClass('show-on-hover hide-on-hover')
+
+    # remove sortable completely
+    SCRIPTSITE.find('.sortable').each(->
+      if ($(this).sortable("instance")?)
+        $(this).sortable("destroy")
+    )
+    # and reinitialize it
     SCRIPTSITE.sortable(sortParams)
     SCRIPTSITE.find('.sortable').sortable(sortParams)
-    SCRIPTSITE.find('.droppable').droppable(dropParams)
 
 updateVisibility = (variable) ->
   # show/hide input fields according to the init selection
