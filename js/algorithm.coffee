@@ -1,5 +1,3 @@
-SHORT_CIRCUIT = true # Short-circuit evaluation
-
 class Node
   ###
     Must be overridden by all subclasses.
@@ -331,7 +329,7 @@ class BlockNode extends Node
         curValue = player.tree.get(n).execute(player, n).value
         value = value and curValue if (combine is 'all')
         value = value or curValue if (combine is 'any')
-        break if (SHORT_CIRCUIT and not value)
+        break if (window.defaults.shortCircuit and not value)
     {value: value, next: next}
 
   mark: (player, node) ->

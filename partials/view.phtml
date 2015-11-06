@@ -55,7 +55,8 @@ if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)): ?>
         'section': "<?= SECTIONS_VIEW ?>",
         'maxSteps': "<?= MAX_STEPS ?>",
         'speed': "<?= SPEED ?>",
-        'breaks': "<?= DEFAULT_BREAKPOINT ?>"
+        'breaks': "<?= DEFAULT_BREAKPOINT ?>",
+        'shortCircuit': "<?= SHORT_CIRCUIT ?>"
     };
     window.errorCodes = {
         <?php foreach ($l10n['runtime_errors'] as $key => $value): ?>

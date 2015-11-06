@@ -38,6 +38,8 @@ define('SPEED', 500);
 define('MAX_STEPS', 1000);
 # Default breakpoint (values: 'before', 'after', 'both')
 define('DEFAULT_BREAKPOINT', 'before');
+# Whether or not short circuit evaluation is enabled
+define('SHORT_CIRCUIT', true);
 
 ##### LIST SETTINGS #####
 # Number of algorithms that are displayed in the home action
