@@ -1,0 +1,8 @@
+
+/*
+ * @license
+ * This file was created 2014-2015 by https://github.com/wurfmaul
+ * and licensed under the GNU GENERAL PUBLIC LICENSE Version 3
+ * https://gnu.org/licenses/gpl-3.0.txt
+ */
+.panel-heading,a{cursor:pointer}.algorithms .name{font-weight:bold;font-variant:small-caps}.algorithms .properties{font-size:small;color:#8d8d8d}.algorithms .description{font-size:small}#saveSuccess{font-size:small;vertical-align:middle}.panel-footer-sm{padding:2px;font-size:x-small;text-align:left}label{font-weight:normal;margin-bottom:0}textarea{resize:vertical;overflow:auto}html{height:100%}html body{height:100%}html body .content-wrapper{min-height:100%;margin:0 auto -50px}html body .footer,html body .footer-placeholder{height:50px;margin:0 auto}.table-sortable{margin:10px auto}.table-sortable th,.table-sortable td{text-align:center}.table-sortable th:first-child,.table-sortable td:first-child{text-align:left}.table-sortable tr:not(.deleted) .deleted-only{display:none}.table-sortable tr.deleted{color:gray}.table-sortable tr.deleted .active-only{display:none}.table-sortable tr.deleted .name{text-decoration:line-through}.table-sortable a{cursor:pointer}.table-sortable span.deleted{text-decoration:line-through}.table-sortable#table-users td:not(.admin) .label-admin{display:none}.table-sortable#table-users .send-mail{float:right}.table-sortable#table-algorithms .tags{max-width:250px}

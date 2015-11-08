@@ -113,7 +113,7 @@ if ($__algorithm) {
         <?php if (file_exists('css/' . ACTION . '.css')): ?>
             <link href="css/<?= ACTION ?>.css" rel="stylesheet"/>
         <?php endif ?>
-    <?php elseif (file_exists('css/' . ACTION . '.min.css')): ?>
+    <?php elseif (file_exists('css/' . ACTION . '.min.css')): // !DEBUG_MODE: ?>
         <link href="css/<?= ACTION ?>.min.css" rel="stylesheet"/>
     <?php endif ?>
 
@@ -333,7 +333,7 @@ if ($__algorithm) {
 <?php if (file_exists('js/' . ACTION . '.js')): ?>
     <script type="text/javascript" src="js/<?= ACTION ?>.js"></script>
 <?php endif ?>
-<?php elseif (file_exists('js/' . ACTION . '.min.js')): ?>
+<?php elseif (file_exists('js/' . ACTION . '.min.js')): // !DEBUG_MODE: ?>
     <script type="text/javascript" src="js/<?= ACTION ?>.min.js"></script>
 <?php endif ?>
 <!-- SCRIPTS END -->

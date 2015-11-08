@@ -1,0 +1,38 @@
+.table-sortable {
+  margin: 10px auto;
+}
+.table-sortable th,
+.table-sortable td {
+  text-align: center;
+}
+.table-sortable th:first-child,
+.table-sortable td:first-child {
+  text-align: left;
+}
+.table-sortable tr:not(.deleted) .deleted-only {
+  display: none;
+}
+.table-sortable tr.deleted {
+  color: #808080;
+}
+.table-sortable tr.deleted .active-only {
+  display: none;
+}
+.table-sortable tr.deleted .name {
+  text-decoration: line-through;
+}
+.table-sortable a {
+  cursor: pointer;
+}
+.table-sortable span.deleted {
+  text-decoration: line-through;
+}
+.table-sortable#table-users td:not(.admin) .label-admin {
+  display: none;
+}
+.table-sortable#table-users .send-mail {
+  float: right;
+}
+.table-sortable#table-algorithms .tags {
+  max-width: 250px;
+}

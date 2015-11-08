@@ -1,0 +1,39 @@
+.table-sortable {
+  margin: 10px auto;
+}
+.table-sortable th,
+.table-sortable td {
+  text-align: center;
+}
+.table-sortable th:first-child,
+.table-sortable td:first-child {
+  text-align: left;
+}
+#table-algorithms .tags {
+  max-width: 250px;
+}
+.tagcloud {
+  padding: 10px;
+}
+.tagcloud.tagcloud-background {
+  background: #d3d3d3;
+  border: 1px solid gray;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+}
+.tagcloud .smallest {
+  font-size: x-small;
+}
+.tagcloud .small {
+  font-size: small;
+}
+.tagcloud .medium {
+  font-size: medium;
+}
+.tagcloud .large {
+  font-size: large;
+}
+.tagcloud .largest {
+  font-size: x-large;
+}
