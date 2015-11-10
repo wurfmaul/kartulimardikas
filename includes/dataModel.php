@@ -96,24 +96,45 @@ class DataModel
     }
 
     /**
-     * @param bool $fetchAll Whether deleted and private algorithms should be fetched.
-     * @return array A list of all defined algorithms.
+     * @return array A list of all defined algorithms including extended information.
      */
-    public function fetchAlgorithms($fetchAll = false)
+    public function fetchAllAlgorithms()
     {
-        $filter = $fetchAll ? '' : 'WHERE a.date_deletion IS NULL AND a.date_publish IS NOT NULL';
         $stmt = $this->_sql->prepare("
             SELECT
               a.*,
-              IFNULL(LENGTH(a.variables),0) + IFNULL(LENGTH(a.tree),0) AS size,
+              IFNULL(LENGTH(`description`),0) + IFNULL(LENGTH(`long_description`),0) +
+              IFNULL(LENGTH(`variables`),0) + IFNULL(LENGTH(`tree`),0) as size,
               u.username AS owner,
               u.date_deletion AS owner_deleted,
               GROUP_CONCAT(t.tag SEPARATOR ', ') AS tags
             FROM algorithm a
             JOIN user u USING (uid)
             LEFT JOIN tag t USING (aid)
-            $filter
             GROUP BY aid
+            ORDER BY aid DESC
+        ");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    /**
+     * @return array A list of all public algorithms.
+     */
+    public function fetchAllPublicAlgorithms()
+    {
+        $stmt = $this->_sql->prepare("
+            SELECT
+              a.*,
+              u.username AS owner,
+              GROUP_CONCAT(t.tag SEPARATOR ', ') AS tags
+            FROM algorithm_public a
+            JOIN user u USING (uid)
+            LEFT JOIN tag t USING (aid)
+            GROUP BY aid
+            ORDER BY view_count DESC, date_creation DESC
         ");
         $stmt->execute();
         $result = $stmt->get_result();
@@ -668,6 +689,25 @@ class DataModel
         $stmt = $this->_sql->prepare("
             UPDATE algorithm
             SET date_publish=$value
+            WHERE aid=?
+        ");
+        $stmt->bind_param("i", $aid);
+        $stmt->execute();
+        $rows = $stmt->affected_rows;
+        $stmt->close();
+        return $rows;
+    }
+
+    /**
+     * Increments the view counter of the algorithm by 1.
+     * @param int $aid The algorithm id.
+     * @return int The number of affected rows.
+     */
+    public function updateAlgorithmViewCount($aid)
+    {
+        $stmt = $this->_sql->prepare("
+            UPDATE algorithm
+            SET view_count = view_count + 1
             WHERE aid=?
         ");
         $stmt->bind_param("i", $aid);

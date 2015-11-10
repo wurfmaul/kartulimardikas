@@ -26,5 +26,5 @@
     </td>
     <td><?= $algorithm['date_creation'] ?></td>
     <td><?= $algorithm['date_lastedit'] ?></td>
-    <td><?= (($size = $algorithm['size']) ? $size : 0) > 1024 ? $size / 1024 . ' KiB' : $size . ' B' ?></td>
+    <td data-text="<?= $count = $algorithm['view_count'] ?>"><?= $count > 1000 ? round($count / 1000,2) . 'K' : $count ?></td>
 </tr>

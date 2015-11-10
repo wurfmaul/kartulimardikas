@@ -105,7 +105,7 @@ $_tab = isset($_GET['tab']) && array_key_exists($_GET['tab'], $_tabs) ? $_GET['t
             </tbody>
             <?php $colCount = 7; require(BASEDIR . 'partials/partials/table_foot.phtml') ?>
         </table>
-    <?php else: ?>
+    <?php else: // tab algorithms: ?>
         <div class="btn-group">
             <button class="filter btn btn-primary" data-target="#table-algorithms" data-column="4" data-filter="<?= (new DateTime())->format('Y-m-d') ?>">
                 <span class="glyphicon glyphicon-filter"></span>
@@ -135,7 +135,7 @@ $_tab = isset($_GET['tab']) && array_key_exists($_GET['tab'], $_tabs) ? $_GET['t
             </tr>
             </thead>
             <tbody>
-            <?php foreach ($__model->fetchAlgorithms(true) as $aid => $algorithm): ?>
+            <?php foreach ($__model->fetchAllAlgorithms() as $aid => $algorithm): ?>
                 <tr<?php if ($algorithm['date_deletion']): ?> class="deleted"<?php endif ?> data-aid="<?= $algorithm['aid'] ?>">
                     <td>
                         <span class="name"><?= $algorithm['name'] ? $algorithm['name'] : $l10n['untitled_algorithm'] ?></span>
@@ -154,9 +154,7 @@ $_tab = isset($_GET['tab']) && array_key_exists($_GET['tab'], $_tabs) ? $_GET['t
                     </td>
                     <td><?= (new DateTime($algorithm['date_creation']))->format('Y-m-d') ?></td>
                     <td><?= (new DateTime($algorithm['date_lastedit']))->format('Y-m-d') ?></td>
-                    <td class="size">
-                        <?= ($size = $algorithm['size']) > 1024 ? $size / 1024 . ' KiB' : $size . ' B' ?>
-                    </td>
+                    <td class="size" data-text="<?= $size = $algorithm['size'] ?>"><?= $size > 1024 ? round($size / 1024,2) . ' KiB' : $size . ' B' ?></td>
                     <td class="active-only">
                         <a href="<?= url(['action' => 'view', 'aid' => $algorithm['aid']]) ?>" title="<?= $l10n['view_algorithm'] ?>"><span class="fa fa-eye"></span></a>
                         <a href="<?= url(['action' => 'edit', 'aid' => $algorithm['aid']]) ?>" title="<?= $l10n['edit_algorithm'] ?>"><span class="fa fa-pencil"></span></a>

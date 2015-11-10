@@ -4,7 +4,12 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
 $scope = 0;
 
 // if algorithm is defined
-if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)): ?>
+if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
+    // Increment the view counter if watching a foreign algorithm
+    if (!$__owner) {
+        $__model->updateAlgorithmViewCount($__aid);
+    }
+?>
     <!-- HEADER -->
     <div class="page-header">
         <h1><?= $l10n['view_algorithm'] ?></h1>

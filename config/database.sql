@@ -20,13 +20,14 @@ CREATE TABLE IF NOT EXISTS `algorithm` (
   `uid` int(6) NOT NULL COMMENT 'the author''s user id',
   `name` varchar(64) COLLATE utf8_general_ci DEFAULT NULL,
   `description` varchar(1024) COLLATE utf8_general_ci DEFAULT NULL,
-  `long_description` varchar(4096) COLLATE utf8_general_ci DEFAULT NULL,
-  `variables` blob COMMENT 'variable information in json format',
-  `tree` longblob COMMENT 'script information in json format',
+  `long_description` text COLLATE utf8_general_ci COMMENT 'algorithm information',
+  `variables` text COLLATE utf8_general_ci COMMENT 'variable information in json format',
+  `tree` mediumtext COLLATE utf8_general_ci COMMENT 'script information in json format',
   `date_creation` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'timestamp of creation',
   `date_lastedit` timestamp NULL DEFAULT NULL COMMENT 'timestamp of last modification',
   `date_publish` timestamp NULL DEFAULT NULL COMMENT 'timestamp of publication',
   `date_deletion` timestamp NULL DEFAULT NULL COMMENT 'timestamp of deletion',
+  `view_count` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'counts the algorithm views',
   PRIMARY KEY (`aid`),
   CONSTRAINT FOREIGN KEY (`uid`) REFERENCES `user`(`uid`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;

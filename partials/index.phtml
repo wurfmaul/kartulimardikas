@@ -43,7 +43,7 @@ $_tab = isset($_GET['tab']) && array_key_exists($_GET['tab'], $_tabs) ? $_GET['t
     </div>
     <!-- CONTENT -->
     <table id="table-algorithms" class="table table-sortable">
-        <?php if ($algorithms = $__model->fetchAlgorithms(false)):
+        <?php if ($algorithms = $__model->fetchAllPublicAlgorithms()):
             $transKeys = ['created_at', 'created_note'];
             $userData = true;
             ?>
@@ -54,7 +54,7 @@ $_tab = isset($_GET['tab']) && array_key_exists($_GET['tab'], $_tabs) ? $_GET['t
                 <th><?= $l10n['owner'] ?></th>
                 <th><?= $l10n['creation'] ?></th>
                 <th><?= $l10n['last_edit'] ?></th>
-                <th><?= $l10n['size'] ?></th>
+                <th><?= $l10n['count'] ?></th>
             </tr>
             </thead>
             <tbody>
