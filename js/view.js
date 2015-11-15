@@ -11,6 +11,7 @@
       this.stats = new Stats(this.memory, this.scope);
       this.speed = this.loadSpeed();
       this.breaks = this.loadBreaks();
+      this.tempo = 0;
       this.reset();
     }
 
@@ -40,7 +41,8 @@
       var maxSteps;
       if (this.timer != null) {
         this.timer = clearInterval(this.timer);
-        return this.curScope.find('.img-play').removeClass('glyphicon-pause').addClass('glyphicon-play');
+        this.curScope.find('.img-play').removeClass('glyphicon-pause').addClass('glyphicon-play');
+        return this.tempo = 0;
       } else {
         maxSteps = window.defaults.maxSteps;
         this.playStep = 0;
@@ -54,7 +56,8 @@
             }
           };
         })(this), this.speed);
-        return this.curScope.find('.img-play').removeClass('glyphicon-play').addClass('glyphicon-pause');
+        this.curScope.find('.img-play').removeClass('glyphicon-play').addClass('glyphicon-pause');
+        return this.tempo = 1;
       }
     };
 
@@ -112,6 +115,7 @@
 
     Player.prototype.finish = function() {
       var i, j, maxSteps, ref;
+      this.tempo = 2;
       maxSteps = window.defaults.maxSteps;
       for (i = j = 0, ref = maxSteps; 0 <= ref ? j <= ref : j >= ref; i = 0 <= ref ? ++j : --j) {
         if (!this.step()) {
@@ -124,7 +128,11 @@
     Player.prototype.callFunction = function(scope, params) {
       var player;
       this.setControls([0, 0, 0, 0]);
-      init(scope);
+      if (this.timer != null) {
+        this.play();
+        this.tempo = 1;
+      }
+      init(scope, this.tempo);
       player = players[scope];
       $('#scope-' + scope).find('.variables .parameter').each(function() {
         var value, vid;
@@ -142,7 +150,14 @@
       $('#scope-' + scope).remove();
       this.curScope.find('.node_' + this.curNode).data('return-value', value);
       this.setControls([1, 1, 1, 1]);
-      return this.step();
+      switch (this.tempo) {
+        case 2:
+          return this.finish();
+        case 1:
+          return this.play();
+        default:
+          return this.step();
+      }
     };
 
     Player.prototype.changeSpeed = function(value) {
@@ -383,7 +398,7 @@
     });
   };
 
-  init = function(scope) {
+  init = function(scope, tempo) {
     var curScope, player, tree;
     curScope = $('#scope-' + scope);
     tree = new Tree(scope);
@@ -425,7 +440,7 @@
       }
       return input.val(value).show().focus();
     });
-    return curScope.find('.value-edit').keyup(function(event) {
+    curScope.find('.value-edit').keyup(function(event) {
       var index, newVal, offset, vid;
       switch (event.which) {
         case 13:
@@ -450,11 +465,17 @@
     }).blur(function() {
       return $(this).hide().siblings('.value-container').show();
     });
+    switch (tempo) {
+      case 1:
+        return player.play();
+      case 2:
+        return player.finish();
+    }
   };
 
   $(function() {
     window.players = {};
-    return init(0);
+    return init(0, 0);
   });
 
 }).call(this);

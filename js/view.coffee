@@ -5,6 +5,7 @@ class Player
     @stats = new Stats(@memory, @scope)
     @speed = @loadSpeed()
     @breaks = @loadBreaks()
+    @tempo = 0
     @reset()
 
   reset: ->
@@ -36,6 +37,7 @@ class Player
       @timer = clearInterval(@timer);
       # set button icon to play
       @curScope.find('.img-play').removeClass('glyphicon-pause').addClass('glyphicon-play')
+      @tempo = 0
     else # play
       # set an interval and perform step after step
       maxSteps = window.defaults.maxSteps
@@ -48,6 +50,7 @@ class Player
       , @speed)
       # set button icon to pause
       @curScope.find('.img-play').removeClass('glyphicon-play').addClass('glyphicon-pause')
+      @tempo = 1
 
   step: ->
     @clearHighlight()
@@ -96,6 +99,7 @@ class Player
       false
 
   finish: ->
+    @tempo = 2
     maxSteps = window.defaults.maxSteps
     for i in [0..maxSteps]
       return if !@step()
@@ -105,7 +109,10 @@ class Player
     # deactivate navigation in outer scope
     @setControls([0,0,0,0])
     # switch to inner scope
-    init(scope)
+    if @timer?
+      @play() # pause
+      @tempo = 1
+    init(scope, @tempo)
     # load the parameters
     player = players[scope]
     $('#scope-' + scope).find('.variables .parameter').each(->
@@ -127,7 +134,10 @@ class Player
     @curScope.find('.node_' + @curNode).data('return-value', value)
     # reactivate navigation in outer scope
     @setControls([1,1,1,1])
-    @step()
+    switch @tempo
+      when 2 then @finish()
+      when 1 then @play()
+      else @step()
 
   changeSpeed: (value) ->
     @speed = value
@@ -308,7 +318,7 @@ toggleComment = (element) ->
     container.toggleClass('collapsed')
   )
 
-init = (scope) ->
+init = (scope, tempo) ->
   # INITIALIZE SCOPE
   curScope = $('#scope-' + scope)
   tree = new Tree(scope)
@@ -362,8 +372,13 @@ init = (scope) ->
     $(this).hide().siblings('.value-container').show()
   )
 
+  # continue execution
+  switch tempo
+    when 1 then player.play()
+    when 2 then player.finish()
+
 $ ->
   # prepare list of scopes
   window.players = {}
   # initialize outer scope
-  init(0)
+  init(0, 0)
