@@ -126,8 +126,8 @@ class Player
     # use returned value
     @curScope.find('.node_' + @curNode).data('return-value', value)
     # reactivate navigation in outer scope
-    @step()
     @setControls([1,1,1,1])
+    @step()
 
   changeSpeed: (value) ->
     @speed = value

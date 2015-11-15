@@ -685,8 +685,10 @@ class WhileNode extends Node
       cond = player.tree.get(@condition)
       # execute the condition
       size = cond.size()
-      if (size is 1) then condValue = cond.execute(player, node)
-      else if (size > 1) then condValue = cond.executeAll(player, node, @op)
+      if (size is 1)
+        condValue = cond.execute(player, node)
+      else if (size > 1)
+        condValue = cond.executeAll(player, node, @op)
       else throw new ExecutionError('no_condition', [])
       # define the next step
       if condValue.next > -1 then next: condValue.next
@@ -694,8 +696,12 @@ class WhileNode extends Node
       else {} # otherwise don't return a next node in order to mark this node as done
     else if (node <= @body)
       bodyValue = player.tree.get(@body).execute(player, node)
-      if bodyValue.next? then next: bodyValue.next # if body has still more nodes to execute, let it!
-      else next: @condition # otherwise jump back to condition
+      if (bodyValue.scope?) # check for function call
+        bodyValue
+      else if bodyValue.next?
+        next: bodyValue.next # if body has still more nodes to execute, let it!
+      else
+        next: @condition # otherwise jump back to condition
 
   mark: (player, node) ->
     condition = player.tree.get(@condition)

@@ -1057,7 +1057,9 @@
         }
       } else if (node <= this.body) {
         bodyValue = player.tree.get(this.body).execute(player, node);
-        if (bodyValue.next != null) {
+        if ((bodyValue.scope != null)) {
+          return bodyValue;
+        } else if (bodyValue.next != null) {
           return {
             next: bodyValue.next
           };

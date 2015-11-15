@@ -141,8 +141,8 @@
       $('#scopes-head .scope-' + scope).parent().remove();
       $('#scope-' + scope).remove();
       this.curScope.find('.node_' + this.curNode).data('return-value', value);
-      this.step();
-      return this.setControls([1, 1, 1, 1]);
+      this.setControls([1, 1, 1, 1]);
+      return this.step();
     };
 
     Player.prototype.changeSpeed = function(value) {
