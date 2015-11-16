@@ -113,6 +113,10 @@
 .algorithm ul .node.if-node.cursor > table > tbody > tr > td.node-box {
   background-color: #b2e792;
 }
+.algorithm ul .node.if-node .if-condition,
+.algorithm ul .node.if-node .if-body {
+  padding-bottom: 1px;
+}
 .algorithm ul .node.inc-node > table > tbody > tr > td.node-box {
   background-color: #ffefe6;
 }
@@ -163,8 +167,14 @@
 .algorithm ul .node.while-node.cursor > table > tbody > tr > td.node-box {
   background-color: #b2e792;
 }
+.algorithm ul .node.while-node .while-condition {
+  padding-bottom: 1px;
+}
 #scopes-head {
   margin-bottom: 1em;
+}
+#scopes-proto {
+  display: none;
 }
 .algorithm .cursor > table > tbody > tr > .handle > .cursor-icon {
   display: table-cell;

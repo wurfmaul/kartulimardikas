@@ -113,6 +113,10 @@
 .algorithm ul .node.if-node.cursor > table > tbody > tr > td.node-box {
   background-color: #b2e792;
 }
+.algorithm ul .node.if-node .if-condition,
+.algorithm ul .node.if-node .if-body {
+  padding-bottom: 1px;
+}
 .algorithm ul .node.inc-node > table > tbody > tr > td.node-box {
   background-color: #ffefe6;
 }
@@ -162,6 +166,9 @@
 }
 .algorithm ul .node.while-node.cursor > table > tbody > tr > td.node-box {
   background-color: #b2e792;
+}
+.algorithm ul .node.while-node .while-condition {
+  padding-bottom: 1px;
 }
 #infoPanel .description-group {
   margin-bottom: 5px;

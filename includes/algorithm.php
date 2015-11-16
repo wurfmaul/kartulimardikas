@@ -14,9 +14,9 @@ class AssignNode extends Node
         $this->from = $from;
     }
 
-    public static function parse($node, $tree)
+    public static function parse($node, $tree, &$scopes)
     {
-        $from = isset($node->from) ? parent::parse($tree[$node->from], $tree) : null;
+        $from = isset($node->from) ? parent::parse($tree[$node->from], $tree, $scopes) : null;
         $to = isset($node->to) ? $node->to : null;
         return new self($node->nid, $to, $from);
     }
@@ -92,12 +92,12 @@ class BlockNode extends Node
         $this->nodes = $nodes;
     }
 
-    public static function parse($node, $tree)
+    public static function parse($node, $tree, &$scopes)
     {
         $nodes = array();
         if (isset($node->nodes)) {
             foreach ($node->nodes as $nid) {
-                $nodes[] = parent::parse($tree[$nid], $tree);
+                $nodes[] = parent::parse($tree[$nid], $tree, $scopes);
             }
         }
         return new self($node->nid, $nodes);
@@ -147,7 +147,7 @@ class CommentNode extends Node
         $this->comment = $comment;
     }
 
-    public static function parse($node, $tree)
+    public static function parse($node, $tree, &$scopes)
     {
         $comment = isset($node->comment) ? $node->comment : null;
         return new self($node->nid, $comment);
@@ -222,7 +222,7 @@ class CompareNode extends Node
         $this->op = $op;
     }
 
-    public static function parse($node, $tree)
+    public static function parse($node, $tree, &$scopes)
     {
         $left = isset($node->left) ? $node->left : null;
         $right = isset($node->right) ? $node->right : null;
@@ -324,11 +324,18 @@ class FunctionNode extends Node
         }
     }
 
-    public static function parse($node, $tree)
+    public static function parse($node, $tree, &$scopes)
     {
         $actParsLine = isset($node->paramsLine) ? $node->paramsLine : "";
-        $actPars = isset($node->params) ? parent::parse($tree[$node->params], $tree) : null;
-        $callee = isset($node->callee) ? $node->callee : -1;
+        $actPars = isset($node->params) ? parent::parse($tree[$node->params], $tree, $scopes) : null;
+        if (isset($node->callee)) {
+            $callee = $node->callee;
+            if (!isset($scopes[$callee])) {
+                $scopes[] = $callee;
+            }
+        } else {
+            $callee = -1;
+        }
         return new self($node->nid, $callee, $actParsLine, $actPars);
     }
 
@@ -430,11 +437,11 @@ class IfNode extends Node
         $this->op = $op;
     }
 
-    public static function parse($node, $tree)
+    public static function parse($node, $tree, &$scopes)
     {
-        $cond = isset($node->condition) ? parent::parse($tree[$node->condition], $tree) : null;
-        $body = isset($node->ifBody) ? parent::parse($tree[$node->ifBody], $tree) : null;
-        $else = isset($node->elseBody) ? parent::parse($tree[$node->elseBody], $tree) : null;
+        $cond = isset($node->condition) ? parent::parse($tree[$node->condition], $tree, $scopes) : null;
+        $body = isset($node->ifBody) ? parent::parse($tree[$node->ifBody], $tree, $scopes) : null;
+        $else = isset($node->elseBody) ? parent::parse($tree[$node->elseBody], $tree, $scopes) : null;
         $op = isset($node->op) ? $node->op : null;
         return new self($node->nid, $cond, $body, $else, $op);
     }
@@ -547,7 +554,7 @@ class IncNode extends Node
         $this->op = $op;
     }
 
-    public static function parse($node, $tree)
+    public static function parse($node, $tree, &$scopes)
     {
         $var = isset($node->var) ? $node->var : null;
         $op = isset($node->operator) ? $node->operator : null;
@@ -618,7 +625,7 @@ class ReturnNode extends Node
         $this->value = new Value($value);
     }
 
-    public static function parse($node, $tree)
+    public static function parse($node, $tree, &$scopes)
     {
         $value = isset($node->value) ? $node->value : null;
         return new self($node->nid, $value);
@@ -682,7 +689,7 @@ class SwapNode extends Node
         $this->right = new Value($right);
     }
 
-    public static function parse($node, $tree)
+    public static function parse($node, $tree, &$scopes)
     {
         $left = isset($node->left) ? $node->left : null;
         $right = isset($node->right) ? $node->right : null;
@@ -755,7 +762,7 @@ class ValueNode extends Node
         $this->value = new Value($value);
     }
 
-    public static function parse($node, $tree)
+    public static function parse($node, $tree, &$scopes)
     {
         $value = isset($node->value) ? $node->value : null;
         return new self($node->nid, $value);
@@ -826,10 +833,10 @@ class WhileNode extends Node
         $this->op = $op;
     }
 
-    public static function parse($node, $tree)
+    public static function parse($node, $tree, &$scopes)
     {
-        $condition = isset($node->condition) ? parent::parse($tree[$node->condition], $tree) : null;
-        $body = isset($node->body) ? parent::parse($tree[$node->body], $tree) : null;
+        $condition = isset($node->condition) ? parent::parse($tree[$node->condition], $tree, $scopes) : null;
+        $body = isset($node->body) ? parent::parse($tree[$node->body], $tree, $scopes) : null;
         $op = isset($node->op) ? $node->op : null;
         return new self($node->nid, $condition, $body, $op);
     }
@@ -939,10 +946,11 @@ abstract class Node
      *
      * @param stdClass $node
      * @param array $tree
+     * @param array $scopes
      * @return Node
      * @throws ParseError if node is unknown
      */
-    public static function parse($node, $tree)
+    public static function parse($node, $tree, &$scopes)
     {
         // unpack container of one node
         if (is_array($node) && sizeof($node) == 1) {
@@ -951,27 +959,27 @@ abstract class Node
         // parse node
         switch ($node->node) {
             case self::ASSIGN_NODE:
-                return AssignNode::parse($node, $tree);
+                return AssignNode::parse($node, $tree, $scopes);
             case self::BLOCK_NODE:
-                return BlockNode::parse($node, $tree);
+                return BlockNode::parse($node, $tree, $scopes);
             case self::COMMENT_NODE:
-                return CommentNode::parse($node, $tree);
+                return CommentNode::parse($node, $tree, $scopes);
             case self::COMPARE_NODE:
-                return CompareNode::parse($node, $tree);
+                return CompareNode::parse($node, $tree, $scopes);
             case self::FUNCTION_NODE:
-                return FunctionNode::parse($node, $tree);
+                return FunctionNode::parse($node, $tree, $scopes);
             case self::IF_NODE:
-                return IfNode::parse($node, $tree);
+                return IfNode::parse($node, $tree, $scopes);
             case self::INC_NODE:
-                return IncNode::parse($node, $tree);
+                return IncNode::parse($node, $tree, $scopes);
             case self::RETURN_NODE:
-                return ReturnNode::parse($node, $tree);
+                return ReturnNode::parse($node, $tree, $scopes);
             case self::SWAP_NODE:
-                return SwapNode::parse($node, $tree);
+                return SwapNode::parse($node, $tree, $scopes);
             case self::VALUE_NODE:
-                return ValueNode::parse($node, $tree);
+                return ValueNode::parse($node, $tree, $scopes);
             case self::WHILE_NODE:
-                return WhileNode::parse($node, $tree);
+                return WhileNode::parse($node, $tree, $scopes);
             default:
                 throw new ParseError("Unknown node: " . print_r($node, true));
         }
@@ -1081,17 +1089,23 @@ abstract class Node
 
 class Tree
 {
-    /** @var $node BlockNode */
+    /** @var int $aid */
+    private $aid;
+    /** @var BlockNode $root */
     private $root;
+    /** @var array $scopes */
+    private $scopes;
 
-    public function __construct($tree)
+    public function __construct($aid, $tree)
     {
+        $this->aid = $aid;
+        $this->scopes = [$aid];
         if (is_null($tree)) {
             // if the algorithm is new, generate a BlockNode as root
-            $rootNode = BlockNode::parse((object)['nid' => 0], $tree);
+            $rootNode = BlockNode::parse((object)['nid' => 0], $tree, $this->scopes);
         } else {
             // take the tree's last element otherwise
-            $rootNode = Node::parse(end($tree), $tree);
+            $rootNode = Node::parse(end($tree), $tree, $this->scopes);
         }
         $this->root = $rootNode;
     }
@@ -1099,6 +1113,11 @@ class Tree
     public function getRoot()
     {
         return $this->root->getNodeId();
+    }
+
+    public function getScopes()
+    {
+        return $this->scopes;
     }
 
     public function printHtml($params)
@@ -1227,4 +1246,12 @@ class TreeHelper
 
 class ParseError extends Exception
 {
+}
+
+class ScopeError extends Exception
+{
+    public function __construct($amount)
+    {
+        parent::__construct("Cannot load more than $amount of scopes!");
+    }
 }

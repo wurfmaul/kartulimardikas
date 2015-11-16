@@ -34,7 +34,7 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
 
     // prepare tree
     require_once BASEDIR . "includes/algorithm.php";
-    $tree = new Tree(json_decode($__algorithm->tree));
+    $tree = new Tree($__aid, json_decode($__algorithm->tree));
     ?>
     <!-- ERROR MESSAGE -->
     <div id="alert" class="alert alert-danger alert-dismissible" role="alert" style="display:none">
@@ -44,13 +44,13 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
     </div>
     <!-- ERROR MESSAGE END -->
 
-    <div id="scope-0" class="row">
+    <div id="scope-0" class="row scope">
         <!-- LEFT COLUMN -->
         <div class="col-md-6">
             <div class="panel-group">
                 <!-- TAB - GENERAL INFORMATION -->
                 <div class="panel panel-default">
-                    <div class="panel-heading" data-target="#infoPanel">
+                    <div class="panel-heading">
                         <h4 class="panel-title">
                             <span class="glyphicon glyphicon-chevron-down"></span>
                             <?= $l10n['general_info'] ?>
@@ -101,7 +101,7 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
 
                 <!-- TAB - VARIABLES -->
                 <div class="panel panel-default">
-                    <div class="panel-heading" data-target="#varPanel">
+                    <div class="panel-heading">
                         <h4 class="panel-title">
                             <span class="glyphicon glyphicon-chevron-down"></span>
                             <?= $l10n['variables'] ?>
@@ -249,7 +249,7 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
             <div class="panel-group">
                 <!-- TAB - STEPS -->
                 <div class="panel panel-default">
-                    <div class="panel-heading" data-target="#stepPanel">
+                    <div class="panel-heading">
                         <h4 class="panel-title">
                             <span class="glyphicon glyphicon-chevron-down"></span>
                             <?= $l10n['algorithm'] ?>
@@ -356,7 +356,7 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
     <script type="text/javascript">
         // hand default values over to js
         window.defaults = {
-            'section': "<?= SECTIONS_EDIT ?>"
+            'section': <?= SECTIONS_EDIT ?>
         };
         // hand translations over to js
         window.initializations = [

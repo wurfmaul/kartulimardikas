@@ -89,13 +89,14 @@ class Player
       if (@curScope.find('.stop-before').is(':checked')) then true
       else @step()
     else
+      tempo = @tempo
       @play() if @timer?
       @unsetCursor()
       @setControls([1, 0, 0, 0])
       # check for outer scopes
       if (@scope > 0)
         value = @curScope.find('.return-value').val()
-        window.players[@scope-1].returnFunction(@scope, value)
+        window.players[@scope-1].returnFunction(@scope, value, tempo)
       false
 
   finish: ->
@@ -124,20 +125,23 @@ class Player
     # show inner scope
     $('#scopes-head .scope-' + scope).tab('show')
 
-  returnFunction: (scope, value) ->
+  returnFunction: (scope, value, tempo) ->
     # switch back to outer scope
     $('#scopes-head .scope-' + @scope).tab('show')
     # remove other scope
     $('#scopes-head .scope-' + scope).parent().remove()
     $('#scope-' + scope).remove()
+    window.players[scope+1] = null
     # use returned value
     @curScope.find('.node_' + @curNode).data('return-value', value)
     # reactivate navigation in outer scope
     @setControls([1,1,1,1])
-    switch @tempo
+    switch tempo
       when 2 then @finish()
       when 1 then @play()
-      else @step()
+      else
+        @tempo = tempo
+        @step()
 
   changeSpeed: (value) ->
     @speed = value
@@ -318,9 +322,30 @@ toggleComment = (element) ->
     container.toggleClass('collapsed')
   )
 
+randomInt = () ->
+  Math.floor(Math.random() * (window.defaults.maxRandInt + 1))
+
+initRandomVariables = (scope) ->
+  scope.find('.variable.random').each(->
+    switch $(this).data('type')
+      when 'elem-int'
+        value = randomInt()
+        $(this).find('.value').text(value)
+        $(this).data('value', value)
+      when 'array-int'
+        values = []
+        $(this).find('.value-container').each(->
+          value = randomInt()
+          $(this).find('.value').text(value)
+          values.push(value)
+        )
+        $(this).data('value', values.join(','))
+  )
+
 init = (scope, tempo) ->
   # INITIALIZE SCOPE
   curScope = $('#scope-' + scope)
+  initRandomVariables(curScope)
   tree = new Tree(scope)
   player = new Player(tree, scope)
   window.players[scope] = player # add scope to list of scopes
@@ -371,7 +396,6 @@ init = (scope, tempo) ->
   ).blur(->
     $(this).hide().siblings('.value-container').show()
   )
-
   # continue execution
   switch tempo
     when 1 then player.play()

@@ -36,7 +36,28 @@ if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
     </ul>
     <div class="row">
         <div id="scopes-body" class="tab-content">
-            <div role="tabpanel" class="tab-pane active" id="scope-<?= $scope ?>"><?php require_once 'partials/show_algorithm.phtml' ?></div>
+            <?php
+            // provide current scope
+            $aid = $__aid;
+            $algorithm = $__algorithm;
+            $scopes = [];
+            ?>
+            <div role="tabpanel" class="tab-pane active scope" id="scope-<?= $scope ?>"><?php require('partials/show_algorithm.phtml') ?></div>
+        </div>
+        <div id="scopes-proto">
+            <?php
+            // provide scopes for function calls
+            $i = 0; $maxRecursion = 30;
+            $scopes[$aid] = false;
+            while ($aid = array_search(false, $scopes)):
+                if ($i++ >= $maxRecursion) {
+                    throw new ScopeError($maxRecursion);
+                }
+                $algorithm = $__model->fetchAlgorithm($aid);
+                $algorithm->tags = $__model->fetchTags($aid);
+            ?>
+            <div role="tabpanel" class="tab-pane scope" id="proto-scope-<?= $aid ?>"><?php require('partials/show_algorithm.phtml') ?></div>
+            <?php endwhile ?>
         </div>
     </div>
     <!-- CONTENT END -->
@@ -57,11 +78,12 @@ if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
 <script type="text/javascript">
     // hand default values, error codes and translations over to js
     window.defaults = {
-        'section': "<?= SECTIONS_VIEW ?>",
-        'maxSteps': "<?= MAX_STEPS ?>",
-        'speed': "<?= SPEED ?>",
+        'section': <?= SECTIONS_VIEW ?>,
+        'maxSteps': <?= MAX_STEPS ?>,
+        'speed': <?= SPEED ?>,
         'breaks': "<?= DEFAULT_BREAKPOINT ?>",
-        'shortCircuit': "<?= SHORT_CIRCUIT ?>"
+        'shortCircuit': <?= SHORT_CIRCUIT ?>,
+        'maxRandInt': <?= MAX_RANDOM_INT ?>
     };
     window.errorCodes = {
         <?php foreach ($l10n['runtime_errors'] as $key => $value): ?>

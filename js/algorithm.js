@@ -692,31 +692,14 @@
     };
 
     FunctionNode.prototype.callFunction = function(player, node) {
-      var head, newScope, params;
+      var head, newScope, params, scope;
       newScope = player.scope + 1;
+      scope = $('#proto-scope-' + this.callee).clone(true, true).attr('id', 'scope-' + newScope);
       head = $('<a/>').data('target', '#scope-' + newScope).addClass('scope-' + newScope);
       head.attr('aria-controls', 'scope-' + newScope).attr('role', 'tab').attr('data-toggle', 'tab');
-      head.append($('<i/>').addClass('fa fa-spinner fa-pulse'));
+      head.text(scope.find('.algorithm-name').text());
       $('#scopes-head').append($('<li/>').attr('role', 'presentation').append(head));
-      $('#scopes-body').append($('<div/>').attr('role', 'tabpanel').addClass('tab-pane').attr('id', 'scope-' + newScope));
-      $.ajax("api/scope.php", {
-        type: 'POST',
-        data: {
-          aid: this.callee,
-          scope: newScope,
-          lang: window.current.lang
-        },
-        dataType: 'json',
-        async: false
-      }).done(function(data) {
-        $('#scope-' + newScope).append(data['algorithm']);
-        return head.text(data['name']);
-      }).fail(function() {
-        $('#scope-' + newScope).remove();
-        head.parent().remove();
-        player.handleError(new ExecutionError('function_load', [name]));
-        return false;
-      });
+      $('#scopes-body').append(scope);
       params = this.paramsLine;
       return {
         scope: newScope,

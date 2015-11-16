@@ -40,6 +40,8 @@ define('MAX_STEPS', 1000);
 define('DEFAULT_BREAKPOINT', 'before');
 # Whether or not short circuit evaluation is enabled
 define('SHORT_CIRCUIT', true);
+# Maximum number that can be generated for random variables
+define('MAX_RANDOM_INT', 100);
 
 ##### LIST SETTINGS #####
 # Number of algorithms that are displayed in the home action

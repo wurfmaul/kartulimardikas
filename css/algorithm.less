@@ -105,6 +105,9 @@
       }
       &.if-node {
         .nodeStyle(@structure-color);
+        .if-condition, .if-body {
+          padding-bottom: 1px;
+        }
       }
       &.inc-node {
         .nodeStyle(@operations-color);
@@ -120,6 +123,9 @@
       }
       &.while-node {
         .nodeStyle(@structure-color);
+        .while-condition {
+          padding-bottom: 1px;
+        }
       }
     }
   }

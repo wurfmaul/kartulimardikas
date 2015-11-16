@@ -1,40 +1,45 @@
 <?php
 // prepare algorithm meta-data
-$name = $__algorithm->name;
-$description = $__algorithm->description;
-if ($long_description = $__algorithm->long_description) {
+$name = $algorithm->name;
+$description = $algorithm->description;
+if ($long_description = $algorithm->long_description) {
     require_once BASEDIR . 'includes/markdownHelper.php';
     $long_description = parseMarkdown($long_description);
 } else {
     $long_description = $l10n['no_description'];
 }
-$tags = $__algorithm->tags;
+$tags = $algorithm->tags;
 
 // prepare variables
-$vars = json_decode($__algorithm->variables, true);
+$vars = json_decode($algorithm->variables, true);
 
 // prepare parameters
 $params = (isset($_GET['p']) and is_array($_GET['p'])) ? $_GET['p'] : false;
 
 // prepare tree
 require_once BASEDIR . "includes/algorithm.php";
-$tree = new Tree(json_decode($__algorithm->tree));
+$tree = new Tree($aid, json_decode($algorithm->tree));
+
+// deal with inner scopes
+$scopes[$aid] = true;
+foreach ($tree->getScopes() as $innerScope) {
+    if (!isset($scopes[$innerScope])) {
+        $scopes[$innerScope] = false;
+    }
+}
 ?>
 <!-- LEFT COLUMN -->
 <div class="col-md-6">
-
-    <!-- ALGORITHM AREA -->
     <div class="panel-group">
-
         <!-- TAB - CONTROLS -->
         <div class="panel panel-default">
-            <div class="panel-heading" data-target="#s<?= $scope ?>-controls">
+            <div class="panel-heading">
                 <h4 class="panel-title">
                     <span class="glyphicon glyphicon-chevron-down"></span>
                     <?= $l10n['controls'] ?>
                 </h4>
             </div>
-            <div id="s<?= $scope ?>-controls" class="panel-collapse">
+            <div class="panel-collapse">
                 <div class="panel-body controls">
                     <div class="col-lg-5 col-md-6 col-sm-4">
                         <table>
@@ -101,13 +106,13 @@ $tree = new Tree(json_decode($__algorithm->tree));
 
         <!-- TAB - PSEUDOCODE -->
         <div class="panel panel-default">
-            <div class="panel-heading" data-target="#s<?= $scope ?>-pseudocode">
+            <div class="panel-heading">
                 <h4 class="panel-title">
                     <span class="glyphicon glyphicon-chevron-down"></span>
-                    <?= $name ? $name : $l10n['untitled_algorithm'] ?>
+                    <span class="algorithm-name"><?= $name ? $name : $l10n['untitled_algorithm'] ?></span>
                 </h4>
             </div>
-            <div id="s<?= $scope ?>-pseudocode" class="panel-collapse">
+            <div class="panel-collapse">
                 <div class="panel-body algorithm">
                     <?php if (is_null($__algorithm->tree)): ?>
                         <?= $l10n['no_algorithm'] ?>
@@ -122,13 +127,13 @@ $tree = new Tree(json_decode($__algorithm->tree));
 
         <!-- TAB - SOURCE CODE -->
         <div class="panel panel-default">
-            <div class="panel-heading" data-target="#s<?= $scope ?>-sourcecode">
+            <div class="panel-heading">
                 <h4 class="panel-title">
                     <span class="glyphicon glyphicon-chevron-down"></span>
                     <?= $l10n['source_code'] ?>
                 </h4>
             </div>
-            <div id="s<?= $scope ?>-sourcecode" class="panel-collapse">
+            <div class="panel-collapse">
                 <div class="panel-body source">
                     <?php if (is_null($__algorithm->tree)): ?>
                         <?= $l10n['no_algorithm'] ?>
@@ -147,13 +152,13 @@ $tree = new Tree(json_decode($__algorithm->tree));
     <div class="panel-group">
         <!-- TAB - DESCRIPTION -->
         <div class="panel panel-default">
-            <div class="panel-heading" data-target="#s<?= $scope ?>-description">
+            <div class="panel-heading">
                 <h4 class="panel-title">
                     <span class="glyphicon glyphicon-chevron-down"></span>
                     <?= $l10n['description'] ?>
                 </h4>
             </div>
-            <div id="s<?= $scope ?>-description" class="panel-collapse">
+            <div class="panel-collapse">
                 <div class="panel-body">
                     <?php if ($tags): ?>
                         <?php foreach ($tags as $tag): ?>
@@ -170,13 +175,13 @@ $tree = new Tree(json_decode($__algorithm->tree));
 
         <!-- TAB - MEMORY -->
         <div class="panel panel-default">
-            <div class="panel-heading" data-target="#s<?= $scope ?>-memory">
+            <div class="panel-heading">
                 <h4 class="panel-title">
                     <span class="glyphicon glyphicon-chevron-down"></span>
                     <?= $l10n['memory'] ?>
                 </h4>
             </div>
-            <div id="s<?= $scope ?>-memory" class="panel-collapse">
+            <div class="panel-collapse">
                 <div class="panel-body">
                     <?php if (sizeof($vars)): ?>
                         <table class="table table-hover table-bordered variables">
@@ -189,40 +194,34 @@ $tree = new Tree(json_decode($__algorithm->tree));
                             <tbody>
                             <?php foreach ($vars as $vid => $var):
                                 $var = (object) $var;
+                                $value = $var->value;
                                 switch ($var->type) {
                                     // compute int elements
                                     case 'elem-int':
-                                        if ($var->value === 'R') {
-                                            $value = rand(0, 100); // TODO: max-number or range definable
-                                        } elseif ($var->value === '?') {
-                                            $value = '?';
-                                        } elseif ($var->value === 'P') {
-                                            $value = $params ? $params[$var->name] : 'P';
-                                        } else {
-                                            $value = $var->value;
+                                        if ($var->value === 'P' && $params) {
+                                            $value = $params[$var->name];
                                         }
                                         break;
                                     // compute int arrays
                                     case 'array-int':
-                                        if ($var->value === 'R') {
+                                        if ($var->value === '?' || $var->value === 'R' || $var->value === 'P') {
                                             $newValue = array();
                                             for ($i = 0; $i < $var->size; $i++)
-                                                $newValue[] = rand(0, 100);
+                                                $newValue[] = $var->value;
                                             $value = implode(',', $newValue);
-                                        } elseif ($var->value === '?') {
-                                            $newValue = array();
-                                            for ($i = 0; $i < $var->size; $i++)
-                                                $newValue[] = '?';
-                                            $value = implode(',', $newValue);
-                                        } elseif ($var->value === 'P') {
-                                            $value = $params ? $params[$var->name] : 'P';
-                                        } else {
-                                            $value = $var->value;
+                                        } elseif ($var->value === 'P' && $params) {
+                                            $value = $params[$var->name];
                                         }
                                         break;
                                 }
+                                $class = '';
+                                if ($var->value === 'P') {
+                                    $class = ' parameter';
+                                } elseif ($var->value === 'R') {
+                                    $class = ' random';
+                                }
                                 ?>
-                                <tr class="variable var-<?= $vid ?><?php if ($var->value === 'P'): ?> parameter<?php endif ?>"
+                                <tr class="variable var-<?= $vid ?><?= $class ?>"
                                     data-vid="<?= $vid ?>"
                                     data-name="<?= $var->name ?>"
                                     data-value="<?= $value ?>"
@@ -262,13 +261,13 @@ $tree = new Tree(json_decode($__algorithm->tree));
 
         <!-- TAB - STATISTICS -->
         <div class="panel panel-default">
-            <div class="panel-heading" data-target="#s<?= $scope ?>-statistics">
+            <div class="panel-heading">
                 <h4 class="panel-title">
                     <span class="glyphicon glyphicon-chevron-down"></span>
                     <?= $l10n['statistics'] ?>
                 </h4>
             </div>
-            <div id="s<?= $scope ?>-statistics" class="panel-collapse">
+            <div class="panel-collapse">
                 <div class="panel-body">
                     <table class="table table-hover table-bordered statistics">
                         <thead>

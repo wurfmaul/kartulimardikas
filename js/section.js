@@ -30,11 +30,6 @@
           return function(url) {
             return window.history.pushState("", "", url);
           };
-        })(this),
-        error: (function(_this) {
-          return function(jqXHR, textStatus, errorThrown) {
-            return _this._printError("Request Error: " + errorThrown);
-          };
         })(this)
       });
     };
@@ -42,7 +37,8 @@
     Section.performToggle = function(element) {
       var sectionNumber;
       this.toggleSection(element, 'slow');
-      sectionNumber = this.panelsToSectionNumber();
+      sectionNumber = this.panelsToSectionNumber(element);
+      this.sectionNumberToPanels(sectionNumber);
       this.updateUrl({
         params: window.current.parameters,
         section: sectionNumber
@@ -52,12 +48,34 @@
 
 
     /*
+      Collapses a section
+     */
+
+    Section.hideSection = function(element, speed) {
+      element.find(".glyphicon").removeClass("glyphicon-chevron-down").addClass('glyphicon-chevron-right');
+      element.siblings('.panel-collapse').hide(speed);
+      return $(element).addClass('collapsed');
+    };
+
+
+    /*
+     Expands a section
+     */
+
+    Section.showSection = function(element, speed) {
+      element.find(".glyphicon").removeClass("glyphicon-chevron-right").addClass('glyphicon-chevron-down');
+      element.siblings('.panel-collapse').show(speed);
+      return $(element).removeClass('collapsed');
+    };
+
+
+    /*
       Collapses/Expands a section.
      */
 
     Section.toggleSection = function(element, speed) {
-      element.find("span").toggleClass("glyphicon-chevron-right glyphicon-chevron-down");
-      $(element.data("target")).toggle(speed);
+      element.find(".glyphicon").toggleClass("glyphicon-chevron-right glyphicon-chevron-down");
+      element.siblings('.panel-collapse').toggle(speed);
       return $(element).toggleClass('collapsed');
     };
 
@@ -66,11 +84,11 @@
       Computes a section number from expansion state of panels.
      */
 
-    Section.panelsToSectionNumber = function() {
+    Section.panelsToSectionNumber = function(element) {
       var counter, section;
       section = 0;
       counter = 1;
-      $('.panel-heading').each(function() {
+      element.closest('.scope').find('.panel-heading').each(function() {
         if (!$(this).hasClass('collapsed')) {
           section += counter;
         }
@@ -85,21 +103,25 @@
      */
 
     Section.sectionNumberToPanels = function(sectionNumber) {
-      var code, panel, panelNumber, panels, results;
-      panels = $('.panel-heading');
-      panelNumber = panels.length - 1;
-      results = [];
-      while (sectionNumber >= 0 && panelNumber >= 0) {
-        code = Math.pow(2, panelNumber);
-        if (sectionNumber >= code) {
-          sectionNumber -= code;
-        } else {
-          panel = $(panels[panelNumber]);
-          this.toggleSection(panel, 0);
+      return $('.scope').each(function() {
+        var code, panel, panelNumber, panels, results, sec;
+        panels = $(this).find('.panel-heading');
+        panelNumber = panels.length - 1;
+        sec = sectionNumber;
+        Section.showSection(panels, 0);
+        results = [];
+        while (sec >= 0 && panelNumber >= 0) {
+          code = Math.pow(2, panelNumber);
+          if (sec >= code) {
+            sec -= code;
+          } else {
+            panel = $(panels[panelNumber]);
+            Section.hideSection(panel, 0);
+          }
+          results.push(panelNumber--);
         }
-        results.push(panelNumber--);
-      }
-      return results;
+        return results;
+      });
     };
 
 
