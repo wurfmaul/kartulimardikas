@@ -28,18 +28,19 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
         $tags .= "$tag, ";
     }
 
+    require_once(BASEDIR . 'includes/algorithm.php');
+    require_once(BASEDIR . 'includes/varHelper.php');
     // prepare variables and add prototype row to variables
     $vars = json_decode($__algorithm->variables, true);
-    $vars['prototype'] = ['name' => '', 'type' => '', 'value' => '', 'size' => 2];
-
+    $vars['prototype'] = VarHelper::compress(['name' => '', 'type' => '', 'value' => '', 'size' => 2]);
     // prepare tree
-    require_once BASEDIR . "includes/algorithm.php";
     $tree = new Tree($__aid, json_decode($__algorithm->tree));
     ?>
     <!-- ERROR MESSAGE -->
     <div id="alert" class="alert alert-danger alert-dismissible" role="alert" style="display:none">
         <button type="button" class="close" data-dismiss="alert" aria-label="<?= $l10n['close'] ?>"><span aria-hidden="true">&times;</span></button>
         <strong><?= $l10n['error'] ?></strong>
+
         <div id="alertText"></div>
     </div>
     <!-- ERROR MESSAGE END -->
@@ -112,41 +113,47 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                             <table class="table table-condensed table-bordered table-hover variables">
                                 <tbody id="insertVarsHere">
                                 <?php foreach ($vars as $vid => $var):
-                                    $var = (object) $var;
+                                    $var = VarHelper::uncompress($var);
                                     $rowVisible = ($vid === 'prototype') ? 'style="display:none"' : '';
                                     $viewMode = $editMode = null;
                                     $viewLabel = $var->name;
-                                    switch($var->type) {
-                                        case "elem-int":
-                                            if ($var->value === 'R') {
-                                                $viewMode = $l10n['var_randomized'];
-                                                $editMode = $l10n['random'];
-                                            } elseif ($var->value === '?') {
-                                                $viewMode = $l10n['var_uninitialized'];
-                                                $editMode = $l10n['uninitialized'];
-                                            } elseif ($var->value === 'P') {
-                                                $viewMode = $l10n['var_parameter'];
-                                                $editMode = $l10n['parameter'];
-                                            } else {
-                                                $viewLabel = sprintf($l10n['var_defined'], $var->name, $var->value);
-                                                $editMode = $var->value;
-                                            }
-                                            break;
-                                        case "array-int":
-                                            if ($var->value === 'R') {
+
+                                    if ($var->type === VarHelper::ARRAY_TYPE) {
+                                        switch ($var->value) {
+                                            case 'R': // random
                                                 $viewMode = $l10n['array_randomized'];
                                                 $editMode = $l10n['random'];
-                                            } elseif ($var->value === '?') {
+                                                break;
+                                            case '?': // uninitialized
                                                 $viewMode = $l10n['array_uninitialized'];
                                                 $editMode = $l10n['uninitialized'];
-                                            } elseif ($var->value === 'P') {
+                                                break;
+                                            case 'P': // parameter
                                                 $viewMode = $l10n['var_parameter'];
                                                 $editMode = $l10n['parameter'];
-                                            } else {
+                                                break;
+                                            default:
                                                 $viewLabel = sprintf($l10n['var_defined'], $var->name, $var->value);
                                                 $editMode = $var->value;
-                                            }
-                                            break;
+                                        }
+                                    } else {
+                                        switch ($var->value) {
+                                            case 'R': // random
+                                                $viewMode = $l10n['var_randomized'];
+                                                $editMode = $l10n['random'];
+                                                break;
+                                            case '?': // uninitialized
+                                                $viewMode = $l10n['var_uninitialized'];
+                                                $editMode = $l10n['uninitialized'];
+                                                break;
+                                            case 'P': // parameter
+                                                $viewMode = $l10n['var_parameter'];
+                                                $editMode = $l10n['parameter'];
+                                                break;
+                                            default:
+                                                $viewLabel = sprintf($l10n['var_defined'], $var->name, $var->value);
+                                                $editMode = $var->value;
+                                        }
                                     }
                                     ?>
                                     <tr id="var-<?= $vid ?>" class="varRow" <?= $rowVisible ?>
@@ -193,12 +200,14 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                                                 <label class="sr-only"><?= $l10n['data_type'] ?></label>
                                                 <select class="form-control input-sm type">
                                                     <optgroup label="<?= $l10n['element'] ?>">
-                                                        <option value="elem-int" <?php if ($var->type === 'elem-int'): ?>selected="selected"<?php endif ?>>
+                                                        <?php $type = VarHelper::INT_TYPE ?>
+                                                        <option value="<?= $type ?>" <?php if ($var->type === $type): ?>selected="selected"<?php endif ?>>
                                                             <?= $l10n['int'] ?>
                                                         </option>
                                                     </optgroup>
                                                     <optgroup label="<?= $l10n['array'] ?>">
-                                                        <option value="array-int" data-target=".size" <?php if ($var->type === 'array-int'): ?>selected="selected"<?php endif ?>>
+                                                        <?php $type = VarHelper::ARRAY_TYPE . VarHelper::INT_TYPE ?>
+                                                        <option value="<?= $type ?>" data-target=".size" <?php if ($var->type === $type): ?>selected="selected"<?php endif ?>>
                                                             <?= $l10n['array_int'] ?>
                                                         </option>
                                                     </optgroup>

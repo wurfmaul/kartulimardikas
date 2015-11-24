@@ -28,8 +28,8 @@ class AlgorithmAPI extends AbstractAPI
 
 class EditAlgorithmManager
 {
-    const INT_TYPE = 'elem-int';
-    const INT_ARRAY_TYPE = 'array-int';
+    const INT_TYPE = 'i';
+    const INT_ARRAY_TYPE = '[i';
 
     private $_uid;
     private $_aid;
@@ -138,6 +138,7 @@ class EditAlgorithmManager
         if (!isset($_POST['vid'], $_POST['name'], $_POST['type'], $_POST['value'], $_POST['size']))
             die("Post parameters not set properly!");
 
+        require_once(BASEDIR . 'includes/varHelper.php');
         $vid = trim($_POST['vid']);
         $name = trim($_POST['name']);
         $type = trim($_POST['type']);
@@ -155,7 +156,7 @@ class EditAlgorithmManager
             $name = false;
         } elseif (!empty($vars)) { // check for name duplicate
             foreach ($vars as $curVid => $curVar) {
-                if ($curVar['name'] === $name && $curVid != $vid) {
+                if ($curVar[VarHelper::KEY_NAME] === $name && $curVid != $vid) {
                     $this->_response['error-name'] = $this->_l10n['same_name'] . BR;
                     $name = false;
                     break;
@@ -233,16 +234,14 @@ class EditAlgorithmManager
 
         // if every field has been filled:
         if ($type && $name && isset($value) && $size) {
-            $vars[$vid] = array(
+            $vars[$vid] = VarHelper::compress([
                 'name' => $name,
                 'type' => $type,
                 'value' => $value,
                 'size' => $size
-            );
-
+            ]);
             // save changes to database
             $this->_model->updateAlgorithmVariables($this->_aid, json_encode($vars, JSON_FORCE_OBJECT));
-
             // generate final response
             $this->_response['success'] = $this->_l10n['saved_to_db'];
         }

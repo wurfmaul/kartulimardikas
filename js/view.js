@@ -109,6 +109,9 @@
         if (this.scope > 0) {
           value = this.curScope.find('.return-value').val();
           window.players[this.scope - 1].returnFunction(this.scope, value, tempo);
+        } else {
+          window.stopBench = Date.now();
+          console.log('Benchmark: ' + (window.stopBench - window.startBench) + ' milliseconds');
         }
         return false;
       }
@@ -409,11 +412,11 @@
     return scope.find('.variable.random').each(function() {
       var value, values;
       switch ($(this).data('type')) {
-        case 'elem-int':
+        case 'i':
           value = randomInt();
           $(this).find('.value').text(value);
           return $(this).data('value', value);
-        case 'array-int':
+        case '[i':
           values = [];
           $(this).find('.value-container').each(function() {
             value = randomInt();

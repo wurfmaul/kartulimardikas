@@ -97,6 +97,9 @@ class Player
       if (@scope > 0)
         value = @curScope.find('.return-value').val()
         window.players[@scope-1].returnFunction(@scope, value, tempo)
+      else
+        window.stopBench = Date.now()
+        console.log('Benchmark: ' + (window.stopBench - window.startBench) + ' milliseconds')
       false
 
   finish: ->
@@ -328,11 +331,11 @@ randomInt = () ->
 initRandomVariables = (scope) ->
   scope.find('.variable.random').each(->
     switch $(this).data('type')
-      when 'elem-int'
+      when 'i' # integer elements
         value = randomInt()
         $(this).find('.value').text(value)
         $(this).data('value', value)
-      when 'array-int'
+      when '[i' # integer arrays
         values = []
         $(this).find('.value-container').each(->
           value = randomInt()

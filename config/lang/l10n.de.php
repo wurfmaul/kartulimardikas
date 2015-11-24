@@ -156,6 +156,7 @@ $l10n['assign_node_title'] = "Zuweisung";
 $l10n['comment_node_title'] = "Kommentar";
 $l10n['compare_node_title'] = "Vergleich";
 $l10n['compare_node_operation'] = "Operation";
+$l10n['function_node_title'] = "Funktion";
 $l10n['return_node_title'] = "Rückgabe";
 $l10n['if_node_title'] = "Wenn";
 $l10n['if_node_then'] = "dann";

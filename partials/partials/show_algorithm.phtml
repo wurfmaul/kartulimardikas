@@ -10,14 +10,13 @@ if ($long_description = $algorithm->long_description) {
 }
 $tags = $algorithm->tags;
 
+require_once BASEDIR . "includes/varHelper.php";
+require_once BASEDIR . "includes/algorithm.php";
 // prepare variables
 $vars = json_decode($algorithm->variables, true);
-
 // prepare parameters
 $params = (isset($_GET['p']) and is_array($_GET['p'])) ? $_GET['p'] : false;
-
 // prepare tree
-require_once BASEDIR . "includes/algorithm.php";
 $tree = new Tree($aid, json_decode($algorithm->tree));
 
 // deal with inner scopes
@@ -193,27 +192,27 @@ foreach ($tree->getScopes() as $innerScope) {
                             </thead>
                             <tbody>
                             <?php foreach ($vars as $vid => $var):
-                                $var = (object) $var;
+                                // un-compress variables
+                                $var = VarHelper::uncompress($var);
+
+                                // process variables
                                 $value = $var->value;
-                                switch ($var->type) {
-                                    // compute int elements
-                                    case 'elem-int':
-                                        if ($var->value === 'P' && $params) {
-                                            $value = $params[$var->name];
-                                        }
-                                        break;
-                                    // compute int arrays
-                                    case 'array-int':
-                                        if ($var->value === '?' || $var->value === 'R' || $var->value === 'P') {
-                                            $newValue = array();
-                                            for ($i = 0; $i < $var->size; $i++)
-                                                $newValue[] = $var->value;
-                                            $value = implode(',', $newValue);
-                                        } elseif ($var->value === 'P' && $params) {
-                                            $value = $params[$var->name];
-                                        }
-                                        break;
+                                if ($var->type{0} === VarHelper::ARRAY_TYPE) {
+                                    if ($var->value === 'P' && $params) {
+                                        $value = $params[$var->name];
+                                    } elseif ($var->value === '?' || $var->value === 'R' || $var->value === 'P') {
+                                        $newValue = array();
+                                        for ($i = 0; $i < $var->size; $i++)
+                                            $newValue[] = $var->value;
+                                        $value = implode(',', $newValue);
+                                    }
+                                } else {
+                                    if ($var->value === 'P' && $params) {
+                                        $value = $params[$var->name];
+                                    }
                                 }
+
+                                // prepare dynamic generation
                                 $class = '';
                                 if ($var->value === 'P') {
                                     $class = ' parameter';
@@ -230,7 +229,7 @@ foreach ($tree->getScopes() as $innerScope) {
                                         <code class="name"><?= $var->name ?></code>
                                     </td>
                                     <td class="var-value">
-                                        <?php if (substr($var->type, 0, 6) === "array-"): // deal with "array-{int}" ?>
+                                        <?php if ($var->type{0} === VarHelper::ARRAY_TYPE): // deal with arrays ?>
                                             <?php foreach (explode(',', $value) as $offset => $val): ?>
                                                 <button class="btn btn-default value-container offset_<?= $offset ?>" data-offset="<?= $offset ?>">
                                                     <span class="value"><?= $val ?></span>
@@ -239,7 +238,7 @@ foreach ($tree->getScopes() as $innerScope) {
                                                 </button>
                                                 <input class="btn btn-default value-edit offset_<?= $offset ?>" data-offset="<?= $offset ?>"/>
                                             <?php endforeach ?>
-                                        <?php else: // deal with "elem-{?,value}" ?>
+                                        <?php else: // deal with elements ?>
                                             <button class="btn btn-default value-container">
                                                 <span class="value"><?= $value ?></span>
                                                 <span class="glyphicon glyphicon-pencil write"></span>

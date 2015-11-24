@@ -1148,8 +1148,6 @@ class Value
     const PROP_KIND = "prop";
     const COMP_KIND = "comp";
 
-    const INT_TYPE = "int";
-
     const LEN_PROP = "length";
 
     /** @var string One of *_KIND. Used by constants. */
@@ -1171,6 +1169,7 @@ class Value
 
     public function __construct($value)
     {
+        require_once(BASEDIR . 'includes/varHelper.php');
         if (isset($value->kind)) $this->kind = $value->kind;
         if (isset($value->type)) $this->type = $value->type;
         if (isset($value->value)) $this->value = $value->value;
@@ -1193,16 +1192,16 @@ class Value
                 return $this->value;
             case self::INDEX_KIND:
                 return sprintf("%s[%s]",
-                    $vars[$this->vid]['name'],
+                    $vars[$this->vid][VarHelper::KEY_NAME],
                     $this->index->parse($params)
                 );
             case self::PROP_KIND:
                 return sprintf("%s.%s",
-                    $vars[$this->vid]['name'],
+                    $vars[$this->vid][VarHelper::KEY_NAME],
                     $this->prop
                 );
             case self::VAR_KIND:
-                return $vars[$this->vid]['name'];
+                return $vars[$this->vid][VarHelper::KEY_NAME];
             case self::COMP_KIND:
                 $left = $this->left->parse($params);
                 $right = $this->right->parse($params);
