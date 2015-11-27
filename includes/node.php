@@ -654,6 +654,8 @@ class IfNode extends Node
         $thenNid = isset($this->then) ? $this->then->nodeId : null;
         $elseNid = isset($this->else) ? $this->else->nodeId : null;
         $selected_op = $this->isPrototype ? 'all' : $this->op;
+
+        $showElse = $params['mode'] === 'edit' || $this->else->size();
         ?>
         <!-- IF NODE -->
         <li class="node if-node node_<?= $this->nodeId ?>" data-node-type="if" data-node-id="<?= $this->nodeId ?>">
@@ -701,13 +703,14 @@ class IfNode extends Node
                     <td class="node-box top right bottom half-width"><?= TreeHelper::l10n('if_node_then') ?></td>
                 </tr>
                 <tr>
-                    <td class="handle node-box right left">&nbsp;</td>
+                    <td class="handle node-box right left<?php if (!$showElse): ?> bottom<?php endif ?>">&nbsp;</td>
                     <td>
                         <ul class="if-body sortable" data-node-id="<?= $thenNid ?>">
                             <?php self::printNode($this->then, $params) ?>
                         </ul>
                     </td>
                 </tr>
+                <?php if ($showElse): ?>
                 <tr>
                     <td class="handle node-box left">&nbsp;</td>
                     <td class="node-box top right bottom half-width"><?= TreeHelper::l10n('if_node_else') ?></td>
@@ -720,6 +723,7 @@ class IfNode extends Node
                         </ul>
                     </td>
                 </tr>
+                <?php endif ?>
             </table>
         </li>
     <?php }
