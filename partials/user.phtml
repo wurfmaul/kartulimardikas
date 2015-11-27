@@ -9,7 +9,7 @@ if (isset($_GET['name'])) {
     die();
 }
 
-require_once BASEDIR . "includes/viewHelper.php";
+require_once BASEDIR . "includes/helper/viewHelper.php";
 // if a user id is specified, load user by uid
 if (isset($_GET['uid'])) {
     $user = $__model->fetchUser($_GET['uid']);

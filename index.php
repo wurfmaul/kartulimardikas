@@ -1,19 +1,15 @@
 <?php
 // setup environment
 define('BASEDIR', __DIR__ . '/');
-define('EMBEDDED', isset($_GET['embedded']) && $_GET['embedded']);
-
-require_once BASEDIR . 'includes/authentication.php';
-if (!EMBEDDED) {
-    // deal with authentication
-    secure_session_start();
-}
+require_once(BASEDIR . 'includes/authentication.php');
+// deal with authentication
+secure_session_start();
 
 // load configuration, helpers
-require_once BASEDIR . 'includes/settings.php';
-require_once BASEDIR . 'includes/dataModel.php';
-require_once BASEDIR . 'includes/urlHelper.php';
-require_once BASEDIR . 'includes/browserchecker.php';
+require_once(BASEDIR . 'includes/settings.php');
+require_once(BASEDIR . 'includes/dataModel.php');
+require_once(BASEDIR . 'includes/helper/urlHelper.php');
+require_once(BASEDIR . 'includes/helper/browserHelper.php');
 
 global $l10n;
 $__model = new DataModel();
@@ -24,24 +20,22 @@ if (!file_exists(BASEDIR . "partials/$__action.phtml"))
     $__action = DEFAULT_PAGE;
 define('ACTION', $__action);
 
-if (!EMBEDDED) {
-    // SIGN IN
-    if ((isset($_POST['signInBtn']) || isset($_POST['registerBtn'])) && isset($_POST['username'], $_POST['password'])) {
-        $username = $_POST['username'];
-        if (signIn($username, $_POST['password'])) {
-            $successMsg = sprintf($l10n['signed_in'], $username);
-            // if the user has just been created
-            if (isset($_POST['registerBtn'])) {
-                $registerMsg = sprintf($l10n['user_created'], $username);
-            }
-        } else {
-            $errorMsg = $l10n['credentials_invalid'];
+// SIGN IN
+if ((isset($_POST['signInBtn']) || isset($_POST['registerBtn'])) && isset($_POST['username'], $_POST['password'])) {
+    $username = $_POST['username'];
+    if (signIn($username, $_POST['password'])) {
+        $successMsg = sprintf($l10n['signed_in'], $username);
+        // if the user has just been created
+        if (isset($_POST['registerBtn'])) {
+            $registerMsg = sprintf($l10n['user_created'], $username);
         }
-    // SIGN OUT
-    } elseif (isset($_POST['signOutBtn'])) {
-        signOut();
-        $successMsg = $l10n['signed_out'];
+    } else {
+        $errorMsg = $l10n['credentials_invalid'];
     }
+// SIGN OUT
+} elseif (isset($_POST['signOutBtn'])) {
+    signOut();
+    $successMsg = $l10n['signed_out'];
 }
 
 /**
@@ -114,8 +108,8 @@ if ($__algorithm) {
             <link href="css/<?= ACTION ?>.css" rel="stylesheet"/>
         <?php endif ?>
     <?php elseif (file_exists('css/' . ACTION . '.min.css')): // !DEBUG_MODE: ?>
-        <link href="css/<?= ACTION ?>.min.css" rel="stylesheet"/>
-    <?php endif ?>
+        <link href="css/gen/<?= ACTION ?>.min.css" rel="stylesheet"/>
+    <?php endif // DEBUG_MODE ?>
 
     <?php if (ACTION === 'edit' || ACTION === 'view'): ?>
         <link href="<?= JQUERYUI_CSS_PATH ?>" rel="stylesheet"/>
@@ -232,7 +226,7 @@ if ($__algorithm) {
                 </ul>
             </div>
         </noscript>
-        <?php if (($_browser = BrowserChecker::isUnsupported())): ?>
+        <?php if (($_browser = BrowserHelper::isUnsupported())): ?>
             <!-- MESSAGE BOX FOR UNSUPPORTED BROWSER -->
             <div class="alert alert-danger alert-dismissible" role="alert">
                 <button type="button" class="close" aria-label="<?= $l10n['close'] ?>"><span aria-hidden="true">&times;</span></button>
@@ -267,7 +261,7 @@ if ($__algorithm) {
         <?php endif ?>
 
         <!-- PAGE CONTENT BEGIN -->
-        <?php require_once BASEDIR . 'partials/' . ACTION . '.phtml' ?>
+        <?php require_once(BASEDIR . 'partials/' . ACTION . '.phtml') ?>
         <!-- PAGE CONTENT END -->
 
         <div class="footer-placeholder"></div>
@@ -326,7 +320,10 @@ if ($__algorithm) {
 <?php if (ACTION === 'edit' || ACTION === 'view'): ?>
     <script type="text/javascript" src="js/section.js"></script>
     <script type="text/javascript" src="js/autocomplete.js"></script>
-    <script type="text/javascript" src="js/algorithm.js"></script>
+    <script type="text/javascript" src="js/value.js"></script>
+    <script type="text/javascript" src="js/node.js"></script>
+    <script type="text/javascript" src="js/memory.js"></script>
+    <script type="text/javascript" src="js/tree.js"></script>
 <?php elseif (ACTION === 'admin' || ACTION === 'index'): ?>
     <script type="text/javascript" src="js/table.js"></script>
 <?php endif ?>
@@ -334,8 +331,8 @@ if ($__algorithm) {
     <script type="text/javascript" src="js/<?= ACTION ?>.js"></script>
 <?php endif ?>
 <?php elseif (file_exists('js/' . ACTION . '.min.js')): // !DEBUG_MODE: ?>
-    <script type="text/javascript" src="js/<?= ACTION ?>.min.js"></script>
-<?php endif ?>
+    <script type="text/javascript" src="js/gen/<?= ACTION ?>.min.js"></script>
+<?php endif  // DEBUG_MODE ?>
 <!-- SCRIPTS END -->
 
 </body>

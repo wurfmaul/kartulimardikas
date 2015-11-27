@@ -8,7 +8,7 @@ error_reporting(DEBUG_MODE ? E_ALL : E_ERROR);
 
 ##### LOAD USER-INTERFACE LANGUAGE #####
 require_once BASEDIR . 'includes/language.php';
-require_once BASEDIR . 'includes/settingsHelper.php';
+require_once BASEDIR . 'includes/helper/languageHelper.php';
 $langHandler = Language::getInstance();
 $langHandler->availableLanguages = $AVAILABLE_LANG;
 $lang = $langHandler->loadLanguage(detectLanguage());

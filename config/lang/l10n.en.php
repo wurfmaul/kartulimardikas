@@ -213,6 +213,7 @@ $l10n['runtime_errors'] = [
 $l10n['edit'] = "Edit";
 $l10n['edit_algo'] = "Edit algorithm";
 $l10n['saved_to_db'] = "Successfully saved to database!";
+$l10n['data_type'] = "Data type";
 $l10n['need_to_be_owner'] = "You need to be the owner in order to change this algorithm!";
 $l10n['edit_not_signed_in'] = "You have to be signed in to publish an algorithm!";
 $l10n['general_info'] = "General Information";

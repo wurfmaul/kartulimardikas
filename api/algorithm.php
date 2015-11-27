@@ -138,7 +138,7 @@ class EditAlgorithmManager
         if (!isset($_POST['vid'], $_POST['name'], $_POST['type'], $_POST['value'], $_POST['size']))
             die("Post parameters not set properly!");
 
-        require_once(BASEDIR . 'includes/varHelper.php');
+        require_once(BASEDIR . 'includes/value.php');
         $vid = trim($_POST['vid']);
         $name = trim($_POST['name']);
         $type = trim($_POST['type']);
@@ -156,7 +156,7 @@ class EditAlgorithmManager
             $name = false;
         } elseif (!empty($vars)) { // check for name duplicate
             foreach ($vars as $curVid => $curVar) {
-                if ($curVar[VarHelper::KEY_NAME] === $name && $curVid != $vid) {
+                if ($curVar[VarValue::KEY_NAME] === $name && $curVid != $vid) {
                     $this->_response['error-name'] = $this->_l10n['same_name'] . BR;
                     $name = false;
                     break;
@@ -234,7 +234,7 @@ class EditAlgorithmManager
 
         // if every field has been filled:
         if ($type && $name && isset($value) && $size) {
-            $vars[$vid] = VarHelper::compress([
+            $vars[$vid] = VarValue::compress([
                 'name' => $name,
                 'type' => $type,
                 'value' => $value,

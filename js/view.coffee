@@ -97,9 +97,6 @@ class Player
       if (@scope > 0)
         value = @curScope.find('.return-value').val()
         window.players[@scope-1].returnFunction(@scope, value, tempo)
-      else
-        window.stopBench = Date.now()
-        console.log('Benchmark: ' + (window.stopBench - window.startBench) + ' milliseconds')
       false
 
   finish: ->

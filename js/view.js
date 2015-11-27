@@ -109,9 +109,6 @@
         if (this.scope > 0) {
           value = this.curScope.find('.return-value').val();
           window.players[this.scope - 1].returnFunction(this.scope, value, tempo);
-        } else {
-          window.stopBench = Date.now();
-          console.log('Benchmark: ' + (window.stopBench - window.startBench) + ' milliseconds');
         }
         return false;
       }

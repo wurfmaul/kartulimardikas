@@ -1,8 +1,193 @@
 <?php
+require_once(BASEDIR . 'includes/helper/treeHelper.php');
+require_once(BASEDIR . 'includes/value.php');
+
+/**
+ * Superclass of all Nodes.
+ */
+abstract class Node
+{
+    const ASSIGN_NODE = "as";
+    const BLOCK_NODE = "bk";
+    const COMMENT_NODE = "cm";
+    const COMPARE_NODE = "cp";
+    const FUNCTION_NODE = "ft";
+    const IF_NODE = "if";
+    const INC_NODE = "ic";
+    const RETURN_NODE = "rt";
+    const SWAP_NODE = "sw";
+    const VALUE_NODE = "vl";
+    const WHILE_NODE = "wl";
+
+    const NAME_KEY = "n";
+
+    /** @var int */
+    protected $nodeId;
+    /** @var bool */
+    protected $isPrototype = false;
+
+    /**
+     * Basically transforms stdClasses (e.g. from a JSON object) to valid Nodes.
+     * Calls the parse function of a subclass according to the node's type. Subclasses
+     * override this function in order to provide the concrete parsing functionality.
+     *
+     * @param stdClass $node
+     * @param array $tree
+     * @param array $scopes
+     * @return Node
+     * @throws ParseError if node is unknown
+     */
+    public static function parse($node, $tree, &$scopes)
+    {
+        // unpack container of one node
+        if (is_array($node) && sizeof($node) == 1) {
+            $node = $node[0];
+        }
+        // parse node
+        switch ($node->{self::NAME_KEY}) {
+            case self::ASSIGN_NODE:
+                return AssignNode::parse($node, $tree, $scopes);
+            case self::BLOCK_NODE:
+                return BlockNode::parse($node, $tree, $scopes);
+            case self::COMMENT_NODE:
+                return CommentNode::parse($node, $tree, $scopes);
+            case self::COMPARE_NODE:
+                return CompareNode::parse($node, $tree, $scopes);
+            case self::FUNCTION_NODE:
+                return FunctionNode::parse($node, $tree, $scopes);
+            case self::IF_NODE:
+                return IfNode::parse($node, $tree, $scopes);
+            case self::INC_NODE:
+                return IncNode::parse($node, $tree, $scopes);
+            case self::RETURN_NODE:
+                return ReturnNode::parse($node, $tree, $scopes);
+            case self::SWAP_NODE:
+                return SwapNode::parse($node, $tree, $scopes);
+            case self::VALUE_NODE:
+                return ValueNode::parse($node, $tree, $scopes);
+            case self::WHILE_NODE:
+                return WhileNode::parse($node, $tree, $scopes);
+            default:
+                throw new ParseError("Unknown node: " . print_r($node, true));
+        }
+    }
+
+    /**
+     * Calls the printHtml method of the Node $node, if it's not null and not a prototype.
+     *
+     * @param $node Node|array
+     * @param $params array
+     * @return bool True if printHtml method was called.
+     */
+    public static final function printNode($node, &$params)
+    {
+        // unpack container of one node
+        if (!($node instanceof Node) && sizeof($node) == 1) {
+            $node = $node[0];
+        }
+        // don't handle prototypes and empty nodes
+        if (is_null($node) || $node->isPrototype)
+            return false;
+        // call printHtml() for valid nodes
+        $node->printHtml($params);
+        return true;
+    }
+
+    /**
+     * Prints HTML code which represents the node.
+     *
+     * @param $params array
+     */
+    public abstract function printHtml(&$params);
+
+    /**
+     * Print the HTML code for the nodes' prototypes.
+     *
+     * @param string $type The node type the prototype should be generated for.
+     * @param array $params Parameters that are needed for the prototype.
+     * @throws Exception If no node can be found for the specified type.
+     */
+    public static final function printPrototype($type, $params)
+    {
+        /** @var $node Node */
+        $node = null;
+        switch ($type) {
+            case self::ASSIGN_NODE:
+                $node = new AssignNode('assign', null, null);
+                break;
+            case self::COMMENT_NODE:
+                $node = new CommentNode('comment', null);
+                break;
+            case self::COMPARE_NODE:
+                $node = new CompareNode('compare', null, null, null);
+                break;
+            case self::FUNCTION_NODE:
+                $node = new FunctionNode('function', null, null, null);
+                break;
+            case self::IF_NODE:
+                $node = new IfNode('if', null, null, null, null);
+                break;
+            case self::INC_NODE:
+                $node = new IncNode('inc', null, null);
+                break;
+            case self::RETURN_NODE:
+                $node = new ReturnNode('return', null);
+                break;
+            case self::SWAP_NODE:
+                $node = new SwapNode('swap', null, null, null);
+                break;
+            case self::VALUE_NODE:
+                $node = new ValueNode('value', null);
+                break;
+            case self::WHILE_NODE:
+                $node = new WhileNode('while', null, null, null);
+                break;
+            default:
+                throw new Exception("No prototype prepared for '$type'.");
+        }
+        $node->isPrototype = true;
+        $node->printHtml($params);
+    }
+
+    public function getNodeId()
+    {
+        return $this->nodeId;
+    }
+
+    /**
+     * Returns the source code representation of the node.
+     *
+     * @param array $params
+     * @return string
+     */
+    public abstract function getSource($params);
+
+    /**
+     * Returns the string representation of a variable.
+     *
+     * @param Value $var
+     * @param array $params
+     * @return string
+     */
+    public final function printVar($var, $params) {
+        return is_null($var) ? '' : $var->printVal($params);
+    }
+
+    /**
+     * Wraps a source code line in surrounding HTML tag.
+     *
+     * @param string $line The plain source code line of the Node.
+     * @return string HTML code of wrapped source code line.
+     */
+    public final function wrapLine($line)
+    {
+        return "<span class=\"source-node-$this->nodeId\">$line</span>";
+    }
+}
 
 class AssignNode extends Node
 {
-    /** @var Value */
+    /** @var Value|null */
     protected $to;
     /** @var BlockNode */
     protected $from;
@@ -10,22 +195,23 @@ class AssignNode extends Node
     public function __construct($nid, $to, $from)
     {
         $this->nodeId = $nid;
-        $this->to = new Value($to);
+        $this->to = $to;
         $this->from = $from;
     }
 
     public static function parse($node, $tree, &$scopes)
     {
-        $from = isset($node->from) ? parent::parse($tree[$node->from], $tree, $scopes) : null;
-        $to = isset($node->to) ? $node->to : null;
-        return new self($node->nid, $to, $from);
+        $nid = $node->i;
+        $from = isset($node->f) ? parent::parse($tree[$node->f], $tree, $scopes) : null;
+        $to = isset($node->t) ? Value::parse($node->t) : null;
+        return new self($nid, $to, $from);
     }
 
     public function getSource($params)
     {
         return $this->wrapLine(
             sprintf("%s := %s",
-                $this->to->parse($params),
+                $this->printVar($this->to, $params),
                 trim($this->from->getSource($params))
             )
         );
@@ -33,7 +219,7 @@ class AssignNode extends Node
 
     public function printHtml(&$params)
     {
-        $toValue = $this->to->parse($params);
+        $toValue = $this->printVar($this->to, $params);
         $fromNid = isset($this->from) ? $this->from->nodeId : null;
         ?>
         <!-- ASSIGN NODE -->
@@ -94,13 +280,14 @@ class BlockNode extends Node
 
     public static function parse($node, $tree, &$scopes)
     {
-        $nodes = array();
-        if (isset($node->nodes)) {
-            foreach ($node->nodes as $nid) {
-                $nodes[] = parent::parse($tree[$nid], $tree, $scopes);
+        $nid = $node->i;
+        $nodes = [];
+        if (isset($node->c)) {
+            foreach ($node->c as $childNid) {
+                $nodes[] = parent::parse($tree[$childNid], $tree, $scopes);
             }
         }
-        return new self($node->nid, $nodes);
+        return new self($nid, $nodes);
     }
 
     public function getSource($params, $combine = false)
@@ -149,13 +336,14 @@ class CommentNode extends Node
 
     public static function parse($node, $tree, &$scopes)
     {
-        $comment = isset($node->comment) ? $node->comment : null;
-        return new self($node->nid, $comment);
+        $nid = $node->i;
+        $comment = isset($node->c) ? $node->c : null;
+        return new self($nid, $comment);
     }
 
     public function getSource($params)
     {
-        require_once BASEDIR . 'includes/markdownHelper.php';
+        require_once BASEDIR . 'includes/helper/markdownHelper.php';
         $comment = parseMarkdown($this->comment, false, false);
         $comment = preg_replace('/\n/', '<br/># ', $comment);
         return '<span style="color:grey"># ' . $comment . '</span>';
@@ -185,7 +373,6 @@ class CommentNode extends Node
                             <div class="comment-container collapsed">
                                 <span class="toggle-comment fa fa-plus-square"></span>
                                 <span class="fa fa-comment"></span>
-                                <?php require_once BASEDIR . 'includes/markdownHelper.php' ?>
                                 <?= parseMarkdown($this->comment, false) ?>
                             </div>
                         <?php endif ?>
@@ -198,9 +385,9 @@ class CommentNode extends Node
 
 class CompareNode extends Node
 {
-    /** @var Value */
+    /** @var Value|null */
     protected $left;
-    /** @var Value */
+    /** @var Value|null */
     protected $right;
     /** @var string */
     protected $op;
@@ -217,34 +404,35 @@ class CompareNode extends Node
     public function __construct($nid, $left, $right, $op)
     {
         $this->nodeId = $nid;
-        $this->left = new Value($left);
-        $this->right = new Value($right);
+        $this->left = $left;
+        $this->right = $right;
         $this->op = $op;
     }
 
     public static function parse($node, $tree, &$scopes)
     {
-        $left = isset($node->left) ? $node->left : null;
-        $right = isset($node->right) ? $node->right : null;
-        $op = isset($node->operator) ? $node->operator : null;
-        return new self($node->nid, $left, $right, $op);
+        $nid = $node->i;
+        $left = isset($node->l) ? Value::parse($node->l) : null;
+        $right = isset($node->r) ? Value::parse($node->r) : null;
+        $op = isset($node->o) ? $node->o : null;
+        return new self($nid, $left, $right, $op);
     }
 
     public function getSource($params)
     {
         return $this->wrapLine(
             sprintf("%s %s %s",
-                $this->left->parse($params),
+                $this->printVar($this->left, $params),
                 $this->ops[$this->op],
-                $this->right->parse($params)
+                $this->printVar($this->right, $params)
             )
         );
     }
 
     public function printHtml(&$params)
     {
-        $leftVal = $this->left->parse($params);
-        $rightVal = $this->right->parse($params);
+        $leftVal = $this->printVar($this->left, $params);
+        $rightVal = $this->printVar($this->right, $params);
         $selected_op = $this->isPrototype ? 'lt' : $this->op;
         ?>
         <!-- COMPARE NODE -->
@@ -326,17 +514,18 @@ class FunctionNode extends Node
 
     public static function parse($node, $tree, &$scopes)
     {
-        $actParsLine = isset($node->paramsLine) ? $node->paramsLine : "";
-        $actPars = isset($node->params) ? parent::parse($tree[$node->params], $tree, $scopes) : null;
-        if (isset($node->callee)) {
-            $callee = $node->callee;
+        $nid = $node->i;
+        $actParsLine = isset($node->l) ? $node->l : "";
+        $actPars = isset($node->p) ? parent::parse($tree[$node->p], $tree, $scopes) : null;
+        if (isset($node->c)) {
+            $callee = $node->c;
             if (!isset($scopes[$callee])) {
                 $scopes[] = $callee;
             }
         } else {
             $callee = -1;
         }
-        return new self($node->nid, $callee, $actParsLine, $actPars);
+        return new self($nid, $callee, $actParsLine, $actPars);
     }
 
     public function getSource($params)
@@ -359,7 +548,6 @@ class FunctionNode extends Node
             }
             $actParsLine = substr($actParsLine, 0, sizeof($actParsLine)-3);
         }
-
         ?>
         <!-- FUNCTION NODE -->
         <li class="node function-node node_<?= $this->nodeId ?>" data-node-type="function" data-node-id="<?= $this->nodeId ?>" data-callee-id="<?= $this->calleeId ?>">
@@ -397,7 +585,7 @@ class FunctionNode extends Node
                         <?php endif ?>
                     </td>
                 </tr>
-                <tr<?php if (is_null($actParsNid) || $actParsNid === '0'): ?> style="display: none;"<?php endif ?>>
+                <tr<?php if (is_null($actParsNid) || $actParsNid === '0' || $this->actPars->size() === 0): ?> style="display: none;"<?php endif ?>>
                     <td class="handle node-box left right bottom">
                         <span class="cursor-icon"></span>
                     </td>
@@ -424,8 +612,8 @@ class IfNode extends Node
     protected $op;
 
     protected $ops = [
-        'all' => 'condition_all',
-        'any' => 'condition_any'
+        'l' => 'condition_all',
+        'y' => 'condition_any'
     ];
 
     function __construct($nid, $cond, $then, $else, $op)
@@ -439,11 +627,12 @@ class IfNode extends Node
 
     public static function parse($node, $tree, &$scopes)
     {
-        $cond = isset($node->condition) ? parent::parse($tree[$node->condition], $tree, $scopes) : null;
-        $body = isset($node->ifBody) ? parent::parse($tree[$node->ifBody], $tree, $scopes) : null;
-        $else = isset($node->elseBody) ? parent::parse($tree[$node->elseBody], $tree, $scopes) : null;
-        $op = isset($node->op) ? $node->op : null;
-        return new self($node->nid, $cond, $body, $else, $op);
+        $nid = $node->i;
+        $cond = isset($node->c) ? parent::parse($tree[$node->c], $tree, $scopes) : null;
+        $body = isset($node->b) ? parent::parse($tree[$node->b], $tree, $scopes) : null;
+        $else = isset($node->e) ? parent::parse($tree[$node->e], $tree, $scopes) : null;
+        $op = isset($node->o) ? $node->o : null;
+        return new self($nid, $cond, $body, $else, $op);
     }
 
     public function getSource($params)
@@ -538,37 +727,38 @@ class IfNode extends Node
 
 class IncNode extends Node
 {
-    /** @var Value */
+    /** @var Value|null */
     protected $var;
     /** @var string */
     protected $op;
     protected $ops = [
-        'inc' => '++',
-        'dec' => '--'
+        'i' => '++',
+        'd' => '--'
     ];
 
     function __construct($nid, $var, $op)
     {
         $this->nodeId = $nid;
-        $this->var = new Value($var);
+        $this->var = $var;
         $this->op = $op;
     }
 
     public static function parse($node, $tree, &$scopes)
     {
-        $var = isset($node->var) ? $node->var : null;
-        $op = isset($node->operator) ? $node->operator : null;
-        return new self($node->nid, $var, $op);
+        $nid = $node->i;
+        $var = isset($node->v) ? Value::parse($node->v) : null;
+        $op = isset($node->o) ? $node->o : null;
+        return new self($nid, $var, $op);
     }
 
     public function getSource($params)
     {
-        return $this->wrapLine($this->var->parse($params) . "++");
+        return $this->wrapLine($this->printVar($this->var, $params) . "++");
     }
 
     public function printHtml(&$params)
     {
-        $varValue = $this->var->parse($params);
+        $varValue = $this->printVar($this->var, $params);
         $selected_op = $this->isPrototype ? 'inc' : $this->op;
         ?>
         <!-- INC NODE -->
@@ -622,23 +812,24 @@ class ReturnNode extends Node
     function __construct($nid, $value)
     {
         $this->nodeId = $nid;
-        $this->value = new Value($value);
+        $this->value = $value;
     }
 
     public static function parse($node, $tree, &$scopes)
     {
-        $value = isset($node->value) ? $node->value : null;
-        return new self($node->nid, $value);
+        $nid = $node->i;
+        $value = isset($node->v) ? Value::parse($node->v) : null;
+        return new self($nid, $value);
     }
 
     public function getSource($params)
     {
-        return $this->wrapLine("return " . $this->value->parse($params));
+        return $this->wrapLine("return " . $this->printVar($this->value, $params));
     }
 
     public function printHtml(&$params)
     {
-        $varValue = $this->value->parse($params);
+        $varValue = $this->printVar($this->value, $params);
         ?>
         <!-- RETURN NODE -->
         <li class="node return-node node_<?= $this->nodeId ?>" data-node-type="return" data-node-id="<?= $this->nodeId ?>">
@@ -652,7 +843,7 @@ class ReturnNode extends Node
                             <label>
                                 <?= TreeHelper::l10n('return_node_title') ?>
                                 <div class="ui-widget combobox-container">
-                                    <input class="return-value combobox" value="<?= $varValue ?>"/>
+                                    <input class="return-val combobox" value="<?= $varValue ?>"/>
                                 </div>
                             </label>
                             <span class="invalid-flag label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
@@ -664,7 +855,7 @@ class ReturnNode extends Node
                                 <?= TreeHelper::l10n('return_node_title') ?>
                                 <?= $varValue ?>
                                 <div style="display: none;">
-                                    <input class="return-value" value="<?= $varValue ?>"/>
+                                    <input class="return-val" value="<?= $varValue ?>"/>
                                 </div>
                             </label>
                         <?php endif ?>
@@ -685,32 +876,33 @@ class SwapNode extends Node
     public function __construct($nid, $left, $right)
     {
         $this->nodeId = $nid;
-        $this->left = new Value($left);
-        $this->right = new Value($right);
+        $this->left = $left;
+        $this->right = $right;
     }
 
     public static function parse($node, $tree, &$scopes)
     {
-        $left = isset($node->left) ? $node->left : null;
-        $right = isset($node->right) ? $node->right : null;
-        return new self($node->nid, $left, $right);
+        $nid = $node->i;
+        $left = isset($node->l) ? Value::parse($node->l) : null;
+        $right = isset($node->r) ? Value::parse($node->r) : null;
+        return new self($nid, $left, $right);
     }
 
     public function getSource($params)
     {
         return $this->wrapLine(
             sprintf("%s %s %s",
-                $this->left->parse($params),
+                $this->printVar($this->left, $params),
                 '&hArr;',
-                $this->right->parse($params)
+                $this->printVar($this->right, $params)
             )
         );
     }
 
     public function printHtml(&$params)
     {
-        $leftVal = $this->left->parse($params);
-        $rightVal = $this->right->parse($params);
+        $leftVal = $this->printVar($this->left, $params);
+        $rightVal = $this->printVar($this->right, $params);
         ?>
         <!-- SWAP NODE -->
         <li class="node swap-node node_<?= $this->nodeId ?>" data-node-type="swap" data-node-id="<?= $this->nodeId ?>">
@@ -759,23 +951,24 @@ class ValueNode extends Node
     function __construct($nid, $value)
     {
         $this->nodeId = $nid;
-        $this->value = new Value($value);
+        $this->value = $value;
     }
 
     public static function parse($node, $tree, &$scopes)
     {
-        $value = isset($node->value) ? $node->value : null;
-        return new self($node->nid, $value);
+        $nid = $node->i;
+        $value = isset($node->v) ? Value::parse($node->v) : null;
+        return new self($nid, $value);
     }
 
     public function getSource($params)
     {
-        return $this->wrapLine($this->value->parse($params));
+        return $this->wrapLine($this->printVar($this->value, $params));
     }
 
     public function printHtml(&$params)
     {
-        $varValue = $this->value->parse($params);
+        $varValue = $this->printVar($this->value, $params);
         ?>
         <!-- VALUE NODE -->
         <li class="node value-node node_<?= $this->nodeId ?>" data-node-type="value" data-node-id="<?= $this->nodeId ?>">
@@ -821,8 +1014,8 @@ class WhileNode extends Node
     protected $op;
 
     protected $ops = [
-        'all' => 'condition_all',
-        'any' => 'condition_any'
+        'l' => 'condition_all',
+        'y' => 'condition_any'
     ];
 
     public function __construct($nid, $cond, $body, $op)
@@ -835,10 +1028,11 @@ class WhileNode extends Node
 
     public static function parse($node, $tree, &$scopes)
     {
-        $condition = isset($node->condition) ? parent::parse($tree[$node->condition], $tree, $scopes) : null;
-        $body = isset($node->body) ? parent::parse($tree[$node->body], $tree, $scopes) : null;
-        $op = isset($node->op) ? $node->op : null;
-        return new self($node->nid, $condition, $body, $op);
+        $nid = $node->i;
+        $condition = isset($node->c) ? parent::parse($tree[$node->c], $tree, $scopes) : null;
+        $body = isset($node->b) ? parent::parse($tree[$node->b], $tree, $scopes) : null;
+        $op = isset($node->o) ? $node->o : null;
+        return new self($nid, $condition, $body, $op);
     }
 
     public function getSource($params)
@@ -913,344 +1107,4 @@ class WhileNode extends Node
             </table>
         </li>
     <?php }
-}
-
-/**
- * Superclass of all Nodes.
- *
- * @author Wolfgang Küllinger
- */
-abstract class Node
-{
-    const ASSIGN_NODE = "assign";
-    const BLOCK_NODE = "block";
-    const COMMENT_NODE = "comment";
-    const COMPARE_NODE = "compare";
-    const FUNCTION_NODE = "function";
-    const IF_NODE = "if";
-    const INC_NODE = "inc";
-    const RETURN_NODE = "return";
-    const SWAP_NODE = "swap";
-    const VALUE_NODE = "value";
-    const WHILE_NODE = "while";
-
-    /** @var int */
-    protected $nodeId;
-    /** @var bool */
-    protected $isPrototype = false;
-
-    /**
-     * Basically transforms stdClasses (e.g. from a JSON object) to valid Nodes.
-     * Calls the parse function of a subclass according to the node's type. Subclasses
-     * override this function in order to provide the concrete parsing functionality.
-     *
-     * @param stdClass $node
-     * @param array $tree
-     * @param array $scopes
-     * @return Node
-     * @throws ParseError if node is unknown
-     */
-    public static function parse($node, $tree, &$scopes)
-    {
-        // unpack container of one node
-        if (is_array($node) && sizeof($node) == 1) {
-            $node = $node[0];
-        }
-        // parse node
-        switch ($node->node) {
-            case self::ASSIGN_NODE:
-                return AssignNode::parse($node, $tree, $scopes);
-            case self::BLOCK_NODE:
-                return BlockNode::parse($node, $tree, $scopes);
-            case self::COMMENT_NODE:
-                return CommentNode::parse($node, $tree, $scopes);
-            case self::COMPARE_NODE:
-                return CompareNode::parse($node, $tree, $scopes);
-            case self::FUNCTION_NODE:
-                return FunctionNode::parse($node, $tree, $scopes);
-            case self::IF_NODE:
-                return IfNode::parse($node, $tree, $scopes);
-            case self::INC_NODE:
-                return IncNode::parse($node, $tree, $scopes);
-            case self::RETURN_NODE:
-                return ReturnNode::parse($node, $tree, $scopes);
-            case self::SWAP_NODE:
-                return SwapNode::parse($node, $tree, $scopes);
-            case self::VALUE_NODE:
-                return ValueNode::parse($node, $tree, $scopes);
-            case self::WHILE_NODE:
-                return WhileNode::parse($node, $tree, $scopes);
-            default:
-                throw new ParseError("Unknown node: " . print_r($node, true));
-        }
-    }
-
-    /**
-     * Calls the printHtml method of the Node $node, if it's not null and not a prototype.
-     *
-     * @param $node Node|array
-     * @param $params array
-     * @return bool True if printHtml method was called.
-     */
-    public static final function printNode($node, &$params)
-    {
-        // unpack container of one node
-        if (!($node instanceof Node) && sizeof($node) == 1) {
-            $node = $node[0];
-        }
-        // don't handle prototypes and empty nodes
-        if (is_null($node) || $node->isPrototype)
-            return false;
-        // call printHtml() for valid nodes
-        $node->printHtml($params);
-        return true;
-    }
-
-    /**
-     * Prints HTML code which represents the node.
-     *
-     * @param $params array
-     */
-    public abstract function printHtml(&$params);
-
-    /**
-     * Print the HTML code for the nodes' prototypes.
-     *
-     * @param string $type The node type the prototype should be generated for.
-     * @param array $params Parameters that are needed for the prototype.
-     * @throws Exception If no node can be found for the specified type.
-     */
-    public static final function printPrototype($type, $params)
-    {
-        /** @var $node Node */
-        $node = null;
-        switch ($type) {
-            case self::ASSIGN_NODE:
-                $node = new AssignNode($type, null, null);
-                break;
-            case self::COMMENT_NODE:
-                $node = new CommentNode($type, null);
-                break;
-            case self::COMPARE_NODE:
-                $node = new CompareNode($type, null, null, null);
-                break;
-            case self::FUNCTION_NODE:
-                $node = new FunctionNode($type, null, null, null);
-                break;
-            case self::IF_NODE:
-                $node = new IfNode($type, null, null, null, null);
-                break;
-            case self::INC_NODE:
-                $node = new IncNode($type, null, null);
-                break;
-            case self::RETURN_NODE:
-                $node = new ReturnNode($type, null);
-                break;
-            case self::SWAP_NODE:
-                $node = new SwapNode($type, null, null, null);
-                break;
-            case self::VALUE_NODE:
-                $node = new ValueNode($type, null);
-                break;
-            case self::WHILE_NODE:
-                $node = new WhileNode($type, null, null, null);
-                break;
-            default:
-                throw new Exception("No prototype prepared for '$type'.");
-        }
-        $node->isPrototype = true;
-        $node->printHtml($params);
-    }
-
-    public function getNodeId()
-    {
-        return $this->nodeId;
-    }
-
-    /**
-     * Returns the source code representation of the node.
-     *
-     * @param $params array
-     * @return string
-     */
-    public abstract function getSource($params);
-
-    /**
-     * Wraps a source code line in surrounding HTML tag.
-     *
-     * @param string $line The plain source code line of the Node.
-     * @return string HTML code of wrapped source code line.
-     */
-    public final function wrapLine($line)
-    {
-        return "<span class=\"source-node-$this->nodeId\">$line</span>";
-    }
-}
-
-class Tree
-{
-    /** @var int $aid */
-    private $aid;
-    /** @var BlockNode $root */
-    private $root;
-    /** @var array $scopes */
-    private $scopes;
-
-    public function __construct($aid, $tree)
-    {
-        $this->aid = $aid;
-        $this->scopes = [$aid];
-        if (is_null($tree)) {
-            // if the algorithm is new, generate a BlockNode as root
-            $rootNode = BlockNode::parse((object)['nid' => 0], $tree, $this->scopes);
-        } else {
-            // take the tree's last element otherwise
-            $rootNode = Node::parse(end($tree), $tree, $this->scopes);
-        }
-        $this->root = $rootNode;
-    }
-
-    public function getRoot()
-    {
-        return $this->root->getNodeId();
-    }
-
-    public function getScopes()
-    {
-        return $this->scopes;
-    }
-
-    public function printHtml($params)
-    {
-        $this->root->printHtml($params);
-    }
-
-    public function printSource($params)
-    {
-        // set indent level
-        if (!isset($params['indent'])) {
-            $params['indent'] = 0;
-        }
-        // start recursion
-        $source = "";
-        foreach (explode(PHP_EOL, trim($this->root->getSource($params))) as $line) {
-            $source .= '<div class="line">' . $line . '</div>';
-        }
-        print($source);
-    }
-}
-
-class Value
-{
-    const VAR_KIND = "var";
-    const CONST_KIND = "const";
-    const INDEX_KIND = "index";
-    const PROP_KIND = "prop";
-    const COMP_KIND = "comp";
-
-    const LEN_PROP = "length";
-
-    /** @var string One of *_KIND. Used by constants. */
-    protected $kind;
-    /** @var string One of *_TYPE. Used by constants. */
-    protected $type;
-    /** @var mixed Used by constants. */
-    protected $value;
-    /** @var int Variable ID, used by variables, array accesses and array properties. */
-    protected $vid;
-    /** @var Value Used by array accesses, contains index value. */
-    protected $index;
-    /** @var string One of *_PROP. Used by array properties. */
-    protected $prop;
-    /** @var Value Used by compound values. */
-    protected $left, $right;
-    /** @var string Used by compound values. */
-    protected $op;
-
-    public function __construct($value)
-    {
-        require_once(BASEDIR . 'includes/varHelper.php');
-        if (isset($value->kind)) $this->kind = $value->kind;
-        if (isset($value->type)) $this->type = $value->type;
-        if (isset($value->value)) $this->value = $value->value;
-        if (isset($value->vid)) $this->vid = intval($value->vid);
-        if (isset($value->index)) $this->index = new Value($value->index);
-        if (isset($value->prop)) $this->prop = $value->prop;
-        if (isset($value->left)) $this->left = new Value($value->left);
-        if (isset($value->right)) $this->right = new Value($value->right);
-        if (isset($value->op)) $this->op = $value->op;
-    }
-
-    public function parse($params)
-    {
-        $vars = TreeHelper::extractVars($params);
-        if (!isset($this->kind))
-            return "";
-
-        switch ($this->kind) {
-            case self::CONST_KIND:
-                return $this->value;
-            case self::INDEX_KIND:
-                return sprintf("%s[%s]",
-                    $vars[$this->vid][VarHelper::KEY_NAME],
-                    $this->index->parse($params)
-                );
-            case self::PROP_KIND:
-                return sprintf("%s.%s",
-                    $vars[$this->vid][VarHelper::KEY_NAME],
-                    $this->prop
-                );
-            case self::VAR_KIND:
-                return $vars[$this->vid][VarHelper::KEY_NAME];
-            case self::COMP_KIND:
-                $left = $this->left->parse($params);
-                $right = $this->right->parse($params);
-                if ($this->left->kind === self::COMP_KIND)
-                    $left = "($left)";
-                if ($this->right->kind === self::COMP_KIND)
-                    $right = "($right)";
-                return $left . $this->op . $right;
-            default:
-                throw new ParseError("Kind not found: '$this->kind'!");
-        }
-    }
-}
-
-class TreeHelper
-{
-    public static function extractVars($params)
-    {
-        $vars = !is_null($params) && isset($params['vars']) ? $params['vars'] : array();
-        if (isset($vars['prototype'])) {
-            unset ($vars['prototype']);
-        }
-        return $vars;
-    }
-
-    public static function getIndent($indent)
-    {
-        $str = "";
-        for ($i = 0; $i < $indent; $i++) {
-            $str .= DEFAULT_INDENT;
-        }
-        return $str;
-    }
-
-    public static function l10n($key)
-    {
-        global $l10n;
-        return array_key_exists($key, $l10n) ? $l10n[$key] : "[$key]";
-    }
-}
-
-class ParseError extends Exception
-{
-}
-
-class ScopeError extends Exception
-{
-    public function __construct($amount)
-    {
-        parent::__construct("Cannot load more than $amount of scopes!");
-    }
 }

@@ -6,7 +6,7 @@ class MarkdownAPI extends AbstractAPI
 {
     public function checkAndSend()
     {
-        require_once BASEDIR . 'includes/markdownHelper.php';
+        require_once BASEDIR . 'includes/helper/markdownHelper.php';
         $this->response['html'] = parseMarkdown($_POST['source']);
         $this->sendResponse();
     }

@@ -1,17 +1,17 @@
 <?php
+require_once(BASEDIR . "includes/tree.php");
+require_once(BASEDIR . 'includes/helper/markdownHelper.php');
+
 // prepare algorithm meta-data
 $name = $algorithm->name;
 $description = $algorithm->description;
 if ($long_description = $algorithm->long_description) {
-    require_once BASEDIR . 'includes/markdownHelper.php';
     $long_description = parseMarkdown($long_description);
 } else {
     $long_description = $l10n['no_description'];
 }
 $tags = $algorithm->tags;
 
-require_once BASEDIR . "includes/varHelper.php";
-require_once BASEDIR . "includes/algorithm.php";
 // prepare variables
 $vars = json_decode($algorithm->variables, true);
 // prepare parameters
@@ -193,11 +193,11 @@ foreach ($tree->getScopes() as $innerScope) {
                             <tbody>
                             <?php foreach ($vars as $vid => $var):
                                 // un-compress variables
-                                $var = VarHelper::uncompress($var);
+                                $var = VarValue::decompress($var);
 
                                 // process variables
                                 $value = $var->value;
-                                if ($var->type{0} === VarHelper::ARRAY_TYPE) {
+                                if ($var->type{0} === VarValue::ARRAY_TYPE) {
                                     if ($var->value === 'P' && $params) {
                                         $value = $params[$var->name];
                                     } elseif ($var->value === '?' || $var->value === 'R' || $var->value === 'P') {
@@ -229,7 +229,7 @@ foreach ($tree->getScopes() as $innerScope) {
                                         <code class="name"><?= $var->name ?></code>
                                     </td>
                                     <td class="var-value">
-                                        <?php if ($var->type{0} === VarHelper::ARRAY_TYPE): // deal with arrays ?>
+                                        <?php if ($var->type{0} === VarValue::ARRAY_TYPE): // deal with arrays ?>
                                             <?php foreach (explode(',', $value) as $offset => $val): ?>
                                                 <button class="btn btn-default value-container offset_<?= $offset ?>" data-offset="<?= $offset ?>">
                                                     <span class="value"><?= $val ?></span>

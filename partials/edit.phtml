@@ -1,7 +1,7 @@
 <?php
 if (!defined('BASEDIR')) die('You cannot call this script directly !');
 global $l10n;
-require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
+require_once(BASEDIR . 'partials/headers/algorithmHeader.phtml');
 ?>
 <!-- HEADER -->
 <div class="page-header">
@@ -13,11 +13,12 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
 
 <!-- CONTENT -->
 <?php if ($__aid && $__uid && ($__owner || $__rights > 0)):
+    require_once(BASEDIR . 'includes/helper/markdownHelper.php');
+    require_once(BASEDIR . 'includes/tree.php');
     // prepare algorithm meta data
     $name = htmlspecialchars_decode($__algorithm->name);
     $description = htmlspecialchars_decode($__algorithm->description);
     if ($long_description = $__algorithm->long_description) {
-        require_once BASEDIR . 'includes/markdownHelper.php';
         $long_preview = parseMarkdown($long_description);
     } else {
         $long_description = "";
@@ -28,11 +29,9 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
         $tags .= "$tag, ";
     }
 
-    require_once(BASEDIR . 'includes/algorithm.php');
-    require_once(BASEDIR . 'includes/varHelper.php');
     // prepare variables and add prototype row to variables
     $vars = json_decode($__algorithm->variables, true);
-    $vars['prototype'] = VarHelper::compress(['name' => '', 'type' => '', 'value' => '', 'size' => 2]);
+    $vars['prototype'] = VarValue::compress(['name' => '', 'type' => '', 'value' => '', 'size' => 2]);
     // prepare tree
     $tree = new Tree($__aid, json_decode($__algorithm->tree));
     ?>
@@ -113,12 +112,12 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                             <table class="table table-condensed table-bordered table-hover variables">
                                 <tbody id="insertVarsHere">
                                 <?php foreach ($vars as $vid => $var):
-                                    $var = VarHelper::uncompress($var);
+                                    $var = VarValue::decompress($var);
                                     $rowVisible = ($vid === 'prototype') ? 'style="display:none"' : '';
                                     $viewMode = $editMode = null;
                                     $viewLabel = $var->name;
 
-                                    if ($var->type === VarHelper::ARRAY_TYPE) {
+                                    if ($var->type === VarValue::ARRAY_TYPE) {
                                         switch ($var->value) {
                                             case 'R': // random
                                                 $viewMode = $l10n['array_randomized'];
@@ -200,13 +199,13 @@ require_once BASEDIR . "partials/headers/algorithmHeader.phtml";
                                                 <label class="sr-only"><?= $l10n['data_type'] ?></label>
                                                 <select class="form-control input-sm type">
                                                     <optgroup label="<?= $l10n['element'] ?>">
-                                                        <?php $type = VarHelper::INT_TYPE ?>
+                                                        <?php $type = VarValue::INT_TYPE ?>
                                                         <option value="<?= $type ?>" <?php if ($var->type === $type): ?>selected="selected"<?php endif ?>>
                                                             <?= $l10n['int'] ?>
                                                         </option>
                                                     </optgroup>
                                                     <optgroup label="<?= $l10n['array'] ?>">
-                                                        <?php $type = VarHelper::ARRAY_TYPE . VarHelper::INT_TYPE ?>
+                                                        <?php $type = VarValue::ARRAY_TYPE . VarValue::INT_TYPE ?>
                                                         <option value="<?= $type ?>" data-target=".size" <?php if ($var->type === $type): ?>selected="selected"<?php endif ?>>
                                                             <?= $l10n['array_int'] ?>
                                                         </option>

@@ -14,7 +14,7 @@ class UrlAPI extends AbstractAPI
             unset($_GET['parameters']);
 
             // call the URL helper
-            require_once BASEDIR . 'includes/urlHelper.php';
+            require_once BASEDIR . 'includes/helper/urlHelper.php';
             $this->response = url($newParams, $oldParams, false);
             $this->sendResponse(false);
         }

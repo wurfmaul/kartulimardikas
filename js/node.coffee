@@ -1,95 +1,9 @@
-class Node
+class window.Node
   ###
     Must be overridden by all subclasses.
   ###
   execute: (player, node) ->
     throw new Error('Node must override execute() method!')
-
-  ###
-    This method executes the index part of an array access.
-  ###
-  executeIndex: (variable, player) ->
-    # constant value as index (e.g. a[1])
-    if (variable.kind is 'const' and variable.type is 'int')
-      variable.value
-
-      # variable as index (e.g. a[i])
-    else if (variable.kind is 'var')
-      player.stats.readVar(variable.vid)
-      player.memory.get(variable.vid).value
-
-      # compound value as index (e.g. a[i+1])
-    else if (variable.kind is 'comp')
-      @executeValue(variable, player)
-
-    else
-      throw new ExecutionError('unsupported_index', [variable.kind])
-
-  executeValue: (value, player) ->
-    if (!value?.kind?)
-      throw new ExecutionError('could_not_execute_value', [value])
-
-    switch value.kind
-      when 'const' then value.value
-
-      when 'index'
-        @readVar(value, player)
-
-      when 'prop'
-        if (value.prop is 'length')
-          variable = player.memory.get(value.vid)
-          if (variable.array) then variable.value.split(',').length
-          else 1
-        else
-          throw new ExecutionError('unknown_property', [value.prop])
-
-      when 'var'
-        @readVar(value, player)
-
-      when 'comp'
-        leftVal = @executeValue(value.left, player)
-        rightVal = @executeValue(value.right, player)
-        player.stats.incArithmeticLogicOps()
-        switch value.op
-          when '+' then leftVal + rightVal
-          when '-' then leftVal - rightVal
-          when '*' then leftVal * rightVal
-          when '/'
-            throw new ExecutionError('divide_by_zero', []) if (rightVal is 0)
-            parseInt(leftVal / rightVal)
-          when '%' then leftVal % rightVal
-          when '&' then leftVal and rightVal
-          when '|' then leftVal or rightVal
-          else
-            throw new ExecutionError('unknown_arithmetic_op', [@operator])
-
-      else
-        throw new ExecutionError('unknown_kind', [value.kind])
-
-  readVar: (source, player) ->
-    switch (source.kind)
-      when 'index'
-        index = @executeIndex(source.index, player)
-        player.stats.readArrayVar(source.vid, index)
-        player.memory.arrayGet(source.vid, index)
-      when 'var'
-        vid = source.vid
-        player.stats.readVar(vid) # tell the stats, that a variable has been read
-        player.memory.get(vid).value # return the current value of the variable
-      else throw new ExecutionError('unknown_kind', [source.kind])
-
-  writeVar: (destination, value, player) ->
-    switch (destination.kind)
-      when 'index'
-        index = @executeIndex(destination.index, player)
-        player.memory.arraySet(destination.vid, index, value)
-        player.stats.writeArrayVar(destination.vid, index, value)
-      when 'var'
-        player.memory.set(destination.vid, value)
-        player.stats.writeVar(destination.vid, value)
-      when 'const' then throw new ExecutionError('assign_to_const', [destination.value])
-      when 'prop' then throw new ExecutionError('assign_to_prop', [])
-      else throw new ExecutionError('unknown_kind', [destination.kind])
 
   ###
     Sets the cursor to the position of the node. Override to place it somewhere else!
@@ -136,115 +50,20 @@ class Node
   ###
   @parseAndCheckValue: (_class, node, memory) ->
     node = @findSubNode(node, _class)
-    value = @parseValue(node.val(), memory)
-    if !value? then node.addClass('error')
+    value = Value.parse(node.val(), memory)
+    if (!value? or node.val() is '') then node.addClass('error')
     else node.removeClass('error')
     value
 
   @parseAndCheckVar: (_class, node, memory) ->
     node = @findSubNode(node, _class)
-    value = @parseValue(node.val(), memory)
+    value = Value.parse(node.val(), memory)
     if value? and (value.kind is 'var' or value.kind is 'index')
       node.removeClass('error')
       value
     else
       node.addClass('error')
       null
-
-  @parseValue: (value, memory) ->
-    value = $.trim(value)
-    # check for constants
-    if (constant = DataType.parse(value))
-      return {kind: 'const', type: constant.type, value: constant.value}
-
-    # check for array ([])
-    open = value.indexOf('[')
-    close = value.lastIndexOf(']')
-    if (open > -1 and close > open)
-      vid = memory.find(value.substr(0, open))
-      inner = @parseValue(value.substr(open + 1, close - open - 1), memory)
-      if vid > -1 and inner?
-        memory.count(vid)
-        return {kind: 'index', vid: vid, index: inner}
-      else return null
-
-    # check for property (.length)
-    period = value.indexOf('.')
-    if (period > -1 and value.substr(period + 1) is "length")
-      vid = memory.find(value.substr(0, period))
-      if (vid > -1)
-        memory.count(vid)
-        return {kind: 'prop', type: 'int', vid: vid, prop: 'length'}
-      else return null
-
-    # check for variable name
-    if (/^[A-Za-z]+$/.test(value))
-      vid = memory.find(value)
-      if (vid > -1)
-        memory.count(vid)
-        return {kind: 'var', vid: vid}
-      else return null
-
-    value = value.replace(/\s*/g, '') # remove white spaces
-    # check for simple computations (e.g. i+1)
-    if (value.indexOf('(') is -1)
-      split = value.split(/(-|\+|\*|\/|%|&|\|)/i)
-      if (split.length is 3) # e.g. "i-1"
-        left = @parseValue(split[0], memory)
-        right = @parseValue(split[2], memory)
-        if (left? and right? and "+-*/%&|".indexOf(split[1]) >= 0)
-          return {kind: 'comp', left: left, right: right, op: split[1]}
-        else return null
-
-    # check for complex computations (using parenthesis)
-    if (value = @parsePars(value))?
-      switch (Object.keys(value).length)
-        when 1 # unnecessary pars
-          return @parseValue(value[0], memory)
-        when 3 # binary
-          left = @parseValue(value[0], memory)
-          right = @parseValue(value[2], memory)
-          op = value[1]
-          if (left? and right? and "+-*/%&|".indexOf(value[1]) >= 0)
-            return {kind: 'comp', left: left, right: right, op: op}
-
-    # return null, if value is not valid
-    null
-
-  ###
-    Deals with complex binary expressions within parenthesis. It goes one level
-    deep (say: not recursive). Returns an object with one value if it is just
-    a simple expression within parenthesis. It the expression is more complex,
-    it returns an object of size 3 that contains two expressions left, right along
-    with the used operator.
-  ###
-  @parsePars: (value) ->
-    level = 0
-    result = {}
-    index = 0
-    split = value.split(/(-|\+|\*|\/|%|&|\||\(|\))/g)
-    for i in [0...split.length]
-      chunk = split[i]
-      if (chunk is '') then continue
-
-      if (level is 0)
-        if (chunk is '(') then level++
-        else if (chunk is ')') then level--
-        else result[index++] = chunk
-      else # level > 0
-        if (chunk is '(') then level++
-        else if (chunk is ')')
-          if (--level is 0)
-            index++
-            continue
-        if (result[index]?) then result[index] += chunk
-        else result[index] = chunk
-
-    if (level isnt 0)
-      console.log("Unbalanced")
-      null
-    else
-      result
 
   ###
   # Returns node's first sub-node of class _class.
@@ -261,7 +80,7 @@ class Node
       node.addClass('invalid')
       flag.show()
 
-class AssignNode extends Node
+class window.AssignNode extends Node
   constructor: (@nid, @from, @to) ->
 
   execute: (player, node) ->
@@ -269,17 +88,11 @@ class AssignNode extends Node
     node = player.tree.get(@from).execute(player, 0)
     if (!node.scope?)
       # write new value
-      @writeVar(@to, node.value, player)
+      Value.write(@to, node.value, player)
     # return value
     node
 
-  toJSON: ->
-    {
-    nid: @nid
-    node: 'assign'
-    from: @from
-    to: @to
-    }
+  toJSON: -> { i: @nid, n: 'as', f: @from, t: @to?.toJSON() }
 
   @parse: (node, tree, memory) =>
     # parse from-node
@@ -292,7 +105,7 @@ class AssignNode extends Node
     nid = tree.length
     new @(nid, from.nid, to)
 
-class BlockNode extends Node
+class window.BlockNode extends Node
   constructor: (@nid, @nodes) ->
     @curNode = 0
 
@@ -351,15 +164,9 @@ class BlockNode extends Node
           else node = n + 1
     return -1
 
-  size: ->
-    @nodes.length
+  size: -> @nodes.length
 
-  toJSON: ->
-    {
-    nid: @nid
-    node: 'block'
-    nodes: @nodes
-    }
+  toJSON: -> { i: @nid, n: 'bk', c: @nodes }
 
   @parse: (node, tree, memory) =>
     # prepare return value
@@ -375,7 +182,7 @@ class BlockNode extends Node
     nid = tree.length
     new @(nid, nodes)
 
-class CommentNode extends Node
+class window.CommentNode extends Node
   constructor: (@nid, @comment) ->
 
   execute: (player, node) ->
@@ -384,24 +191,19 @@ class CommentNode extends Node
   mark: (player, node) ->
     -1 # never let this node be marked
 
-  toJSON: ->
-    {
-    nid: @nid
-    node: 'comment'
-    comment: @comment
-    }
+  toJSON: -> { i: @nid, n: 'cm', c: @comment }
 
   @parse: (node, tree, memory) =>
     comment = @findSubNode(node, '.comment-text').val()
     nid = tree.length
     new @(nid, comment)
 
-class CompareNode extends Node
+class window.CompareNode extends Node
   constructor: (@nid, @left, @right, @operator) ->
 
   execute: (player, node) ->
-    leftVal = @executeValue(@left, player)
-    rightVal = @executeValue(@right, player)
+    leftVal = @left.execute(player)
+    rightVal = @right.execute(player)
     player.stats.incCompareOps()
     switch @operator
       when 'le' then value: leftVal <= rightVal
@@ -412,14 +214,7 @@ class CompareNode extends Node
       when 'ne' then value: leftVal != rightVal
       else throw new Error("CompareNode: unknown operator: '#{@operator}'!")
 
-  toJSON: ->
-    {
-    nid: @nid
-    node: 'compare'
-    left: @left
-    right: @right
-    operator: @operator
-    }
+  toJSON: -> { i: @nid, n: 'cp', l: @left?.toJSON(), r: @right?.toJSON(), o: @operator }
 
   @parse: (node, tree, memory) =>
     left = @parseAndCheckValue('.compare-left', node, memory)
@@ -429,7 +224,7 @@ class CompareNode extends Node
     nid = tree.length
     new @(nid, left, right, operator)
 
-class FunctionNode extends Node
+class window.FunctionNode extends Node
   constructor: (@nid, @callee, @paramsLine, @params) ->
 
   execute: (player, node) ->
@@ -458,14 +253,7 @@ class FunctionNode extends Node
     params = @paramsLine
     { scope: newScope, node: @nid, params: params }
 
-  toJSON: ->
-    {
-    nid: @nid
-    node: 'function'
-    callee: @callee
-    paramsLine: @paramsLine
-    params: @params
-    }
+  toJSON: -> { i: @nid, n: 'ft', c: @callee, l: @paramsLine, p: @params }
 
   @parse: (node, tree, memory) =>
     # get callee
@@ -488,7 +276,7 @@ class FunctionNode extends Node
     nid = tree.length
     new @(nid, callee, paramsLine, params.nid)
 
-class IfNode extends Node
+class window.IfNode extends Node
   constructor: (@nid, @condition, @ifBody, @elseBody, @op) ->
 
   execute: (player, node) ->
@@ -523,15 +311,7 @@ class IfNode extends Node
     else
       player.tree.get(@elseBody).mark(player, node)
 
-  toJSON: ->
-    {
-    nid: @nid
-    node: 'if'
-    condition: @condition
-    ifBody: @ifBody
-    elseBody: @elseBody
-    op: @op
-    }
+  toJSON: -> { i: @nid, n: 'if', c: @condition, b: @ifBody, e: @elseBody, o: @op }
 
   @parse: (node, tree, memory) =>
     # parse condition node
@@ -554,18 +334,20 @@ class IfNode extends Node
     nid = tree.length
     new @(nid, condition.nid, ifBody.nid, elseBody.nid, op.val())
 
-class IncNode extends Node
+class window.IncNode extends Node
   constructor: (@nid, @variable, @operator) ->
 
   execute: (player, node) ->
     vid = @variable.vid
     # increment value of variable
-    value = @executeValue(@variable, player)
-    if (@operator is 'inc') then newValue = value + 1
-    else newValue = value - 1
+    value = @variable.execute(player)
+    switch (@operator)
+      when 'i' then newValue = value + 1
+      when 'd' then newValue = value - 1
+      else throw new Error('IncNode: invalid operator ' + @operator)
 
     if (@variable.kind is 'index')
-      index = @executeValue(@variable.index, player)
+      index = @variable.index.execute(player)
       player.memory.arraySet(vid, index, newValue)
       player.stats.writeArrayVar(vid, index, newValue)
     else
@@ -574,13 +356,7 @@ class IncNode extends Node
     # return the value before incrementing (like i++)
     {value: value}
 
-  toJSON: ->
-    {
-    nid: @nid
-    node: 'inc'
-    var: @variable
-    operator: @operator
-    }
+  toJSON: -> { i: @nid, n: 'ic', v: @variable?.toJSON(), o: @operator }
 
   @parse: (node, tree, memory) =>
     variable = @parseAndCheckVar('.inc-var', node, memory)
@@ -589,46 +365,35 @@ class IncNode extends Node
     nid = tree.length
     new @(nid, variable, operator)
 
-class ReturnNode extends Node
+class window.ReturnNode extends Node
   constructor: (@nid, @value) ->
 
   execute: (player, node) ->
-    value = @executeValue(@value, player)
+    value = @value.execute(player)
     $('#scope-' + player.scope + ' .return-value').val(value).focus()
     -1 # no further steps
 
-  toJSON: ->
-    {
-    nid: @nid
-    node: 'return'
-    value: @value
-    }
+  toJSON: -> { i: @nid, n: 'rt', v: @value?.toJSON() }
 
   @parse: (node, tree, memory) =>
-    value = @parseAndCheckValue('.return-value', node, memory)
+    value = @parseAndCheckValue('.return-val', node, memory)
     @validate(node, value?)
     nid = tree.length
     new @(nid, value)
 
-class SwapNode extends Node
+class window.SwapNode extends Node
   constructor: (@nid, @left, @right) ->
 
   execute: (player, node) ->
     # get values
-    leftVal = @executeValue(@left, player)
-    rightVal = @executeValue(@right, player)
+    leftVal = @left.execute(player)
+    rightVal = @right.execute(player)
     # write values
-    @writeVar(@left, rightVal, player)
-    @writeVar(@right, leftVal, player)
+    Value.write(@left, rightVal, player)
+    Value.write(@right, leftVal, player)
     {value: leftVal isnt rightVal}
 
-  toJSON: ->
-    {
-    nid: @nid
-    node: 'swap'
-    left: @left
-    right: @right
-    }
+  toJSON: -> { i: @nid, n: 'sw', l: @left?.toJSON(), r: @right?.toJSON() }
 
   @parse: (node, tree, memory) =>
     left = @parseAndCheckValue('.swap-left', node, memory)
@@ -637,18 +402,13 @@ class SwapNode extends Node
     nid = tree.length
     new @(nid, left, right)
 
-class ValueNode extends Node
+class window.ValueNode extends Node
   constructor: (@nid, @value) ->
 
   execute: (player, node) ->
-    {value: @executeValue(@value, player)}
+    {value: @value.execute(player)}
 
-  toJSON: ->
-    {
-    nid: @nid
-    node: 'value'
-    value: @value
-    }
+  toJSON: -> { i: @nid, n: 'vl', v: @value?.toJSON() }
 
   @parse: (node, tree, memory) =>
     value = @parseAndCheckValue('.value-var', node, memory)
@@ -656,7 +416,7 @@ class ValueNode extends Node
     nid = tree.length
     new @(nid, value)
 
-class WhileNode extends Node
+class window.WhileNode extends Node
   constructor: (@nid, @condition, @body, @op) ->
 
   execute: (player, node) ->
@@ -697,14 +457,7 @@ class WhileNode extends Node
       if (body.size()) then body.mark(player, node) # deal with empty body
       else condition.mark(player, @condition)
 
-  toJSON: ->
-    {
-    nid: @nid
-    node: 'while'
-    condition: @condition
-    body: @body
-    op: @op
-    }
+  toJSON: -> { i: @nid, n: 'wl', c: @condition, b: @body, o: @op }
 
   @parse: (node, tree, memory) =>
     # parse condition node
@@ -724,118 +477,3 @@ class WhileNode extends Node
     nid = tree.length
     new @(nid, condition.nid, body.nid, op.val())
 
-class window.Tree
-  constructor: (@scope) ->
-    @memory = new Memory($('#scope-' + @scope + ' .variables>tbody'))
-    @reset()
-
-  execute: (player, node) ->
-    @get(@root).execute(player, node)
-
-  mark: (player, node) ->
-    @get(@root).mark(player, node)
-
-  get: (nid) ->
-    @nodes[nid]
-
-  reset: ->
-    @memory.reset()
-    @nodes = []
-    rootNode = BlockNode.parse($('#scope-' + @scope + ' .node_root'), @nodes, @memory)
-    @root = @nodes.length
-    @nodes.push rootNode
-
-  toJSON: ->
-    json = []
-    for node, i in @nodes
-      json[i] = node.toJSON()
-    json
-
-  @toJSON: ->
-    new @(0).toJSON()
-
-class window.Memory
-  constructor: (@table) ->
-    @memory = new Object()
-    @original = new Object()
-    @table.children().not('#var-prototype').each((index, element) =>
-      vid = $(element).data('vid')
-      name = $(element).data('name')
-      value = $(element).data('value')
-      array = $(element).data('type').substr(0, 5) is 'array'
-      @memory[vid] =
-        vid: vid, name: name, value: value, array: array, count: 0
-      @original[vid] =
-        vid: vid, name: name, value: value, array: array, count: 0
-    )
-
-  count: (vid) =>
-    variable = @memory[vid]
-    ++variable.count
-
-  find: (name) =>
-    vid = -1 # return a not-found-value
-    $.each(@memory, (index, elem) ->
-      vid = elem.vid if (elem.name is name)
-    )
-    vid
-
-  get: (vid) =>
-    @memory[vid]
-
-  set: (vid, value) =>
-    try
-      value.split(',')
-      @memory[vid].array = true
-    catch error
-      @memory[vid].array = false
-    @memory[vid].value = value
-
-  arrayCheck: (vid, index) =>
-    variable = @get(vid)
-    # check if the variable is an array
-    if (!variable.array)
-      throw new ExecutionError('no_array_for_index', [variable.name])
-    array = variable.value.split(',')
-    # check if the array is long enough
-    if (index < 0 or array.length <= index)
-      throw new ExecutionError('index_out_of_bounds', [variable.name, index, array.length])
-    array
-
-  arrayGet: (vid, index) =>
-    array = @arrayCheck(vid, index)
-    value = array[index]
-    if (parseInt(value) + '' is value) then parseInt(value)
-    else value
-
-  arraySet: (vid, index, value) =>
-    array = @arrayCheck(vid, index)
-    array[index] = value
-    @set(vid, array.join(','))
-
-  reset: =>
-    $.each(@original, (index, elem) =>
-      @memory[index].value = elem.value
-      @memory[index].count = 0
-    )
-
-class window.DataType
-  @parse: (value) ->
-    # check for number
-    intVal = parseInt(value)
-    if (intVal + "" is value)
-      return {type: 'int', value: intVal}
-
-    # check for boolean
-    boolVal = value.toLowerCase()
-    if (boolVal is 'true' or boolVal is 'false')
-      return {type: 'bool', value: boolVal is 'true'}
-
-    # check for character TODO: data-type char
-    # if (/^'[A-Za-z]'$/.test(value))
-    #   return {kind: 'const', type: 'char', value: value}
-
-    false
-
-class window.ExecutionError extends Error
-  constructor: (@message, @parts) ->

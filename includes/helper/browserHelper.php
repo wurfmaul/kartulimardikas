@@ -1,5 +1,5 @@
 <?php
-class BrowserChecker {
+class BrowserHelper {
     public static function isUnsupported() {
         $_agent = $_SERVER['HTTP_USER_AGENT'];
         // check for Microsoft Internet Explorer
