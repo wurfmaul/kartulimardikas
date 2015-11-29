@@ -360,7 +360,7 @@
     };
 
     StepForm.prototype.updateSortable = function() {
-      var sortParams, update;
+      var dropParams, sortParams, update;
       update = (function(_this) {
         return function() {
           _this.saveChanges();
@@ -372,13 +372,30 @@
         placeholder: "sortable-highlight",
         update: update
       };
+      dropParams = {
+        accept: ".node",
+        activeClass: "ui-state-hover",
+        hoverClass: "ui-state-active",
+        greedy: true,
+        drop: function(event, ui) {
+          var from, to;
+          from = ui.helper;
+          to = event.target;
+          console.log(from);
+          console.log($(to));
+          $(to).find('.assign-from').append(from);
+          $(to).find('.hide-on-drop').hide();
+          return $(to).find('.show-on-drop').show();
+        }
+      };
       SCRIPTSITE.find('.sortable').each(function() {
         if (($(this).sortable("instance") != null)) {
           return $(this).sortable("destroy");
         }
       });
       SCRIPTSITE.sortable(sortParams);
-      return SCRIPTSITE.find('.sortable').sortable(sortParams);
+      SCRIPTSITE.find('.sortable').sortable(sortParams);
+      return SCRIPTSITE.find('.droppable').droppable(dropParams);
     };
 
     return StepForm;

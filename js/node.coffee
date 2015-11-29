@@ -81,29 +81,38 @@ class window.Node
       flag.show()
 
 class window.AssignNode extends Node
-  constructor: (@nid, @from, @to) ->
+  constructor: (@nid, @to, @fromNode, @fromVal) ->
 
   execute: (player, node) ->
-    # get new value
-    node = player.tree.get(@from).execute(player, 0)
-    if (!node.scope?)
-      # write new value
-      Value.write(@to, node.value, player)
+    # get new value from sub-nodes
+    if (@fromNode.size())
+      from = @fromNode.execute(player, 0)
+      return from if (from.scope?)
+      value = from.value
+    else
+      # get new value from input box
+      value = @fromVal.execute(player)
+    # write new value
+    Value.write(@to, value, player)
     # return value
-    node
+    { value: value }
 
-  toJSON: -> { i: @nid, n: 'as', f: @from, t: @to?.toJSON() }
+  toJSON: ->
+    { i: @nid, n: 'as', t: @to?.toJSON(), f: @fromNode.nid, v: @fromVal?.toJSON() }
 
   @parse: (node, tree, memory) =>
-    # parse from-node
-    from = BlockNode.parse(@findSubNode(node, '.assign-from'), tree, memory)
-    tree.push from
     # parse to-value
     to = @parseAndCheckVar('.assign-to', node, memory)
-    @validate(node, to? and from.size())
+    # parse from-node
+    fromNode = BlockNode.parse(@findSubNode(node, '.assign-from'), tree, memory)
+    tree.push fromNode
+    # parse from-value
+    fromVal = @parseAndCheckValue('.assign-from-val', node, memory)
+    # validate
+    @validate(node, to? and (fromNode.size() or fromVal?))
     # create the node
     nid = tree.length
-    new @(nid, from.nid, to)
+    new @(nid, to, fromNode, fromVal)
 
 class window.BlockNode extends Node
   constructor: (@nid, @nodes) ->

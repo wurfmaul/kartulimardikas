@@ -256,10 +256,27 @@ class StepForm
     update = =>
       @saveChanges()
       true
+
     sortParams =
       connectWith: ".sortable"
       placeholder: "sortable-highlight"
       update: update
+
+    dropParams =
+      accept: ".node"
+      activeClass: "ui-state-hover"
+      hoverClass: "ui-state-active"
+      greedy: true
+      drop: ( event, ui ) ->
+        from = ui.helper
+        to = event.target
+
+        console.log(from)
+        console.log($(to))
+
+        $(to).find('.assign-from').append(from)
+        $(to).find('.hide-on-drop').hide()
+        $(to).find('.show-on-drop').show()
 
     # remove sortable completely
     SCRIPTSITE.find('.sortable').each(->
@@ -269,6 +286,7 @@ class StepForm
     # and reinitialize it
     SCRIPTSITE.sortable(sortParams)
     SCRIPTSITE.find('.sortable').sortable(sortParams)
+    SCRIPTSITE.find('.droppable').droppable(dropParams)
 
 updateVisibility = (variable) ->
   # show/hide input fields according to the init selection

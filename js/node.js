@@ -132,38 +132,50 @@
   window.AssignNode = (function(superClass) {
     extend(AssignNode, superClass);
 
-    function AssignNode(nid1, from1, to1) {
+    function AssignNode(nid1, to1, fromNode1, fromVal1) {
       this.nid = nid1;
-      this.from = from1;
       this.to = to1;
+      this.fromNode = fromNode1;
+      this.fromVal = fromVal1;
     }
 
     AssignNode.prototype.execute = function(player, node) {
-      node = player.tree.get(this.from).execute(player, 0);
-      if (node.scope == null) {
-        Value.write(this.to, node.value, player);
+      var from, value;
+      if (this.fromNode.size()) {
+        from = this.fromNode.execute(player, 0);
+        if ((from.scope != null)) {
+          return from;
+        }
+        value = from.value;
+      } else {
+        value = this.fromVal.execute(player);
       }
-      return node;
+      Value.write(this.to, value, player);
+      return {
+        value: value
+      };
     };
 
     AssignNode.prototype.toJSON = function() {
-      var ref;
+      var ref, ref1;
       return {
         i: this.nid,
         n: 'as',
-        f: this.from,
-        t: (ref = this.to) != null ? ref.toJSON() : void 0
+        t: (ref = this.to) != null ? ref.toJSON() : void 0,
+        f: this.fromNode.nid,
+        v: (ref1 = this.fromVal) != null ? ref1.toJSON() : void 0
       };
     };
 
     AssignNode.parse = function(node, tree, memory) {
-      var from, nid, to;
-      from = BlockNode.parse(AssignNode.findSubNode(node, '.assign-from'), tree, memory);
-      tree.push(from);
+      var fromNode, fromVal, nid, to;
       to = AssignNode.parseAndCheckVar('.assign-to', node, memory);
-      AssignNode.validate(node, (to != null) && from.size());
+      fromNode = BlockNode.parse(AssignNode.findSubNode(node, '.assign-from'), tree, memory);
+      tree.push(fromNode);
+      fromVal = AssignNode.parseAndCheckValue('.assign-from-val', node, memory);
+      AssignNode.validate(node, (to != null) && (fromNode.size() || (fromVal != null)));
       nid = tree.length;
-      return new AssignNode(nid, from.nid, to);
+      return new AssignNode(nid, to, fromNode, fromVal);
     };
 
     return AssignNode;

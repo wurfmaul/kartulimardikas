@@ -113,7 +113,7 @@ abstract class Node
         $node = null;
         switch ($type) {
             case self::ASSIGN_NODE:
-                $node = new AssignNode('assign', null, null);
+                $node = new AssignNode('assign', null, null, null);
                 break;
             case self::COMMENT_NODE:
                 $node = new CommentNode('comment', null);
@@ -169,7 +169,7 @@ abstract class Node
      * @param array $params
      * @return string
      */
-    public final function printVar($var, $params) {
+    public final function printValue($var, $params) {
         return is_null($var) ? '' : $var->printVal($params);
     }
 
@@ -189,44 +189,50 @@ class AssignNode extends Node
 {
     /** @var Value|null */
     protected $to;
-    /** @var BlockNode */
-    protected $from;
+    /** @var BlockNode|null */
+    protected $fromNode;
+    /** @var Value|null */
+    protected $fromVal;
 
-    public function __construct($nid, $to, $from)
+    public function __construct($nid, $to, $fromNode, $fromVal)
     {
         $this->nodeId = $nid;
         $this->to = $to;
-        $this->from = $from;
+        $this->fromNode = $fromNode;
+        $this->fromVal = $fromVal;
     }
 
     public static function parse($node, $tree, &$scopes)
     {
         $nid = $node->i;
-        $from = isset($node->f) ? parent::parse($tree[$node->f], $tree, $scopes) : null;
         $to = isset($node->t) ? Value::parse($node->t) : null;
-        return new self($nid, $to, $from);
+        $fromNode = isset($node->f) ? parent::parse($tree[$node->f], $tree, $scopes) : null;
+        $fromVal = isset($node->v) ? Value::parse($node->v) : null;
+        return new self($nid, $to, $fromNode, $fromVal);
     }
 
     public function getSource($params)
     {
         return $this->wrapLine(
             sprintf("%s := %s",
-                $this->printVar($this->to, $params),
-                trim($this->from->getSource($params))
+                $this->printValue($this->to, $params),
+                trim($this->fromNode->getSource($params))
             )
         );
     }
 
     public function printHtml(&$params)
     {
-        $toValue = $this->printVar($this->to, $params);
-        $fromNid = isset($this->from) ? $this->from->nodeId : null;
+        $toValue = $this->printValue($this->to, $params);
+        $fromValue = $this->printValue($this->fromVal, $params);
+        $fromNid = is_null($this->fromNode) ? null : $this->fromNode->nodeId;
+        $collapse = is_null($fromNid) || $this->fromNode->size() === 0;
         ?>
         <!-- ASSIGN NODE -->
-        <li class="node assign-node node_<?= $this->nodeId ?>" data-node-type="assign" data-node-id="<?= $this->nodeId ?>">
+        <li class="node assign-node node_<?= $this->nodeId ?> droppable" data-node-type="assign" data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr>
-                    <td class="handle node-box top left">
+                    <td class="handle node-box top left <?php if ($collapse): ?>bottom<?php endif ?>">
                         <span class="cursor-icon"></span>
                     </td>
                     <td class="node-box top right bottom full-width">
@@ -237,6 +243,9 @@ class AssignNode extends Node
                                     <input class="assign-to combobox" value="<?= $toValue ?>"/>
                                 </div>
                                 :=
+                                <div class="ui-widget combobox-container hide-on-drop" <?php if (!$collapse): ?>style="display: none;"<?php endif ?>>
+                                    <input class="assign-from-val combobox" value="<?= $fromValue ?>"/>
+                                </div>
                             </label>
                             <span class="invalid-flag label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
                             <button type="button" class="close node-remove" aria-label="Close">
@@ -244,21 +253,22 @@ class AssignNode extends Node
                             </button>
                         <?php else: ?>
                             <label>
-                                <?= $toValue ?> :=
+                                <?= $toValue ?> := <?= $fromValue ?>
                                 <div style="display: none;">
                                     <input class="assign-to" value="<?= $toValue ?>"/>
+                                    <input class="assign-from-val" value="<?= $fromValue ?>"/>
                                 </div>
                             </label>
                         <?php endif ?>
                     </td>
                 </tr>
-                <tr>
+                <tr class="show-on-drop" <?php if ($collapse): ?>style="display: none;"<?php endif ?>>
                     <td class="handle node-box left right bottom">
                         <span class="cursor-icon"></span>
                     </td>
                     <td>
                         <ul class="assign-from sortable" data-node-id="<?= $fromNid ?>">
-                            <?php self::printNode($this->from, $params) ?>
+                            <?php self::printNode($this->fromNode, $params) ?>
                         </ul>
                     </td>
                 </tr>
@@ -422,17 +432,17 @@ class CompareNode extends Node
     {
         return $this->wrapLine(
             sprintf("%s %s %s",
-                $this->printVar($this->left, $params),
+                $this->printValue($this->left, $params),
                 $this->ops[$this->op],
-                $this->printVar($this->right, $params)
+                $this->printValue($this->right, $params)
             )
         );
     }
 
     public function printHtml(&$params)
     {
-        $leftVal = $this->printVar($this->left, $params);
-        $rightVal = $this->printVar($this->right, $params);
+        $leftVal = $this->printValue($this->left, $params);
+        $rightVal = $this->printValue($this->right, $params);
         $selected_op = $this->isPrototype ? 'lt' : $this->op;
         ?>
         <!-- COMPARE NODE -->
@@ -757,12 +767,12 @@ class IncNode extends Node
 
     public function getSource($params)
     {
-        return $this->wrapLine($this->printVar($this->var, $params) . "++");
+        return $this->wrapLine($this->printValue($this->var, $params) . "++");
     }
 
     public function printHtml(&$params)
     {
-        $varValue = $this->printVar($this->var, $params);
+        $varValue = $this->printValue($this->var, $params);
         $selected_op = $this->isPrototype ? 'inc' : $this->op;
         ?>
         <!-- INC NODE -->
@@ -828,12 +838,12 @@ class ReturnNode extends Node
 
     public function getSource($params)
     {
-        return $this->wrapLine("return " . $this->printVar($this->value, $params));
+        return $this->wrapLine("return " . $this->printValue($this->value, $params));
     }
 
     public function printHtml(&$params)
     {
-        $varValue = $this->printVar($this->value, $params);
+        $varValue = $this->printValue($this->value, $params);
         ?>
         <!-- RETURN NODE -->
         <li class="node return-node node_<?= $this->nodeId ?>" data-node-type="return" data-node-id="<?= $this->nodeId ?>">
@@ -896,17 +906,17 @@ class SwapNode extends Node
     {
         return $this->wrapLine(
             sprintf("%s %s %s",
-                $this->printVar($this->left, $params),
+                $this->printValue($this->left, $params),
                 '&hArr;',
-                $this->printVar($this->right, $params)
+                $this->printValue($this->right, $params)
             )
         );
     }
 
     public function printHtml(&$params)
     {
-        $leftVal = $this->printVar($this->left, $params);
-        $rightVal = $this->printVar($this->right, $params);
+        $leftVal = $this->printValue($this->left, $params);
+        $rightVal = $this->printValue($this->right, $params);
         ?>
         <!-- SWAP NODE -->
         <li class="node swap-node node_<?= $this->nodeId ?>" data-node-type="swap" data-node-id="<?= $this->nodeId ?>">
@@ -967,12 +977,12 @@ class ValueNode extends Node
 
     public function getSource($params)
     {
-        return $this->wrapLine($this->printVar($this->value, $params));
+        return $this->wrapLine($this->printValue($this->value, $params));
     }
 
     public function printHtml(&$params)
     {
-        $varValue = $this->printVar($this->value, $params);
+        $varValue = $this->printValue($this->value, $params);
         ?>
         <!-- VALUE NODE -->
         <li class="node value-node node_<?= $this->nodeId ?>" data-node-type="value" data-node-id="<?= $this->nodeId ?>">
