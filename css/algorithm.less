@@ -38,6 +38,19 @@
         display: none;
       }
 
+      &.expandable {
+        &:not(.expanded) {
+          .expanded-only {
+            display: none;
+          }
+        }
+        &.expanded {
+          .collapsed-only {
+            display: none;
+          }
+        }
+      }
+
       .node-box {
         min-width: 20px;
         font-family: monospace, Courier;

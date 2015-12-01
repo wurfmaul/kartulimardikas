@@ -21,6 +21,12 @@
 .algorithm ul .node .invalid-flag {
   display: none;
 }
+.algorithm ul .node.expandable:not(.expanded) .expanded-only {
+  display: none;
+}
+.algorithm ul .node.expandable.expanded .collapsed-only {
+  display: none;
+}
 .algorithm ul .node .node-box {
   min-width: 20px;
   font-family: monospace, Courier;
@@ -220,12 +226,6 @@
 }
 #varPanel .variables .size-group {
   width: 55px;
-}
-#stepPanel .algorithm .expandable:not(.expanded) .expanded-only {
-  display: none;
-}
-#stepPanel .algorithm .expandable.expanded .collapsed-only {
-  display: none;
 }
 #stepPanel .algorithm .sortable-highlight {
   background-color: greenyellow;

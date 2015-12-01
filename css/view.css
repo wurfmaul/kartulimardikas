@@ -21,6 +21,12 @@
 .algorithm ul .node .invalid-flag {
   display: none;
 }
+.algorithm ul .node.expandable:not(.expanded) .expanded-only {
+  display: none;
+}
+.algorithm ul .node.expandable.expanded .collapsed-only {
+  display: none;
+}
 .algorithm ul .node .node-box {
   min-width: 20px;
   font-family: monospace, Courier;

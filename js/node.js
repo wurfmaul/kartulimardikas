@@ -661,14 +661,23 @@
   window.ReturnNode = (function(superClass) {
     extend(ReturnNode, superClass);
 
-    function ReturnNode(nid1, value1) {
+    function ReturnNode(nid1, retVal1, retNode1) {
       this.nid = nid1;
-      this.value = value1;
+      this.retVal = retVal1;
+      this.retNode = retNode1;
     }
 
     ReturnNode.prototype.execute = function(player, node) {
-      var value;
-      value = this.value.execute(player);
+      var ret, value;
+      if (this.retNode.size()) {
+        ret = this.retNode.execute(player, 0);
+        if ((ret.scope != null)) {
+          return ret;
+        }
+        value = ret.value;
+      } else {
+        value = this.retVal.execute(player);
+      }
       $('#scope-' + player.scope + ' .return-value').val(value).focus();
       return -1;
     };
@@ -678,16 +687,19 @@
       return {
         i: this.nid,
         n: 'rt',
-        v: (ref = this.value) != null ? ref.toJSON() : void 0
+        v: (ref = this.retVal) != null ? ref.toJSON() : void 0,
+        r: this.retNode.nid
       };
     };
 
     ReturnNode.parse = function(node, tree, memory) {
-      var nid, value;
-      value = ReturnNode.parseAndCheckValue('.return-val', node, memory);
-      ReturnNode.validate(node, value != null);
+      var nid, retNode, retVal;
+      retVal = ReturnNode.parseAndCheckValue('.return-val', node, memory);
+      retNode = BlockNode.parse(ReturnNode.findSubNode(node, '.return-value-node'), tree, memory);
+      tree.push(retNode);
+      ReturnNode.validate(node, (retVal != null) || retNode.size());
       nid = tree.length;
-      return new ReturnNode(nid, value);
+      return new ReturnNode(nid, retVal, retNode);
     };
 
     return ReturnNode;

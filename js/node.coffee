@@ -375,20 +375,27 @@ class window.IncNode extends Node
     new @(nid, variable, operator)
 
 class window.ReturnNode extends Node
-  constructor: (@nid, @value) ->
+  constructor: (@nid, @retVal, @retNode) ->
 
   execute: (player, node) ->
-    value = @value.execute(player)
+    if (@retNode.size())
+      ret = @retNode.execute(player, 0)
+      return ret if (ret.scope?)
+      value = ret.value
+    else
+      value = @retVal.execute(player)
     $('#scope-' + player.scope + ' .return-value').val(value).focus()
     -1 # no further steps
 
-  toJSON: -> { i: @nid, n: 'rt', v: @value?.toJSON() }
+  toJSON: -> { i: @nid, n: 'rt', v: @retVal?.toJSON(), r: @retNode.nid }
 
   @parse: (node, tree, memory) =>
-    value = @parseAndCheckValue('.return-val', node, memory)
-    @validate(node, value?)
+    retVal = @parseAndCheckValue('.return-val', node, memory)
+    retNode = BlockNode.parse(@findSubNode(node, '.return-value-node'), tree, memory)
+    tree.push(retNode)
+    @validate(node, retVal? or retNode.size())
     nid = tree.length
-    new @(nid, value)
+    new @(nid, retVal, retNode)
 
 class window.SwapNode extends Node
   constructor: (@nid, @left, @right) ->

@@ -131,7 +131,7 @@ abstract class Node
                 $node = new IncNode('inc', null, null);
                 break;
             case self::RETURN_NODE:
-                $node = new ReturnNode('return', null);
+                $node = new ReturnNode('return', null, null);
                 break;
             case self::SWAP_NODE:
                 $node = new SwapNode('swap', null, null, null);
@@ -254,7 +254,7 @@ class AssignNode extends Node
                             </button>
                         <?php else: ?>
                             <label>
-                                <?= $toValue ?> := <?= $fromValue ?>
+                                <?= $toValue ?> := <span class="collapsed-only"><?= $fromValue ?></span>
                                 <div style="display: none;">
                                     <input class="assign-to" value="<?= $toValue ?>"/>
                                     <input class="assign-from-val" value="<?= $fromValue ?>"/>
@@ -822,43 +822,50 @@ class IncNode extends Node
 class ReturnNode extends Node
 {
     /** @var Value */
-    protected $value;
+    protected $returnVal;
+    /** @var BlockNode */
+    protected $returnNode;
 
-    function __construct($nid, $value)
+    function __construct($nid, $returnVal, $returnNode)
     {
         $this->nodeId = $nid;
-        $this->value = $value;
+        $this->returnVal = $returnVal;
+        $this->returnNode = $returnNode;
     }
 
     public static function parse($node, $tree, &$scopes)
     {
         $nid = $node->i;
-        $value = isset($node->v) ? Value::parse($node->v) : null;
-        return new self($nid, $value);
+        $returnVal = isset($node->v) ? Value::parse($node->v) : null;
+        $returnNode = isset($node->r) ? parent::parse($tree[$node->r], $tree, $scopes) : null;
+        return new self($nid, $returnVal, $returnNode);
     }
 
     public function getSource($params)
     {
-        return $this->wrapLine("return " . $this->printValue($this->value, $params));
+        return $this->wrapLine("return " . $this->printValue($this->returnVal, $params));
     }
 
     public function printHtml(&$params)
     {
-        $varValue = $this->printValue($this->value, $params);
+        $returnVal = $this->printValue($this->returnVal, $params);
+        $returnNid = is_null($this->returnNode) ? null : $this->returnNode->nodeId;
+        $collapse = is_null($returnNid) || $this->returnNode->size() === 0;
         ?>
         <!-- RETURN NODE -->
-        <li class="node return-node node_<?= $this->nodeId ?>" data-node-type="return" data-node-id="<?= $this->nodeId ?>">
+        <li class="node return-node node_<?= $this->nodeId ?> expandable <?php if (!$collapse): ?>expanded<?php endif ?>"
+            data-node-type="return" data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr>
-                    <td class="handle node-box top left bottom">
+                    <td class="handle node-box top left <?php if ($collapse): ?>bottom<?php endif ?> bottom-collapsed-only">
                         <span class="cursor-icon"></span>
                     </td>
                     <td class="node-box top right bottom full-width">
                         <?php if ($params['mode'] === 'edit'): ?>
                             <label>
                                 <?= TreeHelper::l10n('return_node_title') ?>
-                                <div class="ui-widget combobox-container">
-                                    <input class="return-val combobox" value="<?= $varValue ?>"/>
+                                <div class="ui-widget combobox-container collapsed-only">
+                                    <input class="return-val combobox" value="<?= $returnVal ?>"/>
                                 </div>
                             </label>
                             <span class="invalid-flag label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
@@ -868,12 +875,22 @@ class ReturnNode extends Node
                         <?php else: ?>
                             <label>
                                 <?= TreeHelper::l10n('return_node_title') ?>
-                                <?= $varValue ?>
+                                <span class="collapsed-only"><?= $returnVal ?></span>
                                 <div style="display: none;">
-                                    <input class="return-val" value="<?= $varValue ?>"/>
+                                    <input class="return-val" value="<?= $returnVal ?>"/>
                                 </div>
                             </label>
                         <?php endif ?>
+                    </td>
+                </tr>
+                <tr class="expanded-only">
+                    <td class="handle node-box left right bottom">
+                        <span class="cursor-icon"></span>
+                    </td>
+                    <td>
+                        <ul class="return-value-node sortable expand-body" data-node-id="<?= $returnNid ?>">
+                            <?php self::printNode($this->returnNode, $params) ?>
+                        </ul>
                     </td>
                 </tr>
             </table>
