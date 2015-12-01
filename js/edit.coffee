@@ -253,40 +253,48 @@ class StepForm
       @removeNode($(event.currentTarget).parents('.node:first'))
 
   updateSortable: ->
-    update = =>
+    autoSave = =>
       @saveChanges()
       true
+    expandNode = (node) ->
+      $(node).addClass('expanded')
+      $(node).find('.bottom-collapsed-only').removeClass('bottom')
+    collapseNode = (node) ->
+      if ($(node).find('.expand-body .node').length is 0)
+        $(node).removeClass('expanded')
+        $(node).find('.bottom-collapsed-only').addClass('bottom')
+    updateExpandables = ->
+      SCRIPTSITE.find('.expandable').each(->
+        collapseNode(this)
+      )
 
     sortParams =
       connectWith: ".sortable"
       placeholder: "sortable-highlight"
-      update: update
+      forcePlaceholderSize: true
+      greedy: true
+      update: autoSave
+      stop: updateExpandables
 
     dropParams =
       accept: ".node"
-      activeClass: "ui-state-hover"
-      hoverClass: "ui-state-active"
       greedy: true
-      drop: ( event, ui ) ->
-        from = ui.helper
-        to = event.target
+      tolerance: 'touch'
+      over: -> expandNode(this)
 
-        console.log(from)
-        console.log($(to))
-
-        $(to).find('.assign-from').append(from)
-        $(to).find('.hide-on-drop').hide()
-        $(to).find('.show-on-drop').show()
-
-    # remove sortable completely
+    # remove drag and drop completely
     SCRIPTSITE.find('.sortable').each(->
       if ($(this).sortable("instance")?)
         $(this).sortable("destroy")
     )
+    SCRIPTSITE.find('.expandable').each(->
+      if ($(this).droppable("instance")?)
+        $(this).droppable("destroy")
+    )
     # and reinitialize it
     SCRIPTSITE.sortable(sortParams)
     SCRIPTSITE.find('.sortable').sortable(sortParams)
-    SCRIPTSITE.find('.droppable').droppable(dropParams)
+    SCRIPTSITE.find('.expandable').droppable(dropParams)
 
 updateVisibility = (variable) ->
   # show/hide input fields according to the init selection

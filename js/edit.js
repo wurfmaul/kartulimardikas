@@ -360,32 +360,42 @@
     };
 
     StepForm.prototype.updateSortable = function() {
-      var dropParams, sortParams, update;
-      update = (function(_this) {
+      var autoSave, collapseNode, dropParams, expandNode, sortParams, updateExpandables;
+      autoSave = (function(_this) {
         return function() {
           _this.saveChanges();
           return true;
         };
       })(this);
+      expandNode = function(node) {
+        $(node).addClass('expanded');
+        return $(node).find('.bottom-collapsed-only').removeClass('bottom');
+      };
+      collapseNode = function(node) {
+        if ($(node).find('.expand-body .node').length === 0) {
+          $(node).removeClass('expanded');
+          return $(node).find('.bottom-collapsed-only').addClass('bottom');
+        }
+      };
+      updateExpandables = function() {
+        return SCRIPTSITE.find('.expandable').each(function() {
+          return collapseNode(this);
+        });
+      };
       sortParams = {
         connectWith: ".sortable",
         placeholder: "sortable-highlight",
-        update: update
+        forcePlaceholderSize: true,
+        greedy: true,
+        update: autoSave,
+        stop: updateExpandables
       };
       dropParams = {
         accept: ".node",
-        activeClass: "ui-state-hover",
-        hoverClass: "ui-state-active",
         greedy: true,
-        drop: function(event, ui) {
-          var from, to;
-          from = ui.helper;
-          to = event.target;
-          console.log(from);
-          console.log($(to));
-          $(to).find('.assign-from').append(from);
-          $(to).find('.hide-on-drop').hide();
-          return $(to).find('.show-on-drop').show();
+        tolerance: 'touch',
+        over: function() {
+          return expandNode(this);
         }
       };
       SCRIPTSITE.find('.sortable').each(function() {
@@ -393,9 +403,14 @@
           return $(this).sortable("destroy");
         }
       });
+      SCRIPTSITE.find('.expandable').each(function() {
+        if (($(this).droppable("instance") != null)) {
+          return $(this).droppable("destroy");
+        }
+      });
       SCRIPTSITE.sortable(sortParams);
       SCRIPTSITE.find('.sortable').sortable(sortParams);
-      return SCRIPTSITE.find('.droppable').droppable(dropParams);
+      return SCRIPTSITE.find('.expandable').droppable(dropParams);
     };
 
     return StepForm;

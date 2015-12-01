@@ -229,10 +229,11 @@ class AssignNode extends Node
         $collapse = is_null($fromNid) || $this->fromNode->size() === 0;
         ?>
         <!-- ASSIGN NODE -->
-        <li class="node assign-node node_<?= $this->nodeId ?> droppable" data-node-type="assign" data-node-id="<?= $this->nodeId ?>">
+        <li class="node assign-node node_<?= $this->nodeId ?> expandable <?php if (!$collapse): ?>expanded<?php endif ?>"
+            data-node-type="assign" data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr>
-                    <td class="handle node-box top left <?php if ($collapse): ?>bottom<?php endif ?>">
+                    <td class="handle node-box top left <?php if ($collapse): ?>bottom<?php endif ?> bottom-collapsed-only">
                         <span class="cursor-icon"></span>
                     </td>
                     <td class="node-box top right bottom full-width">
@@ -243,7 +244,7 @@ class AssignNode extends Node
                                     <input class="assign-to combobox" value="<?= $toValue ?>"/>
                                 </div>
                                 :=
-                                <div class="ui-widget combobox-container hide-on-drop" <?php if (!$collapse): ?>style="display: none;"<?php endif ?>>
+                                <div class="ui-widget combobox-container collapsed-only">
                                     <input class="assign-from-val combobox" value="<?= $fromValue ?>"/>
                                 </div>
                             </label>
@@ -262,12 +263,12 @@ class AssignNode extends Node
                         <?php endif ?>
                     </td>
                 </tr>
-                <tr class="show-on-drop" <?php if ($collapse): ?>style="display: none;"<?php endif ?>>
+                <tr class="expanded-only">
                     <td class="handle node-box left right bottom">
                         <span class="cursor-icon"></span>
                     </td>
                     <td>
-                        <ul class="assign-from sortable" data-node-id="<?= $fromNid ?>">
+                        <ul class="assign-from sortable expand-body" data-node-id="<?= $fromNid ?>">
                             <?php self::printNode($this->fromNode, $params) ?>
                         </ul>
                     </td>
