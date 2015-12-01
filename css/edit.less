@@ -59,6 +59,18 @@
 
 #stepPanel {
   .algorithm {
+    .expandable {
+      &:not(.expanded) {
+        .expanded-only {
+          display: none;
+        }
+      }
+      &.expanded {
+        .collapsed-only {
+          display: none;
+        }
+      }
+    }
     .sortable-highlight {
       background-color: greenyellow;
       border: 2px dashed forestgreen;

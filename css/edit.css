@@ -221,6 +221,12 @@
 #varPanel .variables .size-group {
   width: 55px;
 }
+#stepPanel .algorithm .expandable:not(.expanded) .expanded-only {
+  display: none;
+}
+#stepPanel .algorithm .expandable.expanded .collapsed-only {
+  display: none;
+}
 #stepPanel .algorithm .sortable-highlight {
   background-color: greenyellow;
   border: 2px dashed forestgreen;
