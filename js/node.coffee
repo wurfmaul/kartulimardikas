@@ -97,6 +97,10 @@ class window.AssignNode extends Node
     # return value
     { value: value }
 
+  mark: (player, node) ->
+    node = @nid if (node in [@nid, @fromNode.nid])
+    super(player, node)
+
   toJSON: ->
     { i: @nid, n: 'as', t: @to?.toJSON(), f: @fromNode.nid, v: @fromVal?.toJSON() }
 
@@ -153,6 +157,16 @@ class window.BlockNode extends Node
         value = value or curValue if (combine is 'any')
         break if (window.defaults.shortCircuit and not value)
     {value: value, next: next}
+
+  ###
+  Compute the values of all the contained nodes and store them into an array.
+  ###
+  evaluateAll: (player) ->
+    value = []
+    for n in @nodes
+      curValue = player.tree.get(n).execute(player, n).value
+      value.push(curValue)
+    value
 
   mark: (player, node) ->
     # if BlockNode itself should be marked...
@@ -259,10 +273,15 @@ class window.FunctionNode extends Node
     $('#scopes-head').append($('<li/>').attr('role', 'presentation').append(head))
     $('#scopes-body').append(scope)
     # compute active parameters
-    params = @paramsLine
+    if (@params.size()) then params = @params.evaluateAll(player)
+    else params = @paramsLine
     { scope: newScope, node: @nid, params: params }
 
-  toJSON: -> { i: @nid, n: 'ft', c: @callee, l: @paramsLine, p: @params }
+  mark: (player, node) ->
+    node = @nid if (node in [@nid, @params.nid])
+    super(player, node)
+
+  toJSON: -> { i: @nid, n: 'ft', c: @callee, l: @paramsLine, p: @params.nid }
 
   @parse: (node, tree, memory) =>
     # get callee
@@ -275,7 +294,7 @@ class window.FunctionNode extends Node
       for par in paramsRaw.split(';')
         par = @parseValue(par, node, memory)
         if (!par?) then paramsLineError = true
-        else paramsLine.push(par)
+        else paramsLine.push(par.value)
     # parse parameters from sub-nodes
     params = BlockNode.parse(@findSubNode(node, '.act-pars'), tree, memory)
     tree.push(params)
@@ -283,7 +302,7 @@ class window.FunctionNode extends Node
     @validate(node, callee > 0 and !paramsLineError)
     # create the node
     nid = tree.length
-    new @(nid, callee, paramsLine, params.nid)
+    new @(nid, callee, paramsLine, params)
 
 class window.IfNode extends Node
   constructor: (@nid, @condition, @ifBody, @elseBody, @op) ->
@@ -386,6 +405,10 @@ class window.ReturnNode extends Node
       value = @retVal.execute(player)
     $('#scope-' + player.scope + ' .return-value').val(value).focus()
     -1 # no further steps
+
+  mark: (player, node) ->
+    node = @nid if (node in [@nid, @retNode.nid])
+    super(player, node)
 
   toJSON: -> { i: @nid, n: 'rt', v: @retVal?.toJSON(), r: @retNode.nid }
 

@@ -232,7 +232,7 @@ class AssignNode extends Node
         <li class="node assign-node node_<?= $this->nodeId ?> expandable <?php if (!$collapse): ?>expanded<?php endif ?>"
             data-node-type="assign" data-node-id="<?= $this->nodeId ?>">
             <table>
-                <tr>
+                <tr class="head">
                     <td class="handle node-box top left <?php if ($collapse): ?>bottom<?php endif ?> bottom-collapsed-only">
                         <span class="cursor-icon"></span>
                     </td>
@@ -268,7 +268,7 @@ class AssignNode extends Node
                         <span class="cursor-icon"></span>
                     </td>
                     <td>
-                        <ul class="assign-from sortable expand-body" data-node-id="<?= $fromNid ?>">
+                        <ul class="body assign-from sortable expand-body" data-node-id="<?= $fromNid ?>">
                             <?php self::printNode($this->fromNode, $params) ?>
                         </ul>
                     </td>
@@ -365,7 +365,7 @@ class CommentNode extends Node
         <!-- COMMENT NODE -->
         <li class="node comment-node node_<?= $this->nodeId ?>" data-node-type="comment" data-node-id="<?= $this->nodeId ?>">
             <table>
-                <tr>
+                <tr class="head">
                     <td class="handle node-box top bottom left">
                         <span class="cursor-icon"></span>
                     </td>
@@ -449,7 +449,7 @@ class CompareNode extends Node
         <!-- COMPARE NODE -->
         <li class="node compare-node node_<?= $this->nodeId ?>" data-node-type="compare" data-node-id="<?= $this->nodeId ?>">
             <table>
-                <tr>
+                <tr class="head">
                     <td class="handle node-box top bottom left">
                         <span class="cursor-icon"></span>
                     </td>
@@ -559,12 +559,14 @@ class FunctionNode extends Node
             }
             $actParsLine = substr($actParsLine, 0, sizeof($actParsLine)-3);
         }
+        $collapse = is_null($actParsNid) || $this->actPars->size() === 0;
         ?>
         <!-- FUNCTION NODE -->
-        <li class="node function-node node_<?= $this->nodeId ?>" data-node-type="function" data-node-id="<?= $this->nodeId ?>" data-callee-id="<?= $this->calleeId ?>">
+        <li class="node function-node node_<?= $this->nodeId ?> expandable <?php if (!$collapse): ?>expanded<?php endif ?>"
+            data-node-type="function" data-node-id="<?= $this->nodeId ?>" data-callee-id="<?= $this->calleeId ?>">
             <table>
-                <tr>
-                    <td class="handle node-box top bottom left">
+                <tr class="head">
+                    <td class="handle node-box top left <?php if ($collapse): ?>bottom<?php endif ?> bottom-collapsed-only">
                         <span class="cursor-icon"></span>
                     </td>
                     <td class="node-box top right bottom full-width">
@@ -574,11 +576,13 @@ class FunctionNode extends Node
                                 <div class="ui-widget combobox-container">
                                     <input class="function-name combobox-functions" value="<?= $this->calleeName ?>"/>
                                 </div>
+                                <div class="collapsed-only act-pars-container">
                                 (
                                 <div class="ui-widget combobox-container">
                                     <input class="combobox act-pars-line" value="<?= $actParsLine ?>" />
                                 </div>
                                 )
+                                </div>
                             </label>
                             <span class="invalid-flag label label-danger"><?= TreeHelper::l10n('invalid') ?></span>
                             <button type="button" class="close node-remove" aria-label="Close">
@@ -596,12 +600,12 @@ class FunctionNode extends Node
                         <?php endif ?>
                     </td>
                 </tr>
-                <tr<?php if (is_null($actParsNid) || $actParsNid === '0' || $this->actPars->size() === 0): ?> style="display: none;"<?php endif ?>>
+                <tr class="expanded-only">
                     <td class="handle node-box left right bottom">
                         <span class="cursor-icon"></span>
                     </td>
                     <td>
-                        <ul class="act-pars sortable" data-node-id="<?= $actParsNid ?>">
+                        <ul class="body act-pars sortable expand-body" data-node-id="<?= $actParsNid ?>">
                             <?php self::printNode($this->actPars, $params) ?>
                         </ul>
                     </td>
@@ -671,7 +675,7 @@ class IfNode extends Node
         <!-- IF NODE -->
         <li class="node if-node node_<?= $this->nodeId ?>" data-node-type="if" data-node-id="<?= $this->nodeId ?>">
             <table>
-                <tr>
+                <tr class="head">
                     <td class="handle node-box top left">
                         <span class="cursor-icon"></span>
                     </td>
@@ -704,7 +708,7 @@ class IfNode extends Node
                 <tr>
                     <td class="handle node-box right left">&nbsp;</td>
                     <td>
-                        <ul class="if-condition sortable" data-node-id="<?= $condNid ?>">
+                        <ul class="body if-condition sortable" data-node-id="<?= $condNid ?>">
                             <?php self::printNode($this->cond, $params) ?>
                         </ul>
                     </td>
@@ -716,7 +720,7 @@ class IfNode extends Node
                 <tr>
                     <td class="handle node-box right left<?php if (!$showElse): ?> bottom<?php endif ?>">&nbsp;</td>
                     <td>
-                        <ul class="if-body sortable" data-node-id="<?= $thenNid ?>">
+                        <ul class="body if-body sortable" data-node-id="<?= $thenNid ?>">
                             <?php self::printNode($this->then, $params) ?>
                         </ul>
                     </td>
@@ -729,7 +733,7 @@ class IfNode extends Node
                 <tr>
                     <td class="handle node-box right bottom left">&nbsp;</td>
                     <td>
-                        <ul class="if-else sortable" data-node-id="<?= $elseNid ?>">
+                        <ul class="body if-else sortable" data-node-id="<?= $elseNid ?>">
                             <?php self::printNode($this->else, $params) ?>
                         </ul>
                     </td>
@@ -779,7 +783,7 @@ class IncNode extends Node
         <!-- INC NODE -->
         <li class="node inc-node node_<?= $this->nodeId ?>" data-node-type="inc" data-node-id="<?= $this->nodeId ?>">
             <table>
-                <tr>
+                <tr class="head">
                     <td class="handle node-box top bottom left">
                         <span class="cursor-icon"></span>
                     </td>
@@ -856,7 +860,7 @@ class ReturnNode extends Node
         <li class="node return-node node_<?= $this->nodeId ?> expandable <?php if (!$collapse): ?>expanded<?php endif ?>"
             data-node-type="return" data-node-id="<?= $this->nodeId ?>">
             <table>
-                <tr>
+                <tr class="head">
                     <td class="handle node-box top left <?php if ($collapse): ?>bottom<?php endif ?> bottom-collapsed-only">
                         <span class="cursor-icon"></span>
                     </td>
@@ -888,7 +892,7 @@ class ReturnNode extends Node
                         <span class="cursor-icon"></span>
                     </td>
                     <td>
-                        <ul class="return-value-node sortable expand-body" data-node-id="<?= $returnNid ?>">
+                        <ul class="body return-value-node sortable expand-body" data-node-id="<?= $returnNid ?>">
                             <?php self::printNode($this->returnNode, $params) ?>
                         </ul>
                     </td>
@@ -939,7 +943,7 @@ class SwapNode extends Node
         <!-- SWAP NODE -->
         <li class="node swap-node node_<?= $this->nodeId ?>" data-node-type="swap" data-node-id="<?= $this->nodeId ?>">
             <table>
-                <tr>
+                <tr class="head">
                     <td class="handle node-box top bottom left">
                         <span class="cursor-icon"></span>
                     </td>
@@ -1005,7 +1009,7 @@ class ValueNode extends Node
         <!-- VALUE NODE -->
         <li class="node value-node node_<?= $this->nodeId ?>" data-node-type="value" data-node-id="<?= $this->nodeId ?>">
             <table>
-                <tr>
+                <tr class="head">
                     <td class="handle node-box top left bottom">
                         <span class="cursor-icon"></span>
                     </td>
@@ -1119,7 +1123,7 @@ class WhileNode extends Node
                 <tr>
                     <td class="handle node-box right left">&nbsp;</td>
                     <td>
-                        <ul class="while-condition sortable" data-node-id="<?= $condNid ?>">
+                        <ul class="body while-condition sortable" data-node-id="<?= $condNid ?>">
                             <?php self::printNode($this->cond, $params) ?>
                         </ul>
                     </td>
@@ -1131,7 +1135,7 @@ class WhileNode extends Node
                 <tr>
                     <td class="handle node-box right bottom left">&nbsp;</td>
                     <td>
-                        <ul class="while-body sortable" data-node-id="<?= $bodyNid ?>">
+                        <ul class="body while-body sortable" data-node-id="<?= $bodyNid ?>">
                             <?php self::printNode($this->body, $params) ?>
                         </ul>
                     </td>

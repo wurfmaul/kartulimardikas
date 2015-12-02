@@ -207,6 +207,7 @@ $l10n['runtime_errors'] = [
     'divide_by_zero' => "Divisionen dürfen nicht 0 als Nenner haben!",
     'no_condition' => "Es wurden keine Bedingungen angegeben.",
     'function_load' => "Konnte Funktion '%1' nicht laden!",
+    'function_params' => "Ungültige Anzahl an Parametern! Gegeben: %1 Erwartet: %2",
 ];
 
 // EDIT

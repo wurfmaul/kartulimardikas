@@ -229,6 +229,7 @@ class StepForm
     node.hide('slow', =>
       node.remove()
       @varForm.updateVarCount()
+      @updateExpandables()
       @saveChanges()
     )
 
@@ -252,6 +253,13 @@ class StepForm
     parent.find('.node-remove').off('click').click (event) =>
       @removeNode($(event.currentTarget).parents('.node:first'))
 
+  updateExpandables: ->
+    SCRIPTSITE.find('.expandable').each(->
+      if ($(this).find('.expand-body .node').length is 0)
+        $(this).removeClass('expanded')
+        $(this).find('.bottom-collapsed-only').addClass('bottom')
+    )
+
   updateSortable: ->
     autoSave = =>
       @saveChanges()
@@ -259,27 +267,19 @@ class StepForm
     expandNode = (node) ->
       $(node).addClass('expanded')
       $(node).find('.bottom-collapsed-only').removeClass('bottom')
-    collapseNode = (node) ->
-      if ($(node).find('.expand-body .node').length is 0)
-        $(node).removeClass('expanded')
-        $(node).find('.bottom-collapsed-only').addClass('bottom')
-    updateExpandables = ->
-      SCRIPTSITE.find('.expandable').each(->
-        collapseNode(this)
-      )
 
     sortParams =
       connectWith: ".sortable"
       placeholder: "sortable-highlight"
       forcePlaceholderSize: true
       greedy: true
+      tolerance: 'pointer'
       update: autoSave
-      stop: updateExpandables
+      stop: @updateExpandables
 
     dropParams =
       accept: ".node"
-      greedy: true
-      tolerance: 'touch'
+      tolerance: 'pointer'
       over: -> expandNode(this)
 
     # remove drag and drop completely

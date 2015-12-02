@@ -114,11 +114,15 @@ class Player
       @play() # pause
       @tempo = 1
     init(scope, @tempo)
-    # load the parameters
     player = players[scope]
-    $('#scope-' + scope).find('.variables .parameter').each(->
+    # load the parameters
+    formPars = $('#scope-' + scope).find('.variables .parameter')
+    if (formPars.length isnt params.length)
+      @handleError(new ExecutionError('function_pars', params.length, formPars.length))
+      return false
+    formPars.each(->
       vid = $(this).data('vid')
-      value = params.shift().value
+      value = params.shift()
       player.memory.set(vid, value)
       player.stats.writeVar(vid, value)
     )

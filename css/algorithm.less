@@ -38,17 +38,8 @@
         display: none;
       }
 
-      &.expandable {
-        &:not(.expanded) {
-          .expanded-only {
-            display: none;
-          }
-        }
-        &.expanded {
-          .collapsed-only {
-            display: none;
-          }
-        }
+      &.expandable:not(.expanded) > table > tbody > tr.expanded-only {
+        display: none;
       }
 
       .node-box {
@@ -102,6 +93,14 @@
         &.cursor > table > tbody > tr > td.node-box {
           background-color: @color-strong;
         }
+        // mind the last body
+        tr:not(:last-child) .body {
+          padding-bottom: 1px;
+        }
+        // hide elements of expandable nodes
+        &.expanded > table > tbody > tr.head .collapsed-only {
+          display: none;
+        }
       }
 
       &.assign-node {
@@ -115,12 +114,12 @@
       }
       &.function-node {
         .nodeStyle(@operations-color);
+        .act-pars-container {
+          display: inline-block;
+        }
       }
       &.if-node {
         .nodeStyle(@structure-color);
-        .if-condition, .if-body {
-          padding-bottom: 1px;
-        }
       }
       &.inc-node {
         .nodeStyle(@operations-color);
@@ -136,9 +135,6 @@
       }
       &.while-node {
         .nodeStyle(@structure-color);
-        .while-condition {
-          padding-bottom: 1px;
-        }
       }
     }
   }

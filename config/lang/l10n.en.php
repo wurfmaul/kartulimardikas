@@ -207,6 +207,7 @@ $l10n['runtime_errors'] = [
     'divide_by_zero' => "Division cannot have zero as denominator!",
     'no_condition' => "There were no conditions specified.",
     'function_load' => "Could not load function '%1'!",
+    'function_params' => "Invalid amount of parameters! Given: %1 Expected: %2",
 ];
 
 // EDIT

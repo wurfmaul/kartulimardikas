@@ -21,10 +21,7 @@
 .algorithm ul .node .invalid-flag {
   display: none;
 }
-.algorithm ul .node.expandable:not(.expanded) .expanded-only {
-  display: none;
-}
-.algorithm ul .node.expandable.expanded .collapsed-only {
+.algorithm ul .node.expandable:not(.expanded) > table > tbody > tr.expanded-only {
   display: none;
 }
 .algorithm ul .node .node-box {
@@ -79,6 +76,12 @@
 .algorithm ul .node.assign-node.cursor > table > tbody > tr > td.node-box {
   background-color: #ffb181;
 }
+.algorithm ul .node.assign-node tr:not(:last-child) .body {
+  padding-bottom: 1px;
+}
+.algorithm ul .node.assign-node.expanded > table > tbody > tr.head .collapsed-only {
+  display: none;
+}
 .algorithm ul .node.comment-node > table > tbody > tr > td.node-box {
   background-color: #e6e6e6;
 }
@@ -88,6 +91,12 @@
 }
 .algorithm ul .node.comment-node.cursor > table > tbody > tr > td.node-box {
   background-color: #808080;
+}
+.algorithm ul .node.comment-node tr:not(:last-child) .body {
+  padding-bottom: 1px;
+}
+.algorithm ul .node.comment-node.expanded > table > tbody > tr.head .collapsed-only {
+  display: none;
 }
 .algorithm ul .node.compare-node > table > tbody > tr > td.node-box {
   background-color: #ffefe6;
@@ -99,6 +108,12 @@
 .algorithm ul .node.compare-node.cursor > table > tbody > tr > td.node-box {
   background-color: #ffb181;
 }
+.algorithm ul .node.compare-node tr:not(:last-child) .body {
+  padding-bottom: 1px;
+}
+.algorithm ul .node.compare-node.expanded > table > tbody > tr.head .collapsed-only {
+  display: none;
+}
 .algorithm ul .node.function-node > table > tbody > tr > td.node-box {
   background-color: #ffefe6;
 }
@@ -108,6 +123,15 @@
 }
 .algorithm ul .node.function-node.cursor > table > tbody > tr > td.node-box {
   background-color: #ffb181;
+}
+.algorithm ul .node.function-node tr:not(:last-child) .body {
+  padding-bottom: 1px;
+}
+.algorithm ul .node.function-node.expanded > table > tbody > tr.head .collapsed-only {
+  display: none;
+}
+.algorithm ul .node.function-node .act-pars-container {
+  display: inline-block;
 }
 .algorithm ul .node.if-node > table > tbody > tr > td.node-box {
   background-color: #f0fae9;
@@ -119,9 +143,11 @@
 .algorithm ul .node.if-node.cursor > table > tbody > tr > td.node-box {
   background-color: #b2e792;
 }
-.algorithm ul .node.if-node .if-condition,
-.algorithm ul .node.if-node .if-body {
+.algorithm ul .node.if-node tr:not(:last-child) .body {
   padding-bottom: 1px;
+}
+.algorithm ul .node.if-node.expanded > table > tbody > tr.head .collapsed-only {
+  display: none;
 }
 .algorithm ul .node.inc-node > table > tbody > tr > td.node-box {
   background-color: #ffefe6;
@@ -133,6 +159,12 @@
 .algorithm ul .node.inc-node.cursor > table > tbody > tr > td.node-box {
   background-color: #ffb181;
 }
+.algorithm ul .node.inc-node tr:not(:last-child) .body {
+  padding-bottom: 1px;
+}
+.algorithm ul .node.inc-node.expanded > table > tbody > tr.head .collapsed-only {
+  display: none;
+}
 .algorithm ul .node.return-node > table > tbody > tr > td.node-box {
   background-color: #ffefe6;
 }
@@ -142,6 +174,12 @@
 }
 .algorithm ul .node.return-node.cursor > table > tbody > tr > td.node-box {
   background-color: #ffb181;
+}
+.algorithm ul .node.return-node tr:not(:last-child) .body {
+  padding-bottom: 1px;
+}
+.algorithm ul .node.return-node.expanded > table > tbody > tr.head .collapsed-only {
+  display: none;
 }
 .algorithm ul .node.swap-node > table > tbody > tr > td.node-box {
   background-color: #ffefe6;
@@ -153,6 +191,12 @@
 .algorithm ul .node.swap-node.cursor > table > tbody > tr > td.node-box {
   background-color: #ffb181;
 }
+.algorithm ul .node.swap-node tr:not(:last-child) .body {
+  padding-bottom: 1px;
+}
+.algorithm ul .node.swap-node.expanded > table > tbody > tr.head .collapsed-only {
+  display: none;
+}
 .algorithm ul .node.value-node > table > tbody > tr > td.node-box {
   background-color: #f7ecf8;
 }
@@ -162,6 +206,12 @@
 }
 .algorithm ul .node.value-node.cursor > table > tbody > tr > td.node-box {
   background-color: #d5a2da;
+}
+.algorithm ul .node.value-node tr:not(:last-child) .body {
+  padding-bottom: 1px;
+}
+.algorithm ul .node.value-node.expanded > table > tbody > tr.head .collapsed-only {
+  display: none;
 }
 .algorithm ul .node.while-node > table > tbody > tr > td.node-box {
   background-color: #f0fae9;
@@ -173,8 +223,11 @@
 .algorithm ul .node.while-node.cursor > table > tbody > tr > td.node-box {
   background-color: #b2e792;
 }
-.algorithm ul .node.while-node .while-condition {
+.algorithm ul .node.while-node tr:not(:last-child) .body {
   padding-bottom: 1px;
+}
+.algorithm ul .node.while-node.expanded > table > tbody > tr.head .collapsed-only {
+  display: none;
 }
 #infoPanel .description-group {
   margin-bottom: 5px;

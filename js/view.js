@@ -127,7 +127,7 @@
     };
 
     Player.prototype.callFunction = function(scope, params) {
-      var player;
+      var formPars, player;
       this.setControls([0, 0, 0, 0]);
       if (this.timer != null) {
         this.play();
@@ -135,10 +135,15 @@
       }
       init(scope, this.tempo);
       player = players[scope];
-      $('#scope-' + scope).find('.variables .parameter').each(function() {
+      formPars = $('#scope-' + scope).find('.variables .parameter');
+      if (formPars.length !== params.length) {
+        this.handleError(new ExecutionError('function_pars', params.length, formPars.length));
+        return false;
+      }
+      formPars.each(function() {
         var value, vid;
         vid = $(this).data('vid');
-        value = params.shift().value;
+        value = params.shift();
         player.memory.set(vid, value);
         return player.stats.writeVar(vid, value);
       });

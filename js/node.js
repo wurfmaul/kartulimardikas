@@ -156,6 +156,13 @@
       };
     };
 
+    AssignNode.prototype.mark = function(player, node) {
+      if ((node === this.nid || node === this.fromNode.nid)) {
+        node = this.nid;
+      }
+      return AssignNode.__super__.mark.call(this, player, node);
+    };
+
     AssignNode.prototype.toJSON = function() {
       var ref, ref1;
       return {
@@ -258,6 +265,23 @@
         value: value,
         next: next
       };
+    };
+
+
+    /*
+    Compute the values of all the contained nodes and store them into an array.
+     */
+
+    BlockNode.prototype.evaluateAll = function(player) {
+      var curValue, j, len, n, ref, value;
+      value = [];
+      ref = this.nodes;
+      for (j = 0, len = ref.length; j < len; j++) {
+        n = ref[j];
+        curValue = player.tree.get(n).execute(player, n).value;
+        value.push(curValue);
+      }
+      return value;
     };
 
     BlockNode.prototype.mark = function(player, node) {
@@ -458,12 +482,23 @@
       head.text(scope.find('.algorithm-name').text());
       $('#scopes-head').append($('<li/>').attr('role', 'presentation').append(head));
       $('#scopes-body').append(scope);
-      params = this.paramsLine;
+      if (this.params.size()) {
+        params = this.params.evaluateAll(player);
+      } else {
+        params = this.paramsLine;
+      }
       return {
         scope: newScope,
         node: this.nid,
         params: params
       };
+    };
+
+    FunctionNode.prototype.mark = function(player, node) {
+      if ((node === this.nid || node === this.params.nid)) {
+        node = this.nid;
+      }
+      return FunctionNode.__super__.mark.call(this, player, node);
     };
 
     FunctionNode.prototype.toJSON = function() {
@@ -472,7 +507,7 @@
         n: 'ft',
         c: this.callee,
         l: this.paramsLine,
-        p: this.params
+        p: this.params.nid
       };
     };
 
@@ -490,7 +525,7 @@
           if (par == null) {
             paramsLineError = true;
           } else {
-            paramsLine.push(par);
+            paramsLine.push(par.value);
           }
         }
       }
@@ -498,7 +533,7 @@
       tree.push(params);
       FunctionNode.validate(node, callee > 0 && !paramsLineError);
       nid = tree.length;
-      return new FunctionNode(nid, callee, paramsLine, params.nid);
+      return new FunctionNode(nid, callee, paramsLine, params);
     };
 
     return FunctionNode;
@@ -680,6 +715,13 @@
       }
       $('#scope-' + player.scope + ' .return-value').val(value).focus();
       return -1;
+    };
+
+    ReturnNode.prototype.mark = function(player, node) {
+      if ((node === this.nid || node === this.retNode.nid)) {
+        node = this.nid;
+      }
+      return ReturnNode.__super__.mark.call(this, player, node);
     };
 
     ReturnNode.prototype.toJSON = function() {

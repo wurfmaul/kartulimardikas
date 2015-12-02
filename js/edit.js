@@ -322,6 +322,7 @@
         return function() {
           node.remove();
           _this.varForm.updateVarCount();
+          _this.updateExpandables();
           return _this.saveChanges();
         };
       })(this));
@@ -359,8 +360,17 @@
       })(this));
     };
 
+    StepForm.prototype.updateExpandables = function() {
+      return SCRIPTSITE.find('.expandable').each(function() {
+        if ($(this).find('.expand-body .node').length === 0) {
+          $(this).removeClass('expanded');
+          return $(this).find('.bottom-collapsed-only').addClass('bottom');
+        }
+      });
+    };
+
     StepForm.prototype.updateSortable = function() {
-      var autoSave, collapseNode, dropParams, expandNode, sortParams, updateExpandables;
+      var autoSave, dropParams, expandNode, sortParams;
       autoSave = (function(_this) {
         return function() {
           _this.saveChanges();
@@ -371,29 +381,18 @@
         $(node).addClass('expanded');
         return $(node).find('.bottom-collapsed-only').removeClass('bottom');
       };
-      collapseNode = function(node) {
-        if ($(node).find('.expand-body .node').length === 0) {
-          $(node).removeClass('expanded');
-          return $(node).find('.bottom-collapsed-only').addClass('bottom');
-        }
-      };
-      updateExpandables = function() {
-        return SCRIPTSITE.find('.expandable').each(function() {
-          return collapseNode(this);
-        });
-      };
       sortParams = {
         connectWith: ".sortable",
         placeholder: "sortable-highlight",
         forcePlaceholderSize: true,
         greedy: true,
+        tolerance: 'pointer',
         update: autoSave,
-        stop: updateExpandables
+        stop: this.updateExpandables
       };
       dropParams = {
         accept: ".node",
-        greedy: true,
-        tolerance: 'touch',
+        tolerance: 'pointer',
         over: function() {
           return expandNode(this);
         }
