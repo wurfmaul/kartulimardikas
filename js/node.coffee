@@ -145,7 +145,8 @@ class window.BlockNode extends Node
       { value: value }
 
   executeAll: (player, node, combine) ->
-    value = combine is 'all'
+    all = combine is window.defaults.execute.all
+    value = all
     next = -1
     for n,i in @nodes
       if (node < n)
@@ -153,8 +154,10 @@ class window.BlockNode extends Node
         break
       else
         curValue = player.tree.get(n).execute(player, n).value
-        value = value and curValue if (combine is 'all')
-        value = value or curValue if (combine is 'any')
+        if (all)
+          value = value and curValue
+        else
+          value = value or curValue
         break if (window.defaults.shortCircuit and not value)
     {value: value, next: next}
 

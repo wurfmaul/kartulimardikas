@@ -5,7 +5,7 @@ class window.Value
   @read: (source, player) ->
     switch (source.kind)
       when 'index'
-        index = source.index.execute(player)
+        index = source.index.execute(player) + 0
         player.stats.readArrayVar(source.vid, index)
         value = player.memory.arrayGet(source.vid, index)
       when 'var'

@@ -239,8 +239,9 @@
     };
 
     BlockNode.prototype.executeAll = function(player, node, combine) {
-      var curValue, i, j, len, n, next, ref, value;
-      value = combine === 'all';
+      var all, curValue, i, j, len, n, next, ref, value;
+      all = combine === window.defaults.execute.all;
+      value = all;
       next = -1;
       ref = this.nodes;
       for (i = j = 0, len = ref.length; j < len; i = ++j) {
@@ -250,10 +251,9 @@
           break;
         } else {
           curValue = player.tree.get(n).execute(player, n).value;
-          if (combine === 'all') {
+          if (all) {
             value = value && curValue;
-          }
-          if (combine === 'any') {
+          } else {
             value = value || curValue;
           }
           if (window.defaults.shortCircuit && !value) {

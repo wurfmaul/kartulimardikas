@@ -85,6 +85,21 @@ if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
         'shortCircuit': <?= SHORT_CIRCUIT ?>,
         'maxRandInt': <?= MAX_RANDOM_INT ?>
     };
+    window.defaults.init = {
+        'custom': "<?= VarValue::CUSTOM_INIT ?>",
+        'random': "<?= VarValue::RANDOM_INIT ?>",
+        'param': "<?= VarValue::PARAMETER_INIT ?>",
+        'no': "<?= VarValue::NO_INIT ?>"
+    };
+    window.defaults.type = {
+        'array': "<?= DataType::ARRAY_TYPE ?>",
+        'bool': "<?= DataType::BOOL_TYPE ?>",
+        'int': "<?= DataType::INT_TYPE ?>"
+    };
+    window.defaults.execute = {
+        'all': "<?= BlockNode::EXECUTE_ALL ?>",
+        'any': "<?= BlockNode::EXECUTE_ANY ?>"
+    };
     window.errorCodes = {
         <?php foreach ($l10n['runtime_errors'] as $key => $value): ?>
         '<?= $key ?>': "<?= $value ?>",

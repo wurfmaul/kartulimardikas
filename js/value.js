@@ -15,7 +15,7 @@
       var index, value, vid;
       switch (source.kind) {
         case 'index':
-          index = source.index.execute(player);
+          index = source.index.execute(player) + 0;
           player.stats.readArrayVar(source.vid, index);
           value = player.memory.arrayGet(source.vid, index);
           break;

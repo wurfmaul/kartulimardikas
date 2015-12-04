@@ -138,7 +138,7 @@ window.initValueInput = (elem) ->
         target = elem.target
     )
     if (!comboVal)
-      init.val('C')
+      init.val(window.defaults.init.custom)
 
     # show/hide type selection
     type = elem.find('.type-group')
@@ -147,8 +147,10 @@ window.initValueInput = (elem) ->
       # show type option
       typeInput = type.show('slow').find('.type').focus()
       # deal with size option
-      if (typeInput.val().charAt(0) is '[') then size.show('slow')
-      else size.hide('slow')
+      if (typeInput.val().charAt(0) is window.defaults.type.array)
+        size.show('slow')
+      else
+        size.hide('slow')
     else
       # hide type and size option
       type.hide('slow')

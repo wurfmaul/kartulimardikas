@@ -280,6 +280,9 @@ class AssignNode extends Node
 
 class BlockNode extends Node
 {
+    const EXECUTE_ALL = 'l';
+    const EXECUTE_ANY = 'y';
+
     /** @var array */
     protected $nodes;
 
@@ -313,7 +316,7 @@ class BlockNode extends Node
             $source .= $node->getSource($params);
             if ($index < sizeof($this->nodes) - 1) // not the last node
                 if ($combine) {
-                    $source .= $combine === 'any' ? ' or ' : ' and ';
+                    $source .= $combine === self::EXECUTE_ALL ? ' or ' : ' and ';
                 } else {
                     $source .= PHP_EOL;
                 }

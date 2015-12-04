@@ -154,13 +154,13 @@
         }
       });
       if (!comboVal) {
-        init.val('C');
+        init.val(window.defaults.init.custom);
       }
       type = elem.find('.type-group');
       size = elem.find('.size-group');
       if ((target != null) && target === '.type') {
         typeInput = type.show('slow').find('.type').focus();
-        if (typeInput.val().charAt(0) === '[') {
+        if (typeInput.val().charAt(0) === window.defaults.type.array) {
           return size.show('slow');
         } else {
           return size.hide('slow');
