@@ -64,7 +64,7 @@ window.initFuncInput = (elem) ->
 ###
   Prepare combo boxes for variable selection
 ###
-window.initVarInput = (elem) ->
+window.initVarSearch = () ->
   # get all available variables
   vars = []
   $('.varRow').not('#var-prototype').each(->
@@ -72,34 +72,40 @@ window.initVarInput = (elem) ->
   )
   # the three options for variables: variable, array or property selection
   properties = ["", "[*]", ".length"]
+
+  window.varSearch = (request, response) ->
+  # the entered search term
+    val = request.term
+    if (val is "")
+  # use var names for empty term
+      @src = vars
+    else if ($.inArray(val, vars) > -1)
+  # use var operations if a variable name was typed/selected
+      newSrc = []
+      $.each(properties, (i, elem) ->
+        newSrc.push(
+          value: val + elem
+          label: val + elem
+          variable: val
+        )
+      )
+      @src = newSrc
+    # try to find a match in the array of possible matches
+    matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i")
+    response($.grep(@src, (value)->
+      value = value.label || value.value || value
+      matcher.test(value)
+    ))
+window.initVarInput = (elem) ->
+  # deactivate old combo box
   if (elem.autocomplete("instance")?)
     elem.autocomplete("destroy")
+  # create new combo box
   elem.autocomplete(
     delay: 0
     minLength: 0
     source: (request, response) ->
-      # the entered search term
-      val = request.term
-      if (val is "")
-        # use var names for empty term
-        @src = vars
-      else if ($.inArray(val, vars) > -1)
-        # use var operations if a variable name was typed/selected
-        newSrc = []
-        $.each(properties, (i, elem) ->
-          newSrc.push(
-            value: val + elem
-            label: val + elem
-            variable: val
-          )
-        )
-        @src = newSrc
-      # try to find a match in the array of possible matches
-      matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i")
-      response($.grep(@src, (value)->
-        value = value.label || value.value || value
-        matcher.test(value)
-      ))
+      window.varSearch(request, response)
     select: (event, ui) ->
       val = ui.item.variable ? ui.item.label
       $(this).autocomplete("search", val)

@@ -93,6 +93,7 @@ class Api
             varRow.find('.view .details').hide()
           varRow.find('.view').show()
           initVarInput($('.insertStepsHere').find('.combobox'))
+          initVarSearch()
       error: (jqXHR, textStatus, errorThrown) => # if request failed
         @_printError("Request Error: " + errorThrown)
     )
@@ -111,7 +112,10 @@ class Api
         else
           @_printSuccess(data['success'])
           # hide and remove row
-          $('#var-' + vid).hide('slow', -> $(this).remove())
+          $('#var-' + vid).hide('slow', ->
+            $(this).remove()
+            initVarSearch()
+          )
       error: (jqXHR, textStatus, errorThrown) => # if request failed
         @_printError("Request Error: " + errorThrown)
     )
@@ -207,9 +211,13 @@ class VariableForm
 
   performEdit: (vid) ->
     varRow = $('#var-' + vid)
-    # TODO allow renaming of variables
     initValueInput(varRow)
-    varRow.find('.edit').show().find('.name').attr('disabled', 'disabled')
+    count = varRow.find('.counter').text()
+    if (count > 0)
+      varRow.find('.edit').find('.name').attr('disabled', 'disabled')
+    else
+      varRow.find('.edit').find('.name').removeAttr('disabled')
+    varRow.find('.edit').show()
     varRow.find('.view').hide()
 
   performRemove: (vid) ->
@@ -249,6 +257,7 @@ class StepForm
 
   updateActionHandlers: (parent) ->
     # update action handlers
+    initVarSearch()
     initVarInput(parent.find('.combobox'))
     initFuncInput(parent.find('.combobox-functions'))
     parent.find('input, textarea').off('blur').blur => @saveChanges() # save when leaving inputs

@@ -375,6 +375,11 @@ require_once(BASEDIR . 'partials/headers/algorithmHeader.phtml');
         window.defaults = {
             'section': <?= SECTIONS_EDIT ?>
         };
+        window.defaults.type = {
+            'array': "<?= DataType::ARRAY_TYPE ?>",
+            'bool': "<?= DataType::BOOL_TYPE ?>",
+            'int': "<?= DataType::INT_TYPE ?>"
+        };
     </script>
 <?php else: ?>
     <div class="alert alert-danger" role="alert">

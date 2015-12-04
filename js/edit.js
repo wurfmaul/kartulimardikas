@@ -125,7 +125,8 @@
                 varRow.find('.view .details').hide();
               }
               varRow.find('.view').show();
-              return initVarInput($('.insertStepsHere').find('.combobox'));
+              initVarInput($('.insertStepsHere').find('.combobox'));
+              return initVarSearch();
             }
           };
         })(this),
@@ -153,7 +154,8 @@
             } else {
               _this._printSuccess(data['success']);
               return $('#var-' + vid).hide('slow', function() {
-                return $(this).remove();
+                $(this).remove();
+                return initVarSearch();
               });
             }
           };
@@ -290,10 +292,16 @@
     };
 
     VariableForm.prototype.performEdit = function(vid) {
-      var varRow;
+      var count, varRow;
       varRow = $('#var-' + vid);
       initValueInput(varRow);
-      varRow.find('.edit').show().find('.name').attr('disabled', 'disabled');
+      count = varRow.find('.counter').text();
+      if (count > 0) {
+        varRow.find('.edit').find('.name').attr('disabled', 'disabled');
+      } else {
+        varRow.find('.edit').find('.name').removeAttr('disabled');
+      }
+      varRow.find('.edit').show();
       return varRow.find('.view').hide();
     };
 
@@ -343,6 +351,7 @@
     };
 
     StepForm.prototype.updateActionHandlers = function(parent) {
+      initVarSearch();
       initVarInput(parent.find('.combobox'));
       initFuncInput(parent.find('.combobox-functions'));
       parent.find('input, textarea').off('blur').blur((function(_this) {

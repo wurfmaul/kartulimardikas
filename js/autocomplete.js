@@ -77,13 +77,38 @@
     Prepare combo boxes for variable selection
    */
 
-  window.initVarInput = function(elem) {
+  window.initVarSearch = function() {
     var properties, vars;
     vars = [];
     $('.varRow').not('#var-prototype').each(function() {
       return vars.push($(this).data('name'));
     });
     properties = ["", "[*]", ".length"];
+    return window.varSearch = function(request, response) {
+      var matcher, newSrc, val;
+      val = request.term;
+      if (val === "") {
+        this.src = vars;
+      } else if ($.inArray(val, vars) > -1) {
+        newSrc = [];
+        $.each(properties, function(i, elem) {
+          return newSrc.push({
+            value: val + elem,
+            label: val + elem,
+            variable: val
+          });
+        });
+        this.src = newSrc;
+      }
+      matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i");
+      return response($.grep(this.src, function(value) {
+        value = value.label || value.value || value;
+        return matcher.test(value);
+      }));
+    };
+  };
+
+  window.initVarInput = function(elem) {
     if ((elem.autocomplete("instance") != null)) {
       elem.autocomplete("destroy");
     }
@@ -91,26 +116,7 @@
       delay: 0,
       minLength: 0,
       source: function(request, response) {
-        var matcher, newSrc, val;
-        val = request.term;
-        if (val === "") {
-          this.src = vars;
-        } else if ($.inArray(val, vars) > -1) {
-          newSrc = [];
-          $.each(properties, function(i, elem) {
-            return newSrc.push({
-              value: val + elem,
-              label: val + elem,
-              variable: val
-            });
-          });
-          this.src = newSrc;
-        }
-        matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i");
-        return response($.grep(this.src, function(value) {
-          value = value.label || value.value || value;
-          return matcher.test(value);
-        }));
+        return window.varSearch(request, response);
       },
       select: function(event, ui) {
         var ref, val;
