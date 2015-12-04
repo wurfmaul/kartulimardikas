@@ -115,7 +115,46 @@ window.initVarInput = (elem) ->
   Prepare combo boxes for variable initialization
 ###
 window.initValueInput = (elem) ->
+  init = elem.find('.init')
   input = elem.find('.value')
+  # compute drop-down values
+  source = []
+  init.find('.combo-box').each(->
+    source.push(
+      value: $(this).val()
+      label: $(this).text()
+      target: $(this).data('target')
+    )
+  )
+  input.blur(->
+    # select right initialization type in select .init
+    text = $(this).val()
+    comboVal = false
+    target = null
+    $.each(source, (i, elem) ->
+      if (text is elem.label)
+        init.val(elem.value)
+        comboVal = true
+        target = elem.target
+    )
+    if (!comboVal)
+      init.val('C')
+
+    # show/hide type selection
+    type = elem.find('.type-group')
+    size = elem.find('.size-group')
+    if (target? and target is '.type')
+      # show type option
+      typeInput = type.show('slow').find('.type').focus()
+      # deal with size option
+      if (typeInput.val().charAt(0) is '[') then size.show('slow')
+      else size.hide('slow')
+    else
+      # hide type and size option
+      type.hide('slow')
+      size.hide('slow')
+      input.focusout()
+  )
   # destroy old instance of auto-completion
   if (input.autocomplete("instance")?)
     input.autocomplete("destroy")
@@ -123,7 +162,11 @@ window.initValueInput = (elem) ->
   input.autocomplete(
     delay: 0
     minLength: 0
-    source: window.initializations
+    source: source
+    select: (event, ui) ->
+      event.preventDefault()
+      input.val(ui.item.label)
+      input.blur()
   ).click(->
     # open search with basic options
     $(this).autocomplete("search", "")

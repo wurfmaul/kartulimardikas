@@ -87,7 +87,10 @@ class Api
           # change from edit mode to view mode
           varRow.find('.edit').hide()
           varRow.find('.view .cell').text(data['viewLabel'])
-          varRow.find('.view .details').text('(' + data['viewMode'] + ')') if (data['viewMode']?)
+          if (data['viewMode']?)
+            varRow.find('.view .details').text('(' + data['viewMode'] + ')').show()
+          else
+            varRow.find('.view .details').hide()
           varRow.find('.view').show()
           initVarInput($('.insertStepsHere').find('.combobox'))
       error: (jqXHR, textStatus, errorThrown) => # if request failed
@@ -168,7 +171,7 @@ class VariableForm
     newRow.find('.edit').show()
     newRow.find('.view').hide()
     newRow.show('slow')
-    initValueInput(newRow.find('.value-group'))
+    initValueInput(newRow)
     @maxVarId++
 
   updateVarCount: ->
@@ -205,7 +208,7 @@ class VariableForm
   performEdit: (vid) ->
     varRow = $('#var-' + vid)
     # TODO allow renaming of variables
-    initValueInput(varRow.find('.value-group'))
+    initValueInput(varRow)
     varRow.find('.edit').show().find('.name').attr('disabled', 'disabled')
     varRow.find('.view').hide()
 
@@ -300,7 +303,7 @@ updateVisibility = (variable) ->
   # show/hide input fields according to the init selection
   option = $(variable).find('option:selected')
   size = option.closest('.varRow').find('.size-group')
-  if (option.data('target') is '.size') then size.show('slow')
+  if (option.data('target') is '.size') then size.show('slow').find('.size').focus()
   else size.hide('slow')
 
 ###

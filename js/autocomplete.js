@@ -130,15 +130,59 @@
    */
 
   window.initValueInput = function(elem) {
-    var input;
+    var init, input, source;
+    init = elem.find('.init');
     input = elem.find('.value');
+    source = [];
+    init.find('.combo-box').each(function() {
+      return source.push({
+        value: $(this).val(),
+        label: $(this).text(),
+        target: $(this).data('target')
+      });
+    });
+    input.blur(function() {
+      var comboVal, size, target, text, type, typeInput;
+      text = $(this).val();
+      comboVal = false;
+      target = null;
+      $.each(source, function(i, elem) {
+        if (text === elem.label) {
+          init.val(elem.value);
+          comboVal = true;
+          return target = elem.target;
+        }
+      });
+      if (!comboVal) {
+        init.val('C');
+      }
+      type = elem.find('.type-group');
+      size = elem.find('.size-group');
+      if ((target != null) && target === '.type') {
+        typeInput = type.show('slow').find('.type').focus();
+        if (typeInput.val().charAt(0) === '[') {
+          return size.show('slow');
+        } else {
+          return size.hide('slow');
+        }
+      } else {
+        type.hide('slow');
+        size.hide('slow');
+        return input.focusout();
+      }
+    });
     if ((input.autocomplete("instance") != null)) {
       input.autocomplete("destroy");
     }
     return input.autocomplete({
       delay: 0,
       minLength: 0,
-      source: window.initializations
+      source: source,
+      select: function(event, ui) {
+        event.preventDefault();
+        input.val(ui.item.label);
+        return input.blur();
+      }
     }).click(function() {
       return $(this).autocomplete("search", "");
     }).focusout(function() {

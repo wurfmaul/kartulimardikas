@@ -12,19 +12,25 @@
     };
 
     Value.read = function(source, player) {
-      var index, vid;
+      var index, value, vid;
       switch (source.kind) {
         case 'index':
-          index = this.executeIndex(source.index, player);
+          index = source.index.execute(player);
           player.stats.readArrayVar(source.vid, index);
-          return player.memory.arrayGet(source.vid, index);
+          value = player.memory.arrayGet(source.vid, index);
+          break;
         case 'var':
           vid = source.vid;
           player.stats.readVar(vid);
-          return player.memory.get(vid).value;
+          value = player.memory.get(vid).value;
+          break;
         default:
           throw new ExecutionError('unknown_kind', [source.kind]);
       }
+      if (value === 'P') {
+        throw new ExecutionError('param_not_set', []);
+      }
+      return value;
     };
 
     Value.write = function(destination, value, player) {
@@ -67,11 +73,11 @@
         }
       }
       period = value.indexOf('.');
-      if (period > -1 && value.substr(period + 1) === "length") {
+      if (period > -1) {
         vid = memory.find(value.substr(0, period));
         if (vid > -1) {
           memory.count(vid);
-          return new PropValue(vid, 'length');
+          return new PropValue(vid, value.substr(period + 1));
         } else {
           return null;
         }
@@ -211,8 +217,8 @@
     CompValue.prototype.toJSON = function() {
       return {
         k: 'e',
-        l: this.left,
-        r: this.right,
+        l: this.left.toJSON(),
+        r: this.right.toJSON(),
         o: this.op
       };
     };
@@ -257,24 +263,18 @@
 
     IndexValue.prototype.execute = function(player) {
       var variable;
-      variable = player.memory.get(this.index);
-      if (variable.kind === 'const' && variable.type === 'i') {
-        return variable.value;
-      } else if (variable.kind === 'var') {
-        player.stats.readVar(variable.vid);
-        return player.memory.get(variable.vid).value;
-      } else if (variable.kind === 'comp') {
-        return this.executeValue(variable, player);
-      } else {
-        throw new ExecutionError('unsupported_index', [variable.kind]);
+      variable = player.memory.get(this.vid);
+      if (!variable.array) {
+        throw new ExecutionError('no_array_for_index', [variable.name]);
       }
+      return Value.read(this, player);
     };
 
     IndexValue.prototype.toJSON = function() {
       return {
         k: 'i',
         i: this.vid,
-        x: this.index
+        x: this.index.toJSON()
       };
     };
 

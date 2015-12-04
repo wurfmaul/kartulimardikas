@@ -30,7 +30,7 @@ if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
     <ul id="scopes-head" class="nav nav-tabs" role="tablist">
         <li role="presentation" class="active">
             <a data-target="#scope-<?= $scope ?>" aria-controls="scope-<?= $scope ?>" role="tab" data-toggle="tab" class="active scope-<?= $scope ?>">
-                <?= $__algorithm->name ?>
+                <?= ($name = $__algorithm->name) ? $name : $l10n['untitled_algorithm'] ?>
             </a>
         </li>
     </ul>

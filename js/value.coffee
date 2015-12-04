@@ -5,14 +5,19 @@ class window.Value
   @read: (source, player) ->
     switch (source.kind)
       when 'index'
-        index = @executeIndex(source.index, player)
+        index = source.index.execute(player)
         player.stats.readArrayVar(source.vid, index)
-        player.memory.arrayGet(source.vid, index)
+        value = player.memory.arrayGet(source.vid, index)
       when 'var'
         vid = source.vid
         player.stats.readVar(vid) # tell the stats, that a variable has been read
-        player.memory.get(vid).value # return the current value of the variable
+        value = player.memory.get(vid).value # return the current value of the variable
       else throw new ExecutionError('unknown_kind', [source.kind])
+
+    if (value is 'P')
+      throw new ExecutionError('param_not_set', [])
+
+    value
 
   @write: (destination, value, player) ->
     switch (destination.kind)
@@ -46,11 +51,11 @@ class window.Value
 
     # check for property (.length)
     period = value.indexOf('.')
-    if (period > -1 and value.substr(period + 1) is "length")
+    if (period > -1)
       vid = memory.find(value.substr(0, period))
       if (vid > -1)
         memory.count(vid)
-        return new PropValue(vid, 'length')
+        return new PropValue(vid, value.substr(period + 1))
       else return null
 
     # check for variable name
@@ -143,7 +148,7 @@ class CompValue extends Value
       else
         throw new ExecutionError('unknown_arithmetic_op', [@operator])
 
-  toJSON: -> {k:'e', l:@left, r:@right, o:@op}
+  toJSON: -> {k:'e', l:@left.toJSON(), r:@right.toJSON(), o:@op}
 
 class ConstValue extends Value
   constructor: (@type, @value) ->
@@ -159,18 +164,12 @@ class IndexValue extends Value
     @kind = 'index'
 
   execute: (player) ->
-    variable = player.memory.get(@index)
-    if (variable.kind is 'const' and variable.type is 'i') # ConstValue index (e.g. a[1])
-      variable.value
-    else if (variable.kind is 'var') # VarValue index (e.g. a[i])
-      player.stats.readVar(variable.vid)
-      player.memory.get(variable.vid).value
-    else if (variable.kind is 'comp') # CompValue index (e.g. a[i+1])
-      @executeValue(variable, player)
-    else
-      throw new ExecutionError('unsupported_index', [variable.kind])
+    variable = player.memory.get(@vid)
+    if (!variable.array)
+      throw new ExecutionError('no_array_for_index', [variable.name])
+    Value.read(@, player)
 
-  toJSON: -> {k:'i', i:@vid, x:@index}
+  toJSON: -> {k:'i', i:@vid, x:@index.toJSON()}
 
 class PropValue extends Value
   constructor: (@vid, @prop) ->

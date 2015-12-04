@@ -31,7 +31,7 @@ require_once(BASEDIR . 'partials/headers/algorithmHeader.phtml');
 
     // prepare variables and add prototype row to variables
     $vars = json_decode($__algorithm->variables, true);
-    $vars['prototype'] = VarValue::compress(['name' => '', 'type' => '', 'value' => '', 'size' => 2]);
+    $vars['prototype'] = VarValue::compress(['name' => '', 'type' => DataType::INT_TYPE, 'value' => '', 'size' => 2]);
     // prepare tree
     $tree = new Tree($__aid, json_decode($__algorithm->tree));
     ?>
@@ -114,45 +114,31 @@ require_once(BASEDIR . 'partials/headers/algorithmHeader.phtml');
                                 <?php foreach ($vars as $vid => $var):
                                     $var = VarValue::decompress($var);
                                     $rowVisible = ($vid === 'prototype') ? 'style="display:none"' : '';
-                                    $viewMode = $editMode = null;
                                     $viewLabel = $var->name;
+                                    $viewMode = $editMode = null;
+                                    $isList = $var->type{0} === DataType::ARRAY_TYPE;
+                                    $needsType = false;
+                                    $initType = $var->value;
 
-                                    if ($var->type === VarValue::ARRAY_TYPE) {
-                                        switch ($var->value) {
-                                            case 'R': // random
-                                                $viewMode = $l10n['array_randomized'];
-                                                $editMode = $l10n['random'];
-                                                break;
-                                            case '?': // uninitialized
-                                                $viewMode = $l10n['array_uninitialized'];
-                                                $editMode = $l10n['uninitialized'];
-                                                break;
-                                            case 'P': // parameter
-                                                $viewMode = $l10n['var_parameter'];
-                                                $editMode = $l10n['parameter'];
-                                                break;
-                                            default:
-                                                $viewLabel = sprintf($l10n['var_defined'], $var->name, $var->value);
-                                                $editMode = $var->value;
-                                        }
-                                    } else {
-                                        switch ($var->value) {
-                                            case 'R': // random
-                                                $viewMode = $l10n['var_randomized'];
-                                                $editMode = $l10n['random'];
-                                                break;
-                                            case '?': // uninitialized
-                                                $viewMode = $l10n['var_uninitialized'];
-                                                $editMode = $l10n['uninitialized'];
-                                                break;
-                                            case 'P': // parameter
-                                                $viewMode = $l10n['var_parameter'];
-                                                $editMode = $l10n['parameter'];
-                                                break;
-                                            default:
-                                                $viewLabel = sprintf($l10n['var_defined'], $var->name, $var->value);
-                                                $editMode = $var->value;
-                                        }
+                                    switch ($var->value) {
+                                        case VarValue::RANDOM_INIT: // random
+                                            $viewMode = sprintf($l10n[$isList ? 'array_randomized' : 'var_randomized'], $var->size);
+                                            $editMode = $l10n['random'];
+                                            $needsType = true;
+                                            break;
+                                        case VarValue::NO_INIT: // uninitialized
+                                            $viewMode = sprintf($l10n[$isList ? 'array_uninitialized' : 'var_uninitialized'], $var->size);
+                                            $editMode = $l10n['uninitialized'];
+                                            $needsType = true;
+                                            break;
+                                        case VarValue::PARAMETER_INIT: // parameter
+                                            $viewMode = $l10n['var_parameter'];
+                                            $editMode = $l10n['parameter'];
+                                            break;
+                                        default:
+                                            $initType = VarValue::CUSTOM_INIT;
+                                            $viewLabel = sprintf($l10n['var_defined'], $var->name, $var->value);
+                                            $editMode = $var->value;
                                     }
                                     ?>
                                     <tr id="var-<?= $vid ?>" class="varRow" <?= $rowVisible ?>
@@ -195,28 +181,50 @@ require_once(BASEDIR . 'partials/headers/algorithmHeader.phtml');
                                                 <label class="sr-only"></label>
                                                 <button class="form-control input-sm disabled equals">:=</button>
                                             </div>
-                                            <div class="form-group type-group">
+                                            <div class="form-group value-group">
+                                                <label class="sr-only" for="value"><?= $l10n['init_value'] ?></label>
+                                                <select class="form-control input-sm init" style="display: none;">
+                                                    <option class="combo-box" value="<?= VarValue::RANDOM_INIT ?>" data-target=".type"
+                                                        <?php if ($initType === VarValue::RANDOM_INIT): ?>selected="selected"<?php endif ?>><?= $l10n['random'] ?></option>
+                                                    <option class="combo-box" value="<?= VarValue::NO_INIT ?>" data-target=".type"
+                                                        <?php if ($initType === VarValue::NO_INIT): ?>selected="selected"<?php endif ?>><?= $l10n['uninitialized'] ?></option>
+                                                    <option class="combo-box" value="<?= VarValue::PARAMETER_INIT ?>"
+                                                        <?php if ($initType === VarValue::PARAMETER_INIT): ?>selected="selected"<?php endif ?>><?= $l10n['parameter'] ?></option>
+                                                    <option value="<?= VarValue::CUSTOM_INIT ?>"
+                                                        <?php if ($initType === VarValue::CUSTOM_INIT): ?>selected="selected"<?php endif ?>><?= $l10n['custom'] ?></option>
+                                                </select>
+                                                <input class="form-control input-sm value" value="<?= $editMode ?>" placeholder="<?= $l10n['value'] ?>" type="text">
+                                            </div>
+
+                                            <div class="form-group type-group" <?php if (!$needsType): ?>style="display: none;" <?php endif ?>>
                                                 <label class="sr-only"><?= $l10n['data_type'] ?></label>
                                                 <select class="form-control input-sm type">
                                                     <optgroup label="<?= $l10n['element'] ?>">
-                                                        <?php $type = VarValue::INT_TYPE ?>
+                                                        <?php $types = [
+                                                            DataType::INT_TYPE => $l10n['int'],
+                                                            DataType::BOOL_TYPE => $l10n['bool']
+                                                        ];
+                                                        foreach ($types as $type => $name): ?>
                                                         <option value="<?= $type ?>" <?php if ($var->type === $type): ?>selected="selected"<?php endif ?>>
-                                                            <?= $l10n['int'] ?>
+                                                            <?= $name ?>
                                                         </option>
+                                                        <?php endforeach // types ?>
                                                     </optgroup>
                                                     <optgroup label="<?= $l10n['array'] ?>">
-                                                        <?php $type = VarValue::ARRAY_TYPE . VarValue::INT_TYPE ?>
+                                                        <?php $types = [
+                                                            DataType::ARRAY_TYPE . DataType::INT_TYPE => $l10n['array_int'],
+                                                            DataType::ARRAY_TYPE . DataType::BOOL_TYPE => $l10n['array_bool']
+                                                        ];
+                                                        foreach ($types as $type => $name): ?>
                                                         <option value="<?= $type ?>" data-target=".size" <?php if ($var->type === $type): ?>selected="selected"<?php endif ?>>
-                                                            <?= $l10n['array_int'] ?>
+                                                            <?= $name ?>
                                                         </option>
+                                                        <?php endforeach // types ?>
                                                     </optgroup>
                                                 </select>
                                             </div>
-                                            <div class="form-group value-group">
-                                                <label class="sr-only" for="value"><?= $l10n['init_value'] ?></label>
-                                                <input class="form-control input-sm value" value="<?= $editMode ?>" placeholder="<?= $l10n['value'] ?>" type="text">
-                                            </div>
-                                            <div class="form-group size-group" <?php if (substr($var->type, 0, 5) !== 'array'): ?> style="display: none;"<?php endif ?>>
+
+                                            <div class="form-group size-group" <?php if (!$isList): ?> style="display: none;"<?php endif ?>>
                                                 <label class="sr-only"><?= $l10n['array_size'] ?></label>
                                                 <select class="form-control input-sm size">
                                                     <optgroup label="<?= $l10n['size'] ?>">
@@ -226,6 +234,7 @@ require_once(BASEDIR . 'partials/headers/algorithmHeader.phtml');
                                                     </optgroup>
                                                 </select>
                                             </div>
+
                                             <div class="tools">
                                                 <div class="btn-group btn-group-sm">
                                                     <button type="button" class="btn btn-default btn-var-check" title="<?= $l10n['check_var'] ?>">
@@ -366,12 +375,6 @@ require_once(BASEDIR . 'partials/headers/algorithmHeader.phtml');
         window.defaults = {
             'section': <?= SECTIONS_EDIT ?>
         };
-        // hand translations over to js
-        window.initializations = [
-            "<?= $l10n['random'] ?>",
-            "<?= $l10n['uninitialized'] ?>",
-            "<?= $l10n['parameter'] ?>"
-        ];
     </script>
 <?php else: ?>
     <div class="alert alert-danger" role="alert">

@@ -197,7 +197,6 @@ $l10n['runtime_errors'] = [
     'index_out_of_bounds' => "Es wurde auf ein undefiniertes Element der Liste zugegriffen! Liste '%1' hat an der Stelle %2 kein Element, sie ist %3 lang!",
     'too_many_steps' => "Das Programm konnte nicht in %1 Schritten ausgeführt werden. Das Maximum wurde erreicht.",
     'unknown_property' => "Unbekannte Eigenschaft: '%1'. Diese Eigenschaft konnte nicht berechnet werden!",
-    'unsupported_index' => "Der verwendete Index '%1' ist zu kompliziert! Nur Variablen, Konstanten und einfache Berechnungen werden unterstützt!",
     'could_not_execute_value' => "Der Wert '%1' konnte nicht ausgeführt werden!",
     'assign_to_const' => "Einer Konstante kann kein Wert zugewiesen werden: %1!",
     'assign_to_prop' => "Einer Listeneigenschaft kann kein Wert zugewiesen werden!",
@@ -208,6 +207,7 @@ $l10n['runtime_errors'] = [
     'no_condition' => "Es wurden keine Bedingungen angegeben.",
     'function_load' => "Konnte Funktion '%1' nicht laden!",
     'function_params' => "Ungültige Anzahl an Parametern! Gegeben: %1 Erwartet: %2",
+    'param_not_set' => "Parameter müssen einen Wert haben um verwendet zu werden!",
 ];
 
 // EDIT
@@ -230,7 +230,9 @@ $l10n['name'] = "Name";
 $l10n['element'] = "Element";
 $l10n['array'] = "Liste";
 $l10n['int'] = "Nummer";
+$l10n['bool'] = "Boolean";
 $l10n['array_int'] = "Liste von Nummern";
+$l10n['array_bool'] = "Liste von Booleans";
 $l10n['init'] = "Initialisierung";
 $l10n['uninitialized'] = "uninitialisiert";
 $l10n['value'] = "Wert";
@@ -241,8 +243,8 @@ $l10n['var_randomized'] = "zufälliger Wert";
 $l10n['var_uninitialized'] = "unbekannter Wert";
 $l10n['var_parameter'] = "wird Benutzer-definiert";
 $l10n['var_defined'] = "%s = %s";
-$l10n['array_randomized'] = "zufällige Listenwerte";
-$l10n['array_uninitialized'] = "unbekannte Listenwerte";
+$l10n['array_randomized'] = "%d zufällige Listenwerte";
+$l10n['array_uninitialized'] = "%d unbekannte Listenwerte";
 $l10n['init_value'] = "Initialwert";
 $l10n['array_size'] = "Länge der Liste";
 $l10n['size'] = "Länge";

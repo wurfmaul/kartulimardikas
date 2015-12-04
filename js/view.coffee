@@ -326,24 +326,37 @@ toggleComment = (element) ->
     container.toggleClass('collapsed')
   )
 
-randomInt = () ->
-  Math.floor(Math.random() * (window.defaults.maxRandInt + 1))
-
 initRandomVariables = (scope) ->
+  randomBool = ->
+    Math.floor(Math.random() * 2) is 1
+
+  randomInt = ->
+    Math.floor(Math.random() * (window.defaults.maxRandInt + 1))
+
+  initElement = (variable, numberGen) ->
+    value = numberGen()
+    $(variable).find('.value').text(value)
+    $(variable).data('value', value)
+
+  initList = (variable, numberGen) ->
+    values = []
+    $(variable).find('.value-container').each(->
+      value = numberGen()
+      $(this).find('.value').text(value)
+      values.push(value)
+    )
+    $(variable).data('value', values.join(','))
+
   scope.find('.variable.random').each(->
     switch $(this).data('type')
       when 'i' # integer elements
-        value = randomInt()
-        $(this).find('.value').text(value)
-        $(this).data('value', value)
+        initElement(this, randomInt)
       when '[i' # integer arrays
-        values = []
-        $(this).find('.value-container').each(->
-          value = randomInt()
-          $(this).find('.value').text(value)
-          values.push(value)
-        )
-        $(this).data('value', values.join(','))
+        initList(this, randomInt)
+      when 'b' # boolean elements
+        initElement(this, randomBool)
+      when '[b' # boolean list
+        initList(this, randomBool)
   )
 
 init = (scope, tempo) ->

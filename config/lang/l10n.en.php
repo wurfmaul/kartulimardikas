@@ -197,7 +197,6 @@ $l10n['runtime_errors'] = [
     'index_out_of_bounds' => "The array index is outside the legal range! Array '%1' has no element at position %2, it is only %3 long!",
     'too_many_steps' => "Could not terminate in %1 steps! The maximum number of steps is reached.",
     'unknown_property' => "Unknown property: '%1'. This property cannot be computed!",
-    'unsupported_index' => "The used index of kind '%1' is too sophisticated! Only variables, constants and simple computations are supported!",
     'could_not_execute_value' => "The value '%1' could not be executed!",
     'assign_to_const' => "A value cannot be assigned to a constant %1!",
     'assign_to_prop' => "A value cannot be assigned to an array property!",
@@ -208,6 +207,7 @@ $l10n['runtime_errors'] = [
     'no_condition' => "There were no conditions specified.",
     'function_load' => "Could not load function '%1'!",
     'function_params' => "Invalid amount of parameters! Given: %1 Expected: %2",
+    'param_not_set' => "Parameters have to be set before they can be used!",
 ];
 
 // EDIT
@@ -230,7 +230,9 @@ $l10n['name'] = "name";
 $l10n['element'] = "Element";
 $l10n['array'] = "List";
 $l10n['int'] = "number";
+$l10n['bool'] = "boolean";
 $l10n['array_int'] = "List of numbers";
+$l10n['array_bool'] = "List of booleans";
 $l10n['init'] = "Initialization";
 $l10n['uninitialized'] = "uninitialized";
 $l10n['value'] = "value";
@@ -241,8 +243,8 @@ $l10n['var_randomized'] = "random value";
 $l10n['var_uninitialized'] = "unknown value";
 $l10n['var_parameter'] = "will be defined by user";
 $l10n['var_defined'] = "%s = %s";
-$l10n['array_randomized'] = "random list values";
-$l10n['array_uninitialized'] = "unknown list values";
+$l10n['array_randomized'] = "%d random list values";
+$l10n['array_uninitialized'] = "%d unknown list values";
 $l10n['init_value'] = "Initial value";
 $l10n['array_size'] = "Array size";
 $l10n['size'] = "Size";

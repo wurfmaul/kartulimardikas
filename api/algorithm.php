@@ -29,7 +29,9 @@ class AlgorithmAPI extends AbstractAPI
 class EditAlgorithmManager
 {
     const INT_TYPE = 'i';
+    const BOOL_TYPE = 'b';
     const INT_ARRAY_TYPE = '[i';
+    const BOOL_ARRAY_TYPE = '[b';
 
     private $_uid;
     private $_aid;
@@ -170,41 +172,27 @@ class EditAlgorithmManager
         $PARAM_VALUE = $this->_l10n['parameter'];
         $viewLabel = $name;
         $viewMode = null;
-        switch ($type) {
-            // deal with int elements
-            case self::INT_TYPE:
-                if ($value === $RANDOM_VALUE) {
-                    $value = 'R';
-                    $viewMode = $this->_l10n['var_randomized'];
-                } elseif ($value === $UNINIT_VALUE) {
-                    $value = '?';
-                    $viewMode = $this->_l10n['var_uninitialized'];
-                } elseif ($value === $PARAM_VALUE) {
-                    $value = 'P';
-                    $viewMode = $this->_l10n['var_parameter'];
-                } elseif ($value !== "") {
-                    $value = intval($value);
-                    $viewLabel = sprintf($this->_l10n['var_defined'], $name, $value);
-                } else {
-                    $this->_response['error-value'] = $this->_l10n['empty_value'] . BR;
-                    unset($value);
-                }
+        $isList = $type{0} === DataType::ARRAY_TYPE;
+
+        switch ($value) {
+            case $RANDOM_VALUE: // random
+                $value = VarValue::RANDOM_INIT;
+                $viewMode = sprintf($this->_l10n[$isList ? 'array_randomized' : 'var_randomized'], $size);
                 break;
-            // deal with int arrays
-            case self::INT_ARRAY_TYPE:
-                if ($value === $RANDOM_VALUE) {
-                    $this->_checkArraySize($size);
-                    $value = 'R';
-                    $viewMode = $this->_l10n['array_randomized'];
-                } elseif ($value === $UNINIT_VALUE) {
-                    $this->_checkArraySize($size);
-                    $value = '?';
-                    $viewMode = $this->_l10n['array_uninitialized'];
-                } elseif ($value === $PARAM_VALUE) {
-                    $this->_checkArraySize($size);
-                    $value = 'P';
-                    $viewMode = $this->_l10n['var_parameter'];
-                } elseif (!empty($value)) {
+            case $UNINIT_VALUE: // uninitialized
+                $value = VarValue::NO_INIT;
+                $viewMode = sprintf($this->_l10n[$isList ? 'array_uninitialized' : 'var_uninitialized'], $size);
+                break;
+            case $PARAM_VALUE: // parameter
+                $value = VarValue::PARAMETER_INIT;
+                $viewMode = $this->_l10n['var_parameter'];
+                break;
+            case '':
+                $this->_response['error-value'] = $this->_l10n['empty_value'] . BR;
+                unset($value);
+                break;
+            default:
+                if ($isList) {
                     $newValue = array();
                     $size = 0;
                     foreach (explode(',', $value) as $val) {
@@ -212,16 +200,22 @@ class EditAlgorithmManager
                         $size++;
                     }
                     $value = implode(',', $newValue);
-                    $this->_checkArraySize($size);
-                    $viewLabel = sprintf($this->_l10n['var_defined'], $name, $value);
                 } else {
-                    $this->_response['error-value'] = $this->_l10n['empty_value'] . BR;
-                    $value = false;
+                    $data = DataType::check($value);
+                    $value = $data->val;
+                    $type = $data->type;
                 }
-                break;
-            default:
-                $this->_response['error-type'] = $this->_l10n['invalid_init'] . BR;
-                $type = false;
+                $viewLabel = sprintf($this->_l10n['var_defined'], $name, $value);
+        }
+
+        // check size of lists
+        if ($isList && isset($value)) {
+            $this->_checkArraySize($size);
+        }
+
+        if (!in_array($type, [self::INT_TYPE, self::BOOL_TYPE, self::INT_ARRAY_TYPE, self::BOOL_ARRAY_TYPE])) {
+            $this->_response['error-type'] = $this->_l10n['invalid_init'] . BR;
+            $type = false;
         }
 
         // return whatever information is still valid

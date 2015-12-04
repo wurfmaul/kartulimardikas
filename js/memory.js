@@ -21,7 +21,7 @@
           vid = $(element).data('vid');
           name = $(element).data('name');
           value = $(element).data('value');
-          array = $(element).data('type').substr(0, 5) === 'array';
+          array = $(element).data('type').charAt(0) === '[';
           _this.memory[vid] = {
             vid: vid,
             name: name,

@@ -1,11 +1,11 @@
 <?php
 abstract class Value
 {
-    const VAR_KIND   = "v";
-    const CONST_KIND = "c";
-    const INDEX_KIND = "i";
-    const PROP_KIND  = "p";
-    const COMP_KIND  = "e";
+    const VAR_KIND   = 'v';
+    const CONST_KIND = 'c';
+    const INDEX_KIND = 'i';
+    const PROP_KIND  = 'p';
+    const COMP_KIND  = 'e';
 
     /** @var string One of *_KIND. */
     public $kind;
@@ -100,14 +100,14 @@ class IndexValue extends Value
         $vars = TreeHelper::extractVars($params);
         return sprintf("%s[%s]",
             $vars[$this->vid][VarValue::KEY_NAME],
-            $this->index->parse($params)
+            $this->index->printVal($params)
         );
     }
 }
 
 class PropValue extends Value
 {
-    const LEN_PROP = "l";
+    const LEN_PROP = 'l';
 
     /** @var int */
     public $vid;
@@ -133,14 +133,16 @@ class PropValue extends Value
 
 class VarValue extends Value
 {
-    const KEY_NAME = "n";
-    const KEY_TYPE = "t";
-    const KEY_VALUE = "v";
-    const KEY_SIZE = "s";
+    const KEY_NAME = 'n';
+    const KEY_TYPE = 't';
+    const KEY_VALUE = 'v';
+    const KEY_SIZE = 's';
 
-    const ARRAY_TYPE = "[";
-    const BOOL_TYPE = "b";
-    const INT_TYPE = "i";
+    const CUSTOM_INIT = 'C';
+    const NO_INIT = '?';
+    const PARAMETER_INIT = 'P';
+    const RANDOM_INIT = 'R';
+
     private static $_MATRIX = [
         self::KEY_NAME => 'name',
         self::KEY_TYPE => 'type',
@@ -184,5 +186,27 @@ class VarValue extends Value
     {
         $vars = TreeHelper::extractVars($params);
         return $vars[$this->vid][self::KEY_NAME];
+    }
+}
+
+class DataType {
+    const ARRAY_TYPE = '[';
+    const BOOL_TYPE = 'b';
+    const INT_TYPE = 'i';
+
+    public static function check($val) {
+        $type = 'unknown';
+        $value = $val;
+
+        if (strtolower($val) === 'true' || strtolower($val) === 'false') {
+            $type = self::BOOL_TYPE;
+        } elseif (intval($val) . '' === $val) {
+            $type = self::INT_TYPE;
+            $value = intval($val);
+        }
+        return (object) [
+            'type' => $type,
+            'val' => $value
+        ];
     }
 }

@@ -120,7 +120,9 @@
               varRow.find('.edit').hide();
               varRow.find('.view .cell').text(data['viewLabel']);
               if ((data['viewMode'] != null)) {
-                varRow.find('.view .details').text('(' + data['viewMode'] + ')');
+                varRow.find('.view .details').text('(' + data['viewMode'] + ')').show();
+              } else {
+                varRow.find('.view .details').hide();
               }
               varRow.find('.view').show();
               return initVarInput($('.insertStepsHere').find('.combobox'));
@@ -245,7 +247,7 @@
       newRow.find('.edit').show();
       newRow.find('.view').hide();
       newRow.show('slow');
-      initValueInput(newRow.find('.value-group'));
+      initValueInput(newRow);
       return this.maxVarId++;
     };
 
@@ -290,7 +292,7 @@
     VariableForm.prototype.performEdit = function(vid) {
       var varRow;
       varRow = $('#var-' + vid);
-      initValueInput(varRow.find('.value-group'));
+      initValueInput(varRow);
       varRow.find('.edit').show().find('.name').attr('disabled', 'disabled');
       return varRow.find('.view').hide();
     };
@@ -421,7 +423,7 @@
     option = $(variable).find('option:selected');
     size = option.closest('.varRow').find('.size-group');
     if (option.data('target') === '.size') {
-      return size.show('slow');
+      return size.show('slow').find('.size').focus();
     } else {
       return size.hide('slow');
     }

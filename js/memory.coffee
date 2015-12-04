@@ -6,7 +6,7 @@ class window.Memory
       vid = $(element).data('vid')
       name = $(element).data('name')
       value = $(element).data('value')
-      array = $(element).data('type').substr(0, 5) is 'array'
+      array = $(element).data('type').charAt(0) is '['
       @memory[vid] =
         vid: vid, name: name, value: value, array: array, count: 0
       @original[vid] =

@@ -192,31 +192,26 @@ foreach ($tree->getScopes() as $innerScope) {
                             </thead>
                             <tbody>
                             <?php foreach ($vars as $vid => $var):
-                                // un-compress variables
-                                $var = VarValue::decompress($var);
-
                                 // process variables
+                                $var = VarValue::decompress($var);
                                 $value = $var->value;
-                                if ($var->type{0} === VarValue::ARRAY_TYPE) {
-                                    if ($var->value === 'P' && $params) {
-                                        $value = $params[$var->name];
-                                    } elseif ($var->value === '?' || $var->value === 'R' || $var->value === 'P') {
-                                        $newValue = array();
-                                        for ($i = 0; $i < $var->size; $i++)
-                                            $newValue[] = $var->value;
-                                        $value = implode(',', $newValue);
+                                $isList = $var->type{0} === DataType::ARRAY_TYPE;
+
+                                if ($var->value === VarValue::PARAMETER_INIT && $params) {
+                                    $value = $params[$var->name];
+                                } elseif ($isList && in_array($var->value, [VarValue::NO_INIT, VarValue::RANDOM_INIT, VarValue::PARAMETER_INIT])) {
+                                    $newValue = array();
+                                    for ($i = 0; $i < $var->size; $i++) {
+                                        $newValue[] = $var->value;
                                     }
-                                } else {
-                                    if ($var->value === 'P' && $params) {
-                                        $value = $params[$var->name];
-                                    }
+                                    $value = implode(',', $newValue);
                                 }
 
                                 // prepare dynamic generation
                                 $class = '';
-                                if ($var->value === 'P') {
+                                if ($var->value === VarValue::PARAMETER_INIT) {
                                     $class = ' parameter';
-                                } elseif ($var->value === 'R') {
+                                } elseif ($var->value === VarValue::RANDOM_INIT) {
                                     $class = ' random';
                                 }
                                 ?>
@@ -229,7 +224,7 @@ foreach ($tree->getScopes() as $innerScope) {
                                         <code class="name"><?= $var->name ?></code>
                                     </td>
                                     <td class="var-value">
-                                        <?php if ($var->type{0} === VarValue::ARRAY_TYPE): // deal with arrays ?>
+                                        <?php if ($isList): ?>
                                             <?php foreach (explode(',', $value) as $offset => $val): ?>
                                                 <button class="btn btn-default value-container offset_<?= $offset ?>" data-offset="<?= $offset ?>">
                                                     <span class="value"><?= $val ?></span>
@@ -238,7 +233,7 @@ foreach ($tree->getScopes() as $innerScope) {
                                                 </button>
                                                 <input class="btn btn-default value-edit offset_<?= $offset ?>" data-offset="<?= $offset ?>"/>
                                             <?php endforeach ?>
-                                        <?php else: // deal with elements ?>
+                                        <?php else: // isList ?>
                                             <button class="btn btn-default value-container">
                                                 <span class="value"><?= $value ?></span>
                                                 <span class="glyphicon glyphicon-pencil write"></span>
