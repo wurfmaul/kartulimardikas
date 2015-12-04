@@ -37,7 +37,7 @@
       var index;
       switch (destination.kind) {
         case 'index':
-          index = this.executeIndex(destination.index, player);
+          index = destination.index.execute(player);
           player.memory.arraySet(destination.vid, index, value);
           return player.stats.writeArrayVar(destination.vid, index, value);
         case 'var':
@@ -55,7 +55,7 @@
     };
 
     Value.parse = function(value, memory) {
-      var close, constant, inner, left, op, open, period, right, split, vid;
+      var close, constant, inner, left, op, open, period, property, right, split, vid;
       value = $.trim(value);
       if ((constant = DataType.parse(value))) {
         return new ConstValue(constant.type, constant.value);
@@ -73,11 +73,12 @@
         }
       }
       period = value.indexOf('.');
-      if (period > -1) {
+      property = value.substr(period + 1);
+      if (period > -1 && /^[A-Za-z]+$/.test(property)) {
         vid = memory.find(value.substr(0, period));
         if (vid > -1) {
           memory.count(vid);
-          return new PropValue(vid, value.substr(period + 1));
+          return new PropValue(vid, property);
         } else {
           return null;
         }
@@ -188,10 +189,10 @@
 
     CompValue.prototype.execute = function(player) {
       var leftVal, rightVal;
-      leftVal = value.left.execute(player);
-      rightVal = value.right.execute(player);
+      leftVal = this.left.execute(player);
+      rightVal = this.right.execute(player);
       player.stats.incArithmeticLogicOps();
-      switch (value.op) {
+      switch (this.op) {
         case '+':
           return leftVal + rightVal;
         case '-':
@@ -210,7 +211,7 @@
         case '|':
           return leftVal || rightVal;
         default:
-          throw new ExecutionError('unknown_arithmetic_op', [this.operator]);
+          throw new ExecutionError('unknown_arithmetic_op', [this.op]);
       }
     };
 
@@ -295,14 +296,14 @@
     PropValue.prototype.execute = function(player) {
       var variable;
       if (this.prop === 'length') {
-        variable = player.memory.get(value.vid);
+        variable = player.memory.get(this.vid);
         if (variable.array) {
           return variable.value.split(',').length;
         } else {
           return 1;
         }
       } else {
-        throw new ExecutionError('unknown_property', [value.prop]);
+        throw new ExecutionError('unknown_property', [this.prop]);
       }
     };
 

@@ -194,16 +194,22 @@ class DataType {
     const BOOL_TYPE = 'b';
     const INT_TYPE = 'i';
 
+    /**
+     * @param string $val The raw value.
+     * @return object Value and type of the given raw value.
+     * @throws Exception if the provided value is of no valid data type.
+     */
     public static function check($val) {
-        $type = 'unknown';
-        $value = $val;
-
         if (strtolower($val) === 'true' || strtolower($val) === 'false') {
             $type = self::BOOL_TYPE;
+            $value = $val;
         } elseif (intval($val) . '' === $val) {
             $type = self::INT_TYPE;
             $value = intval($val);
+        } else {
+            throw new Exception();
         }
+
         return (object) [
             'type' => $type,
             'val' => $value

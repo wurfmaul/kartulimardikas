@@ -375,6 +375,12 @@ require_once(BASEDIR . 'partials/headers/algorithmHeader.phtml');
         window.defaults = {
             'section': <?= SECTIONS_EDIT ?>
         };
+        window.defaults.init = {
+            'custom': "<?= VarValue::CUSTOM_INIT ?>",
+            'random': "<?= VarValue::RANDOM_INIT ?>",
+            'param': "<?= VarValue::PARAMETER_INIT ?>",
+            'no': "<?= VarValue::NO_INIT ?>"
+        };
         window.defaults.type = {
             'array': "<?= DataType::ARRAY_TYPE ?>",
             'bool': "<?= DataType::BOOL_TYPE ?>",

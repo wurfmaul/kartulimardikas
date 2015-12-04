@@ -28,11 +28,6 @@ class AlgorithmAPI extends AbstractAPI
 
 class EditAlgorithmManager
 {
-    const INT_TYPE = 'i';
-    const BOOL_TYPE = 'b';
-    const INT_ARRAY_TYPE = '[i';
-    const BOOL_ARRAY_TYPE = '[b';
-
     private $_uid;
     private $_aid;
     private $_algorithm;
@@ -192,30 +187,47 @@ class EditAlgorithmManager
                 unset($value);
                 break;
             default:
-                if ($isList) {
-                    $newValue = array();
-                    $size = 0;
-                    foreach (explode(',', $value) as $val) {
-                        $newValue[] = intval($val);
-                        $size++;
+                try {
+                    $listValues = explode(',', $value);
+                    $listSize = sizeof($listValues);
+                    if ($isList || $listSize > 1) {
+                        $newValue = [];
+                        $listType = [
+                            DataType::BOOL_TYPE => 0,
+                            DataType::INT_TYPE => 0
+                        ];
+                        foreach ($listValues as $val) {
+                            $curValue = DataType::check($val);
+                            $newValue[] = $curValue->val;
+                            $listType[$curValue->type]++;
+                        }
+                        $value = implode(',', $newValue);
+                        $size = $listSize;
+                        // compute the lists data type
+                        if ($listType[DataType::BOOL_TYPE] + $listType[DataType::INT_TYPE] === 0) {
+                            throw new Exception();
+                        }
+                        $type = DataType::ARRAY_TYPE;
+                        if ($listType[DataType::BOOL_TYPE] === 0) {
+                            $type .= DataType::INT_TYPE;
+                        } elseif ($listType[DataType::INT_TYPE] === 0) {
+                            $type .= DataType::BOOL_TYPE;
+                        }
+                    } else {
+                        $data = DataType::check($value);
+                        $value = $data->val;
+                        $type = $data->type;
                     }
-                    $value = implode(',', $newValue);
-                } else {
-                    $data = DataType::check($value);
-                    $value = $data->val;
-                    $type = $data->type;
+                    $viewLabel = sprintf($this->_l10n['var_defined'], $name, $value);
+                } catch (Exception $e) {
+                    $this->_response['error-type'] = $this->_l10n['invalid_init'] . BR;
+                    $type = false;
                 }
-                $viewLabel = sprintf($this->_l10n['var_defined'], $name, $value);
         }
 
         // check size of lists
         if ($isList && isset($value)) {
             $this->_checkArraySize($size);
-        }
-
-        if (!in_array($type, [self::INT_TYPE, self::BOOL_TYPE, self::INT_ARRAY_TYPE, self::BOOL_ARRAY_TYPE])) {
-            $this->_response['error-type'] = $this->_l10n['invalid_init'] . BR;
-            $type = false;
         }
 
         // return whatever information is still valid

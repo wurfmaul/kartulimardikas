@@ -22,7 +22,7 @@ class window.Value
   @write: (destination, value, player) ->
     switch (destination.kind)
       when 'index'
-        index = @executeIndex(destination.index, player)
+        index = destination.index.execute(player)
         player.memory.arraySet(destination.vid, index, value)
         player.stats.writeArrayVar(destination.vid, index, value)
       when 'var'
@@ -51,11 +51,12 @@ class window.Value
 
     # check for property (.length)
     period = value.indexOf('.')
-    if (period > -1)
+    property = value.substr(period + 1)
+    if (period > -1 and /^[A-Za-z]+$/.test(property))
       vid = memory.find(value.substr(0, period))
       if (vid > -1)
         memory.count(vid)
-        return new PropValue(vid, value.substr(period + 1))
+        return new PropValue(vid, property)
       else return null
 
     # check for variable name
@@ -132,10 +133,10 @@ class CompValue extends Value
     @kind = 'comp'
 
   execute: (player) ->
-    leftVal = value.left.execute(player)
-    rightVal = value.right.execute(player)
+    leftVal = @left.execute(player)
+    rightVal = @right.execute(player)
     player.stats.incArithmeticLogicOps()
-    switch value.op
+    switch @op
       when '+' then leftVal + rightVal
       when '-' then leftVal - rightVal
       when '*' then leftVal * rightVal
@@ -146,7 +147,7 @@ class CompValue extends Value
       when '&' then leftVal and rightVal
       when '|' then leftVal or rightVal
       else
-        throw new ExecutionError('unknown_arithmetic_op', [@operator])
+        throw new ExecutionError('unknown_arithmetic_op', [@op])
 
   toJSON: -> {k:'e', l:@left.toJSON(), r:@right.toJSON(), o:@op}
 
@@ -178,11 +179,11 @@ class PropValue extends Value
 
   execute: (player) ->
     if (@prop is 'length')
-      variable = player.memory.get(value.vid)
+      variable = player.memory.get(@vid)
       if (variable.array) then variable.value.split(',').length
       else 1
     else
-      throw new ExecutionError('unknown_property', [value.prop])
+      throw new ExecutionError('unknown_property', [@prop])
 
   toJSON: -> {k:'p', i:@vid, p:@prop}
 
