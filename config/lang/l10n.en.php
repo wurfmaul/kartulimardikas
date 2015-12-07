@@ -207,7 +207,7 @@ $l10n['runtime_errors'] = [
     'no_condition' => "There were no conditions specified.",
     'function_load' => "Could not load function '%1'!",
     'function_params' => "Invalid amount of parameters! Given: %1 Expected: %2",
-    'param_not_set' => "Parameters have to be set before they can be used!",
+    'var_not_initialized' => "Variables have to be initialized before they can be used!",
 ];
 
 // EDIT

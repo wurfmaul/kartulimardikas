@@ -84,23 +84,37 @@
       return vars.push($(this).data('name'));
     });
     properties = ["", "[*]", ".length"];
-    return window.varSearch = function(request, response) {
-      var matcher, newSrc, val;
-      val = request.term;
-      if (val === "") {
-        this.src = vars;
-      } else if ($.inArray(val, vars) > -1) {
+    return window.varSearch = function(request, response, elem) {
+      var cursor, fromCursor, matcher, newSrc, ref, ref1, start, term, toCursor, toStart;
+      cursor = elem[0].selectionStart;
+      toCursor = request.term.substr(0, cursor);
+      fromCursor = request.term.substr(cursor);
+      start = toCursor.search(/\w+$/);
+      toStart = request.term.substr(0, start);
+      term = (ref = (ref1 = toCursor.match(/\w+$/)) != null ? ref1[0] : void 0) != null ? ref : '';
+      console.log('term: ' + term);
+      if ($.inArray(term, vars) > -1) {
         newSrc = [];
         $.each(properties, function(i, elem) {
           return newSrc.push({
-            value: val + elem,
-            label: val + elem,
-            variable: val
+            value: toStart + term + elem + fromCursor,
+            label: term + elem,
+            variable: term
+          });
+        });
+        this.src = newSrc;
+      } else {
+        newSrc = [];
+        $.each(vars, function(i, elem) {
+          return newSrc.push({
+            value: toStart + elem + fromCursor,
+            label: elem,
+            variable: elem
           });
         });
         this.src = newSrc;
       }
-      matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i");
+      matcher = new RegExp($.ui.autocomplete.escapeRegex(term), "i");
       return response($.grep(this.src, function(value) {
         value = value.label || value.value || value;
         return matcher.test(value);
@@ -116,7 +130,7 @@
       delay: 0,
       minLength: 0,
       source: function(request, response) {
-        return window.varSearch(request, response);
+        return window.varSearch(request, response, elem);
       },
       select: function(event, ui) {
         var ref, val;

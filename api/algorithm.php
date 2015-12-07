@@ -167,7 +167,7 @@ class EditAlgorithmManager
         $PARAM_VALUE = $this->_l10n['parameter'];
         $viewLabel = $name;
         $viewMode = null;
-        $isList = $type{0} === DataType::ARRAY_TYPE;
+        $isList = DataType::isListType($type);
 
         switch ($value) {
             case $RANDOM_VALUE: // random

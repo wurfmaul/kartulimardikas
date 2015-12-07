@@ -215,4 +215,12 @@ class DataType {
             'val' => $value
         ];
     }
+
+    /**
+     * @param string $type A string representing the variable type.
+     * @return bool True if the given variable is a list.
+     */
+    public static function isListType($type) {
+        return !empty($type) && $type{0} === self::ARRAY_TYPE;
+    }
 }

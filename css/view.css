@@ -311,6 +311,13 @@
   padding: 6px 1px;
   width: 42px;
 }
+.variables .parameter-icon {
+  display: none;
+}
+.variables .parameter .parameter-icon {
+  display: inline-block;
+  float: right;
+}
 .source .code {
   font-family: "Courier New", monospace;
   display: block;

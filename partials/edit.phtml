@@ -116,7 +116,7 @@ require_once(BASEDIR . 'partials/headers/algorithmHeader.phtml');
                                     $rowVisible = ($vid === 'prototype') ? 'style="display:none"' : '';
                                     $viewLabel = $var->name;
                                     $viewMode = $editMode = null;
-                                    $isList = $var->type{0} === DataType::ARRAY_TYPE;
+                                    $isList = DataType::isListType($var->type);
                                     $needsType = false;
                                     $initType = $var->value;
 

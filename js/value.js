@@ -27,8 +27,8 @@
         default:
           throw new ExecutionError('unknown_kind', [source.kind]);
       }
-      if (value === 'P') {
-        throw new ExecutionError('param_not_set', []);
+      if (value === window.defaults.init.no) {
+        throw new ExecutionError('var_not_initialized', []);
       }
       return value;
     };

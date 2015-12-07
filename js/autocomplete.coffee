@@ -73,25 +73,45 @@ window.initVarSearch = () ->
   # the three options for variables: variable, array or property selection
   properties = ["", "[*]", ".length"]
 
-  window.varSearch = (request, response) ->
-  # the entered search term
-    val = request.term
-    if (val is "")
-  # use var names for empty term
-      @src = vars
-    else if ($.inArray(val, vars) > -1)
-  # use var operations if a variable name was typed/selected
+  window.varSearch = (request, response, elem) ->
+    cursor = elem[0].selectionStart
+    toCursor = request.term.substr(0, cursor)
+    fromCursor = request.term.substr(cursor)
+
+#    console.log('to: ' + toCursor)
+#    console.log('from: ' + fromCursor)
+
+    # the entered search term
+    start = toCursor.search(/\w+$/)
+    toStart = request.term.substr(0, start)
+    term = toCursor.match(/\w+$/)?[0] ? ''
+    console.log('term: ' + term)
+
+    if ($.inArray(term, vars) > -1)
+      # use var operations if a variable name was typed/selected
       newSrc = []
       $.each(properties, (i, elem) ->
         newSrc.push(
-          value: val + elem
-          label: val + elem
-          variable: val
+          value: toStart + term + elem + fromCursor
+          label: term + elem
+          variable: term
         )
       )
       @src = newSrc
+    else
+      # use var names for other terms
+      newSrc = []
+      $.each(vars, (i, elem) ->
+        newSrc.push(
+          value: toStart + elem + fromCursor
+          label: elem
+          variable: elem
+        )
+      )
+      @src = newSrc
+
     # try to find a match in the array of possible matches
-    matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i")
+    matcher = new RegExp($.ui.autocomplete.escapeRegex(term), "i")
     response($.grep(@src, (value)->
       value = value.label || value.value || value
       matcher.test(value)
@@ -105,7 +125,7 @@ window.initVarInput = (elem) ->
     delay: 0
     minLength: 0
     source: (request, response) ->
-      window.varSearch(request, response)
+      window.varSearch(request, response, elem)
     select: (event, ui) ->
       val = ui.item.variable ? ui.item.label
       $(this).autocomplete("search", val)

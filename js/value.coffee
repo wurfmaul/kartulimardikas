@@ -14,8 +14,8 @@ class window.Value
         value = player.memory.get(vid).value # return the current value of the variable
       else throw new ExecutionError('unknown_kind', [source.kind])
 
-    if (value is 'P')
-      throw new ExecutionError('param_not_set', [])
+    if (value is window.defaults.init.no)
+      throw new ExecutionError('var_not_initialized', [])
 
     value
 

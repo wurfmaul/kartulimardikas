@@ -195,14 +195,20 @@ foreach ($tree->getScopes() as $innerScope) {
                                 // process variables
                                 $var = VarValue::decompress($var);
                                 $value = $var->value;
-                                $isList = $var->type{0} === DataType::ARRAY_TYPE;
+                                $isList = DataType::isListType($var->type);
 
-                                if ($var->value === VarValue::PARAMETER_INIT && $params) {
-                                    $value = $params[$var->name];
-                                } elseif ($isList && in_array($var->value, [VarValue::NO_INIT, VarValue::RANDOM_INIT, VarValue::PARAMETER_INIT])) {
+                                if ($value === VarValue::PARAMETER_INIT) {
+                                    if ($params) {
+                                        $value = $params[$var->name];
+                                    } else {
+                                        $value = VarValue::NO_INIT;
+                                    }
+                                }
+
+                                if ($isList && ($value === VarValue::NO_INIT || $value === VarValue::RANDOM_INIT)) {
                                     $newValue = array();
                                     for ($i = 0; $i < $var->size; $i++) {
-                                        $newValue[] = $var->value;
+                                        $newValue[] = $value;
                                     }
                                     $value = implode(',', $newValue);
                                 }
@@ -222,6 +228,9 @@ foreach ($tree->getScopes() as $innerScope) {
                                     data-type="<?= $var->type ?>">
                                     <td>
                                         <code class="name"><?= $var->name ?></code>
+                                        <div class="parameter-icon">
+                                            <i class="fa fa-sign-in fa-rotate-90"></i>
+                                        </div>
                                     </td>
                                     <td class="var-value">
                                         <?php if ($isList): ?>
