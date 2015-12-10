@@ -460,7 +460,7 @@
     }
 
     FunctionNode.prototype.execute = function(player, node) {
-      var curNode, scope, value;
+      var curNode, params, scope, value;
       scope = player.scope;
       curNode = $('#scope-' + scope + ' .node_' + this.nid);
       if ((curNode.data('return-value') != null)) {
@@ -470,26 +470,15 @@
           value: value
         };
       }
-      return this.callFunction(player, curNode);
-    };
-
-    FunctionNode.prototype.callFunction = function(player, node) {
-      var head, newScope, params, scope;
-      newScope = player.scope + 1;
-      scope = $('#proto-scope-' + this.callee).clone(true, true).attr('id', 'scope-' + newScope);
-      head = $('<a/>').data('target', '#scope-' + newScope).addClass('scope-' + newScope);
-      head.attr('aria-controls', 'scope-' + newScope).attr('role', 'tab').attr('data-toggle', 'tab');
-      head.text(scope.find('.algorithm-name').text());
-      $('#scopes-head').append($('<li/>').attr('role', 'presentation').append(head));
-      $('#scopes-body').append(scope);
       if (this.params.size()) {
         params = this.params.evaluateAll(player);
       } else {
-        params = this.paramsLine;
+        params = [this.paramsLine.execute(player)];
       }
       return {
-        scope: newScope,
         node: this.nid,
+        callee: this.callee,
+        scope: player.scope + 1,
         params: params
       };
     };
@@ -502,31 +491,28 @@
     };
 
     FunctionNode.prototype.toJSON = function() {
+      var ref;
       return {
         i: this.nid,
         n: 'ft',
         c: this.callee,
-        l: this.paramsLine,
+        l: (ref = this.paramsLine) != null ? ref.toJSON() : void 0,
         p: this.params.nid
       };
     };
 
     FunctionNode.parse = function(node, tree, memory) {
-      var callee, j, len, nid, par, params, paramsLine, paramsLineError, paramsRaw, ref;
+      var callee, nid, par, params, paramsLine, paramsLineError, paramsRaw;
       callee = node.data('callee-id');
-      paramsLine = [];
+      paramsLine = null;
       paramsRaw = FunctionNode.findSubNode(node, '.act-pars-line').val();
       paramsLineError = false;
       if (paramsRaw !== '') {
-        ref = paramsRaw.split(';');
-        for (j = 0, len = ref.length; j < len; j++) {
-          par = ref[j];
-          par = FunctionNode.parseValue(par, node, memory);
-          if (par == null) {
-            paramsLineError = true;
-          } else {
-            paramsLine.push(par.value);
-          }
+        par = Value.parse(paramsRaw, memory);
+        if (par == null) {
+          paramsLineError = true;
+        } else {
+          paramsLine = par;
         }
       }
       params = BlockNode.parse(FunctionNode.findSubNode(node, '.act-pars'), tree, memory);

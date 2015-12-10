@@ -64,7 +64,7 @@ class Player
         if (curNode.scope?)
           # signal for a function call
           @curNode = curNode.node
-          @callFunction(curNode.scope, curNode.params)
+          @callFunction(curNode.callee, curNode.scope, curNode.params)
           return
 
         if (curNode.next? and curNode.next >= 0) then @nextCandidate = curNode.next
@@ -106,19 +106,27 @@ class Player
       return if !@step()
     @handleError(new ExecutionError('too_many_steps', [maxSteps]))
 
-  callFunction: (scope, params) ->
+  callFunction: (callee, scope, params) ->
     # deactivate navigation in outer scope
     @setControls([0,0,0,0])
     # switch to inner scope
     if @timer?
       @play() # pause
       @tempo = 1
+
+    # prepare new scope's html
+    newScope = $('#proto-scope-' + callee).clone(true, true).attr('id', 'scope-' + scope)
+    head = $('<a/>').data('target', '#scope-' + scope).addClass('scope-' + scope)
+    head.attr('aria-controls', 'scope-' + scope).attr('role', 'tab').attr('data-toggle', 'tab')
+    head.text(newScope.find('.algorithm-name').text())
+    $('#scopes-body').append(newScope)
+    # initiate new player
     init(scope, @tempo)
     player = players[scope]
     # load the parameters
-    formPars = $('#scope-' + scope).find('.variables .parameter')
+    formPars = newScope.find('.variables .parameter')
     if (formPars.length isnt params.length)
-      @handleError(new ExecutionError('function_pars', params.length, formPars.length))
+      @handleError(new ExecutionError('function_params', [params.length, formPars.length]))
       return false
     formPars.each(->
       vid = $(this).data('vid')
@@ -127,7 +135,8 @@ class Player
       player.stats.writeVar(vid, value)
     )
     # show inner scope
-    $('#scopes-head .scope-' + scope).tab('show')
+    $('#scopes-head').append($('<li/>').attr('role', 'presentation').append(head))
+    $(head).tab('show')
 
   returnFunction: (scope, value, tempo) ->
     # switch back to outer scope

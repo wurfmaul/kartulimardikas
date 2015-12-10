@@ -70,7 +70,7 @@
           curNode = this.tree.execute(this, this.curNode);
           if ((curNode.scope != null)) {
             this.curNode = curNode.node;
-            this.callFunction(curNode.scope, curNode.params);
+            this.callFunction(curNode.callee, curNode.scope, curNode.params);
             return;
           }
           if ((curNode.next != null) && curNode.next >= 0) {
@@ -126,18 +126,23 @@
       return this.handleError(new ExecutionError('too_many_steps', [maxSteps]));
     };
 
-    Player.prototype.callFunction = function(scope, params) {
-      var formPars, player;
+    Player.prototype.callFunction = function(callee, scope, params) {
+      var formPars, head, newScope, player;
       this.setControls([0, 0, 0, 0]);
       if (this.timer != null) {
         this.play();
         this.tempo = 1;
       }
+      newScope = $('#proto-scope-' + callee).clone(true, true).attr('id', 'scope-' + scope);
+      head = $('<a/>').data('target', '#scope-' + scope).addClass('scope-' + scope);
+      head.attr('aria-controls', 'scope-' + scope).attr('role', 'tab').attr('data-toggle', 'tab');
+      head.text(newScope.find('.algorithm-name').text());
+      $('#scopes-body').append(newScope);
       init(scope, this.tempo);
       player = players[scope];
-      formPars = $('#scope-' + scope).find('.variables .parameter');
+      formPars = newScope.find('.variables .parameter');
       if (formPars.length !== params.length) {
-        this.handleError(new ExecutionError('function_pars', params.length, formPars.length));
+        this.handleError(new ExecutionError('function_params', [params.length, formPars.length]));
         return false;
       }
       formPars.each(function() {
@@ -147,7 +152,8 @@
         player.memory.set(vid, value);
         return player.stats.writeVar(vid, value);
       });
-      return $('#scopes-head .scope-' + scope).tab('show');
+      $('#scopes-head').append($('<li/>').attr('role', 'presentation').append(head));
+      return $(head).tab('show');
     };
 
     Player.prototype.returnFunction = function(scope, value, tempo) {

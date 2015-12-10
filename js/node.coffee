@@ -263,41 +263,29 @@ class window.FunctionNode extends Node
       curNode.removeData('return-value')
       return { value: value }
 
-    # otherwise call function
-    @callFunction(player, curNode)
-
-  callFunction: (player, node) ->
-    newScope = player.scope + 1
-    # prepare new scope
-    scope = $('#proto-scope-' + @callee).clone(true, true).attr('id', 'scope-' + newScope)
-    head = $('<a/>').data('target', '#scope-' + newScope).addClass('scope-' + newScope)
-    head.attr('aria-controls', 'scope-' + newScope).attr('role', 'tab').attr('data-toggle', 'tab')
-    head.text(scope.find('.algorithm-name').text())
-    $('#scopes-head').append($('<li/>').attr('role', 'presentation').append(head))
-    $('#scopes-body').append(scope)
     # compute active parameters
     if (@params.size()) then params = @params.evaluateAll(player)
-    else params = @paramsLine
-    { scope: newScope, node: @nid, params: params }
+    else params = [@paramsLine.execute(player)]
+    # the rest is done by the player
+    { node: @nid, callee: @callee, scope: player.scope + 1, params: params }
 
   mark: (player, node) ->
     node = @nid if (node in [@nid, @params.nid])
     super(player, node)
 
-  toJSON: -> { i: @nid, n: 'ft', c: @callee, l: @paramsLine, p: @params.nid }
+  toJSON: -> { i: @nid, n: 'ft', c: @callee, l: @paramsLine?.toJSON(), p: @params.nid }
 
   @parse: (node, tree, memory) =>
     # get callee
     callee = node.data('callee-id')
     # parse parameters from input field
-    paramsLine = []
+    paramsLine = null
     paramsRaw = @findSubNode(node, '.act-pars-line').val()
     paramsLineError = false
     if (paramsRaw isnt '')
-      for par in paramsRaw.split(';')
-        par = @parseValue(par, node, memory)
-        if (!par?) then paramsLineError = true
-        else paramsLine.push(par.value)
+      par = Value.parse(paramsRaw, memory)
+      if (!par?) then paramsLineError = true
+      else paramsLine = par
     # parse parameters from sub-nodes
     params = BlockNode.parse(@findSubNode(node, '.act-pars'), tree, memory)
     tree.push(params)

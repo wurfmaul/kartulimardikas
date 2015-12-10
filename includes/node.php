@@ -21,10 +21,18 @@ abstract class Node
 
     const NAME_KEY = "n";
 
-    /** @var int */
+    /** @var int|string The node's identification number. */
     protected $nodeId;
-    /** @var bool */
+    /** @var bool Whether or not this node is a prototype. */
     protected $isPrototype = false;
+
+    /**
+     * @param int|string $nodeId The node's identification number.
+     */
+    protected function __construct($nodeId)
+    {
+        $this->nodeId = $nodeId;
+    }
 
     /**
      * Basically transforms stdClasses (e.g. from a JSON object) to valid Nodes.
@@ -185,7 +193,39 @@ abstract class Node
     }
 }
 
-class AssignNode extends Node
+abstract class ExpandableNode extends Node
+{
+    /** @var Value|null The  */
+    protected $collapsedVal;
+    /** @var BlockNode|null */
+    protected $expandedNode;
+
+    protected function __construct($nid, $collapsedVal, $expandedNode)
+    {
+        parent::__construct($nid);
+        $this->collapsedVal = $collapsedVal;
+        $this->expandedNode = $expandedNode;
+    }
+
+    protected function _getSource($params, $combine = false) {
+        if ($this->_isCollapsed()) {
+            // take specified value
+            return $this->printValue($this->collapsedVal, $params);
+        }
+        // take sub node (can also be empty)
+        if (!is_null($this->expandedNode)) {
+            return trim($this->expandedNode->getSource($params, $combine));
+        }
+        return '';
+    }
+
+    protected function _isCollapsed()
+    {
+        return is_null($this->expandedNode) || $this->expandedNode->size() === 0;
+    }
+}
+
+class AssignNode extends ExpandableNode
 {
     /** @var Value|null */
     protected $to;
@@ -196,7 +236,7 @@ class AssignNode extends Node
 
     public function __construct($nid, $to, $fromNode, $fromVal)
     {
-        $this->nodeId = $nid;
+        parent::__construct($nid, $fromVal, $fromNode);
         $this->to = $to;
         $this->fromNode = $fromNode;
         $this->fromVal = $fromVal;
@@ -216,7 +256,7 @@ class AssignNode extends Node
         return $this->wrapLine(
             sprintf("%s := %s",
                 $this->printValue($this->to, $params),
-                trim($this->fromNode->getSource($params))
+                $this->_getSource($params)
             )
         );
     }
@@ -226,14 +266,13 @@ class AssignNode extends Node
         $toValue = $this->printValue($this->to, $params);
         $fromValue = $this->printValue($this->fromVal, $params);
         $fromNid = is_null($this->fromNode) ? null : $this->fromNode->nodeId;
-        $collapse = is_null($fromNid) || $this->fromNode->size() === 0;
         ?>
         <!-- ASSIGN NODE -->
-        <li class="node assign-node node_<?= $this->nodeId ?> expandable <?php if (!$collapse): ?>expanded<?php endif ?>"
+        <li class="node assign-node node_<?= $this->nodeId ?> expandable <?php if (!$this->_isCollapsed()): ?>expanded<?php endif ?>"
             data-node-type="assign" data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr class="head">
-                    <td class="handle node-box top left <?php if ($collapse): ?>bottom<?php endif ?> bottom-collapsed-only">
+                    <td class="handle node-box top left <?php if ($this->_isCollapsed()): ?>bottom<?php endif ?> bottom-collapsed-only">
                         <span class="cursor-icon"></span>
                     </td>
                     <td class="node-box top right bottom full-width">
@@ -283,12 +322,18 @@ class BlockNode extends Node
     const EXECUTE_ALL = 'l';
     const EXECUTE_ANY = 'y';
 
+    protected static $COMBINATIONS = [
+        self::EXECUTE_ALL => ' or ',
+        self::EXECUTE_ANY => ' and ',
+        'compact' => ', '
+    ];
+
     /** @var array */
     protected $nodes;
 
     public function __construct($nid, $nodes)
     {
-        $this->nodeId = $nid;
+        parent::__construct($nid);
         $this->nodes = $nodes;
     }
 
@@ -316,7 +361,7 @@ class BlockNode extends Node
             $source .= $node->getSource($params);
             if ($index < sizeof($this->nodes) - 1) // not the last node
                 if ($combine) {
-                    $source .= $combine === self::EXECUTE_ALL ? ' or ' : ' and ';
+                    $source .= self::$COMBINATIONS[$combine];
                 } else {
                     $source .= PHP_EOL;
                 }
@@ -339,12 +384,12 @@ class BlockNode extends Node
 
 class CommentNode extends Node
 {
-    /** @var string */
+    /** @var string|null */
     protected $comment;
 
     public function __construct($nid, $comment)
     {
-        $this->nodeId = $nid;
+        parent::__construct($nid);
         $this->comment = $comment;
     }
 
@@ -399,14 +444,7 @@ class CommentNode extends Node
 
 class CompareNode extends Node
 {
-    /** @var Value|null */
-    protected $left;
-    /** @var Value|null */
-    protected $right;
-    /** @var string */
-    protected $op;
-
-    protected $ops = [
+    protected static $OPS = [
         'lt' => '&lt;',
         'le' => '&le;',
         'eq' => '&equals;',
@@ -414,13 +452,19 @@ class CompareNode extends Node
         'ge' => '&ge;',
         'gt' => '&gt;'
     ];
+    /** @var Value|null */
+    protected $left;
+    /** @var Value|null */
+    protected $right;
+    /** @var string */
+    protected $op;
 
     public function __construct($nid, $left, $right, $op)
     {
-        $this->nodeId = $nid;
+        parent::__construct($nid);
         $this->left = $left;
         $this->right = $right;
-        $this->op = $op;
+        $this->op = is_null($op) ? self::$OPS[0] : $op;
     }
 
     public static function parse($node, $tree, &$scopes)
@@ -437,7 +481,7 @@ class CompareNode extends Node
         return $this->wrapLine(
             sprintf("%s %s %s",
                 $this->printValue($this->left, $params),
-                $this->ops[$this->op],
+                self::$OPS[$this->op],
                 $this->printValue($this->right, $params)
             )
         );
@@ -447,7 +491,6 @@ class CompareNode extends Node
     {
         $leftVal = $this->printValue($this->left, $params);
         $rightVal = $this->printValue($this->right, $params);
-        $selected_op = $this->isPrototype ? 'lt' : $this->op;
         ?>
         <!-- COMPARE NODE -->
         <li class="node compare-node node_<?= $this->nodeId ?>" data-node-type="compare" data-node-id="<?= $this->nodeId ?>">
@@ -464,9 +507,9 @@ class CompareNode extends Node
                                     <input class="compare-left combobox" value="<?= $leftVal ?>"/>
                                 </div>
                                 <select class="compare-operation">
-                                    <?php foreach ($this->ops as $op => $char): ?>
+                                    <?php foreach (self::$OPS as $op => $char): ?>
                                         <option value="<?= $op ?>"
-                                                <?php if ($selected_op === $op): ?>selected="selected"<?php endif ?>>
+                                                <?php if ($this->op === $op): ?>selected="selected"<?php endif ?>>
                                             <?= $char ?>
                                         </option>
                                     <?php endforeach ?>
@@ -483,11 +526,11 @@ class CompareNode extends Node
                         <?php else: ?>
                             <label>
                                 <?= $leftVal ?>
-                                <?= $this->ops[$selected_op] ?>
+                                <?= self::$OPS[$this->op] ?>
                                 <?= $rightVal ?>
                                 <div style="display: none;">
                                     <input class="compare-left" value="<?= $leftVal ?>"/>
-                                    <input class="compare-operation" value="<?= $selected_op ?>"/>
+                                    <input class="compare-operation" value="<?= $this->op ?>"/>
                                     <input class="compare-right" value="<?= $rightVal ?>"/>
                                 </div>
                             </label>
@@ -499,38 +542,37 @@ class CompareNode extends Node
     <?php }
 }
 
-class FunctionNode extends Node
+class FunctionNode extends ExpandableNode
 {
     /** @var int Node ID of the callee. */
     protected $calleeId;
     /** @var string Name of the callee. */
     protected $calleeName;
-    /** @var BlockNode */
-    protected $actPars;
-    /** @var array */
-    protected $actParsLine;
+    /** @var BlockNode|null */
+    protected $actParsNode;
+    /** @var Value|null */
+    protected $actParsVal;
 
-    public function __construct($nid, $callee, $actParsLine, $actPars)
+    public function __construct($nid, $callee, $actParsLine, $actParsNode)
     {
-        $this->nodeId = $nid;
+        parent::__construct($nid, $actParsLine, $actParsNode);
         $this->calleeId = $callee;
-        $this->actParsLine = $actParsLine;
-        $this->actPars = $actPars;
+        $this->actParsVal = $actParsLine;
+        $this->actParsNode = $actParsNode;
 
         // load callee information
         if ($this->calleeId > 0) {
-            require_once(BASEDIR . 'includes/dataModel.php');
-            $_model = new DataModel();
-            $this->calleeName = $_model->fetchAlgorithm($this->calleeId)->name;
-            $_model->close();
+            global $__model;
+            $this->calleeName = $__model->fetchAlgorithm($this->calleeId)->name;
         }
     }
 
     public static function parse($node, $tree, &$scopes)
     {
         $nid = $node->i;
-        $actParsLine = isset($node->l) ? $node->l : "";
-        $actPars = isset($node->p) ? parent::parse($tree[$node->p], $tree, $scopes) : null;
+        $actParsVal = isset($node->l) ? Value::parse($node->l) : null;
+        $actParsNode = isset($node->p) ? parent::parse($tree[$node->p], $tree, $scopes) : null;
+        // get inner scopes
         if (isset($node->c)) {
             $callee = $node->c;
             if (!isset($scopes[$callee])) {
@@ -539,7 +581,7 @@ class FunctionNode extends Node
         } else {
             $callee = -1;
         }
-        return new self($nid, $callee, $actParsLine, $actPars);
+        return new self($nid, $callee, $actParsVal, $actParsNode);
     }
 
     public function getSource($params)
@@ -547,7 +589,7 @@ class FunctionNode extends Node
         return $this->wrapLine(
             sprintf("%s(%s)",
                 $this->calleeName,
-                trim($this->actPars->getSource($params))
+                $this->_getSource($params, 'compact')
             )
         );
     }
@@ -555,21 +597,14 @@ class FunctionNode extends Node
     public function printHtml(&$params)
     {
         $actParsNid = isset($this->actPars) ? $this->actPars->nodeId : null;
-        $actParsLine = "";
-        if (!empty($this->actParsLine)) {
-            foreach($this->actParsLine as $i => $par) {
-                $actParsLine .= $par->value . "; ";
-            }
-            $actParsLine = substr($actParsLine, 0, sizeof($actParsLine)-3);
-        }
-        $collapse = is_null($actParsNid) || $this->actPars->size() === 0;
+        $actParsLine = $this->printValue($this->actParsVal, $params);
         ?>
         <!-- FUNCTION NODE -->
-        <li class="node function-node node_<?= $this->nodeId ?> expandable <?php if (!$collapse): ?>expanded<?php endif ?>"
+        <li class="node function-node node_<?= $this->nodeId ?> expandable <?php if (!$this->_isCollapsed()): ?>expanded<?php endif ?>"
             data-node-type="function" data-node-id="<?= $this->nodeId ?>" data-callee-id="<?= $this->calleeId ?>">
             <table>
                 <tr class="head">
-                    <td class="handle node-box top left <?php if ($collapse): ?>bottom<?php endif ?> bottom-collapsed-only">
+                    <td class="handle node-box top left <?php if ($this->_isCollapsed()): ?>bottom<?php endif ?> bottom-collapsed-only">
                         <span class="cursor-icon"></span>
                     </td>
                     <td class="node-box top right bottom full-width">
@@ -594,7 +629,10 @@ class FunctionNode extends Node
                         <?php else: ?>
                             <label>
                                 <?= TreeHelper::l10n('function_node_title') ?>
-                                <?= $this->calleeName ?>(<?= $actParsLine ?>)
+                                <?= $this->calleeName ?>
+                                <?php if ($this->_isCollapsed()): ?>
+                                (<?= $actParsLine ?>)
+                                <?php endif ?>
                                 <div style="display: none;">
                                     <input class="function-name" value="<?= $this->calleeName ?>"/>
                                     <input class="act-pars-line" value="<?= $actParsLine ?>" />
@@ -609,7 +647,7 @@ class FunctionNode extends Node
                     </td>
                     <td>
                         <ul class="body act-pars sortable expand-body" data-node-id="<?= $actParsNid ?>">
-                            <?php self::printNode($this->actPars, $params) ?>
+                            <?php self::printNode($this->actParsNode, $params) ?>
                         </ul>
                     </td>
                 </tr>
@@ -620,27 +658,26 @@ class FunctionNode extends Node
 
 class IfNode extends Node
 {
-    /** @var BlockNode */
+    protected static $OPS = [
+        'l' => 'condition_all',
+        'y' => 'condition_any'
+    ];
+    /** @var BlockNode|null */
     protected $cond;
-    /** @var BlockNode */
+    /** @var BlockNode|null */
     protected $then;
-    /** @var BlockNode */
+    /** @var BlockNode|null */
     protected $else;
     /** @var string */
     protected $op;
 
-    protected $ops = [
-        'l' => 'condition_all',
-        'y' => 'condition_any'
-    ];
-
     function __construct($nid, $cond, $then, $else, $op)
     {
-        $this->nodeId = $nid;
+        parent::__construct($nid);
         $this->cond = $cond;
         $this->then = $then;
         $this->else = $else;
-        $this->op = $op;
+        $this->op = is_null($op) ? self::$OPS[0] : $op;
     }
 
     public static function parse($node, $tree, &$scopes)
@@ -671,7 +708,6 @@ class IfNode extends Node
         $condNid = isset($this->cond) ? $this->cond->nodeId : null;
         $thenNid = isset($this->then) ? $this->then->nodeId : null;
         $elseNid = isset($this->else) ? $this->else->nodeId : null;
-        $selected_op = $this->isPrototype ? 'all' : $this->op;
 
         $showElse = $params['mode'] === 'edit' || $this->else->size();
         ?>
@@ -687,9 +723,9 @@ class IfNode extends Node
                             <label>
                                 <?= TreeHelper::l10n('if_node_title') ?>
                                 <select class="if-operator" style="display: none;">
-                                    <?php foreach ($this->ops as $op => $char): ?>
+                                    <?php foreach (self::$OPS as $op => $char): ?>
                                         <option value="<?= $op ?>"
-                                                <?php if ($selected_op === $op): ?>selected="selected"<?php endif ?>>
+                                                <?php if ($this->op === $op): ?>selected="selected"<?php endif ?>>
                                             <?= TreeHelper::l10n($char) ?>
                                         </option>
                                     <?php endforeach ?>
@@ -701,9 +737,9 @@ class IfNode extends Node
                             </button>
                         <?php else: ?>
                             <?= TreeHelper::l10n('if_node_title') ?>
-                            <?= $this->cond->size() > 1 ? TreeHelper::l10n($this->ops[$selected_op]) : '' ?>
+                            <?= $this->cond->size() > 1 ? TreeHelper::l10n(self::$OPS[$this->op]) : '' ?>
                             <div style="display: none;">
-                                <input class="if-operator" value="<?= $selected_op ?>"/>
+                                <input class="if-operator" value="<?= $this->op ?>"/>
                             </div>
                         <?php endif ?>
                     </td>
@@ -749,20 +785,20 @@ class IfNode extends Node
 
 class IncNode extends Node
 {
+    protected static $OPS = [
+        'i' => '++',
+        'd' => '--'
+    ];
     /** @var Value|null */
     protected $var;
     /** @var string */
     protected $op;
-    protected $ops = [
-        'i' => '++',
-        'd' => '--'
-    ];
 
     function __construct($nid, $var, $op)
     {
-        $this->nodeId = $nid;
+        parent::__construct($nid);
         $this->var = $var;
-        $this->op = $op;
+        $this->op = is_null($op) ? self::$OPS[0] : $op;
     }
 
     public static function parse($node, $tree, &$scopes)
@@ -775,13 +811,12 @@ class IncNode extends Node
 
     public function getSource($params)
     {
-        return $this->wrapLine($this->printValue($this->var, $params) . "++");
+        return $this->wrapLine($this->printValue($this->var, $params) . self::$OPS[$this->op]);
     }
 
     public function printHtml(&$params)
     {
         $varValue = $this->printValue($this->var, $params);
-        $selected_op = $this->isPrototype ? 'inc' : $this->op;
         ?>
         <!-- INC NODE -->
         <li class="node inc-node node_<?= $this->nodeId ?>" data-node-type="inc" data-node-id="<?= $this->nodeId ?>">
@@ -798,9 +833,8 @@ class IncNode extends Node
                                     <input class="inc-var combobox" value="<?= $varValue ?>"/>
                                 </div>
                                 <select class="inc-operation">
-                                    <?php foreach ($this->ops as $op => $char): ?>
-                                        <option value="<?= $op ?>"
-                                                <?php if ($selected_op === $op): ?>selected="selected"<?php endif ?>>
+                                    <?php foreach (self::$OPS as $op => $char): ?>
+                                        <option value="<?= $op ?>"<?php if ($this->op === $op): ?> selected="selected"<?php endif ?>>
                                             <?= $char ?>
                                         </option>
                                     <?php endforeach ?>
@@ -812,10 +846,10 @@ class IncNode extends Node
                             </button>
                         <?php else: ?>
                             <label>
-                                <?= $varValue . $this->ops[$selected_op] ?>
+                                <?= $varValue . self::$OPS[$this->op] ?>
                                 <div style="display: none;">
                                     <input class="inc-var" value="<?= $varValue ?>"/>
-                                    <input class="inc-operation" value="<?= $selected_op ?>"/>
+                                    <input class="inc-operation" value="<?= $this->op ?>"/>
                                 </div>
                             </label>
                         <?php endif ?>
@@ -826,16 +860,16 @@ class IncNode extends Node
     <?php }
 }
 
-class ReturnNode extends Node
+class ReturnNode extends ExpandableNode
 {
-    /** @var Value */
+    /** @var Value|null */
     protected $returnVal;
-    /** @var BlockNode */
+    /** @var BlockNode|null */
     protected $returnNode;
 
     function __construct($nid, $returnVal, $returnNode)
     {
-        $this->nodeId = $nid;
+        parent::__construct($nid, $returnVal, $returnNode);
         $this->returnVal = $returnVal;
         $this->returnNode = $returnNode;
     }
@@ -850,21 +884,20 @@ class ReturnNode extends Node
 
     public function getSource($params)
     {
-        return $this->wrapLine("return " . $this->printValue($this->returnVal, $params));
+        return $this->wrapLine("return " . $this->_getSource($params));
     }
 
     public function printHtml(&$params)
     {
         $returnVal = $this->printValue($this->returnVal, $params);
         $returnNid = is_null($this->returnNode) ? null : $this->returnNode->nodeId;
-        $collapse = is_null($returnNid) || $this->returnNode->size() === 0;
         ?>
         <!-- RETURN NODE -->
-        <li class="node return-node node_<?= $this->nodeId ?> expandable <?php if (!$collapse): ?>expanded<?php endif ?>"
+        <li class="node return-node node_<?= $this->nodeId ?> expandable <?php if (!$this->_isCollapsed()): ?>expanded<?php endif ?>"
             data-node-type="return" data-node-id="<?= $this->nodeId ?>">
             <table>
                 <tr class="head">
-                    <td class="handle node-box top left <?php if ($collapse): ?>bottom<?php endif ?> bottom-collapsed-only">
+                    <td class="handle node-box top left <?php if ($this->_isCollapsed()): ?>bottom<?php endif ?> bottom-collapsed-only">
                         <span class="cursor-icon"></span>
                     </td>
                     <td class="node-box top right bottom full-width">
@@ -907,14 +940,14 @@ class ReturnNode extends Node
 
 class SwapNode extends Node
 {
-    /** @var Value */
+    /** @var Value|null */
     protected $left;
-    /** @var Value */
+    /** @var Value|null */
     protected $right;
 
     public function __construct($nid, $left, $right)
     {
-        $this->nodeId = $nid;
+        parent::__construct($nid);
         $this->left = $left;
         $this->right = $right;
     }
@@ -984,12 +1017,12 @@ class SwapNode extends Node
 
 class ValueNode extends Node
 {
-    /** @var Value */
+    /** @var Value|null */
     protected $value;
 
     function __construct($nid, $value)
     {
-        $this->nodeId = $nid;
+        parent::__construct($nid);
         $this->value = $value;
     }
 
@@ -1045,24 +1078,23 @@ class ValueNode extends Node
 
 class WhileNode extends Node
 {
-    /** @var BlockNode */
+    protected static $OPS = [
+        'l' => 'condition_all',
+        'y' => 'condition_any'
+    ];
+    /** @var BlockNode|null */
     protected $cond;
-    /** @var BlockNode */
+    /** @var BlockNode|null */
     protected $body;
     /** @var string */
     protected $op;
 
-    protected $ops = [
-        'l' => 'condition_all',
-        'y' => 'condition_any'
-    ];
-
     public function __construct($nid, $cond, $body, $op)
     {
-        $this->nodeId = $nid;
+        parent::__construct($nid);
         $this->cond = $cond;
         $this->body = $body;
-        $this->op = $op;
+        $this->op = is_null($op) ? self::$OPS[0] : $op;
     }
 
     public static function parse($node, $tree, &$scopes)
@@ -1088,7 +1120,6 @@ class WhileNode extends Node
     {
         $condNid = isset($this->cond) ? $this->cond->nodeId : null;
         $bodyNid = isset($this->body) ? $this->body->nodeId : null;
-        $selected_op = $this->isPrototype ? 'all' : $this->op;
         ?>
         <!-- WHILE NODE -->
         <li class="node while-node node_<?= $this->nodeId ?>" data-node-type="while" data-node-id="<?= $this->nodeId ?>">
@@ -1102,9 +1133,9 @@ class WhileNode extends Node
                             <label>
                                 <?= TreeHelper::l10n('while_node_title') ?>
                                 <select class="while-operator" style="display: none;">
-                                    <?php foreach ($this->ops as $op => $char): ?>
+                                    <?php foreach (self::$OPS as $op => $char): ?>
                                         <option value="<?= $op ?>"
-                                                <?php if ($selected_op === $op): ?>selected="selected"<?php endif ?>>
+                                                <?php if ($this->op === $op): ?>selected="selected"<?php endif ?>>
                                             <?= TreeHelper::l10n($char) ?>
                                         </option>
                                     <?php endforeach ?>
@@ -1116,9 +1147,9 @@ class WhileNode extends Node
                             </button>
                         <?php else: ?>
                             <?= TreeHelper::l10n('while_node_title') ?>
-                            <?= $this->cond->size() > 1 ? TreeHelper::l10n($this->ops[$selected_op]) : '' ?>
+                            <?= $this->cond->size() > 1 ? TreeHelper::l10n(self::$OPS[$this->op]) : '' ?>
                             <div style="display: none;">
-                                <input class="while-operator" value="<?= $selected_op ?>"/>
+                                <input class="while-operator" value="<?= $this->op ?>"/>
                             </div>
                         <?php endif ?>
                     </td>
