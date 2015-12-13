@@ -2,9 +2,9 @@
 # Library paths
 $_jqueryVersion = '2.1.4';
 $_jqueryUiVersion = '1.11.4';
-$_bootstrapVersion = '3.3.5';
-$_fontAwesomeVersion = '4.4.0';
-$_tableSorterVersion = '2.23.5';
+$_bootstrapVersion = '3.3.6';
+$_fontAwesomeVersion = '4.5.0';
+$_tableSorterVersion = '2.24.6';
 
 if (LIBRARY_MODE == 'LOCAL') {
     define('JQUERY_PATH', "lib/jquery/$_jqueryVersion/jquery.min.js");
