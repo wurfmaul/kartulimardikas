@@ -258,16 +258,22 @@ class window.FunctionNode extends Node
     curNode = $('#scope-' + scope + ' .node_' + @nid)
     if (curNode.data('return-value')?)
       # return value has already been computed
-      value = curNode.data('return-value')
+      value = Value.parse(curNode.data('return-value'), player.memory)
       # remove value once executed
       curNode.removeData('return-value')
-      return { value: value }
+      return value
 
     # compute active parameters
     if (@params.size()) then params = @params.evaluateAll(player)
-    else params = [@paramsLine.execute(player)]
+    else if (@paramsLine?) then params = [@paramsLine.execute(player)]
+    else params = []
     # the rest is done by the player
-    { node: @nid, callee: @callee, scope: player.scope + 1, params: params }
+    throw
+      type: 'function-call'
+      node: @nid
+      callee: @callee
+      scope: player.scope + 1
+      params: params
 
   mark: (player, node) ->
     node = @nid if (node in [@nid, @params.nid])

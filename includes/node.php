@@ -323,8 +323,8 @@ class BlockNode extends Node
     const EXECUTE_ANY = 'y';
 
     protected static $COMBINATIONS = [
-        self::EXECUTE_ALL => ' or ',
-        self::EXECUTE_ANY => ' and ',
+        self::EXECUTE_ALL => ' and ',
+        self::EXECUTE_ANY => ' or ',
         'compact' => ', '
     ];
 

@@ -61,16 +61,17 @@ class Player
         # execute current step
         curNode = @tree.execute(@, @curNode)
         # set potential next node
-        if (curNode.scope?)
-          # signal for a function call
-          @curNode = curNode.node
-          @callFunction(curNode.callee, curNode.scope, curNode.params)
-          return
-
-        if (curNode.next? and curNode.next >= 0) then @nextCandidate = curNode.next
+        if (curNode.next? and curNode.next >= 0)
+          @nextCandidate = curNode.next
         else @nextCandidate = null
-      catch runtimeError
-        @handleError(runtimeError)
+      catch exception
+        if (exception.type? and exception.type is 'function-call')
+          # signal for a function call
+          @curNode = exception.node
+          @callFunction(exception.callee, exception.scope, exception.params)
+          return true
+
+        @handleError(exception)
         @setControls([1, 0, 0, 0])
         return false
 
@@ -147,6 +148,7 @@ class Player
     window.players[scope+1] = null
     # use returned value
     @curScope.find('.node_' + @curNode).data('return-value', value)
+
     # reactivate navigation in outer scope
     @setControls([1,1,1,1])
     switch tempo

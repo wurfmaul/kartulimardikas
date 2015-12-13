@@ -464,18 +464,19 @@
       scope = player.scope;
       curNode = $('#scope-' + scope + ' .node_' + this.nid);
       if ((curNode.data('return-value') != null)) {
-        value = curNode.data('return-value');
+        value = Value.parse(curNode.data('return-value'), player.memory);
         curNode.removeData('return-value');
-        return {
-          value: value
-        };
+        return value;
       }
       if (this.params.size()) {
         params = this.params.evaluateAll(player);
-      } else {
+      } else if ((this.paramsLine != null)) {
         params = [this.paramsLine.execute(player)];
+      } else {
+        params = [];
       }
-      return {
+      throw {
+        type: 'function-call',
         node: this.nid,
         callee: this.callee,
         scope: player.scope + 1,

@@ -62,25 +62,25 @@
     };
 
     Player.prototype.step = function() {
-      var curNode, error1, runtimeError, tempo, value;
+      var curNode, error1, exception, tempo, value;
       this.clearHighlight();
       if (this.cursorState === 0) {
         this.curNode = this.nextNode;
         try {
           curNode = this.tree.execute(this, this.curNode);
-          if ((curNode.scope != null)) {
-            this.curNode = curNode.node;
-            this.callFunction(curNode.callee, curNode.scope, curNode.params);
-            return;
-          }
           if ((curNode.next != null) && curNode.next >= 0) {
             this.nextCandidate = curNode.next;
           } else {
             this.nextCandidate = null;
           }
         } catch (error1) {
-          runtimeError = error1;
-          this.handleError(runtimeError);
+          exception = error1;
+          if ((exception.type != null) && exception.type === 'function-call') {
+            this.curNode = exception.node;
+            this.callFunction(exception.callee, exception.scope, exception.params);
+            return true;
+          }
+          this.handleError(exception);
           this.setControls([1, 0, 0, 0]);
           return false;
         }
