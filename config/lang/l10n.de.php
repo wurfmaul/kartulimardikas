@@ -139,6 +139,9 @@ $l10n['if_no_account'] = "Wenn du noch kein Konto hast, kannst du ganz einfach e
 
 // VIEW
 $l10n['view'] = "Ansehen";
+$l10n['by'] = "von";
+$l10n['derived'] = "abgeleitet von";
+$l10n['copy'] = "eine neue Kopie erstellen";
 $l10n['controls'] = "Steuerung";
 $l10n['source_code'] = "Quellcode";
 $l10n['memory'] = "Speicher";

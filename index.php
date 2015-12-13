@@ -47,8 +47,13 @@ $__rights = $__uid ? $__model->fetchUser($__uid)->rights : 0;
 
 // DEAL WITH NEW ALGORITHMS
 if (ACTION === 'new' && $__uid) {
-    // create a new algorithm
-    $aid = $__model->insertAlgorithm($__uid);
+    if (isset($_GET['aid'])) {
+        // clone existing algorithm
+        $aid = $__model->cloneAlgorithm($_GET['aid'], $__uid);
+    } else {
+        // create a new algorithm
+        $aid = $__model->insertAlgorithm($__uid);
+    }
     // redirect to the edit-page
     header("Location:" . url(['action' => 'edit', 'aid' => $aid], false, false));
     die();

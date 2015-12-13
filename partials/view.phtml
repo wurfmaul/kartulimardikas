@@ -5,14 +5,28 @@ $scope = 0;
 
 // if algorithm is defined
 if ($__aid && $__algorithm && ($__public || $__owner || $__rights > 0)):
-    // Increment the view counter if watching a foreign algorithm
-    if (!$__owner) {
-        $__model->updateAlgorithmViewCount($__aid);
-    }
 ?>
     <!-- HEADER -->
     <div class="page-header">
-        <h1><?= $l10n['view_algorithm'] ?></h1>
+        <h1>
+            <?= $l10n['view_algorithm'] ?>
+            <small><?= $__algorithm->name ?></small>
+        </h1>
+        <p>
+        <?php if (!$__owner):
+            // Increment the view counter if watching a foreign algorithm
+            $__model->updateAlgorithmViewCount($__aid);
+            // Fetch author info
+            $author = $__model->fetchUser($__algorithm->uid);
+        ?>
+            <?= $l10n['by'] ?> <a href="<?= url(['action' => 'user', 'uid' => $author->uid]) ?>"><?= $author->username ?></a><br/>
+        <?php endif ?>
+            <i class="fa fa-code-fork"></i>
+        <?php if (!is_null($originalAid = $__algorithm->original)): $original = $__model->fetchAlgorithm($originalAid) ?>
+            <?= $l10n['derived'] ?> <a href="<?= url(['action' => 'view', 'aid' => $originalAid]) ?>"><?= $original->name ?></a>
+        <?php endif ?>
+            (<a href="<?= url(['action' => 'new', 'aid' => $__aid]) ?>"><?= $l10n['copy'] ?></a>)
+        </p>
     </div>
     <!-- HEADER END -->
 

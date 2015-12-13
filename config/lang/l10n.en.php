@@ -139,6 +139,9 @@ $l10n['if_no_account'] = "If you have no account yet, please consider a registra
 
 // VIEW
 $l10n['view'] = "View";
+$l10n['by'] = "by";
+$l10n['derived'] = "derived from";
+$l10n['copy'] = "make a new copy";
 $l10n['controls'] = "Controls";
 $l10n['source_code'] = "Source Code";
 $l10n['memory'] = "Memory";

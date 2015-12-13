@@ -23,6 +23,34 @@ class DataModel
 
     /**
      * @param int $aid The algorithm id.
+     * @param int $newUid The new owner's user id.
+     * @return int The id of the new algorithm.
+     */
+    public function cloneAlgorithm($aid, $newUid)
+    {
+        $stmt = $this->_sql->prepare("
+            INSERT INTO algorithm
+            (uid, original, name, description, long_description, variables, tree)
+            SELECT ? as uid, ? as original, name, description, long_description, variables, tree
+            FROM (SELECT * FROM algorithm WHERE aid = ?) a
+        ");
+        $stmt->bind_param("iii", $newUid, $aid, $aid);
+        $stmt->execute();
+        $newAid = $stmt->insert_id;
+        // attach the same tags as the original
+        $stmt = $this->_sql->prepare("
+            INSERT INTO tag (aid, tag)
+            SELECT ? as aid, tag
+            FROM (SELECT * FROM tag WHERE aid = ?) t;
+        ");
+        $stmt->bind_param("ii", $newAid, $aid);
+        $stmt->execute();
+        $stmt->close();
+        return $newAid;
+    }
+
+    /**
+     * @param int $aid The algorithm id.
      * @return int The number of affected rows.
      */
     public function deleteAlgorithm($aid)
