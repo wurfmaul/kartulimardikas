@@ -113,7 +113,7 @@ if ($__algorithm) {
             <link href="css/<?= ACTION ?>.css" rel="stylesheet"/>
         <?php endif ?>
     <?php elseif (file_exists('css/' . ACTION . '.min.css')): // !DEBUG_MODE: ?>
-        <link href="css/gen/<?= ACTION ?>.min.css" rel="stylesheet"/>
+        <link href="css/<?= ACTION ?>.min.css" rel="stylesheet"/>
     <?php endif // DEBUG_MODE ?>
 
     <?php if (ACTION === 'edit' || ACTION === 'view'): ?>
@@ -336,7 +336,7 @@ if ($__algorithm) {
     <script type="text/javascript" src="js/<?= ACTION ?>.js"></script>
 <?php endif ?>
 <?php elseif (file_exists('js/' . ACTION . '.min.js')): // !DEBUG_MODE: ?>
-    <script type="text/javascript" src="js/gen/<?= ACTION ?>.min.js"></script>
+    <script type="text/javascript" src="js/<?= ACTION ?>.min.js"></script>
 <?php endif  // DEBUG_MODE ?>
 <!-- SCRIPTS END -->
 
