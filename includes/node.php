@@ -629,7 +629,7 @@ class FunctionNode extends ExpandableNode
                         <?php else: ?>
                             <label>
                                 <?= TreeHelper::l10n('function_node_title') ?>
-                                <?= $this->calleeName ?>
+                                <a href="<?= url(['action' => 'view', 'aid' => $this->calleeId]) ?>" target="_blank"><?= $this->calleeName ?></a>
                                 <?php if ($this->_isCollapsed()): ?>
                                 (<?= $actParsLine ?>)
                                 <?php endif ?>

@@ -228,9 +228,15 @@ foreach ($tree->getScopes() as $innerScope) {
                                     data-type="<?= $var->type ?>">
                                     <td>
                                         <code class="name"><?= $var->name ?></code>
-                                        <div class="parameter-icon">
+                                        <?php if ($var->value === VarValue::PARAMETER_INIT): ?>
+                                        <div class="var-icon" title="<?= $l10n['var_parameter'] ?>">
                                             <i class="fa fa-sign-in fa-rotate-90"></i>
                                         </div>
+                                        <?php elseif ($var->value === VarValue::RANDOM_INIT): ?>
+                                        <div class="var-icon" title="<?= $l10n['var_randomized'] ?>">
+                                            <i class="fa fa-random"></i>
+                                        </div>
+                                        <?php endif ?>
                                     </td>
                                     <td class="var-value">
                                         <?php if ($isList): ?>

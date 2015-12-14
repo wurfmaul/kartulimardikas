@@ -133,6 +133,9 @@
 .algorithm ul .node.function-node .act-pars-container {
   display: inline-block;
 }
+.algorithm ul .node.function-node a {
+  color: #444;
+}
 .algorithm ul .node.if-node > table > tbody > tr > td.node-box {
   background-color: #f0fae9;
 }
@@ -311,11 +314,7 @@
   padding: 6px 1px;
   width: 42px;
 }
-.variables .parameter-icon {
-  display: none;
-}
-.variables .parameter .parameter-icon {
-  display: inline-block;
+.variables .var-icon {
   float: right;
 }
 .source .code {

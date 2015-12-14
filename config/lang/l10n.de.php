@@ -244,7 +244,7 @@ $l10n['custom'] = "manuell";
 $l10n['parameter'] = "Parameter";
 $l10n['var_randomized'] = "zufälliger Wert";
 $l10n['var_uninitialized'] = "unbekannter Wert";
-$l10n['var_parameter'] = "wird Benutzer-definiert";
+$l10n['var_parameter'] = "Benutzer-definiert";
 $l10n['var_defined'] = "%s = %s";
 $l10n['array_randomized'] = "%d zufällige Listenwerte";
 $l10n['array_uninitialized'] = "%d unbekannte Listenwerte";
