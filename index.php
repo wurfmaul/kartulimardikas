@@ -118,7 +118,7 @@ if ($__algorithm) {
 
     <?php if (ACTION === 'edit' || ACTION === 'view'): ?>
         <link href="<?= JQUERYUI_CSS_PATH ?>" rel="stylesheet"/>
-    <?php elseif (ACTION === 'admin' || ACTION === 'index'): ?>
+    <?php elseif (ACTION === 'admin' || ACTION === 'index' || ACTION === 'user'): ?>
         <link href="<?= TABLESORTER_CSS_PATH ?>" rel="stylesheet"/>
         <link href="<?= TABLESORTER_PAGER_CSS_PATH ?>" rel="stylesheet"/>
     <?php endif ?>
@@ -312,7 +312,7 @@ if ($__algorithm) {
 <script type="text/javascript" src="<?= BOOTSTRAP_JS_PATH ?>"></script>
 <?php if (ACTION === 'edit' || ACTION === 'view'): ?>
     <script type="text/javascript" src="<?= JQUERYUI_JS_PATH ?>"></script>
-<?php elseif (ACTION === 'admin' || ACTION === 'index'): ?>
+<?php elseif (ACTION === 'admin' || ACTION === 'index' || ACTION === 'user'): ?>
     <script type="text/javascript" src="<?= TABLESORTER_JS_PATH ?>"></script>
     <script type="text/javascript" src="<?= TABLESORTER_WIDGETS_JS_PATH ?>"></script>
     <script type="text/javascript" src="<?= TABLESORTER_PAGER_JS_PATH ?>"></script>
@@ -329,7 +329,7 @@ if ($__algorithm) {
     <script type="text/javascript" src="js/node.js"></script>
     <script type="text/javascript" src="js/memory.js"></script>
     <script type="text/javascript" src="js/tree.js"></script>
-<?php elseif (ACTION === 'admin' || ACTION === 'index'): ?>
+<?php elseif (ACTION === 'admin' || ACTION === 'index' || ACTION === 'user'): ?>
     <script type="text/javascript" src="js/table.js"></script>
 <?php endif ?>
 <?php if (file_exists('js/' . ACTION . '.js')): ?>

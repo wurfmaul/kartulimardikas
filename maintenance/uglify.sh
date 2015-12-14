@@ -27,5 +27,5 @@ uglifycss ${UGLIFY_CSS_OPTIONS} ${CSS_PATH}/common.css > ${CSS_PATH_GEN}/new.min
 uglifycss ${UGLIFY_CSS_OPTIONS} ${CSS_PATH}/common.css > ${CSS_PATH_GEN}/notice.min.css
 uglifycss ${UGLIFY_CSS_OPTIONS} ${CSS_PATH}/common.css > ${CSS_PATH_GEN}/register.min.css
 uglifycss ${UGLIFY_CSS_OPTIONS} ${CSS_PATH}/common.css > ${CSS_PATH_GEN}/settings.min.css
-uglifycss ${UGLIFY_CSS_OPTIONS} ${CSS_PATH}/common.css > ${CSS_PATH_GEN}/user.min.css
+uglifycss ${UGLIFY_CSS_OPTIONS} ${CSS_PATH}/{common,user}.css > ${CSS_PATH_GEN}/user.min.css
 uglifycss ${UGLIFY_CSS_OPTIONS} ${CSS_PATH}/{common,view}.css > ${CSS_PATH_GEN}/view.min.css

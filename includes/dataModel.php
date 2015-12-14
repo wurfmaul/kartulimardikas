@@ -50,6 +50,29 @@ class DataModel
     }
 
     /**
+     * @param int $uid The user id.
+     * @param bool $private Whether private algorithms should be fetched or not.
+     * @param bool $onlyForked Whether forked algorithms should be fetched exclusively.
+     * @return int Number of user's algorithm.
+     */
+    public function countAlgorithmsOfUser($uid, $private = false, $onlyForked = false) {
+        $filter_private = $private ? '' : 'AND date_publish IS NOT NULL';
+        $filter_forked = $onlyForked ? 'AND original IS NOT NULL' : '';
+        $stmt = $this->_sql->prepare("
+            SELECT COUNT(*) AS count
+            FROM algorithm
+            WHERE uid = ?
+            AND date_deletion IS NULL
+            $filter_private $filter_forked
+        ");
+        $stmt->bind_param("i", $uid);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return intval($result->fetch_object()->count);
+    }
+
+    /**
      * @param int $aid The algorithm id.
      * @return int The number of affected rows.
      */

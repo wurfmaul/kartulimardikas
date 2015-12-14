@@ -1,0 +1,7 @@
+.well hr {
+  border-top: 1px solid #ddd;
+}
+.well ul {
+  padding-left: .7em;
+  list-style-type: none;
+}
