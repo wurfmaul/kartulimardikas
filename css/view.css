@@ -251,6 +251,9 @@
 .algorithm .cursor-down > table > tbody > tr:last-child > .handle > .cursor-icon {
   background: url("../img/cursor-down.png") no-repeat;
 }
+.algorithm .cursor-down.expandable:not(.expanded) > table > tbody > tr:first-child > .handle > .cursor-icon {
+  background: url("../img/cursor-down.png") no-repeat;
+}
 .algorithm .comment-container {
   overflow: hidden;
 }

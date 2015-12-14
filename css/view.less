@@ -24,9 +24,18 @@
     }
   }
 
-  .cursor-down > table > tbody > tr:last-child {
-    > .handle > .cursor-icon {
-      background: url("../img/cursor-down.png") no-repeat;
+  .cursor-down {
+    > table > tbody > tr:last-child {
+      > .handle > .cursor-icon {
+        background: url("../img/cursor-down.png") no-repeat;
+      }
+    }
+    &.expandable:not(.expanded) {
+      > table > tbody > tr:first-child {
+        > .handle > .cursor-icon {
+          background: url("../img/cursor-down.png") no-repeat;
+        }
+      }
     }
   }
 
