@@ -93,13 +93,25 @@
   }
 
   #node-btn-group {
+    width: 100%;
+
     a {
       cursor: pointer;
     }
 
     .btnStyle(@color) {
+      width: 23%;
       button {
         background-color: lighten(@color, 10%);
+        width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+    #allnodes-group {
+      width: 8%;
+      button {
+        width: 100%;
       }
     }
     #annotations-group {

@@ -307,20 +307,53 @@
 #stepPanel .comment-container .comment-text {
   width: 100%;
 }
+#stepPanel #node-btn-group {
+  width: 100%;
+}
 #stepPanel #node-btn-group a {
   cursor: pointer;
 }
+#stepPanel #node-btn-group #allnodes-group {
+  width: 8%;
+}
+#stepPanel #node-btn-group #allnodes-group button {
+  width: 100%;
+}
+#stepPanel #node-btn-group #annotations-group {
+  width: 23%;
+}
 #stepPanel #node-btn-group #annotations-group button {
   background-color: #9a9a9a;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#stepPanel #node-btn-group #operations-group {
+  width: 23%;
 }
 #stepPanel #node-btn-group #operations-group button {
   background-color: #ffd1b4;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#stepPanel #node-btn-group #structure-group {
+  width: 23%;
 }
 #stepPanel #node-btn-group #structure-group button {
   background-color: #d0f0bc;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#stepPanel #node-btn-group #value-group {
+  width: 23%;
 }
 #stepPanel #node-btn-group #value-group button {
   background-color: #e5c6e9;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .combobox-container {
   display: inline;
