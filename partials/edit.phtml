@@ -179,15 +179,15 @@ require_once(BASEDIR . 'partials/headers/algorithmHeader.phtml');
 
                                         <!-- Variable in edit mode -->
                                         <td class="edit" style="display: none">
-                                            <div class="form-group name-group">
+                                            <div class="form-group name-group col-sm-2 col-xs-2">
                                                 <label class="sr-only"><?= $l10n['var_name'] ?></label>
                                                 <input class="form-control input-sm name" value="<?= $var->name ?>" placeholder="<?= $l10n['name'] ?>" type="text">
                                             </div>
-                                            <div class="form-group equals-group ">
+                                            <div class="form-group equals-group col-sm-1 col-xs-1">
                                                 <label class="sr-only"></label>
                                                 <button class="form-control input-sm disabled equals">:=</button>
                                             </div>
-                                            <div class="form-group value-group">
+                                            <div class="form-group value-group col-sm-2 col-xs-2">
                                                 <label class="sr-only" for="value"><?= $l10n['init_value'] ?></label>
                                                 <select class="form-control input-sm init" style="display: none;">
                                                     <option class="combo-box" value="<?= VarValue::RANDOM_INIT ?>" data-target=".type"
@@ -201,8 +201,7 @@ require_once(BASEDIR . 'partials/headers/algorithmHeader.phtml');
                                                 </select>
                                                 <input class="form-control input-sm value" value="<?= $editMode ?>" placeholder="<?= $l10n['value'] ?>" type="text">
                                             </div>
-
-                                            <div class="form-group type-group" <?php if (!$needsType): ?>style="display: none;" <?php endif ?>>
+                                            <div class="form-group type-group col-sm-2 col-xs-2" <?php if (!$needsType): ?>style="display: none;" <?php endif ?>>
                                                 <label class="sr-only"><?= $l10n['data_type'] ?></label>
                                                 <select class="form-control input-sm type">
                                                     <optgroup label="<?= $l10n['element'] ?>">
@@ -229,8 +228,7 @@ require_once(BASEDIR . 'partials/headers/algorithmHeader.phtml');
                                                     </optgroup>
                                                 </select>
                                             </div>
-
-                                            <div class="form-group size-group" <?php if (!$isList): ?> style="display: none;"<?php endif ?>>
+                                            <div class="form-group size-group col-sm-2 col-xs-2" <?php if (!$isList): ?> style="display: none;"<?php endif ?>>
                                                 <label class="sr-only"><?= $l10n['array_size'] ?></label>
                                                 <select class="form-control input-sm size">
                                                     <optgroup label="<?= $l10n['size'] ?>">
@@ -240,7 +238,6 @@ require_once(BASEDIR . 'partials/headers/algorithmHeader.phtml');
                                                     </optgroup>
                                                 </select>
                                             </div>
-
                                             <div class="tools">
                                                 <div class="btn-group btn-group-sm">
                                                     <button type="button" class="btn btn-default btn-var-check" title="<?= $l10n['check_var'] ?>">

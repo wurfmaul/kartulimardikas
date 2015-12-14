@@ -256,6 +256,9 @@
   margin-bottom: 10px;
   text-align: left;
 }
+#varPanel .variables .form-group {
+  padding: 1px;
+}
 #varPanel .variables td > div {
   display: inline-flex;
 }
@@ -271,17 +274,10 @@
 }
 #varPanel .variables .form-group {
   margin: 0;
-  width: 100px;
-}
-#varPanel .variables .equals-group {
-  width: 35px;
 }
 #varPanel .variables .equals-group .equals {
   border: none;
   cursor: default;
-}
-#varPanel .variables .size-group {
-  width: 55px;
 }
 #stepPanel .algorithm .sortable-highlight {
   background-color: greenyellow;
