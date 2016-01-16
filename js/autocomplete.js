@@ -140,6 +140,12 @@
     }).click(function(e) {
       e.preventDefault();
       return $(this).autocomplete("search", $(this).val());
+    }).keypress(function(event) {
+      var navKeys;
+      navKeys = ['ArrowLeft', 'ArrowRight', 'PageDown', 'PageUp', 'End', 'Home'];
+      if ($.inArray(event.key, navKeys) >= 0) {
+        return $(this).autocomplete("search", $(this).val());
+      }
     }).focusout(function() {
       return $(this).autocomplete("close");
     });

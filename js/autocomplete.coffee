@@ -130,6 +130,10 @@ window.initVarInput = (elem) ->
     # open search with basic options
     e.preventDefault()
     $(this).autocomplete("search", $(this).val())
+  ).keypress( (event) ->
+    navKeys = [ 'ArrowLeft', 'ArrowRight', 'PageDown', 'PageUp', 'End', 'Home' ]
+    if ($.inArray(event.key, navKeys) >= 0)
+      $(this).autocomplete("search", $(this).val())
   ).focusout(->
     # collapse search, when losing focus
     $(this).autocomplete("close")
