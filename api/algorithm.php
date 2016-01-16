@@ -146,10 +146,18 @@ class EditAlgorithmManager
         $vars = $this->_model->fetchAlgorithm($this->_aid)->variables;
         $vars = (is_null($vars)) ? array() : json_decode($vars, true);
 
-        // check if name is specified
+        // check if name is valid
+        $blacklist = ['true', 'false'];
         $name = htmlspecialchars($name);
-        if (strlen($name) === 0) {
+        if (strlen($name) === 0) { // check if name is specified
             $this->_response['error-name'] = $this->_l10n['empty_name'] . BR;
+            $name = false;
+        } elseif (preg_match('/^[\p{L}\p{Mn}\p{Pd}]+$/u', $name) !== 1) { // check if name contains forbidden characters
+            // \p{L} -> Unicode letters, \p{Mn} -> Unicode accents, \p{Pd} -> Unicode hyphens
+            $this->_response['error-name'] = $this->_l10n['invalid_name'] . BR;
+            $name = false;
+        } elseif (in_array($name, $blacklist)) { // check if name is not allowed
+            $this->_response['error-name'] = sprintf($this->_l10n['name_no_keyword'], implode(', ', $blacklist)) . BR;
             $name = false;
         } elseif (!empty($vars)) { // check for name duplicate
             foreach ($vars as $curVid => $curVar) {
