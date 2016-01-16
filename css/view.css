@@ -290,9 +290,12 @@
 .controls .step-control .icon-stop-after {
   background: url("../img/cursor-down.png") center center no-repeat;
 }
+.variables .value-container,
+.variables .value-edit {
+  margin-right: -4px;
+}
 .variables .value-container {
   position: relative;
-  margin-right: -5px;
 }
 .variables .value-container .read,
 .variables .value-container .write {
@@ -313,9 +316,6 @@
 }
 .variables .value-edit {
   display: none;
-  margin-right: -5px;
-  padding: 6px 1px;
-  width: 42px;
 }
 .variables .var-icon {
   float: right;

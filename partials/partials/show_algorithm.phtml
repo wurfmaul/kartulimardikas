@@ -238,7 +238,8 @@ foreach ($tree->getScopes() as $innerScope) {
                                         </div>
                                         <?php endif ?>
                                     </td>
-                                    <td class="var-value">
+                                    <td class="var-value form-inline">
+                                        <div class="form-group">
                                         <?php if ($isList): ?>
                                             <?php foreach (explode(',', $value) as $offset => $val): ?>
                                                 <button class="btn btn-default value-container offset_<?= $offset ?>" data-offset="<?= $offset ?>">
@@ -246,7 +247,7 @@ foreach ($tree->getScopes() as $innerScope) {
                                                     <span class="glyphicon glyphicon-pencil write"></span>
                                                     <span class="glyphicon glyphicon-eye-open read"></span>
                                                 </button>
-                                                <input class="btn btn-default value-edit offset_<?= $offset ?>" data-offset="<?= $offset ?>"/>
+                                                <input class="form-control value-edit offset_<?= $offset ?>" data-offset="<?= $offset ?>"/>
                                             <?php endforeach ?>
                                         <?php else: // isList ?>
                                             <button class="btn btn-default value-container">
@@ -254,8 +255,9 @@ foreach ($tree->getScopes() as $innerScope) {
                                                 <span class="glyphicon glyphicon-pencil write"></span>
                                                 <span class="glyphicon glyphicon-eye-open read"></span>
                                             </button>
-                                            <input class="btn btn-default value-edit"/>
+                                            <input class="form-control value-edit"/>
                                         <?php endif ?>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach ?>

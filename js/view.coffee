@@ -401,7 +401,7 @@ init = (scope, tempo) ->
       input = $(this).siblings('.value-edit.offset_' + offset)
     else # value
       input = $(this).siblings('.value-edit')
-    input.val(value).show().focus()
+    input.val(value).css('width', $(this).css('width')).show().focus()
   )
   curScope.find('.value-edit').keyup((event) ->
     switch (event.which)

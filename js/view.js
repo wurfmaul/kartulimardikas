@@ -492,7 +492,7 @@
       } else {
         input = $(this).siblings('.value-edit');
       }
-      return input.val(value).show().focus();
+      return input.val(value).css('width', $(this).css('width')).show().focus();
     });
     curScope.find('.value-edit').keyup(function(event) {
       var index, newVal, offset, vid;
