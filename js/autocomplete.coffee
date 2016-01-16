@@ -78,10 +78,7 @@ window.initVarSearch = () ->
     toCursor = request.term.substr(0, cursor)
     fromCursor = request.term.substr(cursor)
 
-#    console.log('to: ' + toCursor)
-#    console.log('from: ' + fromCursor)
-
-    # the entered search term
+    # the entered search term split up
     start = toCursor.search(/\w+$/)
     toStart = request.term.substr(0, start)
     term = toCursor.match(/\w+$/)?[0] ? ''
