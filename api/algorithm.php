@@ -152,8 +152,7 @@ class EditAlgorithmManager
         if (strlen($name) === 0) { // check if name is specified
             $this->_response['error-name'] = $this->_l10n['empty_name'] . BR;
             $name = false;
-        } elseif (preg_match('/^[\p{L}\p{Mn}\p{Pd}]+$/u', $name) !== 1) { // check if name contains forbidden characters
-            // \p{L} -> Unicode letters, \p{Mn} -> Unicode accents, \p{Pd} -> Unicode hyphens
+        } elseif (preg_match('/^[a-z]\w*$/i', $name) !== 1) { // check if name contains forbidden characters
             $this->_response['error-name'] = $this->_l10n['invalid_name'] . BR;
             $name = false;
         } elseif (in_array($name, $blacklist)) { // check if name is not allowed
