@@ -137,7 +137,8 @@
         val = (ref = ui.item.variable) != null ? ref : ui.item.label;
         return $(this).autocomplete("search", val);
       }
-    }).click(function() {
+    }).click(function(e) {
+      e.preventDefault();
       return $(this).autocomplete("search", $(this).val());
     }).focusout(function() {
       return $(this).autocomplete("close");
@@ -203,7 +204,8 @@
         input.val(ui.item.label);
         return input.blur();
       }
-    }).click(function() {
+    }).click(function(e) {
+      e.preventDefault();
       return $(this).autocomplete("search", "");
     }).focusout(function() {
       return $(this).autocomplete("close");

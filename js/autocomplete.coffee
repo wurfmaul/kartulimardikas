@@ -126,8 +126,9 @@ window.initVarInput = (elem) ->
     select: (event, ui) ->
       val = ui.item.variable ? ui.item.label
       $(this).autocomplete("search", val)
-  ).click(->
+  ).click( (e) ->
     # open search with basic options
+    e.preventDefault()
     $(this).autocomplete("search", $(this).val())
   ).focusout(->
     # collapse search, when losing focus
@@ -192,8 +193,9 @@ window.initValueInput = (elem) ->
       event.preventDefault()
       input.val(ui.item.label)
       input.blur()
-  ).click(->
+  ).click( (e) ->
     # open search with basic options
+    e.preventDefault()
     $(this).autocomplete("search", "")
   ).focusout(->
     # collapse search, when losing focus
