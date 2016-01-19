@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS `kartulimardikas` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
-USE `kartulimardikas`;
+#CREATE DATABASE IF NOT EXISTS `kartulimardikas` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+#USE `kartulimardikas`;
 
 CREATE TABLE IF NOT EXISTS `user` (
   `uid` int(6) unsigned NOT NULL AUTO_INCREMENT COMMENT 'user id',
