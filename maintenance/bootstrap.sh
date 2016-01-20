@@ -1,9 +1,11 @@
 #!/bin/bash
 
+DIR=$(dirname $(realpath $0))
+
 echo -n "Secure .git directory..."
-echo "Require all denied" > ../.git/.htaccess
+echo "Require all denied" > $DIR/../.git/.htaccess
 echo "DONE"
 
 echo -n "Prepare config file....."
-cp ../config/config.default.php ../config/config.php
+cp $DIR/../config/config.default.php $DIR/../config/config.php
 echo "DONE"
