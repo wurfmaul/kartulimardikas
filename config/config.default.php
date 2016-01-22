@@ -7,7 +7,7 @@ define('PROJECT_NAME', 'kartulimardikas');
 # set to true in order to enable extra output in case of an error
 define('DEBUG_MODE', true);
 # defines, where the library packages are be taken from (one of LOCAL, DEBUG, CDN)
-define('LIBRARY_MODE', 'LOCAL');
+define('LIBRARY_MODE', 'CDN');
 # Action that is used if the user does not specify a valid action
 define('DEFAULT_PAGE', 'home');
 

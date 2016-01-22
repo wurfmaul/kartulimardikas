@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DIR=$(dirname $(realpath $0))
+DIR=$(dirname $(readlink -e $0))
 
 echo -n "Secure .git directory..."
 echo "Require all denied" > $DIR/../.git/.htaccess

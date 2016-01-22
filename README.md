@@ -26,7 +26,7 @@ For configuration, change to the `kartulimardikas/` directory and run the follow
 
 This will secure the `.git/` directory and create a file `config.php` in the directory `config/`.
 
-Adopt at least the following settings of `config/config.php` to your database configuration:
+Prepare a database for the application. Maybe a new user that has only access rights for the specified database is a good idea too. Adopt at least the following settings of `config/config.php` to your database configuration:
 
 ```
 define('DB_HOST',     'localhost');
