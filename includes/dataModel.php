@@ -2,6 +2,10 @@
 
 class DataModel
 {
+    const RESULT_ARRAY = 1;
+    const RESULT_OBJECT = 2;
+    const RESULT_FLAT_ARRAY = 3;
+
     /** @var mysqli */
     private $_sql;
 
@@ -67,9 +71,10 @@ class DataModel
         ");
         $stmt->bind_param("i", $uid);
         $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt->bind_result($result);
+        $stmt->fetch();
         $stmt->close();
-        return intval($result->fetch_object()->count);
+        return intval($result);
     }
 
     /**
@@ -140,10 +145,58 @@ class DataModel
             AND date_deletion IS NULL
         ");
         $stmt->bind_param("i", $aid);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $result = $this->_execute($stmt, self::RESULT_OBJECT);
         $stmt->close();
-        return $result->fetch_object();
+        return $result;
+    }
+
+    /**
+     * @param mysqli_stmt $stmt The prepared statement.
+     * @param int $resultSet One of RESULT_ARRAY, RESULT_OBJECT to indicate the expected result format.
+     * @return array The result set.
+     */
+    private function _execute($stmt, $resultSet = self::RESULT_ARRAY)
+    {
+        // Execute the statement
+        $stmt->execute();
+        $stmt->store_result(); // for buffering selects
+
+        // Prepare the result set
+        $result = [];
+        $code = "\$stmt->bind_result(";
+        foreach ($stmt->result_metadata()->fetch_fields() as $field) {
+            $code .= "\$result['$field->name'],";
+        }
+        $code = substr($code, 0, -1) . ");";
+        eval($code);
+
+        // Fetch results
+        $return = [];
+        if ($resultSet === self::RESULT_FLAT_ARRAY) {
+            // Merge multiple arrays with one element each to one big array
+            while ($stmt->fetch()) {
+                $return[] = reset($result);
+            }
+        } else {
+            // Create an associative array out of the result set
+            while ($stmt->fetch()) {
+                // Compute key for associative array
+                $assocKey = reset($result);
+                // Copy the array
+                $copy = [];
+                foreach ($result as $key => $value) {
+                    $copy[$key] = $value;
+                }
+                // Create entry in return value
+                $return[$assocKey] = $copy;
+            }
+        }
+
+        if ($resultSet === self::RESULT_OBJECT && sizeof($return) === 1) {
+            // Return the only data row as object
+            return (object) array_pop($return);
+        }
+        return $return;
     }
 
     /**
@@ -165,10 +218,9 @@ class DataModel
             GROUP BY aid
             ORDER BY aid DESC
         ");
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $result = $this->_execute($stmt);
         $stmt->close();
-        return $result->fetch_all(MYSQLI_ASSOC);
+        return $result;
     }
 
     /**
@@ -187,10 +239,9 @@ class DataModel
             GROUP BY aid
             ORDER BY view_count DESC, date_creation DESC
         ");
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $result = $this->_execute($stmt);
         $stmt->close();
-        return $result->fetch_all(MYSQLI_ASSOC);
+        return $result;
     }
 
     /**
@@ -210,10 +261,9 @@ class DataModel
             WHERE tag = ?
         ");
         $stmt->bind_param("s", $tag);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $result = $this->_execute($stmt);
         $stmt->close();
-        return $result->fetch_all(MYSQLI_ASSOC);
+        return $result;
     }
 
     /**
@@ -238,10 +288,9 @@ class DataModel
             LIMIT ?
         ");
         $stmt->bind_param("ii", $uid, $amount);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $result = $this->_execute($stmt);
         $stmt->close();
-        return $result->fetch_all(MYSQLI_ASSOC);
+        return $result;
     }
 
     /**
@@ -257,10 +306,9 @@ class DataModel
             AND name = ?
         ");
         $stmt->bind_param("is", $uid, $name);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $result = $this->_execute($stmt, self::RESULT_OBJECT);
         $stmt->close();
-        return $result->fetch_object();
+        return $result;
     }
 
     /**
@@ -280,10 +328,9 @@ class DataModel
             LIMIT ?
         ");
         $stmt->bind_param("i", $amount);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $result = $this->_execute($stmt);
         $stmt->close();
-        return $result->fetch_all(MYSQLI_ASSOC);
+        return $result;
     }
 
     /**
@@ -303,10 +350,9 @@ class DataModel
             LIMIT ?
         ");
         $stmt->bind_param("i", $amount);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $result = $this->_execute($stmt);
         $stmt->close();
-        return $result->fetch_all(MYSQLI_ASSOC);
+        return $result;
     }
 
     /**
@@ -327,10 +373,9 @@ class DataModel
             LIMIT ?
         ");
         $stmt->bind_param("ii", $uid, $amount);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $result = $this->_execute($stmt);
         $stmt->close();
-        return $result->fetch_all(MYSQLI_ASSOC);
+        return $result;
     }
 
     /**
@@ -339,19 +384,9 @@ class DataModel
     public function fetchAllTags()
     {
         $stmt = $this->_sql->prepare("SELECT DISTINCT tag FROM tag");
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $result = $this->_execute($stmt, self::RESULT_FLAT_ARRAY);
         $stmt->close();
-        return $this->flatten($result->fetch_all());
-    }
-
-    /**
-     * @param array $array Two-dimensional array with exactly one element in the inner array.
-     * @return array One-dimensional array using the inner value instead of the array.
-     */
-    private function flatten($array)
-    {
-        return empty($array) ? $array : call_user_func_array('array_merge', $array);
+        return $result;
     }
 
     /**
@@ -365,10 +400,9 @@ class DataModel
             WHERE aid = ?
         ");
         $stmt->bind_param("i", $aid);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $result = $this->_execute($stmt, self::RESULT_FLAT_ARRAY);
         $stmt->close();
-        return $this->flatten($result->fetch_all());
+        return $result;
     }
 
     /**
@@ -391,10 +425,9 @@ class DataModel
             ORDER BY tag
         ");
         $stmt->bind_param("i", $amount);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $result = $this->_execute($stmt);
         $stmt->close();
-        return $result->fetch_all(MYSQLI_ASSOC);
+        return $result;
     }
 
     /**
@@ -412,10 +445,9 @@ class DataModel
             $filterDeleted
         ");
         $stmt->bind_param("i", $uid);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $result = $this->_execute($stmt, self::RESULT_OBJECT);
         $stmt->close();
-        return $result->fetch_object();
+        return $result;
     }
 
     /**
@@ -430,10 +462,9 @@ class DataModel
             AND date_deletion IS NULL
         ");
         $stmt->bind_param("s", $username);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $result = $this->_execute($stmt, self::RESULT_OBJECT);
         $stmt->close();
-        return $result->fetch_object();
+        return $result;
     }
 
     /**
@@ -448,10 +479,9 @@ class DataModel
             AND date_deletion IS NULL
         ");
         $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $result = $this->_execute($stmt, self::RESULT_OBJECT);
         $stmt->close();
-        return $result->fetch_object();
+        return $result;
     }
 
     /**
@@ -472,10 +502,9 @@ class DataModel
             $filterDeleted
             ORDER BY username
         ");
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $result = $this->_execute($stmt);
         $stmt->close();
-        return $result->fetch_all(MYSQLI_ASSOC);
+        return $result;
     }
 
     /**
@@ -496,10 +525,9 @@ class DataModel
             LIMIT ?
         ");
         $stmt->bind_param("i", $amount);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $result = $this->_execute($stmt);
         $stmt->close();
-        return $result->fetch_all(MYSQLI_ASSOC);
+        return $result;
     }
 
     /**
@@ -517,9 +545,9 @@ class DataModel
         ");
         $stmt->bind_param('s', $username);
         $stmt->execute();
-        $result = $stmt->get_result();
+        $result = $this->_execute($stmt, self::RESULT_OBJECT);
         $stmt->close();
-        return $result->fetch_object();
+        return $result;
     }
 
     /**
@@ -535,9 +563,9 @@ class DataModel
         ");
         $stmt->bind_param('i', $uid);
         $stmt->execute();
-        $result = $stmt->get_result();
+        $result = $this->_execute($stmt, self::RESULT_OBJECT);
         $stmt->close();
-        return $result->fetch_object();
+        return $result;
     }
 
     /**
@@ -555,10 +583,9 @@ class DataModel
             ORDER BY uid ASC
         ");
         $stmt->bind_param('ss', $query, $query);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $result = $this->_execute($stmt);
         $stmt->close();
-        return $result->fetch_all(MYSQLI_ASSOC);
+        return $result;
     }
 
     /**
