@@ -19,6 +19,7 @@ else
     echo "SKIPPED"
 fi
 
+echo ""
 echo "Load external libraries:"
 if [ ! -d ${BASEDIR}/lib ]; then
     mkdir ${BASEDIR}/lib
@@ -28,7 +29,7 @@ fi
 # PARSEDOWN
 if [ ! -d ${BASEDIR}/lib/parsedown ]; then
     git -C ${BASEDIR}/lib clone https://github.com/erusev/parsedown
-    echo "Library parsedown........DONE"
+    echo "Library 'parsedown'.......DONE"
 else
-    echo "Library parsedown........SKIPPED"
+    echo "Library 'parsedown'.......SKIPPED"
 fi
